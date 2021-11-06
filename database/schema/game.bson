@@ -1,0 +1,17 @@
+{
+  required: [
+    'GameId',
+    'GMId'
+  ],
+  properties: {
+    _id: {
+      bsonType: 'objectId'
+    },
+    GameId: {
+      bsonType: 'uuid'
+    },
+    GMId: {
+      bsonType: 'uuid'
+    }
+  }
+}

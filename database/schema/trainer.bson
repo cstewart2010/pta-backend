@@ -1,0 +1,49 @@
+{
+  required: [
+    'TrainerId',
+    'GameId',
+    'Username',
+    'PasswordHash',
+    'Salt',
+    'Items',
+    'IsGM'
+  ],
+  properties: {
+    _id: {
+      bsonType: 'objectId'
+    },
+    TrainerId: {
+      bsonType: 'uuid'
+    },
+    GameId: {
+      bsonType: 'uuid'
+    },
+    Username: {
+      bsonType: 'string'
+    },
+    PasswordHash: {
+      bsonType: 'string'
+    },
+    Salt: {
+      bsonType: 'string'
+    },
+    Items: {
+      bsonType: 'array',
+      items: {
+        bsonType: 'object',
+        properties: {
+          Name: {
+            bsonType: 'string'
+          },
+          Amount: {
+            bsonType: 'int',
+            minimum: 1
+          }
+        }
+      }
+    },
+    IsGM: {
+      bsonType: 'bool'
+    }
+  }
+}
