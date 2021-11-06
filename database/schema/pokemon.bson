@@ -1,0 +1,181 @@
+{
+  required: [
+    'DexNo',
+    'TrainerId',
+    'Nickname',
+    'NaturalMoves',
+    'TMMoves',
+    'Type',
+    'Experience',
+    'Level',
+    'ExpYield',
+    'CatchRate',
+    'Nature',
+    'HP',
+    'Attack',
+    'Defense',
+    'SpecialAttack',
+    'SpecialDefense',
+    'Speed'
+  ],
+  properties: {
+    _id: {
+      bsonType: 'objectId'
+    },
+    DexNo: {
+      bsonType: 'int'
+    },
+    TrainerId: {
+      bsonType: 'int'
+    },
+    Nickname: {
+      bsonType: 'string'
+    },
+    NaturalMoves: {
+      bsonType: 'array',
+      maxItems: 4,
+      items: {
+        bsonType: 'string'
+      }
+    },
+    TMMoves: {
+      bsonType: 'array',
+      maxItems: 4,
+      items: {
+        bsonType: 'string'
+      }
+    },
+    Type: {
+      bsonType: 'int'
+    },
+    Experience: {
+      bsonType: 'int'
+    },
+    Level: {
+      bsonType: 'int'
+    },
+    ExpYield: {
+      bsonType: 'int'
+    },
+    CatchRate: {
+      bsonType: 'int'
+    },
+    Nature: {
+      bsonType: 'int'
+    },
+    HP: {
+      bsonType: 'object',
+      required: [
+        'Base',
+        'Modifier',
+        'Added'
+      ],
+      properties: {
+        Base: {
+          bsonType: 'int'
+        },
+        Modifier: {
+          bsonType: 'int'
+        },
+        Added: {
+          bsonType: 'int'
+        }
+      }
+    },
+    Attack: {
+      bsonType: 'object',
+      required: [
+        'Base',
+        'Modifier',
+        'Added'
+      ],
+      properties: {
+        Base: {
+          bsonType: 'int'
+        },
+        Modifier: {
+          bsonType: 'int'
+        },
+        Added: {
+          bsonType: 'int'
+        }
+      }
+    },
+    Defense: {
+      bsonType: 'object',
+      required: [
+        'Base',
+        'Modifier',
+        'Added'
+      ],
+      properties: {
+        Base: {
+          bsonType: 'int'
+        },
+        Modifier: {
+          bsonType: 'int'
+        },
+        Added: {
+          bsonType: 'int'
+        }
+      }
+    },
+    SpecialAttack: {
+      bsonType: 'object',
+      required: [
+        'Base',
+        'Modifier',
+        'Added'
+      ],
+      properties: {
+        Base: {
+          bsonType: 'int'
+        },
+        Modifier: {
+          bsonType: 'int'
+        },
+        Added: {
+          bsonType: 'int'
+        }
+      }
+    },
+    SpecialDefense: {
+      bsonType: 'object',
+      required: [
+        'Base',
+        'Modifier',
+        'Added'
+      ],
+      properties: {
+        Base: {
+          bsonType: 'int'
+        },
+        Modifier: {
+          bsonType: 'int'
+        },
+        Added: {
+          bsonType: 'int'
+        }
+      }
+    },
+    Speed: {
+      bsonType: 'object',
+      required: [
+        'Base',
+        'Modifier',
+        'Added'
+      ],
+      properties: {
+        Base: {
+          bsonType: 'int'
+        },
+        Modifier: {
+          bsonType: 'int'
+        },
+        Added: {
+          bsonType: 'int'
+        }
+      }
+    }
+  }
+}
