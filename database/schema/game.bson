@@ -1,17 +1,16 @@
 {
-  required: [
-    'GameId',
-    'GMId'
-  ],
-  properties: {
-    _id: {
-      bsonType: 'objectId'
-    },
-    GameId: {
-      bsonType: 'uuid'
-    },
-    GMId: {
-      bsonType: 'uuid'
+  $jsonSchema: {
+    required: [
+      'GameId'
+    ],
+    additionalProperties: false,
+    properties: {
+      _id: {
+        bsonType: 'objectId'
+      },
+      GameId: {
+        bsonType: 'string'
+      }
     }
   }
 }

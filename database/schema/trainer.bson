@@ -1,49 +1,52 @@
 {
-  required: [
-    'TrainerId',
-    'GameId',
-    'Username',
-    'PasswordHash',
-    'Salt',
-    'Items',
-    'IsGM'
-  ],
-  properties: {
-    _id: {
-      bsonType: 'objectId'
-    },
-    TrainerId: {
-      bsonType: 'uuid'
-    },
-    GameId: {
-      bsonType: 'uuid'
-    },
-    Username: {
-      bsonType: 'string'
-    },
-    PasswordHash: {
-      bsonType: 'string'
-    },
-    Salt: {
-      bsonType: 'string'
-    },
-    Items: {
-      bsonType: 'array',
-      items: {
-        bsonType: 'object',
-        properties: {
-          Name: {
-            bsonType: 'string'
-          },
-          Amount: {
-            bsonType: 'int',
-            minimum: 1
+  $jsonSchema: {
+    required: [
+      'TrainerId',
+      'GameId',
+      'Username',
+      'PasswordHash',
+      'Salt',
+      'Items',
+      'IsGM'
+    ],
+    additionalProperties: false,
+    properties: {
+      _id: {
+        bsonType: 'objectId'
+      },
+      TrainerId: {
+        bsonType: 'string'
+      },
+      GameId: {
+        bsonType: 'string'
+      },
+      Username: {
+        bsonType: 'string'
+      },
+      PasswordHash: {
+        bsonType: 'string'
+      },
+      Salt: {
+        bsonType: 'string'
+      },
+      Items: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'object',
+          properties: {
+            Name: {
+              bsonType: 'string'
+            },
+            Amount: {
+              bsonType: 'int',
+              minimum: 1
+            }
           }
         }
+      },
+      IsGM: {
+        bsonType: 'bool'
       }
-    },
-    IsGM: {
-      bsonType: 'bool'
     }
   }
 }
