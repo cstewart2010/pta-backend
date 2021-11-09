@@ -36,7 +36,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(username);
             }
 
-            if (trainer.PasswordHash != BCrypt.Net.BCrypt.HashPassword(Request.Query["password"]))
+            if (!BCrypt.Net.BCrypt.Verify(Request.Query["password"], trainer.PasswordHash))
             {
                 return Unauthorized(username);
             }
@@ -50,108 +50,92 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             };
         }
 
-        [HttpPost("{gameId}")]
-        public ActionResult<object> PostPlayer(string gameId)
+        [HttpGet("{trainerId}/{pokemonId}")]
+        public ActionResult<PokemonModel> FindTrainerMon(
+            string trainerId,
+            string pokemonId)
         {
-            if (DatabaseUtility.FindGame(gameId) == null)
+            var pokemon = DatabaseUtility.FindPokemon(pokemon => pokemon.TrainerId == trainerId && pokemon.PokemonId == pokemonId);
+            if (pokemon == null)
             {
-                return NotFound(gameId);
-            }
-            if (!DatabaseUtility.HasGM(gameId))
-            {
-                return BadRequest(new
-                {
-                    message = "No GM has been made",
-                    gameId
-                });
+                return NotFound(pokemonId);
             }
 
-            var username = Request.Query["username"];
-            if (DatabaseUtility.FindTrainers(trainer => trainer.Username == username).Any())
-            {
-                return BadRequest(new
-                {
-                    message = "Duplicate username",
-                    gameId,
-                    username
-                });
-            }
-
-            var trainer = CreateTrainer
-            (
-                gameId,
-                username
-            );
-            if (trainer == null)
-            {
-                return BadRequest(new
-                {
-                    message = "Missing password",
-                    gameId,
-                    username
-                });
-            }
-
-            DatabaseUtility.AddTrainer(trainer);
-            return new
-            {
-                trainer.TrainerId,
-                trainer.Username,
-                trainer.IsGM,
-                trainer.Items
-            };
+            return pokemon;
         }
 
-        [HttpPost("{gameId}/gm")]
-        public ActionResult<object> PostGM(string gameId)
+        [HttpPost("{trainerId}")]
+        public ActionResult<PokemonModel> AddPokemon(string trainerId)
         {
-            if (DatabaseUtility.FindGame(gameId) == null)
-            {
-                return NotFound(gameId);
-            }
-
-            if (DatabaseUtility.HasGM(gameId))
+            var fails = new[] { "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" }
+                .Where(key => string.IsNullOrWhiteSpace(Request.Query[key]));
+            if (fails.Any())
             {
                 return BadRequest(new
                 {
-                    message = "There is already a GM",
-                    gameId
+                    message = "Missing the follwoing parameters in the query",
+                    fails
                 });
             }
+            var parseFails = new[]
+            {
+                    GetBadRequestMessage("expYield", result => result > 0, out var expYield),
+                    GetBadRequestMessage("catchRate", result => result >= 0, out var catchRate),
+                    GetBadRequestMessage("experience", result => result >= 0, out var experience),
+                    GetBadRequestMessage("level", result => result > 0, out var level),
+                }.Where(fail => fail != null);
+            if (parseFails.Any())
+            {
+                return BadRequest(parseFails);
+            }
 
-            var username = Request.Query["username"];
-            var trainer = CreateTrainer
+            var naturalMoves = Request.Query["naturalMoves"].ToString().Split(",");
+            if (naturalMoves.Length < 1 || naturalMoves.Length > 4)
+            {
+                return BadRequest(naturalMoves);
+            }
+            var tmMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? new string[0];
+            if (tmMoves.Length > 4)
+            {
+                return BadRequest(tmMoves);
+            }
+
+            var pokemonName = Request.Query["pokemon"];
+            var natureName = Request.Query["nature"];
+            var pokemon = PokeAPIUtility.GetPokemon
             (
-                gameId,
-                username
+                pokemonName,
+                natureName
             );
-            if (trainer == null)
+
+            pokemon.TrainerId = trainerId;
+            pokemon.NaturalMoves = naturalMoves;
+            pokemon.TMMoves = tmMoves;
+            pokemon.ExpYield = expYield;
+            pokemon.CatchRate = catchRate;
+            pokemon.Experience = experience;
+            pokemon.Level = level;
+            if (!string.IsNullOrWhiteSpace(Request.Query["nickname"]))
             {
-                return BadRequest(new
-                {
-                    message = "Missing password",
-                    gameId,
-                    username
-                });
+                pokemon.Nickname = Request.Query["nickname"];
             }
 
-            trainer.IsGM = true;
-            DatabaseUtility.AddTrainer(trainer);
-            return new
-            {
-                trainer.TrainerId,
-                trainer.Username,
-                trainer.IsGM,
-                trainer.Items
-            };
+            DatabaseUtility.AddPokemon(pokemon);
+
+            return pokemon;
         }
 
-        [HttpPut("{gameId}/{trainerId}")]
-        public ActionResult<object> AddItems(string gameId, string trainerId)
+        [HttpPut("{trainerId}/addItems")]
+        public ActionResult<object> AddItemsToTrainer(
+            string gameId,
+            string trainerId)
         {
-            var itemName = Request.Query["item"];
-            var increase = Request.Query["increase"];
-            if (string.IsNullOrWhiteSpace(itemName))
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            if (trainer == null)
+            {
+                return NotFound(trainerId);
+            }
+            if (!Request.Query.Any())
             {
                 return BadRequest(new
                 {
@@ -159,42 +143,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     gameId
                 });
             }
-            if (!int.TryParse(increase, out var itemIncrease))
-            {
-                return BadRequest(new
-                {
-                    message = "No increase listed",
-                    gameId,
-                    item = itemName
-                });
-            }
-            if (itemIncrease == 0)
-            {
-                return BadRequest(new
-                {
-                    message = "Should not increase item count by 0",
-                    gameId,
-                    item = itemName
-                });
-            }
-            else if (itemIncrease > 100)
-            {
-                itemIncrease = 100;
-            }
-            else if (itemIncrease < -100)
-            {
-                itemIncrease = -100;
-            }
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            if (trainer == null)
-            {
-                return NotFound(trainerId);
-            }
 
-            IEnumerable<ItemModel> itemList;
-            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemName, StringComparison.CurrentCultureIgnoreCase));
-            if (itemIncrease > 0)
+            foreach (var itemName in Request.Query.Keys)
             {
+                var (itemIncrease, badDataObject) = GetCleanData(gameId, itemName);
+                if (badDataObject != null)
+                {
+                    BadRequest(badDataObject);
+                    continue;
+                }
+
+                IEnumerable<ItemModel> itemList;
+                var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemName, StringComparison.CurrentCultureIgnoreCase));
                 if (item == null)
                 {
                     itemList = trainer.Items.Append(new ItemModel
@@ -221,20 +181,54 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                         return item;
                     });
                 }
-            }
-            else
-            {
-                if (item == null)
+
+                var result = TrySendItemUpdate
+                (
+                    trainerId,
+                    itemList
+                );
+                if (result)
                 {
-                    return BadRequest(new
-                    {
-                        message = $"{trainerId} has no item named {itemName}"
-                    });
+                    StatusCode(500);
+                }
+            }
+
+            return DatabaseUtility.FindTrainerById(trainerId);
+        }
+
+        [HttpPut("{trainerId}/removeItems")]
+        public ActionResult<object> RemoveItemsFromTrainer(
+            string gameId,
+            string trainerId)
+        {
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            if (trainer == null)
+            {
+                return NotFound(trainerId);
+            }
+            if (!Request.Query.Any())
+            {
+                return BadRequest(new
+                {
+                    message = "No item listed",
+                    gameId
+                });
+            }
+
+            foreach (var itemName in Request.Query.Keys)
+            {
+                var (itemIncrease, badDataObject) = GetCleanData(gameId, itemName);
+                if (badDataObject != null)
+                {
+                    BadRequest(badDataObject);
+                    continue;
                 }
 
-                if (item.Amount < -itemIncrease)
+                IEnumerable<ItemModel> itemList;
+                var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemName, StringComparison.CurrentCultureIgnoreCase));
+                if (item.Amount < itemIncrease)
                 {
-                    return BadRequest(new
+                    BadRequest(new
                     {
                         message = $"{trainerId} has too few {itemName}",
                         amount = item.Amount
@@ -249,35 +243,47 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                             return new ItemModel
                             {
                                 Name = itemName,
-                                Amount = item.Amount + itemIncrease
+                                Amount = item.Amount - itemIncrease
                             };
                         }
 
                         return item;
                     })
                     .Where(item => item.Amount > 0);
+
+                var result = TrySendItemUpdate
+                (
+                    trainerId,
+                    itemList
+                );
+                if (result)
+                {
+                    StatusCode(500);
+                }
             }
 
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
-            var update = Builders<TrainerModel>.Update.Set("Items", itemList);
-            var result = DatabaseUtility.TableHelper.Trainer.UpdateOne(filter, update);
-            if (result.IsAcknowledged)
-            {
-                return DatabaseUtility.FindTrainer(filter);
-            }
-
-            return StatusCode(500);
+            return DatabaseUtility.FindTrainerById(trainerId);
         }
 
         [HttpPut("reset")]
-        public ActionResult ChangePassword()
+        public ActionResult ChangeTrainerPassword()
         {
             var username = Request.Query["username"];
             var gameId = Request.Query["gameId"];
             Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username && trainer.GameId == gameId;
-            var update = Builders<TrainerModel>.Update.Set("PasswordHash", BCrypt.Net.BCrypt.HashPassword(Request.Query["password"]));
-            var result = DatabaseUtility.TableHelper.Trainer.UpdateOne(filter, update);
-            if (result.IsAcknowledged)
+            var update = Builders<TrainerModel>
+                .Update
+                .Set
+                (
+                    "PasswordHash",
+                    GetHashPassword(Request.Query["password"])
+                );
+            var result = DatabaseUtility.UpdateTrainer
+            (
+                filter,
+                update
+            );
+            if (result)
             {
                 return Ok();
             }
@@ -291,10 +297,10 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var username = Request.Query["username"];
             var gameId = Request.Query["gameId"];
             Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
-            var result = DatabaseUtility.TableHelper.Trainer.DeleteOne(filter);
-            if (result.IsAcknowledged)
+            var result = DatabaseUtility.DeleteTrainers(filter);
+            if (result)
             {
-                return DatabaseUtility.DeleteTrainerMon(trainerId);
+                return DatabaseUtility.DeleteTrainerMons(trainerId);
             }
             else
             {
@@ -302,24 +308,87 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
         }
 
-        private TrainerModel CreateTrainer(string gameId, string username)
+        private object GetBadRequestMessage(
+            string parameter,
+            Predicate<int> check,
+            out int outVar)
         {
-            foreach (var key in new[] { "username", "password" })
+            var value = Request.Query[parameter];
+            if (!(int.TryParse(value, out outVar) && check(outVar)))
             {
-                if (string.IsNullOrWhiteSpace(Request.Query[key]))
+                return new
                 {
-                    return null;
-                }
+                    message = $"Invalid {parameter}",
+                    invalidValue = value
+                };
             }
 
-            return new TrainerModel
+            return null;
+        }
+
+        private Tuple<int, object> GetCleanData(
+            string gameId,
+            string itemName)
+        {
+            var change = Request.Query[itemName];
+            if (!int.TryParse(change, out var itemChange))
             {
-                GameId = gameId,
-                TrainerId = Guid.NewGuid().ToString(),
-                Username = username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Request.Query["password"]),
-                Items = new List<ItemModel>()
-            };
+                return new Tuple<int, object>
+                (
+                    0,
+                    new
+                    {
+                        message = "No change listed",
+                        gameId,
+                        item = itemName
+                    }
+                );
+            }
+            if (itemChange == 0)
+            {
+                return new Tuple<int, object>
+                (
+                    0,
+                    new
+                    {
+                        message = "Should not change item count by 0",
+                        gameId,
+                        item = itemName
+                    }
+                );
+            }
+            else if (itemChange > 100)
+            {
+                itemChange = 100;
+            }
+
+            return new Tuple<int, object>
+            (
+                itemChange,
+                null
+            );
+        }
+
+        private bool TrySendItemUpdate(
+            string trainerId,
+            IEnumerable<ItemModel> itemList)
+        {
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
+            var update = Builders<TrainerModel>.Update.Set
+            (
+                "Items",
+                itemList
+            );
+            return DatabaseUtility.UpdateTrainer
+            (
+                filter,
+                update
+            );
+        }
+
+        private string GetHashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
     }
 }

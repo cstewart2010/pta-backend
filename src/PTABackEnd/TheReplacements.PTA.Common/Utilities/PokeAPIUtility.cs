@@ -11,6 +11,13 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     public static class PokeAPIUtility
     {
+        public static PokemonModel GetShinyPokemon(string pokemonName, string natureName)
+        {
+            var pokemon = GetPokemon(pokemonName, natureName);
+            pokemon.IsShiny = true;
+            return pokemon;
+        }
+
         public static PokemonModel GetPokemon(string pokemonName, string natureName)
         {
             var pokemon = InvokePokeAPI($"pokemon/{pokemonName}");
@@ -24,6 +31,17 @@ namespace TheReplacements.PTA.Common.Utilities
                 return null;
             }
 
+            var random = new Random();
+            var genderRate = (int)InvokePokeAPI($"pokemon-species/{pokemonName}")["gender_rate"];
+            var gender = genderRate switch
+            {
+                -1 => Gender.Genderless,
+                0 => Gender.Male,
+                8 => Gender.Female,
+                _ => random.Next(8) >= genderRate
+                    ? Gender.Male
+                    : Gender.Female
+            };
             var modifiers = Attribute.GetCustomAttribute(typeof(Nature).GetField(nature.ToString()), typeof(NatureModifierAttribute)) as NatureModifierAttribute;
             var stats = pokemon["stats"];
             return new PokemonModel
@@ -35,8 +53,10 @@ namespace TheReplacements.PTA.Common.Utilities
                     Enum.TryParse((string)curr["type"]["name"], true, out PokemonTypes result);
                     return prev | result;
                 }),
+                Gender = gender,
                 Nickname = (string)pokemon["name"],
                 Nature = (int)nature,
+                IsShiny = random.Next(420) == 69,
                 HP = GetStat(stats, "hp", modifiers.HpModifier),
                 Attack = GetStat(stats, "attack", modifiers.AttackModifier),
                 Defense = GetStat(stats, "defense", modifiers.DefenseModifier),

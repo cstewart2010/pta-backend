@@ -122,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\NatureModifierAttribute.cs" />
+    <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\Nature.cs" />
     <Compile Include="Utilities\DatabaseUtility.cs" />
     <Compile Include="Utilities\PokeAPIUtility.cs" />

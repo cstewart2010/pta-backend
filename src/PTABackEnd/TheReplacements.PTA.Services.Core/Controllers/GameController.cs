@@ -22,13 +22,13 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<GameModel> Get(string id)
+        public ActionResult<GameModel> FindGame(string id)
         {
             return GetGame(id);
         }
 
         [HttpGet("{gameId}/{id}")]
-        public ActionResult<object> GetTrainer(string gameId, string id)
+        public ActionResult<object> FindTrainerInGame(string gameId, string id)
         {
             if (DatabaseUtility.FindGame(gameId) == null)
             {
@@ -60,36 +60,128 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         }
 
         [HttpPost]
-        public ActionResult<GameModel> Post()
+        public ActionResult<GameModel> CreateNewGame()
         {
-            var id = Guid.NewGuid().ToString();
-            DatabaseUtility.AddGame(id);
-            return GetGame(id);
+            var game = new GameModel
+            {
+                GameId = Guid.NewGuid().ToString()
+            };
+            DatabaseUtility.AddGame(game);
+            return GetGame(game.GameId);
+        }
+
+        [HttpPost("{gameId}")]
+        public ActionResult<object> AddPlayerToGame(string gameId)
+        {
+            if (DatabaseUtility.FindGame(gameId) == null)
+            {
+                return NotFound(gameId);
+            }
+            if (!DatabaseUtility.HasGM(gameId))
+            {
+                return BadRequest(new
+                {
+                    message = "No GM has been made",
+                    gameId
+                });
+            }
+
+            var username = Request.Query["username"];
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username;
+            if (DatabaseUtility.FindTrainers(filter).Any())
+            {
+                return BadRequest(new
+                {
+                    message = "Duplicate username",
+                    gameId,
+                    username
+                });
+            }
+
+            var trainer = CreateTrainer
+            (
+                gameId,
+                username
+            );
+            if (trainer == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Missing password",
+                    gameId,
+                    username
+                });
+            }
+
+            DatabaseUtility.AddTrainer(trainer);
+            return new
+            {
+                trainer.TrainerId,
+                trainer.Username,
+                trainer.IsGM,
+                trainer.Items
+            };
+        }
+
+        [HttpPost("{gameId}/gm")]
+        public ActionResult<object> AddGMToGame(string gameId)
+        {
+            if (DatabaseUtility.FindGame(gameId) == null)
+            {
+                return NotFound(gameId);
+            }
+
+            if (DatabaseUtility.HasGM(gameId))
+            {
+                return BadRequest(new
+                {
+                    message = "There is already a GM",
+                    gameId
+                });
+            }
+
+            var username = Request.Query["username"];
+            var trainer = CreateTrainer
+            (
+                gameId,
+                username
+            );
+            if (trainer == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Missing password",
+                    gameId,
+                    username
+                });
+            }
+
+            trainer.IsGM = true;
+            DatabaseUtility.AddTrainer(trainer);
+            return new
+            {
+                trainer.TrainerId,
+                trainer.Username,
+                trainer.IsGM,
+                trainer.Items
+            };
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<object> DeleteAsync(string id)
+        public ActionResult<object> DeleteGame(string id)
         {
-            var gameResult = DatabaseUtility
-                .TableHelper
-                .Game
-                .DeleteOne(game => game.GameId == id);
-            if (!gameResult.IsAcknowledged)
-            {
-                NotFound(id);
-            }
-
             Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == id;
             var trainers = DatabaseUtility.FindTrainers(filter);
-            var results = new List<object>()
+            var results = trainers.Select(trainer => DatabaseUtility.DeleteTrainerMons(trainer.TrainerId)).ToList();
+            results.Add(new
             {
-                new
-                {
-                    message = DeleteTrainers(filter),
-                    gameId = id
-                }
-            };
-            results.AddRange(trainers.Select(DatabaseUtility.DeletePokemon));
+                message = DeleteTrainers(filter),
+                gameId = id
+            });
+            if (!DatabaseUtility.DeleteGame(id))
+            {
+                return NotFound(id);
+            }
 
             return results;
         }
@@ -97,7 +189,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         private string DeleteTrainers(Expression<Func<TrainerModel, bool>> filter)
         {
             string message;
-            if (DatabaseUtility.TableHelper.Trainer.DeleteMany(filter).IsAcknowledged)
+            if (DatabaseUtility.DeleteTrainers(filter))
             {
                 message = $"Successfully deleted all trainers";
                 _logger.LogInformation(message);
@@ -119,6 +211,28 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(id);
             }
             return game;
+        }
+
+        private TrainerModel CreateTrainer(
+            string gameId,
+            string username)
+        {
+            foreach (var key in new[] { "username", "password" })
+            {
+                if (string.IsNullOrWhiteSpace(Request.Query[key]))
+                {
+                    return null;
+                }
+            }
+
+            return new TrainerModel
+            {
+                GameId = gameId,
+                TrainerId = Guid.NewGuid().ToString(),
+                Username = username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Request.Query["password"]),
+                Items = new List<ItemModel>()
+            };
         }
     }
 }
