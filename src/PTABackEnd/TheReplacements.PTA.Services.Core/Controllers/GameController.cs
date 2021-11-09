@@ -27,20 +27,43 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return GetGame(id);
         }
 
+        [HttpGet("{gameId}/{id}")]
+        public ActionResult<object> GetTrainer(string gameId, string id)
+        {
+            if (DatabaseUtility.FindGame(gameId) == null)
+            {
+                return NotFound(gameId);
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(id);
+            if (trainer == null)
+            {
+                return NotFound(id);
+            }
+
+            if (trainer.GameId != gameId)
+            {
+                return BadRequest(new
+                {
+                    message = $"{id} had an invalid game id",
+                    trainer.GameId
+                });
+            }
+
+            return new
+            {
+                trainer.TrainerId,
+                trainer.Username,
+                trainer.IsGM,
+                trainer.Items
+            };
+        }
+
         [HttpPost]
         public ActionResult<GameModel> Post()
         {
             var id = Guid.NewGuid().ToString();
-            DatabaseUtility
-                .TableHelper
-                .Game
-                .InsertOne(
-                new GameModel
-                {
-                    GameId = id
-                }
-                );
-
+            DatabaseUtility.AddGame(id);
             return GetGame(id);
         }
 

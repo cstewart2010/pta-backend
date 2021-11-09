@@ -21,34 +21,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{gameId}/{id}")]
-        public ActionResult<object> Get(string gameId, string id)
-        {
-            if (DatabaseUtility.FindGame(gameId) == null)
-            {
-                return NotFound(gameId);
-            }
-
-            var trainer = DatabaseUtility.FindTrainerById(id);
-            if (trainer == null)
-            {
-                return NotFound(id);
-            }
-
-            if (trainer.GameId != gameId)
-            {
-                return BadRequest();
-            }
-
-            return new
-            {
-                trainer.TrainerId,
-                trainer.Username,
-                trainer.IsGM,
-                trainer.Items
-            };
-        }
-
         [HttpGet]
         public ActionResult<object> Login()
         {
@@ -130,10 +102,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             };
         }
 
-        [HttpPost("gm")]
-        public ActionResult<object> PostGM()
+        [HttpPost("{gameId}/gm")]
+        public ActionResult<object> PostGM(string gameId)
         {
-            var gameId = Request.Query["gameId"];
             if (DatabaseUtility.FindGame(gameId) == null)
             {
                 return NotFound(gameId);
@@ -175,11 +146,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             };
         }
 
-        [HttpPut]
-        public ActionResult<object> AddItems()
+        [HttpPut("{gameId}/{trainerId}")]
+        public ActionResult<object> AddItems(string gameId, string trainerId)
         {
-            var trainerId = Request.Query["trainerId"];
-            var gameId = Request.Query["gameId"];
             var itemName = Request.Query["item"];
             var increase = Request.Query["increase"];
             if (string.IsNullOrWhiteSpace(itemName))
@@ -252,7 +221,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                         return item;
                     });
                 }
-
             }
             else
             {
@@ -273,19 +241,21 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     });
                 }
 
-                itemList = trainer.Items.Select(item =>
-                {
-                    if (item.Name == itemName)
+                itemList = trainer.Items
+                    .Select(item =>
                     {
-                        return new ItemModel
+                        if (item.Name == itemName)
                         {
-                            Name = itemName,
-                            Amount = item.Amount + itemIncrease
-                        };
-                    }
+                            return new ItemModel
+                            {
+                                Name = itemName,
+                                Amount = item.Amount + itemIncrease
+                            };
+                        }
 
-                    return item;
-                });
+                        return item;
+                    })
+                    .Where(item => item.Amount > 0);
             }
 
             Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
@@ -293,7 +263,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var result = DatabaseUtility.TableHelper.Trainer.UpdateOne(filter, update);
             if (result.IsAcknowledged)
             {
-                return Ok();
+                return DatabaseUtility.FindTrainer(filter);
             }
 
             return StatusCode(500);
@@ -315,16 +285,16 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return NotFound();
         }
 
-        [HttpDelete]
-        public ActionResult DeleteTrainer()
+        [HttpDelete("{trainerId}")]
+        public ActionResult<object> DeleteTrainer(string trainerId)
         {
             var username = Request.Query["username"];
             var gameId = Request.Query["gameId"];
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username && trainer.GameId == gameId;
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
             var result = DatabaseUtility.TableHelper.Trainer.DeleteOne(filter);
             if (result.IsAcknowledged)
             {
-                return Ok();
+                return DatabaseUtility.DeleteTrainerMon(trainerId);
             }
             else
             {

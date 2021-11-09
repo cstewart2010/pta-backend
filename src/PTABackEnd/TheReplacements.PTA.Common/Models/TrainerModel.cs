@@ -14,7 +14,6 @@ namespace TheReplacements.PTA.Common.Models
         public string GameId { get; set; }
         public string Username { get; set; }
         public string PasswordHash { get; set; }
-        public string Salt { get; set; }
         public bool IsGM { get; set; }
         public List<ItemModel> Items { get; set; }
     }

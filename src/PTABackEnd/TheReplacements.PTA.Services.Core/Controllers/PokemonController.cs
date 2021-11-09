@@ -24,10 +24,10 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpGet("{id}")]
         public ActionResult<PokemonModel> GetPokemon(string id)
         {
-            return DatabaseUtility.TableHelper.Pokemon.Find(pokemon => pokemon._id.ToString() == id).FirstOrDefault();
+            return DatabaseUtility.TableHelper.Pokemon.Find(pokemon => pokemon.PokemonId == id).FirstOrDefault();
         }
 
-        [HttpPost("add")]
+        [HttpPost]
         public ActionResult<PokemonModel> AddPokemon()
         {
             var fails = new[] { "trainerId", "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" }
@@ -81,8 +81,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 natureName
             );
 
-            pokemon.Trainerid = trainerId;
+            pokemon.TrainerId = trainerId;
             pokemon.NaturalMoves = Request.Query["naturalMoves"].ToString().Split(",");
+            pokemon.TMMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? new string[0];
             pokemon.ExpYield = expYield;
             pokemon.CatchRate = catchRate;
             pokemon.Experience = experience;
@@ -97,16 +98,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 pokemon.TMMoves = Request.Query["tmMoves"].ToString().Split(",");
             }
 
+            DatabaseUtility.AddPokemon(pokemon);
+
             return pokemon;
         }
 
         [HttpPut("{id}")]
         public ActionResult<PokemonModel> UpdatePokemon(string id)
         {
-            Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon._id.ToString() == id;
+            Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == id;
             var pokemon = DatabaseUtility.TableHelper.Pokemon.Find(filter).FirstOrDefault();
             var updates = new List<UpdateDefinition<PokemonModel>>();
-            if (int.TryParse(Request.Query["expereience"], out var experience))
+            if (int.TryParse(Request.Query["experience"], out var experience))
             {
                 updates.Add(Builders<PokemonModel>.Update.Set("Experience", experience));
             }
@@ -119,27 +122,27 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             if (int.TryParse(Request.Query["attackAdded"], out added))
             {
                 pokemon.Attack.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("HP", pokemon.Attack));
+                updates.Add(Builders<PokemonModel>.Update.Set("Attack", pokemon.Attack));
             }
             if (int.TryParse(Request.Query["defenseAdded"], out added))
             {
                 pokemon.Defense.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("HP", pokemon.Defense));
+                updates.Add(Builders<PokemonModel>.Update.Set("Defense", pokemon.Defense));
             }
             if (int.TryParse(Request.Query["specialAttackAdded"], out added))
             {
                 pokemon.SpecialAttack.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("HP", pokemon.SpecialAttack));
+                updates.Add(Builders<PokemonModel>.Update.Set("SpecialAttack", pokemon.SpecialAttack));
             }
             if (int.TryParse(Request.Query["specialDefenseAdded"], out added))
             {
                 pokemon.SpecialDefense.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("HP", pokemon.SpecialDefense));
+                updates.Add(Builders<PokemonModel>.Update.Set("SpecialDefense", pokemon.SpecialDefense));
             }
             if (int.TryParse(Request.Query["speedAdded"], out added))
             {
                 pokemon.Speed.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("HP", pokemon.Speed));
+                updates.Add(Builders<PokemonModel>.Update.Set("Special", pokemon.Speed));
             }
             if (!string.IsNullOrWhiteSpace(Request.Query["nickname"]))
             {
@@ -154,13 +157,13 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            pokemon = DatabaseUtility.TableHelper.Pokemon.FindOneAndUpdate(filter, Builders<PokemonModel>.Update.Combine(updates.ToArray()));
-            if (pokemon == null)
+            var updateResult = DatabaseUtility.TableHelper.Pokemon.UpdateOne(filter, Builders<PokemonModel>.Update.Combine(updates.ToArray()));
+            if (!updateResult.IsAcknowledged)
             {
                 return StatusCode(500);
             }
 
-            return pokemon;
+            return DatabaseUtility.TableHelper.Pokemon.Find(filter).FirstOrDefault();
         }
 
         [HttpDelete("{id}")]
@@ -169,13 +172,25 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var pokemon = DatabaseUtility
                 .TableHelper
                 .Pokemon
-                .FindOneAndDelete(pokemon => pokemon._id.ToString() == id);
+                .FindOneAndDelete(pokemon => pokemon.PokemonId == id);
             if (pokemon == null)
             {
                 NotFound(id);
             }
 
             return pokemon;
+        }
+
+        [HttpDelete("trainer/{trainerId}")]
+        public ActionResult<object> DeleteTrainerMons(string trainerId)
+        {
+            var deleteResponse = DatabaseUtility.DeleteTrainerMon(trainerId);
+            if (deleteResponse != null)
+            {
+                return deleteResponse;
+            }
+
+            return StatusCode(500);
         }
     }
 }

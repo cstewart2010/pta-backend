@@ -1,6 +1,7 @@
 {
   $jsonSchema: {
     required: [
+      'PokemonId',
       'DexNo',
       'TrainerId',
       'Nickname',
@@ -23,6 +24,9 @@
     properties: {
       _id: {
         bsonType: 'objectId'
+      },
+      PokemonId: {
+        bsonType: 'string'
       },
       DexNo: {
         bsonType: 'int'

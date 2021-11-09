@@ -28,6 +28,7 @@ namespace TheReplacements.PTA.Common.Utilities
             var stats = pokemon["stats"];
             return new PokemonModel
             {
+                PokemonId = Guid.NewGuid().ToString(),
                 DexNo = (int)pokemon["id"],
                 Type = (int)pokemon["types"].Aggregate(PokemonTypes.None, (prev, curr) =>
                 {

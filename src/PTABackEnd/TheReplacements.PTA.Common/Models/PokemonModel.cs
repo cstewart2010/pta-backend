@@ -11,8 +11,9 @@ namespace TheReplacements.PTA.Common.Models
     public class PokemonModel
     {
         public ObjectId _id { get; set; }
+        public string PokemonId { get; set; }
         public int DexNo { get; set; }
-        public string Trainerid { get; set; }
+        public string TrainerId { get; set; }
         public string Nickname { get; set; }
         public IEnumerable<string> NaturalMoves { get; set; }
         public IEnumerable<string> TMMoves { get; set; }

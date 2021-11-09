@@ -5,7 +5,6 @@
       'GameId',
       'Username',
       'PasswordHash',
-      'Salt',
       'Items',
       'IsGM'
     ],
@@ -24,9 +23,6 @@
         bsonType: 'string'
       },
       PasswordHash: {
-        bsonType: 'string'
-      },
-      Salt: {
         bsonType: 'string'
       },
       Items: {

@@ -16,10 +16,17 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static void AddGame(string id)
         {
-            _tableHelper.Game.InsertOne(new GameModel
-            {
-                GameId = id
-            });
+            _tableHelper
+                .Game
+                .InsertOne(new GameModel
+                {
+                    GameId = id
+                });
+        }
+
+        public static void AddPokemon(PokemonModel pokemon)
+        {
+            _tableHelper.Pokemon.InsertOne(pokemon);
         }
 
         public static void AddTrainer(TrainerModel trainer)
@@ -27,9 +34,27 @@ namespace TheReplacements.PTA.Common.Utilities
             _tableHelper.Trainer.InsertOne(trainer);
         }
 
+        public static object DeleteTrainerMon(string trainerId)
+        {
+            var deleteResult = _tableHelper
+                .Pokemon
+                .DeleteMany(pokemon => pokemon.TrainerId == trainerId);
+
+            if (deleteResult.IsAcknowledged)
+            {
+                return new
+                {
+                    message = "Successful delete",
+                    deleteResult.DeletedCount
+                };
+            }
+
+            return null;
+        }
+
         public static object DeletePokemon(TrainerModel trainer)
         {
-            Expression<Func<PokemonModel, bool>> pokemonFiler = pokemon => pokemon.Trainerid == trainer.TrainerId;
+            Expression<Func<PokemonModel, bool>> pokemonFiler = pokemon => pokemon.TrainerId == trainer.TrainerId;
             string message;
             if (TableHelper.Pokemon.DeleteMany(pokemonFiler).IsAcknowledged)
             {
