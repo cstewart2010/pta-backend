@@ -5,12 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
     <PackageReference Include="MongoDB.Driver" Version="2.13.2" />
     <PackageReference Include="Newtonsoft.Json" Version="6.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TheReplacements.PTA.Common\TheReplacements.PTA.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Internal\" />
   </ItemGroup>
 
 

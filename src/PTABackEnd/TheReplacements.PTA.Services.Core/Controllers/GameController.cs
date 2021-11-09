@@ -4,10 +4,9 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using TheReplacements.PTA.Common.Databases;
+using System.Linq.Expressions;
+using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
-using TheReplacements.PTA.Services.Core.Internal;
 
 namespace TheReplacements.PTA.Services.Core.Controllers
 {
@@ -23,35 +22,80 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Game> Get(string id)
+        public ActionResult<GameModel> Get(string id)
         {
-            var game = TableHelpers.GameTable.Collection.Find(game => game.GameId == id).FirstOrDefault();
+            return GetGame(id);
+        }
+
+        [HttpPost]
+        public ActionResult<GameModel> Post()
+        {
+            var id = Guid.NewGuid().ToString();
+            DatabaseUtility
+                .TableHelper
+                .Game
+                .InsertOne(
+                new GameModel
+                {
+                    GameId = id
+                }
+                );
+
+            return GetGame(id);
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult<object> DeleteAsync(string id)
+        {
+            var gameResult = DatabaseUtility
+                .TableHelper
+                .Game
+                .DeleteOne(game => game.GameId == id);
+            if (!gameResult.IsAcknowledged)
+            {
+                NotFound(id);
+            }
+
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == id;
+            var trainers = DatabaseUtility.FindTrainers(filter);
+            var results = new List<object>()
+            {
+                new
+                {
+                    message = DeleteTrainers(filter),
+                    gameId = id
+                }
+            };
+            results.AddRange(trainers.Select(DatabaseUtility.DeletePokemon));
+
+            return results;
+        }
+
+        private string DeleteTrainers(Expression<Func<TrainerModel, bool>> filter)
+        {
+            string message;
+            if (DatabaseUtility.TableHelper.Trainer.DeleteMany(filter).IsAcknowledged)
+            {
+                message = $"Successfully deleted all trainers";
+                _logger.LogInformation(message);
+            }
+            else
+            {
+                message = $"Failed to delete trainers";
+                _logger.LogWarning(message);
+            }
+
+            return message;
+        }
+
+        private ActionResult<GameModel> GetGame(string id)
+        {
+            var game = DatabaseUtility.FindGame(id);
             if (game == null)
             {
                 return NotFound(id);
             }
             return game;
-        }
-
-        [HttpPost]
-        public ActionResult<Game> Post()
-        {
-            var id = Guid.NewGuid().ToString();
-            TableHelpers.GameTable.Collection.InsertOne(new Game
-            {
-                GameId = id
-            });
-            return TableHelpers.GameTable.Collection.Find(game => game.GameId == id).FirstOrDefault();
-        }
-
-        [HttpDelete("{id}")]
-        public void Delete(string id)
-        {
-            var result = TableHelpers.GameTable.Collection.DeleteOne(game => game.GameId == id);
-            if (!result.IsAcknowledged)
-            {
-                NotFound(id);
-            }
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TheReplacements.PTA.Common.Models
 {
-    public class Trainer
+    public class TrainerModel
     {
         public ObjectId _id { get; set; }
         public string TrainerId { get; set; }
@@ -16,6 +16,6 @@ namespace TheReplacements.PTA.Common.Models
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public bool IsGM { get; set; }
-        public IEnumerable<Item> Items { get; set; }
+        public List<ItemModel> Items { get; set; }
     }
 }

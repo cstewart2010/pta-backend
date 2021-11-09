@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace TheReplacements.PTA.Common.Models
 {
-    public class Item
+    public class StatModel
     {
-        public string Name { get; set; }
-        public byte Amount { get; set; }
+        public int Base { get; set; }
+        public int Nature { get; set; }
+        public int Modifier { get; set; }
+        public int Added { get; set; }
     }
 }

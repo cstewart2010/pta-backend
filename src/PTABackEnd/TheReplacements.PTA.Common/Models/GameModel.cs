@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace TheReplacements.PTA.Common.Models
 {
-    public class Stat
+    public class GameModel
     {
-        public byte Base { get; set; }
-        public byte Modifier { get; set; }
-        public byte Added { get; set; }
+        public ObjectId _id { get; set; }
+        public string GameId { get; set; }
     }
 }

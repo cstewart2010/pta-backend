@@ -10,6 +10,7 @@
     <RootNamespace>TheReplacements.PTA.Common</RootNamespace>
     <AssemblyName>TheReplacements.PTA.Common</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <LangVersion>8.0</LangVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
@@ -120,14 +121,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BodyParser.cs" />
-    <Compile Include="Databases\TableHelper.cs" />
-    <Compile Include="Models\Game.cs" />
-    <Compile Include="Models\Item.cs" />
-    <Compile Include="Models\Pokemon.cs" />
-    <Compile Include="Models\PokemonType.cs" />
-    <Compile Include="Models\Stat.cs" />
-    <Compile Include="Models\Trainer.cs" />
+    <Compile Include="Attributes\NatureModifierAttribute.cs" />
+    <Compile Include="Enums\Nature.cs" />
+    <Compile Include="Utilities\DatabaseUtility.cs" />
+    <Compile Include="Utilities\PokeAPIUtility.cs" />
+    <Compile Include="Utilities\TableHelper.cs" />
+    <Compile Include="Models\GameModel.cs" />
+    <Compile Include="Models\ItemModel.cs" />
+    <Compile Include="Models\PokemonModel.cs" />
+    <Compile Include="Enums\PokemonTypes.cs" />
+    <Compile Include="Models\StatModel.cs" />
+    <Compile Include="Models\TrainerModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

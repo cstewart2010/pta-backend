@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TheReplacements.PTA.Common.Models
+namespace TheReplacements.PTA.Common.Enums
 {
     [Flags]
-    public enum PokemonType
+    public enum PokemonTypes
     {
         None = 0,
         Normal = 1,
