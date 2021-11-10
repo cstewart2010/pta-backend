@@ -36,6 +36,9 @@
       TrainerId: {
         bsonType: 'string'
       },
+      Gender: {
+        bsonType: 'int'
+      },
       Nickname: {
         bsonType: 'string'
       },
@@ -67,6 +70,9 @@
       },
       CatchRate: {
         bsonType: 'int'
+      },
+      IsShiny: {
+        bsonType: 'bool'
       },
       Nature: {
         bsonType: 'int'

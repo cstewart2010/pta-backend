@@ -21,7 +21,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("login")]
         public ActionResult<object> Login()
         {
             var username = Request.Query["username"];
@@ -73,7 +73,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             {
                 return BadRequest(new
                 {
-                    message = "Missing the follwoing parameters in the query",
+                    message = "Missing the following parameters in the query",
                     fails
                 });
             }
@@ -265,30 +265,16 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return DatabaseUtility.FindTrainerById(trainerId);
         }
 
-        [HttpPut("reset")]
-        public ActionResult ChangeTrainerPassword()
+        [HttpDelete("{trainerId}/pokemon")]
+        public ActionResult<object> DeleteTrainerMons(string trainerId)
         {
-            var username = Request.Query["username"];
-            var gameId = Request.Query["gameId"];
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username && trainer.GameId == gameId;
-            var update = Builders<TrainerModel>
-                .Update
-                .Set
-                (
-                    "PasswordHash",
-                    GetHashPassword(Request.Query["password"])
-                );
-            var result = DatabaseUtility.UpdateTrainer
-            (
-                filter,
-                update
-            );
-            if (result)
+            var deleteResponse = DatabaseUtility.DeleteTrainerMons(trainerId);
+            if (deleteResponse != null)
             {
-                return Ok();
+                return deleteResponse;
             }
 
-            return NotFound();
+            return StatusCode(500);
         }
 
         [HttpDelete("{trainerId}")]
@@ -384,11 +370,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 filter,
                 update
             );
-        }
-
-        private string GetHashPassword(string password)
-        {
-            return BCrypt.Net.BCrypt.HashPassword(password);
         }
     }
 }

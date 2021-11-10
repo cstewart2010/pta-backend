@@ -21,31 +21,31 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<GameModel> FindGame(string id)
+        [HttpGet("{gameId}")]
+        public ActionResult<GameModel> FindGame(string gameId)
         {
-            return GetGame(id);
+            return GetGame(gameId);
         }
 
-        [HttpGet("{gameId}/{id}")]
-        public ActionResult<object> FindTrainerInGame(string gameId, string id)
+        [HttpGet("{gameId}/{trainerId}")]
+        public ActionResult<object> FindTrainerInGame(string gameId, string trainerId)
         {
             if (DatabaseUtility.FindGame(gameId) == null)
             {
                 return NotFound(gameId);
             }
 
-            var trainer = DatabaseUtility.FindTrainerById(id);
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
-                return NotFound(id);
+                return NotFound(trainerId);
             }
 
             if (trainer.GameId != gameId)
             {
                 return BadRequest(new
                 {
-                    message = $"{id} had an invalid game id",
+                    message = $"{trainerId} had an invalid game id",
                     trainer.GameId
                 });
             }
@@ -59,7 +59,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             };
         }
 
-        [HttpPost]
+        [HttpPost("new")]
         public ActionResult<GameModel> CreateNewGame()
         {
             var game = new GameModel
@@ -70,7 +70,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return GetGame(game.GameId);
         }
 
-        [HttpPost("{gameId}")]
+        [HttpPost("{gameId}/new")]
         public ActionResult<object> AddPlayerToGame(string gameId)
         {
             if (DatabaseUtility.FindGame(gameId) == null)
@@ -167,20 +167,51 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             };
         }
 
-        [HttpDelete("{id}")]
-        public ActionResult<object> DeleteGame(string id)
+        [HttpPut("{gameId}/reset")]
+        public ActionResult<object> ChangeTrainerPassword(string gameId)
         {
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == id;
+            var username = Request.Query["username"];
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username && trainer.GameId == gameId;
+            var update = Builders<TrainerModel>
+                .Update
+                .Set
+                (
+                    "PasswordHash",
+                    GetHashPassword(Request.Query["password"])
+                );
+            var trainer = DatabaseUtility.UpdateTrainer
+            (
+                filter,
+                update
+            );
+            if (trainer != null)
+            {
+                return new
+                {
+                    trainer.TrainerId,
+                    trainer.Username,
+                    trainer.IsGM,
+                    trainer.Items
+                };
+            }
+
+            return NotFound();
+        }
+
+        [HttpDelete("{gameId}")]
+        public ActionResult<object> DeleteGame(string gameId)
+        {
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == gameId;
             var trainers = DatabaseUtility.FindTrainers(filter);
             var results = trainers.Select(trainer => DatabaseUtility.DeleteTrainerMons(trainer.TrainerId)).ToList();
             results.Add(new
             {
                 message = DeleteTrainers(filter),
-                gameId = id
+                gameId = gameId
             });
-            if (!DatabaseUtility.DeleteGame(id))
+            if (!DatabaseUtility.DeleteGame(gameId))
             {
-                return NotFound(id);
+                return NotFound(gameId);
             }
 
             return results;
@@ -233,6 +264,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(Request.Query["password"]),
                 Items = new List<ItemModel>()
             };
+        }
+
+        private string GetHashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
     }
 }

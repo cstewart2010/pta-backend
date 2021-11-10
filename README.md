@@ -1,2 +1,301 @@
-# PTA BackEnd 
+PTA BackEnd 
+---
 
+### Table Of Contents
+- [Pokemon](#pokemon)
+  * [Find Pokemon By Id](#find-pokemon-by-id)
+  * [Create Wild Pokemon](#create-wild-pokemon)
+  * [Trade Pokemon](#trade-pokemon)
+  * [Update Pokemon Stats](#update-pokemon-stats)
+  * [Delete Pokemon by Id](#delete-pokemon-by-id)
+  * [Evolve Pokemon](#evolve-pokemon)
+- [Trainer](#trainer)
+  * [Verify Login](#verify-login)
+  * [Find Trainer Pokemon](#find-trainer-pokemon)
+  * [Add Trainer Pokemon](#add-trainer-pokemon)
+  * [Add Items](#add-items)
+  * [Remove Items](#remove-items)
+  * [Reset password](#reset-password)
+  * [Delete Trainer's pokemon](#delete-trainer's-pokemon)
+  * [Delete Trainer](#delete-trainer)
+- [Game](#game)
+  * [Find Game by Id](#find-game-by-id)
+  * [Find Trainer In Game](#find-trainer-in-game)
+  * [Create New Game](#create-new-game)
+  * [Add New Trainer to Game](#add-new-trainer-to-game)
+  * [Add GM to Game](#add-gm-to-game)
+  * [Reset Trainer password](#reset-trainer-password)
+  * [Delete Game](#delete-game)
+
+---
+
+# Pokemon
+Controller - api/v1/pokemon  
+[Back to top](#PTA-BackEnd)
+
+---
+
+## Find Pokemon By Id
+Endpoint - {pokemonId}  
+Method - GET  
+Response Type - PokemonModel  
+[Back to Pokemon](#pokemon)
+
+---
+
+## Create Wild Pokemon
+Endpoint - wild  
+Method - POST  
+Response Type - PokemonModel  
+[Back to Pokemon](#pokemon)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|pokemon|string|A pokemon's name|required|
+|nature|string|A pokemon's nature|required|
+|naturalMoves|list|A list of Pokemon moves|At least one, no more than four|
+|expYield|int|Experience yield|>0|
+|catchRate|int|A pokemon's catch rate|>=0|
+|experience|int|Total experience|>=0|
+|level|int|Current level|>0|
+|tmMoves|list|A list of Pokemon moves|optional, no more than four|
+|nickname|string|The pokemon's nickname|optional|
+
+---
+
+## Trade Pokemon
+Endpoint - trade  
+Method - PUT  
+Response Type - { leftPokemon: PokemonModel, rightPokemon: PokemonModel }  
+[Back to Pokemon](#pokemon)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|leftPokemonId|string|A pokemonId|required|
+|leftTrainerId|string|A trainerId|required|
+|rightPokemonId|string|A pokemonId|required|
+|rightTrainerId|string|A trainerId|required|
+
+---
+
+## Update Pokemon Stats
+Endpoint - update/{pokemonId}  
+Method - PUT  
+Response Type - PokemonModel  
+[Back to Pokemon](#pokemon)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|experience|int|Total experience|optional, >=0|
+|hpAdded|int|HP Added Value|optional, >=0|
+|attackAdded|int|AttackAdded Value|optional, >=0|
+|defenseAdded|int|Defense Added Value|optional, >=0|
+|specialAttackAdded|int|Special Attack Added Value|optional, >=0|
+|specialDefenseAdded|int|Special Defense Added Value|optional, >=0|
+|speedAdded|int|Speed Added Value|optional, >=0|
+|nickname|string|The pokemon's nickname|optional|
+
+---
+
+## Delete Pokemon by Id
+Endpoint - {pokemonId}  
+Method - DELETE  
+Response Type - message  
+[Back to Pokemon](#pokemon)
+
+---
+
+## Evolve Pokemon
+Endpoint - evolve/{pokemonId}  
+Method - PUT  
+Response Type - PokemonModel  
+[Back to Pokemon](#pokemon)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|nextForm|string|Evolution species namence|required|
+
+---
+
+# Trainer
+Controller - api/v1/trainer  
+[Back to top](#PTA-BackEnd)
+
+---
+
+## Verify Login
+Endpoint - login  
+Method - GET  
+Response Type - TrainerModel  
+[Back to Trainer](#trainer)
+
+---
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|username|string|Trainer's username|required|
+|password|string|Trainer's password|required|
+|gameId|string|The game id for the relevant game|required|
+
+---
+
+## Find Trainer Pokemon
+Endpoint - {trainerId}/{pokemonId}  
+Method - GET  
+Response Type - PokemonModel  
+[Back to Trainer](#trainer)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|trainerId|string|Trainer Id|required|
+|pokemonId|string|Pokemon Id|required|
+
+---
+
+## Add Trainer Pokemon
+Endpoint - {trainerId}  
+Method - POST  
+Response Type - PokemonModel  
+[Back to Trainer](#trainer)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|trainerId|string|Trainer Id|required|
+|pokemon|string|A pokemon's name|required|
+|nature|string|A pokemon's nature|required|
+|naturalMoves|list|A list of Pokemon moves|At least one, no more than four|
+|expYield|int|Experience yield|>0|
+|catchRate|int|A pokemon's catch rate|>=0|
+|experience|int|Total experience|>=0|
+|level|int|Current level|>0|
+|tmMoves|list|A list of Pokemon moves|optional, no more than four|
+|nickname|string|The pokemon's nickname|optional|
+
+---
+
+## Add Items
+Endpoint - {trainerId}/addItems  
+Method - PUT  
+Response Type - PokemonModel  
+[Back to Trainer](#trainer)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|{itemName}|int|>0|at least one item|
+
+---
+
+## Remove Items
+Endpoint - {trainerId}/addItems  
+Method - PUT  
+Response Type - PokemonModel  
+[Back to Trainer](#trainer)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|{itemName}|int|>0|at least one item|
+
+---
+
+## Reset password
+Endpoint - reset  
+Method - PUT  
+Response Type - TrainerModel  
+[Back to Trainer](#trainer)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|username|string|Trainer's username|required|
+|password|string|Trainer's password|required|
+|gameId|string|The game id for the relevant game|required|
+
+---
+
+## Delete Trainer's pokemon
+Endpoint - {trainerId}/pokemon  
+Method - DELETE  
+Response Type - message  
+[Back to Trainer](#trainer)
+
+---
+
+## Delete Trainer
+Endpoint - {trainerId}  
+Method - DELETE  
+Response Type - message  
+[Back to Trainer](#trainer)
+
+---
+
+# Game
+Controller - api/v1/game  
+[Back to top](#PTA-BackEnd)
+
+## Find Game by Id
+Endpoint - {gameId}  
+Method - GET  
+Response Type - GameModel  
+[Back to Game](#game)
+
+---
+
+## Find Trainer In Game
+Endpoint - {gameId}/{trainerId}  
+Method - GET  
+Response Type - GameModel  
+[Back to Game](#game)
+
+---
+
+## Create New Game
+Endpoint - new  
+Method - POST  
+Response Type - GameModel  
+[Back to Game](#game)
+
+---
+
+## Add New Trainer to Game
+Endpoint - {gameId}/new  
+Method - PUT  
+Response Type - TrainerModel  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|username|string|Trainer's username|required|
+|password|string|Trainer's password|required|
+
+---
+
+## Add GM to Game
+Endpoint - {gameId}/gm  
+Method - PUT  
+Response Type - TrainerModel  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|username|string|Trainer's username|required|
+|password|string|Trainer's password|required|
+
+---
+
+## Reset Trainer password
+Endpoint - {gameId}/reset  
+Method - PUT  
+Response Type - TrainerModel  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|username|string|Trainer's username|required|
+|password|string|Trainer's password|required|
+
+---
+
+## Delete Game
+Endpoint - {gameId}  
+Method - DELETE  
+Response Type - GameModel  
+[Back to Game](#game)

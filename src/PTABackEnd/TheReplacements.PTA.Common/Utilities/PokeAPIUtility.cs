@@ -11,6 +11,36 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     public static class PokeAPIUtility
     {
+        public static PokemonModel GetEvolved(PokemonModel currentForm, string nextForm)
+        {
+            var pokemon = InvokePokeAPI($"pokemon-species/{currentForm.DexNo}");
+            if (pokemon == null)
+            {
+                return null;
+            }
+
+            var pokemonName = (string)pokemon["name"];
+            var evolutionChain = GetEvolutionChain(pokemon, pokemonName);
+            if (evolutionChain?["evolvesTo"].First(possible => string.Equals((string)possible["species"]["name"], nextForm, StringComparison.CurrentCultureIgnoreCase)) == null)
+            {
+                return null;
+            }
+
+            var evolvedPokemon = InvokePokeAPI($"pokemon/{nextForm}");
+            var stats = evolvedPokemon["stats"];
+            currentForm.DexNo = (int)evolvedPokemon["id"];
+            currentForm.HP.Base = (int)stats["hp"]["base_stat"] / 10;
+            currentForm.Attack.Base = (int)stats["attack"]["base_stat"] / 10;
+            currentForm.Defense.Base = (int)stats["defense"]["base_stat"] / 10;
+            currentForm.SpecialAttack.Base = (int)stats["special-attack"]["base_stat"] / 10;
+            currentForm.SpecialDefense.Base = (int)stats["special-defense"]["base_stat"] / 10;
+            currentForm.Speed.Base = (int)stats["speed"]["base_stat"] / 10;
+            if (currentForm.Nickname == ((string)pokemon["name"]).ToUpper())
+            {
+                currentForm.Nickname = ((string)evolvedPokemon["name"]).ToUpper();
+            }
+            return currentForm;
+        }
         public static PokemonModel GetShinyPokemon(string pokemonName, string natureName)
         {
             var pokemon = GetPokemon(pokemonName, natureName);
@@ -54,7 +84,7 @@ namespace TheReplacements.PTA.Common.Utilities
                     return prev | result;
                 }),
                 Gender = gender,
-                Nickname = (string)pokemon["name"],
+                Nickname = ((string)pokemon["name"]).ToUpper(),
                 Nature = (int)nature,
                 IsShiny = random.Next(420) == 69,
                 HP = GetStat(stats, "hp", modifiers.HpModifier),
@@ -76,6 +106,41 @@ namespace TheReplacements.PTA.Common.Utilities
             };
         }
 
+        private static JToken GetEvolutionChain(JToken pokemon, string name)
+        {
+            JToken evolutionChain = InvokePokeAPI(CreateHttpRequest((string)pokemon["evolution_chain"]["url"]));
+
+            if (evolutionChain == null)
+            {
+                return null;
+            }
+
+            if (string.Equals((string)evolutionChain["species"]["name"], name, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return evolutionChain;
+            }
+
+            return SearchEvolvesTo(evolutionChain, name);
+        }
+
+        private static JToken SearchEvolvesTo(JToken evolutionChain, string name)
+        {
+            JToken found = null;
+            foreach (var possible in evolutionChain["evolvesTo"].TakeWhile(possible => found == null))
+            {
+                var possibleName = (string)possible["species"]["name"];
+                if (string.Equals(possibleName, name, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    found = possible;
+                    break;
+                }
+
+                found = SearchEvolvesTo(possible, name);
+            }
+
+            return found;
+        }
+
         private static JObject InvokePokeAPI(string endpoint, string query)
         {
             return InvokePokeAPI($"{endpoint}?{query}");
@@ -83,7 +148,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         private static JObject InvokePokeAPI(string endpoint)
         {
-            HttpWebRequest request = WebRequest.CreateHttp($"https://pokeapi.co/api/v2/{endpoint}");
+            HttpWebRequest request = CreateHttpRequest($"https://pokeapi.co/api/v2/{endpoint}");
             request.Method = "GET";
             using var response = (HttpWebResponse)request.GetResponse();
             if (response.StatusCode != HttpStatusCode.OK)
@@ -97,6 +162,28 @@ namespace TheReplacements.PTA.Common.Utilities
             response.Close();
 
             return JObject.Parse(responseBody);
+        }
+
+        private static JObject InvokePokeAPI(HttpWebRequest request)
+        {
+            request.Method = "GET";
+            using var response = (HttpWebResponse)request.GetResponse();
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                response.Close();
+                return null;
+            }
+
+            using var reader = new StreamReader(response.GetResponseStream());
+            var responseBody = reader.ReadToEnd();
+            response.Close();
+
+            return JObject.Parse(responseBody);
+        }
+
+        private static HttpWebRequest CreateHttpRequest(string endpoint)
+        {
+            return WebRequest.CreateHttp(endpoint);
         }
     }
 }

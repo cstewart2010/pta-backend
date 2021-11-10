@@ -172,12 +172,11 @@ namespace TheReplacements.PTA.Common.Utilities
                 .IsAcknowledged;
         }
 
-        public static bool UpdateTrainer(FilterDefinition<TrainerModel> filter, UpdateDefinition<TrainerModel> update)
+        public static TrainerModel UpdateTrainer(FilterDefinition<TrainerModel> filter, UpdateDefinition<TrainerModel> update)
         {
             return _tableHelper
                 .Trainer
-                .UpdateOne(filter, update)
-                .IsAcknowledged;
+                .FindOneAndUpdate(filter, update);
         }
     }
 }
