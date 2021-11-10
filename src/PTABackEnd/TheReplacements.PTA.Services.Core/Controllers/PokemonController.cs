@@ -198,7 +198,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 Builders<PokemonModel>.Update.Set("SpecialAttack", evolvedForm.SpecialAttack),
                 Builders<PokemonModel>.Update.Set("SpecialDefense", evolvedForm.SpecialDefense),
                 Builders<PokemonModel>.Update.Set("Speed", evolvedForm.Speed),
-                Builders<PokemonModel>.Update.Set("NickName", evolvedForm.Nickname)
+                Builders<PokemonModel>.Update.Set("Nickname", evolvedForm.Nickname)
             };
 
             Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;

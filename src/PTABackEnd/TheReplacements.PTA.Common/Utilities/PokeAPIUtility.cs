@@ -21,20 +21,20 @@ namespace TheReplacements.PTA.Common.Utilities
 
             var pokemonName = (string)pokemon["name"];
             var evolutionChain = GetEvolutionChain(pokemon, pokemonName);
-            if (evolutionChain?["evolvesTo"].First(possible => string.Equals((string)possible["species"]["name"], nextForm, StringComparison.CurrentCultureIgnoreCase)) == null)
+            if (evolutionChain?["evolves_to"].FirstOrDefault(possible => string.Equals((string)possible["species"]["name"], nextForm, StringComparison.CurrentCultureIgnoreCase)) == null)
             {
                 return null;
             }
 
-            var evolvedPokemon = InvokePokeAPI($"pokemon/{nextForm}");
+            var evolvedPokemon = InvokePokeAPI($"pokemon/{nextForm.ToLower()}");
             var stats = evolvedPokemon["stats"];
             currentForm.DexNo = (int)evolvedPokemon["id"];
-            currentForm.HP.Base = (int)stats["hp"]["base_stat"] / 10;
-            currentForm.Attack.Base = (int)stats["attack"]["base_stat"] / 10;
-            currentForm.Defense.Base = (int)stats["defense"]["base_stat"] / 10;
-            currentForm.SpecialAttack.Base = (int)stats["special-attack"]["base_stat"] / 10;
-            currentForm.SpecialDefense.Base = (int)stats["special-defense"]["base_stat"] / 10;
-            currentForm.Speed.Base = (int)stats["speed"]["base_stat"] / 10;
+            currentForm.HP.Base = (int)stats[0]["base_stat"] / 10;
+            currentForm.Attack.Base = (int)stats[1]["base_stat"] / 10;
+            currentForm.Defense.Base = (int)stats[2]["base_stat"] / 10;
+            currentForm.SpecialAttack.Base = (int)stats[3]["base_stat"] / 10;
+            currentForm.SpecialDefense.Base = (int)stats[4]["base_stat"] / 10;
+            currentForm.Speed.Base = (int)stats[5]["base_stat"] / 10;
             if (currentForm.Nickname == ((string)pokemon["name"]).ToUpper())
             {
                 currentForm.Nickname = ((string)evolvedPokemon["name"]).ToUpper();
@@ -108,7 +108,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         private static JToken GetEvolutionChain(JToken pokemon, string name)
         {
-            JToken evolutionChain = InvokePokeAPI(CreateHttpRequest((string)pokemon["evolution_chain"]["url"]));
+            JToken evolutionChain = InvokePokeAPI(CreateHttpRequest((string)pokemon["evolution_chain"]["url"]))?["chain"];
 
             if (evolutionChain == null)
             {

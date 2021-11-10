@@ -187,7 +187,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     trainerId,
                     itemList
                 );
-                if (result)
+                if (result == null)
                 {
                     StatusCode(500);
                 }
@@ -256,7 +256,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     trainerId,
                     itemList
                 );
-                if (result)
+                if (result == null)
                 {
                     StatusCode(500);
                 }
@@ -355,7 +355,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             );
         }
 
-        private bool TrySendItemUpdate(
+        private TrainerModel TrySendItemUpdate(
             string trainerId,
             IEnumerable<ItemModel> itemList)
         {
