@@ -1,7 +1,8 @@
 {
   $jsonSchema: {
     required: [
-      'GameId'
+      'GameId',
+      'Nickname'
     ],
     additionalProperties: false,
     properties: {
@@ -9,6 +10,9 @@
         bsonType: 'objectId'
       },
       GameId: {
+        bsonType: 'string'
+      },
+      Nickname: {
         bsonType: 'string'
       }
     }

@@ -6,6 +6,7 @@
       'Username',
       'PasswordHash',
       'Items',
+      'Money',
       'IsGM'
     ],
     additionalProperties: false,
@@ -39,6 +40,9 @@
             }
           }
         }
+      },
+      Money: {
+        bsonType: 'int'
       },
       IsGM: {
         bsonType: 'bool'

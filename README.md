@@ -253,6 +253,12 @@ Method - POST
 Response Type - GameModel  
 [Back to Game](#game)
 
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|nickname|string|a nickname for the game session|optional|
+|username|string|GM's username|required|
+|password|string|GM's password|required|
+
 ---
 
 ## Add New Trainer to Game

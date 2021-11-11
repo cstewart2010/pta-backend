@@ -24,6 +24,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpGet("login")]
         public ActionResult<object> Login()
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var username = Request.Query["username"];
             var gameId = Request.Query["gameId"];
             var trainer = DatabaseUtility.FindTrainerByUsername
@@ -55,6 +56,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string trainerId,
             string pokemonId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var pokemon = DatabaseUtility.FindPokemon(pokemon => pokemon.TrainerId == trainerId && pokemon.PokemonId == pokemonId);
             if (pokemon == null)
             {
@@ -67,6 +69,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpPost("{trainerId}")]
         public ActionResult<PokemonModel> AddPokemon(string trainerId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var fails = new[] { "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" }
                 .Where(key => string.IsNullOrWhiteSpace(Request.Query[key]));
             if (fails.Any())
@@ -130,6 +133,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string gameId,
             string trainerId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
@@ -201,6 +205,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string gameId,
             string trainerId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
@@ -268,6 +273,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpDelete("{trainerId}/pokemon")]
         public ActionResult<object> DeleteTrainerMons(string trainerId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var deleteResponse = DatabaseUtility.DeleteTrainerMons(trainerId);
             if (deleteResponse != null)
             {
@@ -280,6 +286,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpDelete("{trainerId}")]
         public ActionResult<object> DeleteTrainer(string trainerId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var username = Request.Query["username"];
             var gameId = Request.Query["gameId"];
             Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
