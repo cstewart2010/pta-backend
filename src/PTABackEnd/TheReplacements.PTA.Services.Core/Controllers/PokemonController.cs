@@ -24,12 +24,14 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpGet("{pokemonId}")]
         public ActionResult<PokemonModel> GetPokemon(string pokemonId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             return DatabaseUtility.FindPokemonById(pokemonId);
         }
 
         [HttpPost("wild")]
         public ActionResult<PokemonModel> AddPokemon()
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var fails = new[] { "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" }
                 .Where(key => string.IsNullOrWhiteSpace(Request.Query[key]));
             if (fails.Any())
@@ -91,11 +93,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpPut("trade")]
         public ActionResult<object> TradePokemon()
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var leftTrainer = DatabaseUtility.FindTrainerById(Request.Query["leftTrainerId"]);
             var rightTrainer = DatabaseUtility.FindTrainerById(Request.Query["rightTrainerId"]);
             if (leftTrainer == null || rightTrainer == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             if (leftTrainer.TrainerId == rightTrainer.TrainerId)
@@ -145,6 +148,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpPut("update/{pokemonId}")]
         public ActionResult<PokemonModel> UpdatePokemon(string pokemonId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;
             var updates = GetPokemonUpdates(filter);
 
@@ -172,6 +176,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpPut("evolve/{pokemonId}")]
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (pokemon == null)
             {
@@ -210,6 +215,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         [HttpDelete("{pokemonId}")]
         public ActionResult<object> DeletePokemon(string pokemonId)
         {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var deleteResult = DatabaseUtility.DeletePokemon(pokemonId);
             if (!deleteResult)
             {
