@@ -1,6 +1,6 @@
 ﻿namespace TheReplacements.PTA.Common.Models
 {
-    public class StatModel
+    public class PokemonStatModel
     {
         public int Base { get; set; }
         public int Nature { get; set; }

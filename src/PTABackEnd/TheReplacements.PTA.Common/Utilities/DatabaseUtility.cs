@@ -1,4 +1,6 @@
 ﻿using MongoDB.Driver;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,47 +11,68 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     public static class DatabaseUtility
     {
-        private static TableHelper _tableHelper = new TableHelper(27017, "localhost");
-        public static TableHelper TableHelper => _tableHelper;
+        private static readonly TableHelper TableHelper = new TableHelper(27017, "localhost");
 
-        public static void AddGame(GameModel game)
+        public static bool TryAddGame(GameModel game, out object error)
         {
-            _tableHelper
-                .Game
-                .InsertOne(game);
+            return TryAddDocument
+            (
+                () => TableHelper.Game.InsertOne(game),
+                out error
+            );
         }
 
-        public static void AddPokemon(PokemonModel pokemon)
+        public static bool TryAddPokemon(PokemonModel pokemon, out object error)
         {
-            _tableHelper
-                .Pokemon
-                .InsertOne(pokemon);
+            return TryAddDocument
+            (
+                () => TableHelper.Pokemon.InsertOne(pokemon),
+                out error
+            );
         }
 
-        public static void AddTrainer(TrainerModel trainer)
+        public static bool TryAddTrainer(TrainerModel trainer, out object error)
         {
-            _tableHelper.Trainer.InsertOne(trainer);
+            return TryAddDocument
+            (
+                () => TableHelper.Trainer.InsertOne(trainer),
+                out error
+            );
+        }
+
+        private static bool TryAddDocument(Action action, out object error)
+        {
+            try
+            {
+                error = null;
+                return true;
+            }
+            catch (MongoWriteException exception)
+            {
+                error = new { writeErrorJsonString = exception.WriteError.Details.GetValue("details").AsBsonDocument.ToString() };
+                return false;
+            }
         }
 
         public static bool DeleteGame(string id)
         {
-            return _tableHelper
+            return TableHelper
                 .Game
-                .DeleteOne(game => game.GameId == id).IsAcknowledged;
+                .FindOneAndDelete(game => game.GameId == id) != null;
         }
 
         public static bool DeletePokemon(string id)
         {
-            return _tableHelper
+            return TableHelper
                 .Pokemon
-                .DeleteOne(pokemon => pokemon.PokemonId == id).IsAcknowledged;
+                .FindOneAndDelete(pokemon => pokemon.PokemonId == id) != null;
         }
 
         public static object DeletePokemon(TrainerModel trainer)
         {
             Expression<Func<PokemonModel, bool>> pokemonFiler = pokemon => pokemon.TrainerId == trainer.TrainerId;
             string message;
-            if (_tableHelper.Pokemon.DeleteMany(pokemonFiler).IsAcknowledged)
+            if (TableHelper.Pokemon.DeleteMany(pokemonFiler).IsAcknowledged)
             {
                 message = $"Successfully deleted all pokemon";
             }
@@ -66,14 +89,14 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static bool DeleteTrainers(FilterDefinition<TrainerModel> filter)
         {
-            return _tableHelper
+            return TableHelper
                 .Trainer
                 .DeleteMany(filter).IsAcknowledged;
         }
 
         public static object DeleteTrainerMons(string trainerId)
         {
-            var deleteResult = _tableHelper
+            var deleteResult = TableHelper
                 .Pokemon
                 .DeleteMany(pokemon => pokemon.TrainerId == trainerId);
 
@@ -91,7 +114,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static GameModel FindGame(string id)
         {
-            return _tableHelper
+            return TableHelper
                 .Game
                 .Find(game => game.GameId == id)
                 .FirstOrDefault();
@@ -99,7 +122,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static PokemonModel FindPokemon(Expression<Func<PokemonModel, bool>> filter)
         {
-            return _tableHelper
+            return TableHelper
                 .Pokemon
                 .Find(filter)
                 .FirstOrDefault();
@@ -107,7 +130,7 @@ namespace TheReplacements.PTA.Common.Utilities
         
         public static PokemonModel FindPokemonById(string id)
         {
-            return _tableHelper
+            return TableHelper
                 .Pokemon
                 .Find(pokemon => pokemon.PokemonId == id)
                 .FirstOrDefault();
@@ -115,7 +138,7 @@ namespace TheReplacements.PTA.Common.Utilities
         
         public static TrainerModel FindTrainer(Expression<Func<TrainerModel, bool>> filter)
         {
-            return _tableHelper
+            return TableHelper
                 .Trainer
                 .Find(filter)
                 .FirstOrDefault();
@@ -123,7 +146,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static IEnumerable<TrainerModel> FindTrainers(FilterDefinition<TrainerModel> filter)
         {
-            return _tableHelper
+            return TableHelper
                 .Trainer
                 .Find(filter)
                 .ToList();
@@ -131,17 +154,9 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static TrainerModel FindTrainerById(string id)
         {
-            return _tableHelper
+            return TableHelper
                 .Trainer
                 .Find(trainer => trainer.TrainerId == id)
-                .FirstOrDefault();
-        }
-
-        public static TrainerModel FindTrainerByUsername(string username)
-        {
-            return _tableHelper
-                .Trainer
-                .Find(trainer => trainer.Username == username)
                 .FirstOrDefault();
         }
 
@@ -149,8 +164,8 @@ namespace TheReplacements.PTA.Common.Utilities
             string username,
             string gameId)
         {
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username && trainer.GameId == gameId;
-            return _tableHelper
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerName == username && trainer.GameId == gameId;
+            return TableHelper
                 .Trainer
                 .Find(filter)
                 .FirstOrDefault();
@@ -158,7 +173,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static bool HasGM(string gameId)
         {
-            return _tableHelper
+            return TableHelper
                 .Trainer
                 .Find(trainer => trainer.IsGM && trainer.GameId == gameId)
                 .Any();
@@ -166,7 +181,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static bool UpdatePokemon(FilterDefinition<PokemonModel> filter, UpdateDefinition<PokemonModel> update)
         {
-            return _tableHelper
+            return TableHelper
                 .Pokemon
                 .UpdateOne(filter, update)
                 .IsAcknowledged;
@@ -174,7 +189,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static TrainerModel UpdateTrainer(FilterDefinition<TrainerModel> filter, UpdateDefinition<TrainerModel> update)
         {
-            return _tableHelper
+            return TableHelper
                 .Trainer
                 .FindOneAndUpdate(filter, update);
         }
@@ -182,7 +197,7 @@ namespace TheReplacements.PTA.Common.Utilities
         public static TrainerModel UpdateTrainer(string trainerId, UpdateDefinition<TrainerModel> update)
         {
             Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
-            return _tableHelper
+            return TableHelper
                 .Trainer
                 .FindOneAndUpdate(filter, update);
         }
@@ -190,7 +205,7 @@ namespace TheReplacements.PTA.Common.Utilities
         public static GameModel UpdateGame(string gameId, UpdateDefinition<GameModel> update)
         {
             Expression<Func<GameModel, bool>> filter = game => game.GameId == gameId;
-            return _tableHelper
+            return TableHelper
                 .Game
                 .FindOneAndUpdate(filter, update);
         }

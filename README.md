@@ -136,7 +136,7 @@ Response Type - TrainerModel
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|username|string|Trainer's username|required|
+|trainerName|string|Trainer's username|required|
 |password|string|Trainer's password|required|
 |gameId|string|The game id for the relevant game|required|
 
@@ -208,20 +208,6 @@ Response Type - PokemonModel
 
 ---
 
-## Reset password
-Endpoint - reset  
-Method - PUT  
-Response Type - TrainerModel  
-[Back to Trainer](#trainer)
-
-|Parameter|Type|Expected Value|Required|
-|---------|----|--------------|--------|
-|username|string|Trainer's username|required|
-|password|string|Trainer's password|required|
-|gameId|string|The game id for the relevant game|required|
-
----
-
 ## Delete Trainer's pokemon
 Endpoint - {trainerId}/pokemon  
 Method - DELETE  
@@ -267,8 +253,9 @@ Response Type - GameModel
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
 |nickname|string|a nickname for the game session|optional|
-|username|string|GM's username|required|
+|gmName|string|GM's username|required|
 |password|string|GM's password|required|
+|gameSessionPassword|string|the password for the game session|required|
 
 ---
 
@@ -280,7 +267,7 @@ Response Type - TrainerModel
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|username|string|Trainer's username|required|
+|trainerName|string|Trainer's username|required|
 |password|string|Trainer's password|required|
 
 ---
@@ -311,19 +298,6 @@ Response Type - Status(200)
 
 ---
 
-## Add GM to Game
-Endpoint - {gameId}/gm  
-Method - PUT  
-Response Type - TrainerModel  
-[Back to Game](#game)
-
-|Parameter|Type|Expected Value|Required|
-|---------|----|--------------|--------|
-|username|string|Trainer's username|required|
-|password|string|Trainer's password|required|
-
----
-
 ## Reset Trainer password
 Endpoint - {gameId}/reset  
 Method - PUT  
@@ -332,7 +306,7 @@ Response Type - TrainerModel
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|username|string|Trainer's username|required|
+|trainerName|string|Trainer's username|required|
 |password|string|Trainer's password|required|
 
 ---

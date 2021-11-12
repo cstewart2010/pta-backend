@@ -55,7 +55,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return new
             {
                 trainer.TrainerId,
-                trainer.Username,
+                trainer.TrainerName,
                 trainer.IsGM,
                 trainer.Items
             };
@@ -68,14 +68,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var guid = Guid.NewGuid().ToString();
             var game = new GameModel
             {
-                GameId = guid,
+                //GameId = guid,
                 Nickname = Request.Query["nickname"].ToString() ?? guid.Split('-')[0],
                 IsOnline = true,
-                PasswordHash = GetHashPassword(Request.Query["dbPassword"])
+                PasswordHash = GetHashPassword(Request.Query["gameSessionPassword"])
             };
-            DatabaseUtility.AddGame(game);
+            if (!DatabaseUtility.TryAddGame(game, out var error))
+            {
+                return BadRequest(error);
+            }
+            
 
-            var username = Request.Query["username"];
+            var username = Request.Query["gmName"];
             var trainer = CreateTrainer(game.GameId);
             if (trainer == null)
             {
@@ -88,18 +92,22 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             trainer.IsGM = true;
-            DatabaseUtility.AddTrainer(trainer);
-            return new
+            if (DatabaseUtility.TryAddTrainer(trainer, out error))
             {
-                game.GameId,
-                GameMaster = new
+                return new
                 {
-                    trainer.TrainerId,
-                    trainer.Username,
-                    trainer.IsGM,
-                    trainer.Items
-                }
-            };
+                    game.GameId,
+                    GameMaster = new
+                    {
+                        trainer.TrainerId,
+                        trainer.TrainerName,
+                        trainer.IsGM,
+                        trainer.Items
+                    }
+                };
+            }
+
+            return BadRequest(error);
         }
 
         [HttpPost("{gameId}/new")]
@@ -110,6 +118,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             {
                 return NotFound(gameId);
             }
+
             if (!DatabaseUtility.HasGM(gameId))
             {
                 return BadRequest(new
@@ -119,18 +128,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var username = Request.Query["username"];
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username;
-            if (DatabaseUtility.FindTrainers(filter).Any())
+
+            var trainerName = Request.Query["trainerName"];
+            if (DatabaseUtility.FindTrainerByUsername(trainerName, gameId) != null)
             {
                 return BadRequest(new
                 {
-                    message = "Duplicate username",
+                    message = "Duplicate trainerName",
                     gameId,
-                    username
+
                 });
             }
-
+                        
             var trainer = CreateTrainer(gameId);
             if (trainer == null)
             {
@@ -138,25 +147,29 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 {
                     message = "Missing password",
                     gameId,
-                    username
+                    trainerName
                 });
             }
 
-            DatabaseUtility.AddTrainer(trainer);
-            return new
+            if (DatabaseUtility.TryAddTrainer(trainer, out var error))
             {
-                trainer.TrainerId,
-                trainer.Username,
-                trainer.IsGM,
-                trainer.Items
-            };
+                return new
+                {
+                    trainer.TrainerId,
+                    trainer.TrainerName,
+                    trainer.IsGM,
+                    trainer.Items
+                };
+            }
+
+            return BadRequest(error);
         }
 
         [HttpPut("{gameId}/start")]
         public ActionResult StartGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var gamePassword = Request.Query["gamePassword"];
+            var gamePassword = Request.Query["gameSessionPassword"];
 
             var game = DatabaseUtility.FindGame(gameId);
 
@@ -255,8 +268,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> ChangeTrainerPassword(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var username = Request.Query["username"];
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username && trainer.GameId == gameId;
+            var username = Request.Query["trainerName"];
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerName == username && trainer.GameId == gameId;
             var update = Builders<TrainerModel>
                 .Update
                 .Combine(new[]
@@ -274,7 +287,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return new
                 {
                     trainer.TrainerId,
-                    trainer.Username,
+                    trainer.TrainerName,
                     trainer.IsGM,
                     trainer.Items
                 };
@@ -332,22 +345,23 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
         private TrainerModel CreateTrainer(string gameId)
         {
-            foreach (var key in new[] { "username", "password" })
+            if (string.IsNullOrWhiteSpace(Request.Query["password"]))
             {
-                if (string.IsNullOrWhiteSpace(Request.Query[key]))
-                {
-                    return null;
-                }
+                return null;
             }
 
             return new TrainerModel
             {
                 GameId = gameId,
                 TrainerId = Guid.NewGuid().ToString(),
-                Username = Request.Query["username"],
+                TrainerName = Request.Query["trainerName"],
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(Request.Query["password"]),
                 Items = new List<ItemModel>(),
-                IsOnline = true
+                IsOnline = true,
+                TrainerClasses = new List<string>(),
+                TrainerStats = new TrainerStatsModel(),
+                Level = 1,
+                Feats = new List<string>()
             };
         }
 

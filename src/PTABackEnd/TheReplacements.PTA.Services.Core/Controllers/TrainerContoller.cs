@@ -93,16 +93,19 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 pokemon.Nickname = Request.Query["nickname"];
             }
 
-            DatabaseUtility.AddPokemon(pokemon);
+            if (DatabaseUtility.TryAddPokemon(pokemon, out var error))
+            {
+                return pokemon;
+            }
 
-            return pokemon;
+            return BadRequest(error);
         }
 
         [HttpPut("login")]
         public ActionResult<object> Login()
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var username = Request.Query["username"];
+            var username = Request.Query["trainerName"];
             var gameId = Request.Query["gameId"];
             var trainer = DatabaseUtility.FindTrainerByUsername
             (
@@ -133,7 +136,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return new
             {
                 trainer.TrainerId,
-                trainer.Username,
+                trainer.TrainerName,
                 trainer.IsGM,
                 trainer.Items
             };
@@ -159,7 +162,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return Unauthorized(new
                 {
                     message = "User is already offline",
-                    trainer.Username
+                    trainer.TrainerName
                 });
             }
 
@@ -377,14 +380,14 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     }
                 );
             }
-            if (itemChange == 0)
+            if (itemChange < 1)
             {
                 return new Tuple<int, object>
                 (
                     0,
                     new
                     {
-                        message = "Should not change item count by 0",
+                        message = "Should not change item count less than 1",
                         gameId,
                         item = itemName
                     }
