@@ -15,6 +15,7 @@
       'CatchRate',
       'Nature',
       'IsShiny',
+      'IsOnActiveTeam',
       'HP',
       'Attack',
       'Defense',
@@ -70,6 +71,9 @@
       },
       CatchRate: {
         bsonType: 'int'
+      },
+      IsOnActiveTeam: {
+        bsonType: 'bool'
       },
       IsShiny: {
         bsonType: 'bool'

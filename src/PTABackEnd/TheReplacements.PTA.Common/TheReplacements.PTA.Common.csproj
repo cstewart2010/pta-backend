@@ -160,6 +160,8 @@
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\Nature.cs" />
     <Compile Include="Interfaces\IAuthenticated.cs" />
+    <Compile Include="Interfaces\IPerson.cs" />
+    <Compile Include="Models\TrainerStatsModel.cs" />
     <Compile Include="Utilities\DatabaseUtility.cs" />
     <Compile Include="Utilities\PokeAPIUtility.cs" />
     <Compile Include="Utilities\TableHelper.cs" />
@@ -167,7 +169,7 @@
     <Compile Include="Models\ItemModel.cs" />
     <Compile Include="Models\PokemonModel.cs" />
     <Compile Include="Enums\PokemonTypes.cs" />
-    <Compile Include="Models\StatModel.cs" />
+    <Compile Include="Models\PokemonStatModel.cs" />
     <Compile Include="Models\TrainerModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

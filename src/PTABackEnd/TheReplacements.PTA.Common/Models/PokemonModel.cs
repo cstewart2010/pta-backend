@@ -21,11 +21,12 @@ namespace TheReplacements.PTA.Common.Models
         public int CatchRate { get; set; }
         public int Nature { get; set; }
         public bool IsShiny { get; set; }
-        public StatModel HP { get; set; }
-        public StatModel Attack { get; set; }
-        public StatModel Defense { get; set; }
-        public StatModel SpecialAttack { get; set; }
-        public StatModel SpecialDefense { get; set; }
-        public StatModel Speed { get; set; }
+        public bool IsOnActiveTeam { get; set; }
+        public PokemonStatModel HP { get; set; }
+        public PokemonStatModel Attack { get; set; }
+        public PokemonStatModel Defense { get; set; }
+        public PokemonStatModel SpecialAttack { get; set; }
+        public PokemonStatModel SpecialDefense { get; set; }
+        public PokemonStatModel Speed { get; set; }
     }
 }

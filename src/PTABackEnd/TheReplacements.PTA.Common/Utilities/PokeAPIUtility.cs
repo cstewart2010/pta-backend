@@ -96,10 +96,10 @@ namespace TheReplacements.PTA.Common.Utilities
             };
         }
 
-        private static StatModel GetStat(JToken stats, string statName, int natureModifier)
+        private static PokemonStatModel GetStat(JToken stats, string statName, int natureModifier)
         {
             var correctStat = stats.First(stat => (string)stat["stat"]["name"] == statName);
-            return new StatModel
+            return new PokemonStatModel
             {
                 Nature = natureModifier,
                 Base = ((int)correctStat["base_stat"]) / 10

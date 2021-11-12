@@ -1,13 +1,17 @@
 {
   $jsonSchema: {
     required: [
-      'TrainerId',
       'GameId',
-      'Username',
-      'IsOnline',
+      'TrainerId',
+      'Level',
+      'TrainerName',
       'PasswordHash',
-      'Items',
+      'TrainerClasses',
+      'TrainerStats',
+      'Feats',
       'Money',
+      'IsOnline',
+      'Items',
       'IsGM'
     ],
     additionalProperties: false,
@@ -15,20 +19,64 @@
       _id: {
         bsonType: 'objectId'
       },
-      TrainerId: {
-        bsonType: 'string'
-      },
       GameId: {
         bsonType: 'string'
       },
-      Username: {
+      TrainerId: {
         bsonType: 'string'
       },
-      IsOnline: {
-        bsonType: 'bool'
+      Level: {
+        bsonType: 'int'
+      },
+      TrainerName: {
+        bsonType: 'string'
       },
       PasswordHash: {
         bsonType: 'string'
+      },
+      TrainerClasses: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'string'
+        }
+      },
+      TrainerStats: {
+        bsonType: 'object',
+        properties: {
+          RawStrValue: {
+            bsonType: 'int'
+          },
+          RawDexValue: {
+            bsonType: 'int'
+          },
+          RawConValue: {
+            bsonType: 'int'
+          },
+          RawIntValue: {
+            bsonType: 'int'
+          },
+          RawWisValue: {
+            bsonType: 'int'
+          },
+          RawChaValue: {
+            bsonType: 'int'
+          },
+          EarnedStats: {
+            bsonType: 'int'
+          }
+        }
+      },
+      Feats: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'string'
+        }
+      },
+      Money: {
+        bsonType: 'int'
+      },
+      IsOnline: {
+        bsonType: 'bool'
       },
       Items: {
         bsonType: 'array',
@@ -44,9 +92,6 @@
             }
           }
         }
-      },
-      Money: {
-        bsonType: 'int'
       },
       IsGM: {
         bsonType: 'bool'

@@ -85,9 +85,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 pokemon.Nickname = Request.Query["nickname"];
             }
 
-            DatabaseUtility.AddPokemon(pokemon);
+            if (DatabaseUtility.TryAddPokemon(pokemon, out var error))
+            {
+                return pokemon;
+            }
 
-            return pokemon;
+            return BadRequest(error);
         }
 
         [HttpPut("trade")]
