@@ -4,6 +4,7 @@
       'TrainerId',
       'GameId',
       'Username',
+      'IsOnline',
       'PasswordHash',
       'Items',
       'Money',
@@ -22,6 +23,9 @@
       },
       Username: {
         bsonType: 'string'
+      },
+      IsOnline: {
+        bsonType: 'bool'
       },
       PasswordHash: {
         bsonType: 'string'
