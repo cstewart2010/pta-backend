@@ -157,7 +157,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\NatureModifierAttribute.cs" />
-    <Compile Include="Core\Interfaces\IHasPresence.cs" />
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\Nature.cs" />
     <Compile Include="Interfaces\IAuthenticated.cs" />

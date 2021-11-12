@@ -143,7 +143,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult Logout(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var gameId = Request.Query["gameId"];
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
