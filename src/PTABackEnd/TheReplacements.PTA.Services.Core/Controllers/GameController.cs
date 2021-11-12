@@ -264,6 +264,73 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return Ok();
         }
 
+        [HttpPut("{gameId}/addNpcs")]
+        public ActionResult<object> AddNPCsToGame(string gameId)
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            var game = DatabaseUtility.FindGame(gameId);
+            var npcIds = Request.Query["npcIds"].ToString()?.Split(',');
+            if ((npcIds?.Length).GetValueOrDefault() < 1)
+            {
+                return BadRequest(new
+                {
+                    message = "No npc Ids provided"
+                });
+            }
+            var npcs = DatabaseUtility.FindNpcs(npcIds);
+            if (npcs.Count() < 1)
+            {
+                return BadRequest(new
+                {
+                    message = "No valid npc Ids provided"
+                });
+            }
+            var newNpcList = game.NPCs.ToList();
+            newNpcList.AddRange(npcs.Select(npc => npc.NPCId));
+            if (DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
+            {
+                return new
+                {
+                    updatedNpcList = newNpcList
+                };
+            }
+
+            return StatusCode(500);
+        }
+
+        [HttpPut("{gameId}/removeNpcs")]
+        public ActionResult<object> RemovesNPCsFromGame(string gameId)
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            var game = DatabaseUtility.FindGame(gameId);
+            var npcIds = Request.Query["npcIds"].ToString()?.Split(',');
+            if ((npcIds?.Length).GetValueOrDefault() < 1)
+            {
+                return BadRequest(new
+                {
+                    message = "No npc Ids provided"
+                });
+            }
+            var npcs = DatabaseUtility.FindNpcs(npcIds);
+            if (npcs.Count() < 1)
+            {
+                return BadRequest(new
+                {
+                    message = "No valid npc Ids provided"
+                });
+            }
+            var newNpcList = game.NPCs.ToList().Except(npcs.Select(npc => npc.NPCId));
+            if (DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
+            {
+                return new
+                {
+                    updatedNpcList = newNpcList
+                };
+            }
+
+            return StatusCode(500);
+        }
+
         [HttpPut("{gameId}/reset")]
         public ActionResult<object> ChangeTrainerPassword(string gameId)
         {

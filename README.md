@@ -16,7 +16,6 @@ PTA BackEnd
   * [Add Trainer Pokemon](#add-trainer-pokemon)
   * [Add Items](#add-items)
   * [Remove Items](#remove-items)
-  * [Reset password](#reset-password)
   * [Delete Trainer's pokemon](#delete-trainer's-pokemon)
   * [Delete Trainer](#delete-trainer)
 - [Game](#game)
@@ -26,14 +25,15 @@ PTA BackEnd
   * [Add New Trainer to Game](#add-new-trainer-to-game)
   * [Start Game](#start-game)
   * [End Game](#end-game)
-  * [Add GM to Game](#add-gm-to-game)
+  * [Add Npcs to Game](#add-npcs-to-game)
+  * [Remove Npcs from Game](#remove-npcs-from-game)
   * [Reset Trainer password](#reset-trainer-password)
   * [Delete Game](#delete-game)
 
 ---
 
 # Pokemon
-Controller - api/v1/pokemon  
+Resource - api/v1/pokemon  
 [Back to top](#PTA-BackEnd)
 
 ---
@@ -121,7 +121,7 @@ Response Type - PokemonModel
 ---
 
 # Trainer
-Controller - api/v1/trainer  
+Resource - api/v1/trainer  
 [Back to top](#PTA-BackEnd)
 
 ---
@@ -225,7 +225,7 @@ Response Type - message
 ---
 
 # Game
-Controller - api/v1/game  
+Resource - api/v1/game  
 [Back to top](#PTA-BackEnd)
 
 ## Find Game by Id
@@ -295,6 +295,30 @@ Response Type - Status(200)
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
 |trainerId|string|GameMaster's id|required|
+
+---
+
+## Add Npcs to Game
+Endpoint - {gameId}/addNpcs  
+Method - PUT  
+Response Type - Status(200)  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|npcId|string[]|npcs to add to the game|required|
+
+---
+
+## Remove Npcs from Game
+Endpoint - {gameId}/removeNpcs  
+Method - PUT  
+Response Type - Status(200)  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|npcIds|string[]|npcs to remove from the game|required|
 
 ---
 

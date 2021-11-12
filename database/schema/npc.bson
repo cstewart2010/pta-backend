@@ -1,0 +1,38 @@
+{
+  $jsonSchema: {
+    required: [
+      'NPCId',
+      'TrainerName',
+      'TrainerClasses',
+      'TrainerStats',
+      'Feats'
+    ],
+    additionalProperties: false,
+    properties: {
+      _id: {
+        bsonType: 'objectId'
+      },
+      NPCId: {
+        bsonType: 'string'
+      },
+      TrainerName: {
+        bsonType: 'string'
+      },
+      TrainerClasses: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'string'
+        }
+      },
+      TrainerStats: {
+        bsonType: 'object'
+      },
+      Feats: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'string'
+        }
+      }
+    }
+  }
+}
