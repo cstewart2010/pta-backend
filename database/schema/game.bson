@@ -2,7 +2,9 @@
   $jsonSchema: {
     required: [
       'GameId',
-      'Nickname'
+      'Nickname',
+      'IsOnline',
+      'PasswordHash'
     ],
     additionalProperties: false,
     properties: {
@@ -13,6 +15,12 @@
         bsonType: 'string'
       },
       Nickname: {
+        bsonType: 'string'
+      },
+      IsOnline: {
+        bsonType: 'bool'
+      },
+      PasswordHash: {
         bsonType: 'string'
       }
     }

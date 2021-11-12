@@ -178,5 +178,21 @@ namespace TheReplacements.PTA.Common.Utilities
                 .Trainer
                 .FindOneAndUpdate(filter, update);
         }
+
+        public static TrainerModel UpdateTrainer(string trainerId, UpdateDefinition<TrainerModel> update)
+        {
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
+            return _tableHelper
+                .Trainer
+                .FindOneAndUpdate(filter, update);
+        }
+
+        public static GameModel UpdateGame(string gameId, UpdateDefinition<GameModel> update)
+        {
+            Expression<Func<GameModel, bool>> filter = game => game.GameId == gameId;
+            return _tableHelper
+                .Game
+                .FindOneAndUpdate(filter, update);
+        }
     }
 }

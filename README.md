@@ -11,6 +11,7 @@ PTA BackEnd
   * [Evolve Pokemon](#evolve-pokemon)
 - [Trainer](#trainer)
   * [Verify Login](#verify-login)
+  * [Verify Logout](#verify-logout)
   * [Find Trainer Pokemon](#find-trainer-pokemon)
   * [Add Trainer Pokemon](#add-trainer-pokemon)
   * [Add Items](#add-items)
@@ -23,6 +24,8 @@ PTA BackEnd
   * [Find Trainer In Game](#find-trainer-in-game)
   * [Create New Game](#create-new-game)
   * [Add New Trainer to Game](#add-new-trainer-to-game)
+  * [Start Game](#start-game)
+  * [End Game](#end-game)
   * [Add GM to Game](#add-gm-to-game)
   * [Reset Trainer password](#reset-trainer-password)
   * [Delete Game](#delete-game)
@@ -136,6 +139,14 @@ Response Type - TrainerModel
 |username|string|Trainer's username|required|
 |password|string|Trainer's password|required|
 |gameId|string|The game id for the relevant game|required|
+
+---
+
+## Verify Logout
+Endpoint - login  
+Method - GET  
+Response Type - Status(200)  
+[Back to Trainer](#trainer)
 
 ---
 
@@ -271,6 +282,32 @@ Response Type - TrainerModel
 |---------|----|--------------|--------|
 |username|string|Trainer's username|required|
 |password|string|Trainer's password|required|
+
+---
+
+## Start Game
+Endpoint - {gameId}/start  
+Method - PUT  
+Response Type - Status(200)  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|gamePassword|string|Game's password|required
+|gmUsername|string|Trainer's username|required|
+|gmPassword|string|Trainer's password|required|
+
+---
+
+## End Game
+Endpoint - {gameId}/end  
+Method - PUT  
+Response Type - Status(200)  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|trainerId|string|GameMaster's id|required|
 
 ---
 

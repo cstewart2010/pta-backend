@@ -21,36 +21,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             _logger = logger;
         }
 
-        [HttpGet("login")]
-        public ActionResult<object> Login()
-        {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var username = Request.Query["username"];
-            var gameId = Request.Query["gameId"];
-            var trainer = DatabaseUtility.FindTrainerByUsername
-            (
-                username,
-                gameId
-            );
-            if (trainer == null)
-            {
-                return NotFound(username);
-            }
-
-            if (!BCrypt.Net.BCrypt.Verify(Request.Query["password"], trainer.PasswordHash))
-            {
-                return Unauthorized(username);
-            }
-
-            return new
-            {
-                trainer.TrainerId,
-                trainer.Username,
-                trainer.IsGM,
-                trainer.Items
-            };
-        }
-
         [HttpGet("{trainerId}/{pokemonId}")]
         public ActionResult<PokemonModel> FindTrainerMon(
             string trainerId,
@@ -126,6 +96,77 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             DatabaseUtility.AddPokemon(pokemon);
 
             return pokemon;
+        }
+
+        [HttpPut("login")]
+        public ActionResult<object> Login()
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            var username = Request.Query["username"];
+            var gameId = Request.Query["gameId"];
+            var trainer = DatabaseUtility.FindTrainerByUsername
+            (
+                username,
+                gameId
+            );
+            if (trainer == null)
+            {
+                return NotFound(username);
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(Request.Query["password"], trainer.PasswordHash))
+            {
+                return Unauthorized(username);
+            }
+
+            if (trainer.IsOnline)
+            {
+                return Unauthorized(new
+                {
+                    message = "User is already online",
+                    username
+                });
+            }
+
+            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", true);
+            DatabaseUtility.UpdateTrainer(trainer.TrainerId, trainerUpdate);
+            return new
+            {
+                trainer.TrainerId,
+                trainer.Username,
+                trainer.IsGM,
+                trainer.Items
+            };
+        }
+
+        [HttpPut("{trainerId}/logout")]
+        public ActionResult Logout(string trainerId)
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            var gameId = Request.Query["gameId"];
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            if (trainer == null)
+            {
+                return NotFound(trainerId);
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(Request.Query["password"], trainer.PasswordHash))
+            {
+                return Unauthorized(trainerId);
+            }
+
+            if (!trainer.IsOnline)
+            {
+                return Unauthorized(new
+                {
+                    message = "User is already offline",
+                    trainer.Username
+                });
+            }
+
+            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", false);
+            DatabaseUtility.UpdateTrainer(trainer.TrainerId, trainerUpdate);
+            return Ok();
         }
 
         [HttpPut("{trainerId}/addItems")]

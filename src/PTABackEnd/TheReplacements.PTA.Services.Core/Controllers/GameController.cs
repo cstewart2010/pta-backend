@@ -69,7 +69,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var game = new GameModel
             {
                 GameId = guid,
-                Nickname = Request.Query["nickname"].ToString() ?? guid.Split('-')[0]
+                Nickname = Request.Query["nickname"].ToString() ?? guid.Split('-')[0],
+                IsOnline = true,
+                PasswordHash = GetHashPassword(Request.Query["dbPassword"])
             };
             DatabaseUtility.AddGame(game);
 
@@ -150,6 +152,105 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             };
         }
 
+        [HttpPut("{gameId}/start")]
+        public ActionResult StartGame(string gameId)
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            var gamePassword = Request.Query["gamePassword"];
+
+            var game = DatabaseUtility.FindGame(gameId);
+
+            if (game.IsOnline)
+            {
+                return BadRequest(new
+                {
+                    message = "This game is already online",
+                    gameId
+                });
+            }
+            if (!BCrypt.Net.BCrypt.Verify(gamePassword, game.PasswordHash))
+            {
+                return Unauthorized(new
+                {
+                    message = "Could not login in to game with provided password",
+                    gameId
+                });
+            }
+            var username = Request.Query["gmUsername"];
+            var password = Request.Query["gmPassword"];
+
+            var gameMaster = DatabaseUtility.FindTrainerByUsername(username, gameId);
+            if (gameMaster == null)
+            {
+                return NotFound(new
+                {
+                    message = "No username found with provided",
+                    username
+                });
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(password, game.PasswordHash))
+            {
+                return Unauthorized(new
+                {
+                    message = "Invalid password",
+                    password
+                });
+            }
+
+            if (!gameMaster.IsGM)
+            {
+                return Unauthorized(new
+                {
+                    message = $"This user is not the GM for {game.Nickname}",
+                    username,
+                    gameId
+                });
+            }
+
+            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", true);
+            var gameUpdate = Builders<GameModel>.Update.Set("IsOnline", true);
+            DatabaseUtility.UpdateTrainer(gameMaster.TrainerId, trainerUpdate);
+            DatabaseUtility.UpdateGame(game.GameId, gameUpdate);
+
+            return Ok();
+        }
+
+        [HttpPut("{gameId}/end")]
+        public ActionResult EndGame(string gameId)
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            var trainerId = Request.Query["trainerId"];
+            var game = DatabaseUtility.FindGame(gameId);
+            var gameMaster = DatabaseUtility.FindTrainerById(trainerId);
+            if (gameMaster == null)
+            {
+                return NotFound(new
+                {
+                    message = "No trainerId found with provided",
+                    trainerId
+                });
+            }
+
+            if (!gameMaster.IsGM)
+            {
+                return Unauthorized(new
+                {
+                    message = $"This user is not the GM for {game.Nickname}",
+                    trainerId,
+                    gameId
+                });
+            }
+
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == gameId && trainer.IsOnline;
+            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", false);
+            var gameUpdate = Builders<GameModel>.Update.Set("IsOnline", false);
+            DatabaseUtility.UpdateTrainer(filter, trainerUpdate);
+            DatabaseUtility.UpdateGame(game.GameId, gameUpdate);
+
+            return Ok();
+        }
+
         [HttpPut("{gameId}/reset")]
         public ActionResult<object> ChangeTrainerPassword(string gameId)
         {
@@ -158,11 +259,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             Expression<Func<TrainerModel, bool>> filter = trainer => trainer.Username == username && trainer.GameId == gameId;
             var update = Builders<TrainerModel>
                 .Update
-                .Set
-                (
-                    "PasswordHash",
-                    GetHashPassword(Request.Query["password"])
-                );
+                .Combine(new[]
+                {
+                    Builders<TrainerModel>.Update.Set("PasswordHash", GetHashPassword(Request.Query["password"])),
+                    Builders<TrainerModel>.Update.Set("IsOnline", true)
+                });
             var trainer = DatabaseUtility.UpdateTrainer
             (
                 filter,
@@ -245,7 +346,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 TrainerId = Guid.NewGuid().ToString(),
                 Username = Request.Query["username"],
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(Request.Query["password"]),
-                Items = new List<ItemModel>()
+                Items = new List<ItemModel>(),
+                IsOnline = true
             };
         }
 

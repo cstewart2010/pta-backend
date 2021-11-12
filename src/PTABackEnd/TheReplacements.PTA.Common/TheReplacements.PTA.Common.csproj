@@ -157,8 +157,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\NatureModifierAttribute.cs" />
+    <Compile Include="Core\Interfaces\IHasPresence.cs" />
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\Nature.cs" />
+    <Compile Include="Interfaces\IAuthenticated.cs" />
     <Compile Include="Utilities\DatabaseUtility.cs" />
     <Compile Include="Utilities\PokeAPIUtility.cs" />
     <Compile Include="Utilities\TableHelper.cs" />
