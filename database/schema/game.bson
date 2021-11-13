@@ -4,7 +4,8 @@
       'GameId',
       'Nickname',
       'IsOnline',
-      'PasswordHash'
+      'PasswordHash',
+      'NPCs'
     ],
     additionalProperties: false,
     properties: {
@@ -22,6 +23,12 @@
       },
       PasswordHash: {
         bsonType: 'string'
+      },
+      NPCs: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'string'
+        }
       }
     }
   }

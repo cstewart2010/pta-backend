@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using BCrypt.Net;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     public static class DatabaseUtility
     {
-        private static readonly MongoCollectionHelper MongoCollectionHelper = new MongoCollectionHelper(27017, "localhost");
+        private static readonly MongoCollectionHelper MongoCollectionHelper = new(27017, "localhost");
 
         public static bool TryAddGame(GameModel game, out object error)
         {
@@ -51,6 +52,7 @@ namespace TheReplacements.PTA.Common.Utilities
         {
             try
             {
+                action();
                 error = null;
                 return true;
             }
@@ -200,6 +202,11 @@ namespace TheReplacements.PTA.Common.Utilities
                 .Trainer
                 .Find(trainer => trainer.IsGM && trainer.GameId == gameId)
                 .Any();
+        }
+
+        public static string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
         public static GameModel UpdateGame(string gameId, UpdateDefinition<GameModel> update)

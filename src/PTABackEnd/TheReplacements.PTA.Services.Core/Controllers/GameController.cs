@@ -77,7 +77,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 //GameId = guid,
                 Nickname = Request.Query["nickname"].ToString() ?? guid.Split('-')[0],
                 IsOnline = true,
-                PasswordHash = GetHashPassword(Request.Query["gameSessionPassword"])
+                PasswordHash = DatabaseUtility.HashPassword(Request.Query["gameSessionPassword"])
             };
             if (!DatabaseUtility.TryAddGame(game, out var error))
             {
@@ -284,7 +284,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
             var npcs = DatabaseUtility.FindNpcs(npcIds);
-            if (npcs.Count() < 1)
+            if (!npcs.Any())
             {
                 return BadRequest(new
                 {
@@ -318,7 +318,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
             var npcs = DatabaseUtility.FindNpcs(npcIds);
-            if (npcs.Count() < 1)
+            if (!npcs.Any())
             {
                 return BadRequest(new
                 {
@@ -347,7 +347,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 .Update
                 .Combine(new[]
                 {
-                    Builders<TrainerModel>.Update.Set("PasswordHash", GetHashPassword(Request.Query["password"])),
+                    Builders<TrainerModel>.Update.Set("PasswordHash", DatabaseUtility.HashPassword(Request.Query["password"])),
                     Builders<TrainerModel>.Update.Set("IsOnline", true)
                 });
             var trainer = DatabaseUtility.UpdateTrainer
@@ -379,7 +379,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             results.Add(new
             {
                 message = DeleteTrainers(filter),
-                gameId = gameId
+                gameId
             });
             if (!DatabaseUtility.DeleteGame(gameId))
             {
@@ -436,11 +436,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 Level = 1,
                 Feats = new List<string>()
             };
-        }
-
-        private string GetHashPassword(string password)
-        {
-            return BCrypt.Net.BCrypt.HashPassword(password);
         }
     }
 }

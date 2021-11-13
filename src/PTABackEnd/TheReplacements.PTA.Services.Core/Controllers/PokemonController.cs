@@ -65,7 +65,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             {
                 return BadRequest(naturalMoves);
             }
-            var tmMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? new string[0];
+            var tmMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? Array.Empty<string>();
             if (tmMoves.Length > 4)
             {
                 return BadRequest(tmMoves);
