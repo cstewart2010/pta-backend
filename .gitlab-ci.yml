@@ -1,5 +1,5 @@
 default:
-  image: mcr.microsoft.com/dotnet/runtime:5.0
+  image: mcr.microsoft.com/dotnet/aspnet:5.0
 
 Build:
   stage: build
