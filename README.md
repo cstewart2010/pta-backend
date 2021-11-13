@@ -29,6 +29,10 @@ PTA BackEnd
   * [Remove Npcs from Game](#remove-npcs-from-game)
   * [Reset Trainer password](#reset-trainer-password)
   * [Delete Game](#delete-game)
+- [Npc](#npc)
+  * [Find Npc by Id](#find-npc-by-id)
+  * [Create new Npc](#create-new-npc)
+  * [Delete Npc](#delete-npc)
 
 ---
 
@@ -340,3 +344,37 @@ Endpoint - {gameId}
 Method - DELETE  
 Response Type - GameModel  
 [Back to Game](#game)
+
+---
+
+# Npc
+Resource - api/v1/npc  
+[Back to top](#PTA-BackEnd)
+
+## Find Npc by Id
+Endpoint - {npcId}  
+Method - GET  
+Response Type - NpcModel  
+[Back to Npc](#npc)
+
+---
+
+## Create New Npc
+Endpoint - new  
+Method - POST  
+Response Type - NpcModel  
+[Back to Npc](#npc)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|trainerName|string|Trainer's username|required|
+|feats|string[]|comma separated list of feats|optional|
+|classes|string[]|comma separated list of trainer classes|optional|
+
+---
+
+## Delete Npc
+Endpoint - {npcId}  
+Method - DELETE  
+Response Type - Status(200)  
+[Back to Npc](#npc)

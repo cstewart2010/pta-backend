@@ -25,7 +25,13 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<GameModel> FindGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            return GetGame(gameId);
+            var game = GetGame(gameId);
+            if (game == null)
+            {
+                return NotFound(gameId);
+            }
+
+            return game;
         }
 
         [HttpGet("{gameId}/{trainerId}")]
