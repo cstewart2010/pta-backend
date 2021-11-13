@@ -1,10 +1,9 @@
 default:
-  image: mcr.microsoft.com/dotnet/core/sdk:3.0
+  image: mcr.microsoft.com/dotnet/core/sdk:6.0
 
 Build:
   stage: build
   script: 
-    - 'docker pull mcr.microsoft.com/dotnet/sdk:6.0'
     - 'dotnet restore src/PTABackEnd/PTABackEnd.sln'
     - 'dotnet build src/PTABackEnd/PTABackEnd.sln'    
   tags:
