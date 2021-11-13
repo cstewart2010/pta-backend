@@ -4,6 +4,7 @@ default:
 Build:
   stage: build
   script: 
+    - 'docker pull mcr.microsoft.com/dotnet/sdk:6.0'
     - 'dotnet restore src/PTABackEnd/PTABackEnd.sln'
     - 'dotnet build src/PTABackEnd/PTABackEnd.sln'    
   tags:
