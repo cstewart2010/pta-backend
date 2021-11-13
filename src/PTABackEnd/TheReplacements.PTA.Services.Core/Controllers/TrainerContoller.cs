@@ -117,7 +117,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(username);
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(Request.Query["password"], trainer.PasswordHash))
+            if (!DatabaseUtility.VerifyTrainerPassword(Request.Query["password"], trainer.PasswordHash))
             {
                 return Unauthorized(username);
             }
@@ -131,8 +131,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", true);
-            DatabaseUtility.UpdateTrainer(trainer.TrainerId, trainerUpdate);
+            DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, true);
             return new
             {
                 trainer.TrainerId,
@@ -152,11 +151,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(trainerId);
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(Request.Query["password"], trainer.PasswordHash))
-            {
-                return Unauthorized(trainerId);
-            }
-
             if (!trainer.IsOnline)
             {
                 return Unauthorized(new
@@ -166,8 +160,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", false);
-            DatabaseUtility.UpdateTrainer(trainer.TrainerId, trainerUpdate);
+            DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
             return Ok();
         }
 
@@ -234,7 +227,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     trainerId,
                     itemList
                 );
-                if (result == null)
+                if (!result)
                 {
                     StatusCode(500);
                 }
@@ -304,7 +297,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     trainerId,
                     itemList
                 );
-                if (result == null)
+                if (!result)
                 {
                     StatusCode(500);
                 }
@@ -330,10 +323,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> DeleteTrainer(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var username = Request.Query["username"];
-            var gameId = Request.Query["gameId"];
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
-            var result = DatabaseUtility.DeleteTrainers(filter);
+            var result = DatabaseUtility.DeleteTrainer(trainerId);
             if (result)
             {
                 return DatabaseUtility.DeleteTrainerMons(trainerId);
@@ -405,7 +395,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             );
         }
 
-        private static TrainerModel TrySendItemUpdate(
+        private static bool TrySendItemUpdate(
             string trainerId,
             IEnumerable<ItemModel> itemList)
         {
@@ -415,10 +405,10 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 "Items",
                 itemList
             );
-            return DatabaseUtility.UpdateTrainer
+            return DatabaseUtility.UpdateTrainerItemList
             (
-                filter,
-                update
+                trainerId,
+                itemList
             );
         }
     }

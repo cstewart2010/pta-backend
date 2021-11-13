@@ -3,7 +3,7 @@ using TheReplacements.PTA.Common.Models;
 
 namespace TheReplacements.PTA.Common.Utilities
 {
-    public class MongoCollectionHelper
+    internal class MongoCollectionHelper
     {
         public IMongoCollection<GameModel> Game { get; }
         public IMongoCollection<PokemonModel> Pokemon { get; }

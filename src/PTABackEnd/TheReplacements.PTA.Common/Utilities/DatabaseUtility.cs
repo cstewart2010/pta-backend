@@ -84,25 +84,6 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndDelete(pokemon => pokemon.PokemonId == id) != null;
         }
 
-        public static object DeletePokemon(TrainerModel trainer)
-        {
-            Expression<Func<PokemonModel, bool>> pokemonFiler = pokemon => pokemon.TrainerId == trainer.TrainerId;
-            string message;
-            if (MongoCollectionHelper.Pokemon.DeleteMany(pokemonFiler).IsAcknowledged)
-            {
-                message = $"Successfully deleted all pokemon";
-            }
-            else
-            {
-                message = $"Failed to delete pokemon";
-            }
-            return new
-            {
-                message,
-                trainerId = trainer.TrainerId
-            };
-        }
-
         public static bool DeleteTrainer(string id)
         {
             return MongoCollectionHelper
@@ -110,11 +91,11 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndDelete(trainer => trainer.TrainerId == id) != null;
         }
 
-        public static bool DeleteTrainers(FilterDefinition<TrainerModel> filter)
+        public static bool DeleteTrainersByGameId(string gameId)
         {
             return MongoCollectionHelper
                 .Trainer
-                .DeleteMany(filter).IsAcknowledged;
+                .DeleteMany(trainer => trainer.GameId == gameId).IsAcknowledged;
         }
 
         public static object DeleteTrainerMons(string trainerId)
@@ -143,13 +124,20 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FirstOrDefault();
         }
 
+        public static NpcModel FindNpc(string id)
+        {
+            return MongoCollectionHelper
+                .Npc
+                .Find(npc => npc.NPCId == id)
+                .FirstOrDefault();
+        }
+
         public static IEnumerable<NpcModel> FindNpcs(IEnumerable<string> npcIds)
         {
             return MongoCollectionHelper
                 .Npc
                 .Find(npc => npcIds.Contains(npc.NPCId))
                 .ToList();
-                
         }
 
         public static PokemonModel FindPokemon(Expression<Func<PokemonModel, bool>> filter)
@@ -166,22 +154,6 @@ namespace TheReplacements.PTA.Common.Utilities
                 .Pokemon
                 .Find(pokemon => pokemon.PokemonId == id)
                 .FirstOrDefault();
-        }
-        
-        public static TrainerModel FindTrainer(Expression<Func<TrainerModel, bool>> filter)
-        {
-            return MongoCollectionHelper
-                .Trainer
-                .Find(filter)
-                .FirstOrDefault();
-        }
-
-        public static IEnumerable<TrainerModel> FindTrainers(FilterDefinition<TrainerModel> filter)
-        {
-            return MongoCollectionHelper
-                .Trainer
-                .Find(filter)
-                .ToList();
         }
 
         public static TrainerModel FindTrainerById(string id)
@@ -203,6 +175,14 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FirstOrDefault();
         }
 
+        public static IEnumerable<TrainerModel> FindTrainersByGameId(string gameId)
+        {
+            return MongoCollectionHelper
+                .Trainer
+                .Find(trainer => trainer.GameId == gameId)
+                .ToList();
+        }
+
         public static bool HasGM(string gameId)
         {
             return MongoCollectionHelper
@@ -216,12 +196,12 @@ namespace TheReplacements.PTA.Common.Utilities
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
-        public static GameModel UpdateGame(string gameId, UpdateDefinition<GameModel> update)
+        public static bool UpdateGame(string gameId, UpdateDefinition<GameModel> update)
         {
             Expression<Func<GameModel, bool>> filter = game => game.GameId == gameId;
             return MongoCollectionHelper
                 .Game
-                .FindOneAndUpdate(filter, update);
+                .FindOneAndUpdate(filter, update) != null;
         }
 
         public static bool UpdateGameNpcList(string gameId, IEnumerable<string> npcIds)
@@ -242,19 +222,75 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndUpdate(filter, update) != null;
         }
 
-        public static TrainerModel UpdateTrainer(FilterDefinition<TrainerModel> filter, UpdateDefinition<TrainerModel> update)
+        public static bool UpdatePokemonTrainerId(
+            string pokemonId,
+            string trainerId)
         {
+            Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;
+            var update = Builders<PokemonModel>.Update.Set("TrainerId", trainerId);
+            return MongoCollectionHelper
+                .Pokemon
+                .FindOneAndUpdate(filter, update) != null;
+        }
+
+        public static bool UpdateTrainerItemList(
+            string trainerId,
+            IEnumerable<ItemModel> itemList)
+        {
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
+            var update = Builders<TrainerModel>.Update.Set
+            (
+                "Items",
+                itemList
+            );
+
+            return MongoCollectionHelper
+                .Trainer
+                .FindOneAndUpdate(filter, update) != null;
+        }
+
+        public static bool UpdateTrainerOnlineStatus(
+            string trainerId,
+            bool isOnline)
+        {
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
+            var update = Builders<TrainerModel>.Update.Set("IsOnline", isOnline);
+            return MongoCollectionHelper
+                .Trainer
+                .FindOneAndUpdate(filter, update) != null;
+        }
+
+        public static bool UpdateTrainersOnlineStatus(string gameId)
+        {
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == gameId;
+            var update = Builders<TrainerModel>.Update.Set("IsOnline", false);
+            return MongoCollectionHelper
+                .Trainer
+                .UpdateMany(filter, update).IsAcknowledged;
+        }
+
+        public static TrainerModel UpdateTrainerPassword(
+            string trainerId,
+            string password)
+        {
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
+            var update = Builders<TrainerModel>
+                .Update
+                .Combine(new[]
+                {
+                    Builders<TrainerModel>.Update.Set("PasswordHash", HashPassword(password)),
+                    Builders<TrainerModel>.Update.Set("IsOnline", true)
+                });
             return MongoCollectionHelper
                 .Trainer
                 .FindOneAndUpdate(filter, update);
         }
 
-        public static TrainerModel UpdateTrainer(string trainerId, UpdateDefinition<TrainerModel> update)
+        public static bool VerifyTrainerPassword(
+            string password,
+            string hashPassword)
         {
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
-            return MongoCollectionHelper
-                .Trainer
-                .FindOneAndUpdate(filter, update);
+            return BCrypt.Net.BCrypt.Verify(password, hashPassword);
         }
     }
 }

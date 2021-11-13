@@ -137,7 +137,9 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData("Test Item", 0)]
         [InlineData("", 0)]
         [InlineData(null, 0)]
-        public void TryAddTrainer_ItemInvalid_False(string name, int amount)
+        public void TryAddTrainer_ItemInvalid_False(
+            string name,
+            int amount)
         {
             var trainer = TestTrainer;
             trainer.Items.Add(new Models.ItemModel

@@ -4,7 +4,6 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
 
@@ -82,8 +81,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             if (!DatabaseUtility.TryAddGame(game, out var error))
             {
                 return BadRequest(error);
-            }
-            
+            }            
 
             var username = Request.Query["gmName"];
             var trainer = CreateTrainer(game.GameId);
@@ -227,9 +225,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", true);
             var gameUpdate = Builders<GameModel>.Update.Set("IsOnline", true);
-            DatabaseUtility.UpdateTrainer(gameMaster.TrainerId, trainerUpdate);
+            DatabaseUtility.UpdateTrainerOnlineStatus(gameMaster.TrainerId, true);
             DatabaseUtility.UpdateGame(game.GameId, gameUpdate);
 
             return Ok();
@@ -261,10 +258,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == gameId && trainer.IsOnline;
-            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", false);
             var gameUpdate = Builders<GameModel>.Update.Set("IsOnline", false);
-            DatabaseUtility.UpdateTrainer(filter, trainerUpdate);
+            DatabaseUtility.UpdateTrainersOnlineStatus(gameId);
             DatabaseUtility.UpdateGame(game.GameId, gameUpdate);
 
             return Ok();
@@ -341,19 +336,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> ChangeTrainerPassword(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var username = Request.Query["trainerName"];
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerName == username && trainer.GameId == gameId;
-            var update = Builders<TrainerModel>
-                .Update
-                .Combine(new[]
-                {
-                    Builders<TrainerModel>.Update.Set("PasswordHash", DatabaseUtility.HashPassword(Request.Query["password"])),
-                    Builders<TrainerModel>.Update.Set("IsOnline", true)
-                });
-            var trainer = DatabaseUtility.UpdateTrainer
+            var trainerId = Request.Query["trainerId"];
+            var trainer = DatabaseUtility.UpdateTrainerPassword
             (
-                filter,
-                update
+                trainerId,
+                Request.Query["password"]
             );
             if (trainer != null)
             {
@@ -373,12 +360,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> DeleteGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == gameId;
-            var trainers = DatabaseUtility.FindTrainers(filter);
+            var trainers = DatabaseUtility.FindTrainersByGameId(gameId);
             var results = trainers.Select(trainer => DatabaseUtility.DeleteTrainerMons(trainer.TrainerId)).ToList();
             results.Add(new
             {
-                message = DeleteTrainers(filter),
+                message = DeleteTrainers(gameId),
                 gameId
             });
             if (!DatabaseUtility.DeleteGame(gameId))
@@ -389,10 +375,10 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return results;
         }
 
-        private string DeleteTrainers(Expression<Func<TrainerModel, bool>> filter)
+        private string DeleteTrainers(string gameId)
         {
             string message;
-            if (DatabaseUtility.DeleteTrainers(filter))
+            if (DatabaseUtility.DeleteTrainersByGameId(gameId))
             {
                 message = $"Successfully deleted all trainers";
                 _logger.LogInformation(message);

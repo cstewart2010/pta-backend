@@ -133,18 +133,17 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
-            Expression<Func<PokemonModel, bool>> leftFilter = pokemon => pokemon.PokemonId == leftPokemon.PokemonId;
-            DatabaseUtility.UpdatePokemon
+            DatabaseUtility.UpdatePokemonTrainerId
             (
-                leftFilter,
-                Builders<PokemonModel>.Update.Set("TrainerId", rightTrainer.TrainerId)
+                leftPokemon.PokemonId,
+                rightTrainer.TrainerId
             );
 
             Expression<Func<PokemonModel, bool>> rightFilter = pokemon => pokemon.PokemonId == rightPokemon.PokemonId;
-            DatabaseUtility.UpdatePokemon
+            DatabaseUtility.UpdatePokemonTrainerId
             (
-                rightFilter,
-                Builders<PokemonModel>.Update.Set("TrainerId", leftTrainer.TrainerId)
+                rightPokemon.PokemonId,
+                rightTrainer.TrainerId
             );
 
             return new

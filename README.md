@@ -334,7 +334,7 @@ Response Type - TrainerModel
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|trainerName|string|Trainer's username|required|
+|trainerId|string|Trainer's id|required|
 |password|string|Trainer's password|required|
 
 ---

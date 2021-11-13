@@ -41,6 +41,7 @@ namespace TheReplacements.PTA.Common.Utilities
             }
             return currentForm;
         }
+
         public static PokemonModel GetShinyPokemon(string pokemonName, string natureName)
         {
             var pokemon = GetPokemon(pokemonName, natureName);
