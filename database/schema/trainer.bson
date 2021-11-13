@@ -26,19 +26,22 @@
         bsonType: 'string'
       },
       Level: {
-        bsonType: 'int'
+        bsonType: 'int',
+        minimum: 0
       },
       TrainerName: {
         bsonType: 'string'
       },
       PasswordHash: {
-        bsonType: 'string'
+        bsonType: 'string',
+        minLength: 1
       },
       TrainerClasses: {
         bsonType: 'array',
         items: {
           bsonType: 'string'
-        }
+        },
+        maxItems: 4
       },
       TrainerStats: {
         bsonType: 'object',
@@ -70,7 +73,8 @@
         bsonType: 'array',
         items: {
           bsonType: 'string'
-        }
+        },
+        maxItems: 36
       },
       Money: {
         bsonType: 'int'

@@ -118,5 +118,34 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             trainer.PasswordHash = password;
             PerformTryAddTrainerFailTest(trainer);
         }
+
+        [Fact]
+        public void TryAddTrainer_ItemValid_True()
+        {
+            var trainer = TestTrainer;
+            trainer.Items.Add(new Models.ItemModel
+            {
+                Name = "Test Item",
+                Amount = 5
+            });
+            PerformTryAddTrainerPassTest(trainer);
+        }
+
+        [Theory]
+        [InlineData("", 5)]
+        [InlineData(null, 5)]
+        [InlineData("Test Item", 0)]
+        [InlineData("", 0)]
+        [InlineData(null, 0)]
+        public void TryAddTrainer_ItemInvalid_False(string name, int amount)
+        {
+            var trainer = TestTrainer;
+            trainer.Items.Add(new Models.ItemModel
+            {
+                Name = name,
+                Amount = amount
+            });
+            PerformTryAddTrainerFailTest(trainer);
+        }
     }
 }
