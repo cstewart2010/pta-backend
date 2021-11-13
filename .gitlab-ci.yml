@@ -4,15 +4,15 @@ default:
 Build:
   stage: build
   script: 
-    - 'dotnet restore'
-    - 'dotnet build'    
+    - 'dotnet restore src/PTABackEnd/PTABackEnd.sln'
+    - 'dotnet build src/PTABackEnd/PTABackEnd.sln'    
   tags:
     - docker
 
 Test:
   stage: test
   script: 
-    - 'dotnet test --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
+    - 'dotnet test src/PTABackEnd/PTABackEnd.sln --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
   artifacts:
     when: always
     paths: 
