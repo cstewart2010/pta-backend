@@ -25,7 +25,13 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> GetPokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            return DatabaseUtility.FindPokemonById(pokemonId);
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            if (pokemon == null)
+            {
+                return NotFound(pokemonId);
+            }
+
+            return pokemon;
         }
 
         [HttpPost("wild")]
