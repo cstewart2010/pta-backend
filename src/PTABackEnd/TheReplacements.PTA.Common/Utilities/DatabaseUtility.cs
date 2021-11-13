@@ -103,6 +103,13 @@ namespace TheReplacements.PTA.Common.Utilities
             };
         }
 
+        public static bool DeleteTrainer(string id)
+        {
+            return MongoCollectionHelper
+                .Trainer
+                .FindOneAndDelete(trainer => trainer.TrainerId == id) != null;
+        }
+
         public static bool DeleteTrainers(FilterDefinition<TrainerModel> filter)
         {
             return MongoCollectionHelper
