@@ -8,5 +8,7 @@ stages:
 - test
 sast:
   stage: test
+  script:
+    - dotnet test --logger console;verbosity=detailed
 include:
 - template: Security/SAST.gitlab-ci.yml
