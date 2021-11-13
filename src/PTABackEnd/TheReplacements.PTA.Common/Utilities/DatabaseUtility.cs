@@ -10,7 +10,7 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     public static class DatabaseUtility
     {
-        private static readonly MongoCollectionHelper MongoCollectionHelper = new(27017, "localhost");
+        private static readonly MongoCollectionHelper MongoCollectionHelper = new MongoCollectionHelper(27017, "localhost");
 
         public static bool TryAddGame(GameModel game, out object error)
         {
