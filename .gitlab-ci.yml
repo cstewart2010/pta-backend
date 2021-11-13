@@ -12,4 +12,4 @@ Build:
 Test:
   stage: test
   script: 
-    - 'dotnet test --logger:console;verbosity=detailed'
+    - 'dotnet test src/PTABackEnd/PTABackEnd.sln --logger:console;verbosity=detailed'
