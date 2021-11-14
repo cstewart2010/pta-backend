@@ -249,5 +249,27 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             DatabaseUtility.DeleteTrainer(trainer.TrainerId);
             Assert.Null(retrievedTrainer);
         }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("A game that doesn't exist")]
+        public void FindTrainerByUsername_InvalidGameId_Null(string gameId)
+        {
+            var trainer = GetTestTrainer();
+            Logger.WriteLine($"Adding trainer with username {trainer.TrainerName}");
+            DatabaseUtility.TryAddTrainer(trainer, out _);
+
+            Logger.WriteLine($"Retrieving trainer with username {trainer.TrainerName}");
+            var retrievedTrainer = DatabaseUtility.FindTrainerByUsername
+            (
+                trainer.TrainerName,
+                gameId
+            );
+
+            Logger.WriteLine($"Verifying that no trainer was found");
+            DatabaseUtility.DeleteTrainer(trainer.TrainerId);
+            Assert.Null(retrievedTrainer);
+        }
     }
 }

@@ -187,17 +187,12 @@ namespace TheReplacements.PTA.Common.Utilities
             );
         }
 
-        public static bool UpdateGameOnlineStatus(
-            string gameId,
-            bool isOnline)
-        {
-            Expression<Func<GameModel, bool>> filter = game => game.GameId == gameId;
-            var update = Builders<GameModel>.Update.Set("IsOnline", isOnline);
-            return MongoCollectionHelper
-                .Game
-                .FindOneAndUpdate(filter, update) != null;
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gameId"></param>
+        /// <param name="npcIds"></param>
+        /// <exception cref="MongoCommandException" />
         public static bool UpdateGameNpcList(string gameId, IEnumerable<string> npcIds)
         {
             return MongoCollectionHelper
@@ -207,6 +202,17 @@ namespace TheReplacements.PTA.Common.Utilities
                     game => game.GameId == gameId,
                     Builders<GameModel>.Update.Set("NPCs", npcIds)
                 ) != null;
+        }
+
+        public static bool UpdateGameOnlineStatus(
+            string gameId,
+            bool isOnline)
+        {
+            Expression<Func<GameModel, bool>> filter = game => game.GameId == gameId;
+            var update = Builders<GameModel>.Update.Set("IsOnline", isOnline);
+            return MongoCollectionHelper
+                .Game
+                .FindOneAndUpdate(filter, update) != null;
         }
 
         public static bool UpdatePokemonStats(
