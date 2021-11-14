@@ -132,7 +132,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static bool HasGM(string gameId)
         {
-            return MongoCollectionHelper
+            return FindGame(gameId) != null && MongoCollectionHelper
                 .Trainer
                 .Find(trainer => trainer.IsGM && trainer.GameId == gameId)
                 .Any();
@@ -215,10 +215,22 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndUpdate(filter, update) != null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pokemonId"></param>
+        /// <param name="query"></param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
         public static bool UpdatePokemonStats(
             string pokemonId,
             Dictionary<string, string> query)
         {
+            if (query == null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
             Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;
             var updates = GetPokemonUpdates(pokemonId, query);
             return MongoCollectionHelper
@@ -241,6 +253,11 @@ namespace TheReplacements.PTA.Common.Utilities
             string pokemonId,
             PokemonModel evolvedForm)
         {
+            if (evolvedForm == null)
+            {
+                throw new ArgumentNullException(nameof(pokemonId));
+            }
+
             var updates = new[]
             {
                 Builders<PokemonModel>.Update.Set("DexNo", evolvedForm.DexNo),
@@ -264,6 +281,11 @@ namespace TheReplacements.PTA.Common.Utilities
             string trainerId,
             IEnumerable<ItemModel> itemList)
         {
+            if (itemList == null)
+            {
+                throw new ArgumentNullException(nameof(itemList));
+            }
+
             Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
             var update = Builders<TrainerModel>.Update.Set
             (
@@ -287,16 +309,7 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndUpdate(filter, update) != null;
         }
 
-        public static bool UpdateTrainersOnlineStatus(string gameId)
-        {
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.GameId == gameId;
-            var update = Builders<TrainerModel>.Update.Set("IsOnline", false);
-            return MongoCollectionHelper
-                .Trainer
-                .UpdateMany(filter, update).IsAcknowledged;
-        }
-
-        public static TrainerModel UpdateTrainerPassword(
+        public static bool UpdateTrainerPassword(
             string trainerId,
             string password)
         {
@@ -310,7 +323,7 @@ namespace TheReplacements.PTA.Common.Utilities
                 });
             return MongoCollectionHelper
                 .Trainer
-                .FindOneAndUpdate(filter, update);
+                .FindOneAndUpdate(filter, update) != null;
         }
 
         public static bool VerifyTrainerPassword(
@@ -339,41 +352,42 @@ namespace TheReplacements.PTA.Common.Utilities
         {
             var pokemon = FindPokemonById(pokemonId);
             var updates = new List<UpdateDefinition<PokemonModel>>();
-            if (int.TryParse(query["experience"], out var experience))
+            var currentKey = string.Empty;
+            if (query.TryGetValue("experience", out currentKey) && int.TryParse(currentKey, out var experience))
             {
                 updates.Add(Builders<PokemonModel>.Update.Set("Experience", experience));
             }
-            if (int.TryParse(query["hpAdded"], out var added))
+            if (query.TryGetValue("hpAdded", out currentKey) && int.TryParse(currentKey, out var added))
             {
                 pokemon.HP.Added = added;
                 updates.Add(Builders<PokemonModel>.Update.Set("HP", pokemon.HP));
             }
-            if (int.TryParse(query["attackAdded"], out added))
+            if (query.TryGetValue("attackAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
                 pokemon.Attack.Added = added;
                 updates.Add(Builders<PokemonModel>.Update.Set("Attack", pokemon.Attack));
             }
-            if (int.TryParse(query["defenseAdded"], out added))
+            if (query.TryGetValue("defenseAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
                 pokemon.Defense.Added = added;
                 updates.Add(Builders<PokemonModel>.Update.Set("Defense", pokemon.Defense));
             }
-            if (int.TryParse(query["specialAttackAdded"], out added))
+            if (query.TryGetValue("specialAttackAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
                 pokemon.SpecialAttack.Added = added;
                 updates.Add(Builders<PokemonModel>.Update.Set("SpecialAttack", pokemon.SpecialAttack));
             }
-            if (int.TryParse(query["specialDefenseAdded"], out added))
+            if (query.TryGetValue("specialDefenseAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
                 pokemon.SpecialDefense.Added = added;
                 updates.Add(Builders<PokemonModel>.Update.Set("SpecialDefense", pokemon.SpecialDefense));
             }
-            if (int.TryParse(query["speedAdded"], out added))
+            if (query.TryGetValue("speedAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
                 pokemon.Speed.Added = added;
                 updates.Add(Builders<PokemonModel>.Update.Set("Speed", pokemon.Speed));
             }
-            if (!string.IsNullOrWhiteSpace(query["nickname"]))
+            if (query.TryGetValue("nickname", out currentKey) && !string.IsNullOrWhiteSpace(currentKey))
             {
                 updates.Add(Builders<PokemonModel>.Update.Set("Nickname", query["nickname"]));
             }
