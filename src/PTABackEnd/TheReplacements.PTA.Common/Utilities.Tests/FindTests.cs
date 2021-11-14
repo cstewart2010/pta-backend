@@ -84,8 +84,8 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Assert.Throws<ArgumentNullException>(() => DatabaseUtility.FindNpcs(null));
         }
 
-        [Fact]
-        public void FindPokemonById_ValidId_NotNull()
+        [Fact, Trait("Category", "smoke")]
+        public void FindPokemonById_SmokeTest_NotNull()
         {
             var pokemon = GetTestPokemon();
             DatabaseUtility.TryAddPokemon(pokemon, out _);

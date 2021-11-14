@@ -28,6 +28,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(pokemonId);
             }
 
+            pokemon.AggregateStats();
             return pokemon;
         }
 
@@ -47,11 +48,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
             var parseFails = new[]
             {
-                    GetBadRequestMessage("expYield", result => result > 0, out var expYield),
-                    GetBadRequestMessage("catchRate", result => result >= 0, out var catchRate),
-                    GetBadRequestMessage("experience", result => result >= 0, out var experience),
-                    GetBadRequestMessage("level", result => result > 0, out var level),
-                }.Where(fail => fail != null);
+                GetBadRequestMessage("expYield", result => result > 0, out var expYield),
+                GetBadRequestMessage("catchRate", result => result >= 0, out var catchRate),
+                GetBadRequestMessage("experience", result => result >= 0, out var experience),
+                GetBadRequestMessage("level", result => result > 0, out var level),
+            }.Where(fail => fail != null);
             if (parseFails.Any())
             {
                 return BadRequest(parseFails);
@@ -90,6 +91,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             if (DatabaseUtility.TryAddPokemon(pokemon, out var error))
             {
+                pokemon.AggregateStats();
                 return pokemon;
             }
 
@@ -143,7 +145,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 rightPokemon.PokemonId,
                 rightTrainer.TrainerId
             );
-
+            
+            leftPokemon.AggregateStats();
+            rightPokemon.AggregateStats();
             return new
             {
                 leftPokemon,
@@ -166,7 +170,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return StatusCode(500);
             }
 
-            return DatabaseUtility.FindPokemonById(pokemonId);
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            pokemon.AggregateStats();
+            return pokemon;
         }
 
         [HttpPut("evolve/{pokemonId}")]
@@ -190,6 +196,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
+            evolvedForm.AggregateStats();
             return evolvedForm;
         }
 
