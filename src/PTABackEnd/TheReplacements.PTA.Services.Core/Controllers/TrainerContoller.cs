@@ -306,27 +306,17 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return DatabaseUtility.FindTrainerById(trainerId);
         }
 
-        [HttpDelete("{trainerId}/pokemon")]
-        public ActionResult<object> DeleteTrainerMons(string trainerId)
-        {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var deleteResponse = DatabaseUtility.DeleteTrainerMons(trainerId);
-            if (deleteResponse != null)
-            {
-                return deleteResponse;
-            }
-
-            return StatusCode(500);
-        }
-
         [HttpDelete("{trainerId}")]
         public ActionResult<object> DeleteTrainer(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var result = DatabaseUtility.DeleteTrainer(trainerId);
-            if (result)
+            if (result && DatabaseUtility.DeletePokemonByTrainerId(trainerId) > -1)
             {
-                return DatabaseUtility.DeleteTrainerMons(trainerId);
+                return new
+                {
+                    message = $"Successfully deleted all pokemon associated with {trainerId}"
+                };
             }
             else
             {

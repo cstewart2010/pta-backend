@@ -361,16 +361,32 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var trainers = DatabaseUtility.FindTrainersByGameId(gameId);
-            var results = trainers.Select(trainer => DatabaseUtility.DeleteTrainerMons(trainer.TrainerId)).ToList();
+            var results = trainers.Select
+            (
+                trainer =>
+                {
+                    if (DatabaseUtility.DeletePokemonByTrainerId(trainer.TrainerId) > -1)
+                    {
+                        return new
+                        {
+                            message = $"Successfully deleted all pokemon associated with {trainer.TrainerId}"
+                        };
+                    }
+                    return null;
+                }
+            )
+            .Where(response => response != null)
+            .ToList();
             results.Add(new
             {
-                message = DeleteTrainers(gameId),
-                gameId
+                message = DeleteTrainers(gameId)
             });
-            if (!DatabaseUtility.DeleteGame(gameId))
+            results.Add(new
             {
-                return NotFound(gameId);
-            }
+                message = DatabaseUtility.DeleteGame(gameId)
+                    ? $"Successfully deleted game {gameId}"
+                    : $"Failed to delete {gameId}"
+            });
 
             return results;
         }
@@ -378,9 +394,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         private string DeleteTrainers(string gameId)
         {
             string message;
-            if (DatabaseUtility.DeleteTrainersByGameId(gameId))
+            if (DatabaseUtility.DeleteTrainersByGameId(gameId) > -1)
             {
-                message = $"Successfully deleted all trainers";
+                message = $"Successfully deleted all trainers associate with {gameId}";
                 _logger.LogInformation(message);
             }
             else

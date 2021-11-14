@@ -15,7 +15,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact, Trait("Category", "smoke")]
         public void TryAddGame_StandardGame_True()
         {
-            PerformTryAddGamePassTest(TestGame);
+            PerformTryAddGamePassTest(GetTestGame());
         }
 
         [Theory]
@@ -24,7 +24,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData("aaaaaaaaaaaaaaaaaaaaa")]
         public void TryAddGame_NicknameInvalid_False(string nickname)
         {
-            var game = TestGame;
+            var game = GetTestGame();
             game.Nickname = nickname;
             PerformTryAddGameFailTest(game);
         }
@@ -32,7 +32,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddNewGame_NPCsInvalid_False()
         {
-            var game = TestGame;
+            var game = GetTestGame();
             game.NPCs = null;
             PerformTryAddGameFailTest(game);
         }
@@ -42,7 +42,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(null)]
         public void TryAddNewGame_PasswordInvalid_False(string password)
         {
-            var game = TestGame;
+            var game = GetTestGame();
             game.PasswordHash = password;
             PerformTryAddGameFailTest(game);
         }

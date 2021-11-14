@@ -14,13 +14,13 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact, Trait("Category", "smoke")]
         public void TryAddPokemon_SmokeTest_True()
         {
-            PerformTryAddPokemonPassTest(TestPokemon);
+            PerformTryAddPokemonPassTest(GetTestPokemon());
         }
 
         [Fact]
         public void TryAddPokemon_StatsNull_False()
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.HP = null;
             PerformTryAddPokemonFailTest(pokemon);
             pokemon.Attack = null;
@@ -40,7 +40,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(255)]
         public void TryAddPokemon_CatchRateInRanges_True(int catchRate)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.CatchRate = catchRate;
             PerformTryAddPokemonPassTest(pokemon);
         }
@@ -50,7 +50,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(256)]
         public void TryAddPokemon_CatchRateOutOfRanges_False(int catchRate)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.CatchRate = catchRate;
             PerformTryAddPokemonFailTest(pokemon);
         }
@@ -58,7 +58,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddPokemon_DexNoOutOfRange_False()
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.DexNo = 0;
             PerformTryAddPokemonFailTest(pokemon);
         }
@@ -66,7 +66,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddPokemon_ExpYieldOutOfRange_False()
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.ExpYield = 0;
             PerformTryAddPokemonFailTest(pokemon);
         }
@@ -77,7 +77,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(Gender.Female)]
         public void TryAddPokemon_GenderInRanges_True(Gender gender)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.Gender = gender;
             PerformTryAddPokemonPassTest(pokemon);
         }
@@ -87,7 +87,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(3)]
         public void TryAddPokemon_GenderOutOfRanges_False(int gender)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.Gender = (Gender)gender;
             PerformTryAddPokemonFailTest(pokemon);
         }
@@ -98,7 +98,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(100)]
         public void TryAddPokemon_LevelInRanges_True(int level)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.Level = level;
             PerformTryAddPokemonPassTest(pokemon);
         }
@@ -108,7 +108,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(101)]
         public void TryAddPokemon_LevelOutOfRanges_False(int level)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.Level = level;
             PerformTryAddPokemonFailTest(pokemon);
         }
@@ -126,7 +126,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
                 moves[i] = $"Move{i}";
             }
 
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.NaturalMoves = moves;
             PerformTryAddPokemonPassTest(pokemon);
         }
@@ -142,7 +142,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
                 moves[i] = $"Move{i}";
             }
 
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.NaturalMoves = moves;
             PerformTryAddPokemonFailTest(pokemon);
         }
@@ -153,7 +153,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(35)]
         public void TryAddPokemon_NatureInRanges_True(int nature)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.Nature = nature;
             PerformTryAddPokemonPassTest(pokemon);
         }
@@ -163,7 +163,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(36)]
         public void TryAddPokemon_NatureOutOfRanges_False(int nature)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.Nature = nature;
             PerformTryAddPokemonFailTest(pokemon);
         }
@@ -171,7 +171,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddPokemon_NicknameNull_False()
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.Nickname = null;
             PerformTryAddPokemonFailTest(pokemon);
         }
@@ -181,7 +181,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData("aaaaaaaaaaaaaaaaaaa")]
         public void TryAddPokemon_NicknameEmptyOrTooLong_False(string nickname)
         {
-            var pokemon = TestPokemon;
+            var pokemon = GetTestPokemon();
             pokemon.Nickname = nickname;
             PerformTryAddPokemonFailTest(pokemon);
         }

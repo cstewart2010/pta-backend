@@ -14,13 +14,13 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact, Trait("Category", "smoke")]
         public void TryAddTrainer_SmokeTest_True()
         {
-            PerformTryAddTrainerPassTest(TestTrainer);
+            PerformTryAddTrainerPassTest(GetTestTrainer());
         }
 
         [Fact]
         public void TryAddTrainer_LevelOutOfRange_False()
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             trainer.Level = -1;
             PerformTryAddTrainerFailTest(trainer);
         }
@@ -28,7 +28,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddTrainer_StatsNull_False()
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             trainer.TrainerStats = null;
             PerformTryAddTrainerFailTest(trainer);
         }
@@ -38,7 +38,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(36)]
         public void TryAddTrainer_FeatsCountInRange_True(int count)
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             var feats = new string[count];
             for (int i = 0; i < count; i++)
             {
@@ -52,7 +52,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddTrainer_FeatsCountOutOfRange_False()
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             var feats = new string[37];
             for (int i = 0; i < 5; i++)
             {
@@ -66,7 +66,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddTrainer_FeatsNull_False()
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             trainer.Feats = null;
             PerformTryAddTrainerFailTest(trainer);
         }
@@ -76,7 +76,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(4)]
         public void TryAddTrainer_ClassesCountInRange_True(int count)
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             var classes = new string[count];
             for (int i = 0; i < count; i++)
             {
@@ -90,7 +90,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddTrainer_ClassesCountOutOfRange_False()
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             var classes = new string[5];
             for (int i = 0; i < 5; i++)
             {
@@ -104,7 +104,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddTrainer_ClassesNull_False()
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             trainer.TrainerClasses = null;
             PerformTryAddTrainerFailTest(trainer);
         }
@@ -114,7 +114,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [InlineData(null)]
         public void TryAddTrainer_PasswordInvalid_False(string password)
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             trainer.PasswordHash = password;
             PerformTryAddTrainerFailTest(trainer);
         }
@@ -122,7 +122,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact]
         public void TryAddTrainer_ItemValid_True()
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             trainer.Items.Add(new Models.ItemModel
             {
                 Name = "Test Item",
@@ -141,7 +141,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             string name,
             int amount)
         {
-            var trainer = TestTrainer;
+            var trainer = GetTestTrainer();
             trainer.Items.Add(new Models.ItemModel
             {
                 Name = name,

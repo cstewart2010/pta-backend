@@ -11,61 +11,73 @@ namespace TheReplacements.PTA.Common.Utilities
     {
         protected static ITestOutputHelper Logger { get; set; }
 
-        internal static GameModel TestGame => new GameModel
+        public static GameModel GetTestGame()
         {
-            GameId = Guid.NewGuid().ToString(),
-            Nickname = "Test Nickname",
-            NPCs = Array.Empty<string>(),
-            PasswordHash = "testpassword"
-        };
+            return new GameModel
+            {
+                GameId = Guid.NewGuid().ToString(),
+                Nickname = "Test Nickname",
+                NPCs = Array.Empty<string>(),
+                PasswordHash = "testpassword"
+            };
+        }
 
-        internal static NpcModel TestNpc => new NpcModel
+        public static NpcModel GetTestNpc()
         {
-            NPCId = Guid.NewGuid().ToString(),
-            Feats = Array.Empty<string>(),
-            TrainerClasses = Array.Empty<string>(),
-            TrainerName = "Test Trainername",
-            TrainerStats = new TrainerStatsModel()
-        };
+            return new NpcModel
+            {
+                NPCId = Guid.NewGuid().ToString(),
+                Feats = Array.Empty<string>(),
+                TrainerClasses = Array.Empty<string>(),
+                TrainerName = "Test Trainername",
+                TrainerStats = new TrainerStatsModel()
+            };
+        }
 
-        internal static PokemonModel TestPokemon => new PokemonModel
+        public static PokemonModel GetTestPokemon()
         {
-            HP = new PokemonStatModel(),
-            Attack = new PokemonStatModel(),
-            Defense = new PokemonStatModel(),
-            SpecialAttack = new PokemonStatModel(),
-            SpecialDefense = new PokemonStatModel(),
-            Speed = new PokemonStatModel(),
-            CatchRate = 180,
-            DexNo = 143,
-            Experience = 1000,
-            ExpYield = 35,
-            Gender = Gender.Male,
-            IsShiny = false,
-            Level = 8,
-            NaturalMoves = new[]
-                {
+            return new PokemonModel
+            {
+                HP = new PokemonStatModel(),
+                Attack = new PokemonStatModel(),
+                Defense = new PokemonStatModel(),
+                SpecialAttack = new PokemonStatModel(),
+                SpecialDefense = new PokemonStatModel(),
+                Speed = new PokemonStatModel(),
+                CatchRate = 180,
+                DexNo = 143,
+                Experience = 1000,
+                ExpYield = 35,
+                Gender = Gender.Male,
+                IsShiny = false,
+                Level = 8,
+                NaturalMoves = new[]
+{
                     "A Move"
                 },
-            Nature = 18,
-            Nickname = "Snorlax",
-            PokemonId = Guid.NewGuid().ToString(),
-            TMMoves = Array.Empty<string>(),
-            TrainerId = Guid.NewGuid().ToString(),
-            Type = (int)PokemonTypes.Normal
-        };
+                Nature = 18,
+                Nickname = "Snorlax",
+                PokemonId = Guid.NewGuid().ToString(),
+                TMMoves = Array.Empty<string>(),
+                TrainerId = Guid.NewGuid().ToString(),
+                Type = (int)PokemonTypes.Normal
+            };
+        }
 
-        internal static TrainerModel TestTrainer => new TrainerModel
+        public static TrainerModel GetTestTrainer()
         {
-            Feats = Array.Empty<string>(),
-            GameId = Guid.NewGuid().ToString(),
-            Items = new List<ItemModel>(),
-            PasswordHash = "testpassword",
-            TrainerClasses = Array.Empty<string>(),
-            TrainerId = Guid.NewGuid().ToString(),
-            TrainerName = "Test Trainer",
-            TrainerStats = new TrainerStatsModel()
-        };
+            return new TrainerModel
+            {
+                Feats = Array.Empty<string>(),
+                GameId = Guid.NewGuid().ToString(),
+                Items = new List<ItemModel>(),
+                PasswordHash = "testpassword",
+                TrainerClasses = Array.Empty<string>(),
+                TrainerId = Guid.NewGuid().ToString(),
+                TrainerName = "Test Trainer",
+                TrainerStats = new TrainerStatsModel()
+            };
+        }
 
         internal static void PerformTryAddGamePassTest(GameModel game)
         {
