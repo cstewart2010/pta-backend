@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
 
 namespace TheReplacements.PTA.Common.Utilities.Tests
@@ -14,7 +13,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact, Trait("Category", "smoke")]
         public void TryAddTrainer_SmokeTest_True()
         {
-            PerformTryAddTrainerPassTest(GetTestTrainer());
+            PerformTryAddTrainerPassTest(GetTestTrainer(), Logger);
         }
 
         [Fact]
@@ -22,7 +21,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var trainer = GetTestTrainer();
             trainer.Level = -1;
-            PerformTryAddTrainerFailTest(trainer);
+            PerformTryAddTrainerFailTest(trainer, Logger);
         }
 
         [Fact]
@@ -30,7 +29,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var trainer = GetTestTrainer();
             trainer.TrainerStats = null;
-            PerformTryAddTrainerFailTest(trainer);
+            PerformTryAddTrainerFailTest(trainer, Logger);
         }
 
         [Theory]
@@ -46,7 +45,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             trainer.Feats = feats;
-            PerformTryAddTrainerPassTest(trainer);
+            PerformTryAddTrainerPassTest(trainer, Logger);
         }
 
         [Fact]
@@ -60,7 +59,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             trainer.Feats = feats;
-            PerformTryAddTrainerFailTest(trainer);
+            PerformTryAddTrainerFailTest(trainer, Logger);
         }
 
         [Fact]
@@ -68,7 +67,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var trainer = GetTestTrainer();
             trainer.Feats = null;
-            PerformTryAddTrainerFailTest(trainer);
+            PerformTryAddTrainerFailTest(trainer, Logger);
         }
 
         [Theory]
@@ -84,7 +83,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             trainer.TrainerClasses = classes;
-            PerformTryAddTrainerPassTest(trainer);
+            PerformTryAddTrainerPassTest(trainer, Logger);
         }
 
         [Fact]
@@ -98,7 +97,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             trainer.TrainerClasses = classes;
-            PerformTryAddTrainerFailTest(trainer);
+            PerformTryAddTrainerFailTest(trainer, Logger);
         }
 
         [Fact]
@@ -106,7 +105,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var trainer = GetTestTrainer();
             trainer.TrainerClasses = null;
-            PerformTryAddTrainerFailTest(trainer);
+            PerformTryAddTrainerFailTest(trainer, Logger);
         }
 
         [Theory]
@@ -116,7 +115,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var trainer = GetTestTrainer();
             trainer.PasswordHash = password;
-            PerformTryAddTrainerFailTest(trainer);
+            PerformTryAddTrainerFailTest(trainer, Logger);
         }
 
         [Fact]
@@ -128,7 +127,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
                 Name = "Test Item",
                 Amount = 5
             });
-            PerformTryAddTrainerPassTest(trainer);
+            PerformTryAddTrainerPassTest(trainer, Logger);
         }
 
         [Theory]
@@ -147,7 +146,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
                 Name = name,
                 Amount = amount
             });
-            PerformTryAddTrainerFailTest(trainer);
+            PerformTryAddTrainerFailTest(trainer, Logger);
         }
     }
 }

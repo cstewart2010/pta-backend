@@ -14,7 +14,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact, Trait("Category", "smoke")]
         public void TryAddPokemon_SmokeTest_True()
         {
-            PerformTryAddPokemonPassTest(GetTestPokemon());
+            PerformTryAddPokemonPassTest(GetTestPokemon(), Logger);
         }
 
         [Fact]
@@ -22,17 +22,17 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.HP = null;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
             pokemon.Attack = null;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
             pokemon.Defense = null;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
             pokemon.SpecialAttack = null;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
             pokemon.SpecialDefense = null;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
             pokemon.Speed = null;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Theory]
@@ -42,7 +42,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.CatchRate = catchRate;
-            PerformTryAddPokemonPassTest(pokemon);
+            PerformTryAddPokemonPassTest(pokemon, Logger);
         }
 
         [Theory]
@@ -52,7 +52,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.CatchRate = catchRate;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.DexNo = 0;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.ExpYield = 0;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Theory]
@@ -79,7 +79,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.Gender = gender;
-            PerformTryAddPokemonPassTest(pokemon);
+            PerformTryAddPokemonPassTest(pokemon, Logger);
         }
 
         [Theory]
@@ -89,7 +89,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.Gender = (Gender)gender;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Theory]
@@ -100,7 +100,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.Level = level;
-            PerformTryAddPokemonPassTest(pokemon);
+            PerformTryAddPokemonPassTest(pokemon, Logger);
         }
 
         [Theory]
@@ -110,7 +110,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.Level = level;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Theory]
@@ -128,7 +128,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 
             var pokemon = GetTestPokemon();
             pokemon.NaturalMoves = moves;
-            PerformTryAddPokemonPassTest(pokemon);
+            PerformTryAddPokemonPassTest(pokemon, Logger);
         }
 
         [Theory]
@@ -144,7 +144,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 
             var pokemon = GetTestPokemon();
             pokemon.NaturalMoves = moves;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Theory]
@@ -155,7 +155,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.Nature = nature;
-            PerformTryAddPokemonPassTest(pokemon);
+            PerformTryAddPokemonPassTest(pokemon, Logger);
         }
 
         [Theory]
@@ -165,7 +165,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.Nature = nature;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.Nickname = null;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
 
         [Theory]
@@ -183,7 +183,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var pokemon = GetTestPokemon();
             pokemon.Nickname = nickname;
-            PerformTryAddPokemonFailTest(pokemon);
+            PerformTryAddPokemonFailTest(pokemon, Logger);
         }
     }
 }

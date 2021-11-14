@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
 
@@ -27,10 +25,19 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var pokemon = DatabaseUtility.FindPokemon(pokemon => pokemon.TrainerId == trainerId && pokemon.PokemonId == pokemonId);
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (pokemon == null)
             {
                 return NotFound(pokemonId);
+            }
+            if (pokemon.TrainerId != trainerId)
+            {
+                return BadRequest(new
+                {
+                    message = "Invalid trainerId",
+                    expected = trainerId,
+                    found = pokemon.TrainerId
+                });
             }
 
             return pokemon;
@@ -222,7 +229,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     });
                 }
 
-                var result = TrySendItemUpdate
+                var result = DatabaseUtility.UpdateTrainerItemList
                 (
                     trainerId,
                     itemList
@@ -292,7 +299,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     })
                     .Where(item => item.Amount > 0);
 
-                var result = TrySendItemUpdate
+                var result = DatabaseUtility.UpdateTrainerItemList
                 (
                     trainerId,
                     itemList
@@ -382,23 +389,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             (
                 itemChange,
                 null
-            );
-        }
-
-        private static bool TrySendItemUpdate(
-            string trainerId,
-            IEnumerable<ItemModel> itemList)
-        {
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
-            var update = Builders<TrainerModel>.Update.Set
-            (
-                "Items",
-                itemList
-            );
-            return DatabaseUtility.UpdateTrainerItemList
-            (
-                trainerId,
-                itemList
             );
         }
     }

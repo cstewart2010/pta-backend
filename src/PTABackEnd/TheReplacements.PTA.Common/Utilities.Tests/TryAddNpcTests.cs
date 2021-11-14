@@ -13,7 +13,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         [Fact, Trait("Category", "smoke")]
         public void TryAddNpc_SmokeTest_True()
         {
-            PerformTryAddNpcPassTest(GetTestNpc());
+            PerformTryAddNpcPassTest(GetTestNpc(), Logger);
         }
 
         [Theory]
@@ -29,7 +29,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             npc.Feats = feats;
-            PerformTryAddNpcPassTest(npc);
+            PerformTryAddNpcPassTest(npc, Logger);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             npc.Feats = feats;
-            PerformTryAddNpcFailTest(npc);
+            PerformTryAddNpcFailTest(npc, Logger);
         }
         
         [Fact]
@@ -51,7 +51,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var npc = GetTestNpc();
             npc.Feats = null;
-            PerformTryAddNpcFailTest(npc);
+            PerformTryAddNpcFailTest(npc, Logger);
         }
 
         [Theory]
@@ -67,7 +67,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             npc.TrainerClasses = classes;
-            PerformTryAddNpcPassTest(npc);
+            PerformTryAddNpcPassTest(npc, Logger);
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             npc.TrainerClasses = classes;
-            PerformTryAddNpcFailTest(npc);
+            PerformTryAddNpcFailTest(npc, Logger);
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var npc = GetTestNpc();
             npc.TrainerClasses = null;
-            PerformTryAddNpcFailTest(npc);
+            PerformTryAddNpcFailTest(npc, Logger);
         }
 
         [Theory]
@@ -99,7 +99,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var npc = GetTestNpc();
             npc.TrainerName = name;
-            PerformTryAddNpcFailTest(npc);
+            PerformTryAddNpcFailTest(npc, Logger);
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             var npc = GetTestNpc();
             npc.TrainerStats = null;
-            PerformTryAddNpcFailTest(npc);
+            PerformTryAddNpcFailTest(npc, Logger);
         }
     }
 }

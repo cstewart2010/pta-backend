@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -225,9 +224,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var gameUpdate = Builders<GameModel>.Update.Set("IsOnline", true);
             DatabaseUtility.UpdateTrainerOnlineStatus(gameMaster.TrainerId, true);
-            DatabaseUtility.UpdateGame(game.GameId, gameUpdate);
+            DatabaseUtility.UpdateGameOnlineStatus(game.GameId, true);
 
             return Ok();
         }
@@ -258,9 +256,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var gameUpdate = Builders<GameModel>.Update.Set("IsOnline", false);
             DatabaseUtility.UpdateTrainersOnlineStatus(gameId);
-            DatabaseUtility.UpdateGame(game.GameId, gameUpdate);
+            DatabaseUtility.UpdateGameOnlineStatus(game.GameId, false);
 
             return Ok();
         }

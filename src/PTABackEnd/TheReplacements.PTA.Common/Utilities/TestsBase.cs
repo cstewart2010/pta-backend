@@ -9,7 +9,7 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     public class TestsBase
     {
-        protected static ITestOutputHelper Logger { get; set; }
+        protected ITestOutputHelper Logger { get; set; }
 
         public static GameModel GetTestGame()
         {
@@ -79,83 +79,83 @@ namespace TheReplacements.PTA.Common.Utilities
             };
         }
 
-        internal static void PerformTryAddGamePassTest(GameModel game)
+        internal static void PerformTryAddGamePassTest(GameModel game, ITestOutputHelper logger)
         {
-            Logger.WriteLine($"Adding new game with game id {game.GameId}");
+            logger.WriteLine($"Adding new game with game id {game.GameId}");
             Assert.True(DatabaseUtility.TryAddGame(game, out var error));
-            Logger.WriteLine($"Verify that error object is null");
+            logger.WriteLine($"Verify that error object is null");
             Assert.Null(error);
-            Logger.WriteLine($"Removing game with game id {game.GameId}");
+            logger.WriteLine($"Removing game with game id {game.GameId}");
             DatabaseUtility.DeleteGame(game.GameId);
         }
 
-        internal static void PerformTryAddGameFailTest(GameModel game)
+        internal static void PerformTryAddGameFailTest(GameModel game, ITestOutputHelper logger)
         {
-            Logger.WriteLine($"Adding new game with game id {game.GameId}");
+            logger.WriteLine($"Adding new game with game id {game.GameId}");
             Assert.False(DatabaseUtility.TryAddGame(game, out var error));
-            Logger.WriteLine($"Verify that error object is null");
+            logger.WriteLine($"Verify that error object is null");
             Assert.NotNull(error);
-            Logger.WriteLine($"Verify no game is found with game id {game.GameId}");
+            logger.WriteLine($"Verify no game is found with game id {game.GameId}");
             Assert.Null(DatabaseUtility.FindGame(game.GameId));
         }
 
-        internal static void PerformTryAddNpcPassTest(NpcModel npc)
+        internal static void PerformTryAddNpcPassTest(NpcModel npc, ITestOutputHelper logger)
         {
-            Logger.WriteLine($"Adding new game with npc id {npc.NPCId}");
+            logger.WriteLine($"Adding new game with npc id {npc.NPCId}");
             Assert.True(DatabaseUtility.TryAddNpc(npc, out var error));
-            Logger.WriteLine($"Verify that error object is null");
+            logger.WriteLine($"Verify that error object is null");
             Assert.Null(error);
-            Logger.WriteLine($"Removing game with game id {npc.NPCId}");
+            logger.WriteLine($"Removing game with game id {npc.NPCId}");
             DatabaseUtility.DeleteNpc(npc.NPCId);
         }
 
-        internal static void PerformTryAddNpcFailTest(NpcModel npc)
+        internal static void PerformTryAddNpcFailTest(NpcModel npc, ITestOutputHelper logger)
         {
-            Logger.WriteLine($"Adding new npc with npc id {npc.NPCId}");
+            logger.WriteLine($"Adding new npc with npc id {npc.NPCId}");
             Assert.False(DatabaseUtility.TryAddNpc(npc, out var error));
-            Logger.WriteLine($"Verify that error object is null");
+            logger.WriteLine($"Verify that error object is null");
             Assert.NotNull(error);
-            Logger.WriteLine($"Verify no npc is found with npc id {npc.NPCId}");
+            logger.WriteLine($"Verify no npc is found with npc id {npc.NPCId}");
             Assert.Empty(DatabaseUtility.FindNpcs(new[] { npc.NPCId }));
         }
 
-        internal static void PerformTryAddPokemonFailTest(PokemonModel pokemon)
+        internal static void PerformTryAddPokemonFailTest(PokemonModel pokemon, ITestOutputHelper logger)
         {
-            Logger.WriteLine($"Adding new pokemon with pokemon id {pokemon.PokemonId}");
+            logger.WriteLine($"Adding new pokemon with pokemon id {pokemon.PokemonId}");
             Assert.False(DatabaseUtility.TryAddPokemon(pokemon, out var error));
-            Logger.WriteLine($"Verify that error object is null");
+            logger.WriteLine($"Verify that error object is null");
             Assert.NotNull(error);
-            Logger.WriteLine($"Verify no pokemon is found with pokemon id {pokemon.PokemonId}");
+            logger.WriteLine($"Verify no pokemon is found with pokemon id {pokemon.PokemonId}");
             Assert.Null(DatabaseUtility.FindPokemonById(pokemon.PokemonId));
         }
 
-        internal static void PerformTryAddPokemonPassTest(PokemonModel pokemon)
+        internal static void PerformTryAddPokemonPassTest(PokemonModel pokemon, ITestOutputHelper logger)
         {
-            Logger.WriteLine($"Adding new pokemon with pokemon id {pokemon.PokemonId}");
+            logger.WriteLine($"Adding new pokemon with pokemon id {pokemon.PokemonId}");
             Assert.True(DatabaseUtility.TryAddPokemon(pokemon, out var error));
-            Logger.WriteLine($"Verify that error object is null");
+            logger.WriteLine($"Verify that error object is null");
             Assert.Null(error);
-            Logger.WriteLine($"Removing pokemon with pokemon id {pokemon.PokemonId}");
+            logger.WriteLine($"Removing pokemon with pokemon id {pokemon.PokemonId}");
             DatabaseUtility.DeletePokemon(pokemon.PokemonId);
         }
 
-        internal static void PerformTryAddTrainerFailTest(TrainerModel trainer)
+        internal static void PerformTryAddTrainerFailTest(TrainerModel trainer, ITestOutputHelper logger)
         {
-            Logger.WriteLine($"Adding new pokemon with pokemon id {trainer.TrainerId}");
+            logger.WriteLine($"Adding new pokemon with pokemon id {trainer.TrainerId}");
             Assert.False(DatabaseUtility.TryAddTrainer(trainer, out var error));
-            Logger.WriteLine($"Verify that error object is null");
+            logger.WriteLine($"Verify that error object is null");
             Assert.NotNull(error);
-            Logger.WriteLine($"Verify no pokemon is found with pokemon id {trainer.TrainerId}");
+            logger.WriteLine($"Verify no pokemon is found with pokemon id {trainer.TrainerId}");
             Assert.Null(DatabaseUtility.FindTrainerById(trainer.TrainerId));
         }
 
-        internal static void PerformTryAddTrainerPassTest(TrainerModel trainer)
+        internal static void PerformTryAddTrainerPassTest(TrainerModel trainer, ITestOutputHelper logger)
         {
-            Logger.WriteLine($"Adding new pokemon with pokemon id {trainer.TrainerId}");
+            logger.WriteLine($"Adding new pokemon with pokemon id {trainer.TrainerId}");
             Assert.True(DatabaseUtility.TryAddTrainer(trainer, out var error));
-            Logger.WriteLine($"Verify that error object is null");
+            logger.WriteLine($"Verify that error object is null");
             Assert.Null(error);
-            Logger.WriteLine($"Removing pokemon with pokemon id {trainer.TrainerId}");
+            logger.WriteLine($"Removing pokemon with pokemon id {trainer.TrainerId}");
             DatabaseUtility.DeleteTrainer(trainer.TrainerId);
         }
     }

@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
 
@@ -103,19 +100,28 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> TradePokemon()
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var leftTrainer = DatabaseUtility.FindTrainerById(Request.Query["leftTrainerId"]);
-            var rightTrainer = DatabaseUtility.FindTrainerById(Request.Query["rightTrainerId"]);
-            if (leftTrainer == null || rightTrainer == null)
+            var leftPokemon = DatabaseUtility.FindPokemonById(Request.Query["leftPokemonId"]);
+            var rightPokemon = DatabaseUtility.FindPokemonById(Request.Query["leftPokemonId"]);
+
+            if (leftPokemon == null || rightPokemon == null)
             {
                 return NotFound();
             }
 
-            if (leftTrainer.TrainerId == rightTrainer.TrainerId)
+            if (leftPokemon.TrainerId == rightPokemon.TrainerId)
             {
                 return BadRequest(new
                 {
                     message = "Cannot trade pokemon to oneself"
                 });
+            }
+
+            var leftTrainer = DatabaseUtility.FindTrainerById(leftPokemon.TrainerId);
+            var rightTrainer = DatabaseUtility.FindTrainerById(rightPokemon.TrainerId);
+
+            if (leftTrainer == null || rightTrainer == null)
+            {
+                return NotFound();
             }
 
             if (leftTrainer.GameId != rightTrainer.GameId)
@@ -126,20 +132,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var leftPokemon = DatabaseUtility.FindPokemon(pokemon => pokemon.PokemonId == Request.Query["leftPokemonId"] && pokemon.TrainerId == leftTrainer.TrainerId);
-            var rightPokemon = DatabaseUtility.FindPokemon(pokemon => pokemon.PokemonId == Request.Query["rightPokemonId"] && pokemon.TrainerId == rightTrainer.TrainerId);
-            if (leftPokemon == null || rightPokemon == null)
-            {
-                return NotFound();
-            }
-
             DatabaseUtility.UpdatePokemonTrainerId
             (
                 leftPokemon.PokemonId,
                 rightTrainer.TrainerId
             );
 
-            Expression<Func<PokemonModel, bool>> rightFilter = pokemon => pokemon.PokemonId == rightPokemon.PokemonId;
             DatabaseUtility.UpdatePokemonTrainerId
             (
                 rightPokemon.PokemonId,
@@ -157,28 +155,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> UpdatePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;
-            var updates = GetPokemonUpdates(filter);
-
-            if (updates != null)
-            {
-                return BadRequest(new
-                {
-                    message = "No updates were found"
-                });
-            }
-
-            var updateResult = DatabaseUtility.UpdatePokemon
+            var updateResult = DatabaseUtility.UpdatePokemonStats
             (
-                filter,
-                updates
+                pokemonId,
+                Request.Query.ToDictionary(pair => pair.Key, pair => pair.Value.ToString())
             );
+
             if (!updateResult)
             {
                 return StatusCode(500);
             }
 
-            return DatabaseUtility.FindPokemon(filter);
+            return DatabaseUtility.FindPokemonById(pokemonId);
         }
 
         [HttpPut("evolve/{pokemonId}")]
@@ -201,22 +189,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-
-            var updates = new[]
-            {
-                Builders<PokemonModel>.Update.Set("DexNo", evolvedForm.DexNo),
-                Builders<PokemonModel>.Update.Set("HP", evolvedForm.HP),
-                Builders<PokemonModel>.Update.Set("Attack", evolvedForm.Attack),
-                Builders<PokemonModel>.Update.Set("Defense", evolvedForm.Defense),
-                Builders<PokemonModel>.Update.Set("SpecialAttack", evolvedForm.SpecialAttack),
-                Builders<PokemonModel>.Update.Set("SpecialDefense", evolvedForm.SpecialDefense),
-                Builders<PokemonModel>.Update.Set("Speed", evolvedForm.Speed),
-                Builders<PokemonModel>.Update.Set("Nickname", evolvedForm.Nickname)
-            };
-
-            Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;
-            DatabaseUtility.UpdatePokemon(filter, Builders<PokemonModel>.Update.Combine(updates));
-
+            DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
             return evolvedForm;
         }
 
@@ -252,54 +225,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             return null;
-        }
-
-        private UpdateDefinition<PokemonModel> GetPokemonUpdates(Expression<Func<PokemonModel, bool>> filter)
-        {
-            var pokemon = DatabaseUtility.FindPokemon(filter);
-            var updates = new List<UpdateDefinition<PokemonModel>>();
-            if (int.TryParse(Request.Query["experience"], out var experience))
-            {
-                updates.Add(Builders<PokemonModel>.Update.Set("Experience", experience));
-            }
-            if (int.TryParse(Request.Query["hpAdded"], out var added))
-            {
-                pokemon.HP.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("HP", pokemon.HP));
-            }
-            if (int.TryParse(Request.Query["attackAdded"], out added))
-            {
-                pokemon.Attack.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Attack", pokemon.Attack));
-            }
-            if (int.TryParse(Request.Query["defenseAdded"], out added))
-            {
-                pokemon.Defense.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Defense", pokemon.Defense));
-            }
-            if (int.TryParse(Request.Query["specialAttackAdded"], out added))
-            {
-                pokemon.SpecialAttack.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("SpecialAttack", pokemon.SpecialAttack));
-            }
-            if (int.TryParse(Request.Query["specialDefenseAdded"], out added))
-            {
-                pokemon.SpecialDefense.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("SpecialDefense", pokemon.SpecialDefense));
-            }
-            if (int.TryParse(Request.Query["speedAdded"], out added))
-            {
-                pokemon.Speed.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Speed", pokemon.Speed));
-            }
-            if (!string.IsNullOrWhiteSpace(Request.Query["nickname"]))
-            {
-                updates.Add(Builders<PokemonModel>.Update.Set("Nickname", Request.Query["nickname"]));
-            }
-
-            return updates.Any()
-                ? Builders<PokemonModel>.Update.Combine(updates.ToArray())
-                : null;
         }
     }
 }

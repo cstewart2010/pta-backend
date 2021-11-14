@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace TheReplacements.PTA.Common.Utilities.Tests
@@ -46,6 +48,32 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         {
             Logger.WriteLine($"Retrieving npc id {id}");
             Assert.Null(DatabaseUtility.FindNpc(id));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void FindNpcs_ValidIds_NpcCount(int npcCount)
+        {
+            Logger.WriteLine($"Adding {npcCount} npcs");
+            var npcIds = new List<string>();
+            for (int i = 0; i < npcCount; i++)
+            {
+                var npc = GetTestNpc();
+                DatabaseUtility.TryAddNpc(npc, out _);
+                npcIds.Add(npc.NPCId);
+            }
+
+            Logger.WriteLine($"Retrieving npc ids {string.Join(",", npcIds)}");
+            var retrievedNpcs = DatabaseUtility.FindNpcs(npcIds);
+            foreach (var npc in retrievedNpcs)
+            {
+                DatabaseUtility.DeleteNpc(npc.NPCId);
+            }
+            Logger.WriteLine($"Verifying retrieved list of npcs are from the original set");
+            Assert.True(retrievedNpcs.All(npc => npcIds.Contains(npc.NPCId)));
+            Assert.Equal(npcCount, retrievedNpcs.Count());
         }
 
         [Fact]
