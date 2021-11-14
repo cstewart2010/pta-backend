@@ -13,6 +13,16 @@ namespace TheReplacements.PTA.Common.Utilities
     {
         public static PokemonModel GetEvolved(PokemonModel currentForm, string nextForm)
         {
+            if (currentForm == null)
+            {
+                throw new ArgumentNullException(nameof(currentForm));
+            }
+
+            if (string.IsNullOrWhiteSpace(nextForm))
+            {
+                throw new ArgumentNullException(nameof(nextForm));
+            }
+
             var pokemon = InvokePokeAPI($"pokemon-species/{currentForm.DexNo}");
             if (pokemon == null)
             {
@@ -28,29 +38,54 @@ namespace TheReplacements.PTA.Common.Utilities
 
             var evolvedPokemon = InvokePokeAPI($"pokemon/{nextForm.ToLower()}");
             var stats = evolvedPokemon["stats"];
-            currentForm.DexNo = (int)evolvedPokemon["id"];
-            currentForm.HP.Base = (int)stats[0]["base_stat"] / 10;
-            currentForm.Attack.Base = (int)stats[1]["base_stat"] / 10;
-            currentForm.Defense.Base = (int)stats[2]["base_stat"] / 10;
-            currentForm.SpecialAttack.Base = (int)stats[3]["base_stat"] / 10;
-            currentForm.SpecialDefense.Base = (int)stats[4]["base_stat"] / 10;
-            currentForm.Speed.Base = (int)stats[5]["base_stat"] / 10;
+            string updatedName = null;
             if (currentForm.Nickname == ((string)pokemon["name"]).ToUpper())
             {
-                currentForm.Nickname = ((string)evolvedPokemon["name"]).ToUpper();
+                updatedName = ((string)evolvedPokemon["name"]).ToUpper();
             }
-            return currentForm;
-        }
 
-        public static PokemonModel GetShinyPokemon(string pokemonName, string natureName)
-        {
-            var pokemon = GetPokemon(pokemonName, natureName);
-            pokemon.IsShiny = true;
-            return pokemon;
+            var evolvedForm = new PokemonModel
+            {
+                PokemonId = currentForm.PokemonId,
+                DexNo = (int)evolvedPokemon["id"],
+                Type = (int)evolvedPokemon["types"].Aggregate(PokemonTypes.None, (prev, curr) =>
+                {
+                    Enum.TryParse((string)curr["type"]["name"], true, out PokemonTypes result);
+                    return prev | result;
+                }),
+                Gender = currentForm.Gender,
+                Nickname = updatedName ?? currentForm.Nickname,
+                Nature = currentForm.Nature,
+                IsShiny = currentForm.IsShiny,
+                HP = currentForm.HP,
+                Attack = currentForm.Attack,
+                Defense = currentForm.Defense,
+                SpecialAttack = currentForm.SpecialAttack,
+                SpecialDefense = currentForm.SpecialDefense,
+                Speed = currentForm.Speed
+            };
+            evolvedForm.DexNo = (int)evolvedPokemon["id"];
+            evolvedForm.HP.Base = (int)stats[0]["base_stat"] / 10;
+            evolvedForm.Attack.Base = (int)stats[1]["base_stat"] / 10;
+            evolvedForm.Defense.Base = (int)stats[2]["base_stat"] / 10;
+            evolvedForm.SpecialAttack.Base = (int)stats[3]["base_stat"] / 10;
+            evolvedForm.SpecialDefense.Base = (int)stats[4]["base_stat"] / 10;
+            evolvedForm.Speed.Base = (int)stats[5]["base_stat"] / 10;
+            return evolvedForm;
         }
 
         public static PokemonModel GetPokemon(string pokemonName, string natureName)
         {
+            if (string.IsNullOrWhiteSpace(pokemonName))
+            {
+                throw new ArgumentNullException(nameof(pokemonName));
+            }
+
+            if (string.IsNullOrWhiteSpace(natureName))
+            {
+                throw new ArgumentNullException(nameof(natureName));
+            }
+
             var pokemon = InvokePokeAPI($"pokemon/{pokemonName.ToLower()}");
             if (pokemon == null)
             {
@@ -93,7 +128,7 @@ namespace TheReplacements.PTA.Common.Utilities
                 Defense = GetStat(stats, "defense", modifiers.DefenseModifier),
                 SpecialAttack = GetStat(stats, "special-attack", modifiers.SpecialAttackModifier),
                 SpecialDefense = GetStat(stats, "special-defense", modifiers.DefenseModifier),
-                Speed = GetStat(stats, "speed", modifiers.SpeedModifier),
+                Speed = GetStat(stats, "speed", modifiers.SpeedModifier)
             };
         }
 
@@ -127,7 +162,7 @@ namespace TheReplacements.PTA.Common.Utilities
         private static JToken SearchEvolvesTo(JToken evolutionChain, string name)
         {
             JToken found = null;
-            foreach (var possible in evolutionChain["evolvesTo"].TakeWhile(possible => found == null))
+            foreach (var possible in evolutionChain["evolves_to"].TakeWhile(possible => found == null))
             {
                 var possibleName = (string)possible["species"]["name"];
                 if (string.Equals(possibleName, name, StringComparison.InvariantCultureIgnoreCase))
