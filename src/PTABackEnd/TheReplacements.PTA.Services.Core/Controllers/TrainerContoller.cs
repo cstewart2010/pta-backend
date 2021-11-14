@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
 
@@ -27,10 +25,19 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var pokemon = DatabaseUtility.FindPokemon(pokemon => pokemon.TrainerId == trainerId && pokemon.PokemonId == pokemonId);
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (pokemon == null)
             {
                 return NotFound(pokemonId);
+            }
+            if (pokemon.TrainerId != trainerId)
+            {
+                return BadRequest(new
+                {
+                    message = "Invalid trainerId",
+                    expected = trainerId,
+                    found = pokemon.TrainerId
+                });
             }
 
             return pokemon;
@@ -67,7 +74,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             {
                 return BadRequest(naturalMoves);
             }
-            var tmMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? new string[0];
+            var tmMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? Array.Empty<string>();
             if (tmMoves.Length > 4)
             {
                 return BadRequest(tmMoves);
@@ -117,7 +124,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(username);
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(Request.Query["password"], trainer.PasswordHash))
+            if (!DatabaseUtility.VerifyTrainerPassword(Request.Query["password"], trainer.PasswordHash))
             {
                 return Unauthorized(username);
             }
@@ -131,8 +138,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", true);
-            DatabaseUtility.UpdateTrainer(trainer.TrainerId, trainerUpdate);
+            DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, true);
             return new
             {
                 trainer.TrainerId,
@@ -152,11 +158,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(trainerId);
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(Request.Query["password"], trainer.PasswordHash))
-            {
-                return Unauthorized(trainerId);
-            }
-
             if (!trainer.IsOnline)
             {
                 return Unauthorized(new
@@ -166,8 +167,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var trainerUpdate = Builders<TrainerModel>.Update.Set("IsOnline", false);
-            DatabaseUtility.UpdateTrainer(trainer.TrainerId, trainerUpdate);
+            DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
             return Ok();
         }
 
@@ -229,12 +229,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     });
                 }
 
-                var result = TrySendItemUpdate
+                var result = DatabaseUtility.UpdateTrainerItemList
                 (
                     trainerId,
                     itemList
                 );
-                if (result == null)
+                if (!result)
                 {
                     StatusCode(500);
                 }
@@ -299,12 +299,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     })
                     .Where(item => item.Amount > 0);
 
-                var result = TrySendItemUpdate
+                var result = DatabaseUtility.UpdateTrainerItemList
                 (
                     trainerId,
                     itemList
                 );
-                if (result == null)
+                if (!result)
                 {
                     StatusCode(500);
                 }
@@ -313,30 +313,17 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return DatabaseUtility.FindTrainerById(trainerId);
         }
 
-        [HttpDelete("{trainerId}/pokemon")]
-        public ActionResult<object> DeleteTrainerMons(string trainerId)
-        {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var deleteResponse = DatabaseUtility.DeleteTrainerMons(trainerId);
-            if (deleteResponse != null)
-            {
-                return deleteResponse;
-            }
-
-            return StatusCode(500);
-        }
-
         [HttpDelete("{trainerId}")]
         public ActionResult<object> DeleteTrainer(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var username = Request.Query["username"];
-            var gameId = Request.Query["gameId"];
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
-            var result = DatabaseUtility.DeleteTrainers(filter);
-            if (result)
+            var result = DatabaseUtility.DeleteTrainer(trainerId);
+            if (result && DatabaseUtility.DeletePokemonByTrainerId(trainerId) > -1)
             {
-                return DatabaseUtility.DeleteTrainerMons(trainerId);
+                return new
+                {
+                    message = $"Successfully deleted all pokemon associated with {trainerId}"
+                };
             }
             else
             {
@@ -402,23 +389,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             (
                 itemChange,
                 null
-            );
-        }
-
-        private TrainerModel TrySendItemUpdate(
-            string trainerId,
-            IEnumerable<ItemModel> itemList)
-        {
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerId == trainerId;
-            var update = Builders<TrainerModel>.Update.Set
-            (
-                "Items",
-                itemList
-            );
-            return DatabaseUtility.UpdateTrainer
-            (
-                filter,
-                update
             );
         }
     }

@@ -212,14 +212,6 @@ Response Type - PokemonModel
 
 ---
 
-## Delete Trainer's pokemon
-Endpoint - {trainerId}/pokemon  
-Method - DELETE  
-Response Type - message  
-[Back to Trainer](#trainer)
-
----
-
 ## Delete Trainer
 Endpoint - {trainerId}  
 Method - DELETE  
@@ -334,7 +326,7 @@ Response Type - TrainerModel
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|trainerName|string|Trainer's username|required|
+|trainerId|string|Trainer's id|required|
 |password|string|Trainer's password|required|
 
 ---

@@ -29,22 +29,32 @@
         bsonType: 'objectId'
       },
       PokemonId: {
-        bsonType: 'string'
+        bsonType: 'string',
+        minLength: 36,
+        maxLength: 36
       },
       DexNo: {
-        bsonType: 'int'
+        bsonType: 'int',
+        minimum: 1
       },
       TrainerId: {
-        bsonType: 'string'
+        bsonType: 'string',
+        minLength: 36,
+        maxLength: 36
       },
       Gender: {
-        bsonType: 'int'
+        bsonType: 'int',
+        minimum: 0,
+        maximum: 2
       },
       Nickname: {
-        bsonType: 'string'
+        bsonType: 'string',
+        minLength: 1,
+        maxLength: 18
       },
       NaturalMoves: {
         bsonType: 'array',
+        minItems: 1,
         maxItems: 4,
         items: {
           bsonType: 'string'
@@ -61,16 +71,22 @@
         bsonType: 'int'
       },
       Experience: {
-        bsonType: 'int'
+        bsonType: 'int',
+        minimum: 0
       },
       Level: {
-        bsonType: 'int'
+        bsonType: 'int',
+        minimum: 1,
+        maximum: 100
       },
       ExpYield: {
-        bsonType: 'int'
+        bsonType: 'int',
+        minimum: 1
       },
       CatchRate: {
-        bsonType: 'int'
+        bsonType: 'int',
+        minimum: 0,
+        maximum: 255
       },
       IsOnActiveTeam: {
         bsonType: 'bool'
@@ -79,7 +95,9 @@
         bsonType: 'bool'
       },
       Nature: {
-        bsonType: 'int'
+        bsonType: 'int',
+        minimum: 1,
+        maximum: 35
       },
       HP: {
         bsonType: 'object',

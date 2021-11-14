@@ -4,7 +4,8 @@
       'GameId',
       'Nickname',
       'IsOnline',
-      'PasswordHash'
+      'PasswordHash',
+      'NPCs'
     ],
     additionalProperties: false,
     properties: {
@@ -12,16 +13,29 @@
         bsonType: 'objectId'
       },
       GameId: {
-        bsonType: 'string'
+        bsonType: 'string',
+        minLength: 36,
+        maxLength: 36
       },
       Nickname: {
-        bsonType: 'string'
+        bsonType: 'string',
+        minLength: 1,
+        maxLength: 18
       },
       IsOnline: {
         bsonType: 'bool'
       },
       PasswordHash: {
-        bsonType: 'string'
+        bsonType: 'string',
+        minLength: 1
+      },
+      NPCs: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
+        }
       }
     }
   }

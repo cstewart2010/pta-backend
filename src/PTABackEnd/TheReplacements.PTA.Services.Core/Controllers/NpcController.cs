@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using TheReplacements.PTA.Common.Models;
 using TheReplacements.PTA.Common.Utilities;
 
@@ -40,8 +38,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var npc = new NpcModel
             {
                 NPCId = Guid.NewGuid().ToString(),
-                Feats = Request.Query["feats"].ToString()?.Split(',') ?? new string[0],
-                TrainerClasses = Request.Query["classes"].ToString()?.Split(',') ?? new string[0],
+                Feats = Request.Query["feats"].ToString()?.Split(',') ?? Array.Empty<string>(),
+                TrainerClasses = Request.Query["classes"].ToString()?.Split(',') ?? Array.Empty<string>(),
                 TrainerName = Request.Query["trainerName"],
                 TrainerStats = new TrainerStatsModel()
             };
