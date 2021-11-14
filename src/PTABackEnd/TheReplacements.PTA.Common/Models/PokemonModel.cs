@@ -28,5 +28,15 @@ namespace TheReplacements.PTA.Common.Models
         public PokemonStatModel SpecialAttack { get; set; }
         public PokemonStatModel SpecialDefense { get; set; }
         public PokemonStatModel Speed { get; set; }
+
+        public void AggregateStats()
+        {
+            HP.AggregateStatValue();
+            Attack.AggregateStatValue();
+            Defense.AggregateStatValue();
+            SpecialAttack.AggregateStatValue();
+            SpecialDefense.AggregateStatValue();
+            Speed.AggregateStatValue();
+        }
     }
 }
