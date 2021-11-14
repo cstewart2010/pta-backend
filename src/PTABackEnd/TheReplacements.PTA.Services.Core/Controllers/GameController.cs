@@ -256,8 +256,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            DatabaseUtility.UpdateTrainersOnlineStatus(gameId);
             DatabaseUtility.UpdateGameOnlineStatus(game.GameId, false);
+            foreach (var trainer in DatabaseUtility.FindTrainersByGameId(gameId))
+            {
+                DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
+            }
 
             return Ok();
         }
@@ -334,13 +337,14 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var trainerId = Request.Query["trainerId"];
-            var trainer = DatabaseUtility.UpdateTrainerPassword
+            var wasUpdateSucessful = DatabaseUtility.UpdateTrainerPassword
             (
                 trainerId,
                 Request.Query["password"]
             );
-            if (trainer != null)
+            if (wasUpdateSucessful)
             {
+                var trainer = DatabaseUtility.FindTrainerById(trainerId);
                 return new
                 {
                     trainer.TrainerId,

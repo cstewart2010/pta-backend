@@ -51,7 +51,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
         public static PokemonModel GetPokemon(string pokemonName, string natureName)
         {
-            var pokemon = InvokePokeAPI($"pokemon/{pokemonName}");
+            var pokemon = InvokePokeAPI($"pokemon/{pokemonName.ToLower()}");
             if (pokemon == null)
             {
                 return null;
@@ -63,7 +63,7 @@ namespace TheReplacements.PTA.Common.Utilities
             }
 
             var random = new Random();
-            var genderRate = (int)InvokePokeAPI($"pokemon-species/{pokemonName}")["gender_rate"];
+            var genderRate = (int)InvokePokeAPI($"pokemon-species/{pokemonName.ToLower()}")["gender_rate"];
             var gender = genderRate switch
             {
                 -1 => Gender.Genderless,

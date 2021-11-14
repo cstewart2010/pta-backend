@@ -107,7 +107,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Logger.WriteLine($"Updating game id {gameId} online status to true");
             Assert.False(DatabaseUtility.UpdateGameOnlineStatus(gameId, true));
 
-            Logger.WriteLine($"Verifying game online status has been changed to true");
+            Logger.WriteLine($"Verifying game online status has not been changed to true");
             DatabaseUtility.DeleteGame(game.GameId);
             game = DatabaseUtility.FindGame(gameId);
             Assert.Null(game);
