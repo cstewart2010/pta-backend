@@ -5,6 +5,7 @@
       'DexNo',
       'TrainerId',
       'Nickname',
+      'Ability',
       'Gender',
       'NaturalMoves',
       'TMMoves',
@@ -51,6 +52,11 @@
         bsonType: 'string',
         minLength: 1,
         maxLength: 18
+      },
+      Ability: {
+        bsonType: 'int',
+        minimum: 1,
+        maximum: 3
       },
       NaturalMoves: {
         bsonType: 'array',

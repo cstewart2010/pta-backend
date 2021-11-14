@@ -12,6 +12,7 @@ namespace TheReplacements.PTA.Common.Models
         public string TrainerId { get; set; }
         public Gender Gender { get; set; }
         public string Nickname { get; set; }
+        public int Ability { get; set; }
         public IEnumerable<string> NaturalMoves { get; set; }
         public IEnumerable<string> TMMoves { get; set; }
         public int Type { get; set; }

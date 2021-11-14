@@ -10,8 +10,8 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Logger = output;
         }
 
-        [Fact]
-        public void DeleteGame_ValidId_True()
+        [Fact, Trait("Category", "smoke")]
+        public void DeleteGame_SmokeTest_True()
         {
             var game = GetTestGame();
             Logger.WriteLine($"Inserting game with game id {game.GameId}");
@@ -29,8 +29,8 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Assert.False(DatabaseUtility.DeleteGame(id));
         }
 
-        [Fact]
-        public void DeleteNpc_ValidId_True()
+        [Fact, Trait("Category", "smoke")]
+        public void DeleteNpc_SmokeTest_True()
         {
             var npc = GetTestNpc();
             Logger.WriteLine($"Inserting npc with npc id {npc.NPCId}");
@@ -48,8 +48,8 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Assert.False(DatabaseUtility.DeleteNpc(id));
         }
 
-        [Fact]
-        public void DeletePokemon_ValidId_True()
+        [Fact, Trait("Category", "smoke")]
+        public void DeletePokemon_SmokeTest_True()
         {
             var pokemon = GetTestPokemon();
             Logger.WriteLine($"Inserting pokemon with pokemon id {pokemon.PokemonId}");
@@ -108,8 +108,8 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Assert.Equal(0, DatabaseUtility.DeletePokemonByTrainerId(id));
         }
 
-        [Fact]
-        public void DeleteTrainer_ValidId_True()
+        [Fact, Trait("Category", "smoke")]
+        public void DeleteTrainer_SmokeTest_True()
         {
             var trainer = GetTestTrainer();
             Logger.WriteLine($"Inserting trainer with trainer id {trainer.TrainerId}");
