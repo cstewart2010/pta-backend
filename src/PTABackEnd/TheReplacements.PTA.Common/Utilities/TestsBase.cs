@@ -44,6 +44,7 @@ namespace TheReplacements.PTA.Common.Utilities
                 SpecialAttack = new PokemonStatModel(),
                 SpecialDefense = new PokemonStatModel(),
                 Speed = new PokemonStatModel(),
+                Ability = 1,
                 CatchRate = 180,
                 DexNo = 143,
                 Experience = 1000,

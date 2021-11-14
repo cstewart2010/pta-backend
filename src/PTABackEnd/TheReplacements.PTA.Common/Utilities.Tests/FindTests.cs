@@ -13,8 +13,8 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Logger = output;
         }
 
-        [Fact]
-        public void FindGame_ValidId_NotNull()
+        [Fact, Trait("Category", "smoke")]
+        public void FindGame_SmokeTest_NotNull()
         {
             var game = GetTestGame();
             DatabaseUtility.TryAddGame(game, out _);
@@ -32,8 +32,8 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Assert.Null(DatabaseUtility.FindGame(id));
         }
 
-        [Fact]
-        public void FindNpc_ValidId_NotNull()
+        [Fact, Trait("Category", "smoke")]
+        public void FindNpc_SmokeTest_NotNull()
         {
             var npc = GetTestNpc();
             DatabaseUtility.TryAddNpc(npc, out _);
@@ -144,8 +144,8 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             Assert.Empty(pokemonIds);
         }
 
-        [Fact]
-        public void FindTrainerById_ValidId_NotNull()
+        [Fact, Trait("Category", "smoke")]
+        public void FindTrainerById_SmokeTest_NotNull()
         {
             var trainer = GetTestTrainer();
             DatabaseUtility.TryAddTrainer(trainer, out _);

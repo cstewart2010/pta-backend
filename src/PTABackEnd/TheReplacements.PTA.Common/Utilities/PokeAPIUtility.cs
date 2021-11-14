@@ -119,6 +119,7 @@ namespace TheReplacements.PTA.Common.Utilities
                     Enum.TryParse((string)curr["type"]["name"], true, out PokemonTypes result);
                     return prev | result;
                 }),
+                Ability = random.Next(2) + 1,
                 Gender = gender,
                 Nickname = ((string)pokemon["name"]).ToUpper(),
                 Nature = (int)nature,
