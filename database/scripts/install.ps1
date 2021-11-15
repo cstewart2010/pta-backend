@@ -22,7 +22,6 @@ Write-Host All tools installed
 if ($env:MongoDBConnectionString){
     Write-Host Running mongo update script
     $CurrentDirectory = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-    Write-Host $CurrentDirectory
     Start-Process -FilePath "$env:LocalAppData\Programs\mongosh\mongosh.exe" -ArgumentList $env:MongoDBConnectionString,-f,"$CurrentDirectory\update.js" -NoNewWindow -Wait
 }
 else {

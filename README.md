@@ -2,6 +2,11 @@ PTA BackEnd
 ---
 
 ### Table Of Contents
+- [First Time User Setup](#first-time-user-setup)
+  * [Environment Variables](#environment-variables)
+  * [Installation](#installation)
+  * [Build](#build)
+  * [Run](#run)
 - [Pokemon](#pokemon)
   * [Find Pokemon By Id](#find-pokemon-by-id)
   * [Create Wild Pokemon](#create-wild-pokemon)
@@ -33,6 +38,45 @@ PTA BackEnd
   * [Find Npc by Id](#find-npc-by-id)
   * [Create new Npc](#create-new-npc)
   * [Delete Npc](#delete-npc)
+
+---
+
+# First Time User Setup
+
+## Environment Variables
+MongoDBConnectionString = mongodb+srv://**dbusername**:**dbPassword**@**url/to/mongo**/PTA?retryWrites=true&w=majority  
+Example: mongodb+srv://**dbAdmin**:**dbPassword**@**pokemontabletopdatabase.com**/PTA?retryWrites=true&w=majority
+
+---
+
+## Installation
+
+Run the install powershell script in the database/scripts directory to install any missing applications
+
+```ps1
+./database/scripts/install.ps1
+Running install.ps1 to install any missing tools
+All tools installed
+Running mongo update script
+```
+
+---
+
+## Build
+
+Build and test the solution before deployment
+
+```cmd
+dotnet build .src/PTABackend.sln # builds the solutions
+dotnet test .src/PTABackend.sln # runs the entire unit test suite
+dotnet test .src/PTABackend.sln --filter Category=smoke # only runs the smoke test
+```
+
+---
+
+## Run
+
+Not yet configured
 
 ---
 
