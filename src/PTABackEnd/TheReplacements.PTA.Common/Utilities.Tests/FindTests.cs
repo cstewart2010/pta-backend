@@ -62,7 +62,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             for (int i = 0; i < npcCount; i++)
             {
                 var npc = GetTestNpc();
-                DatabaseUtility.TryAddNpc(npc, out _);
+                var result = DatabaseUtility.TryAddNpc(npc, out var error);
                 npcIds.Add(npc.NPCId);
             }
 
