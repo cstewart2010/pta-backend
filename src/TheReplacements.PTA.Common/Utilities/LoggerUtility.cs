@@ -3,7 +3,7 @@ using TheReplacements.PTA.Common.Enums;
 
 namespace TheReplacements.PTA.Common.Utilities
 {
-    internal static class LoggerUtility
+    public static class LoggerUtility
     {
         public static void Debug(
             MongoCollection affectedCollection,

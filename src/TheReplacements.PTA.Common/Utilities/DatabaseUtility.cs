@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using TheReplacements.PTA.Common.Enums;
 using TheReplacements.PTA.Common.Models;
 
 namespace TheReplacements.PTA.Common.Utilities
@@ -18,9 +19,20 @@ namespace TheReplacements.PTA.Common.Utilities
         /// <param name="id">The game session id</param>
         public static bool DeleteGame(string id)
         {
-            return MongoCollectionHelper
+            var result = MongoCollectionHelper
                 .Game
                 .FindOneAndDelete(game => game.GameId == id) != null;
+
+            if (result)
+            {
+                LoggerUtility.Info(MongoCollection.Game, $"Deleted game session {id}");
+            }
+            else
+            {
+                LoggerUtility.Warn(MongoCollection.Game, $"Failed to delete game session {id}");
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -29,9 +41,20 @@ namespace TheReplacements.PTA.Common.Utilities
         /// <param name="id">The npc id</param>
         public static bool DeleteNpc(string id)
         {
-            return MongoCollectionHelper
+            var result = MongoCollectionHelper
                 .Npc
                 .FindOneAndDelete(npc => npc.NPCId == id) != null;
+
+            if (result)
+            {
+                LoggerUtility.Info(MongoCollection.Game, $"Deleted npc {id}");
+            }
+            else
+            {
+                LoggerUtility.Warn(MongoCollection.Game, $"Failed to delete npc {id}");
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -40,9 +63,20 @@ namespace TheReplacements.PTA.Common.Utilities
         /// <param name="id">The Pokemon id</param>
         public static bool DeletePokemon(string id)
         {
-            return MongoCollectionHelper
+            var result = MongoCollectionHelper
                 .Pokemon
-                .FindOneAndDelete(Pokemon => Pokemon.PokemonId == id) != null;
+                .FindOneAndDelete(pokemon => pokemon.PokemonId == id) != null;
+
+            if (result)
+            {
+                LoggerUtility.Info(MongoCollection.Pokemon, $"Deleted pokemon {id}");
+            }
+            else
+            {
+                LoggerUtility.Warn(MongoCollection.Pokemon, $"Failed to delete pokemon {id}");
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -53,11 +87,18 @@ namespace TheReplacements.PTA.Common.Utilities
         {
             var deleteResult = MongoCollectionHelper
                 .Pokemon
-                .DeleteMany(Pokemon => Pokemon.TrainerId == trainerId);
+                .DeleteMany(pokemon => pokemon.TrainerId == trainerId);
             
-            return deleteResult.IsAcknowledged
-                ? deleteResult.DeletedCount
-                : -1;
+            if (deleteResult.IsAcknowledged)
+            {
+                LoggerUtility.Info(MongoCollection.Pokemon, $"Deleted {deleteResult.DeletedCount} pokemon associated with trainer {trainerId}");
+                return deleteResult.DeletedCount;
+            }
+            else
+            {
+                LoggerUtility.Warn(MongoCollection.Pokemon, $"Failed to delete any pokemon associated with trainer {trainerId}");
+                return -1;
+            }
         }
 
         /// <summary>
@@ -66,9 +107,20 @@ namespace TheReplacements.PTA.Common.Utilities
         /// <param name="id">The trainer id</param>
         public static bool DeleteTrainer(string id)
         {
-            return MongoCollectionHelper
+            var result = MongoCollectionHelper
                 .Trainer
                 .FindOneAndDelete(trainer => trainer.TrainerId == id) != null;
+
+            if (result)
+            {
+                LoggerUtility.Info(MongoCollection.Trainer, $"Deleted trainer {id}");
+            }
+            else
+            {
+                LoggerUtility.Warn(MongoCollection.Trainer, $"Failed to delete trainer {id}");
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -80,10 +132,17 @@ namespace TheReplacements.PTA.Common.Utilities
             var deleteResult =  MongoCollectionHelper
                 .Trainer
                 .DeleteMany(trainer => trainer.GameId == gameId);
-            
-            return deleteResult.IsAcknowledged
-                ? deleteResult.DeletedCount
-                : -1;
+
+            if (deleteResult.IsAcknowledged)
+            {
+                LoggerUtility.Info(MongoCollection.Trainer, $"Deleted {deleteResult.DeletedCount} trainer associated with game {gameId}");
+                return deleteResult.DeletedCount;
+            }
+            else
+            {
+                LoggerUtility.Warn(MongoCollection.Trainer, $"Failed to delete any trainer associated with game {gameId}");
+                return -1;
+            }
         }
 
         /// <summary>
