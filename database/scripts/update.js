@@ -7,7 +7,8 @@ updatedCollections = [
     'Game',
     'NPC',
     'Pokemon',
-    'Trainer'
+    'Trainer',
+    'Logs'
 ];
 for (collection of updatedCollections){
     if (!currentCollections.includes(collection)){
@@ -471,4 +472,8 @@ db.runCommand({
             }
         }
     }
+})
+db.runCommand({
+    collMod: "Logs",
+    expireAfterSeconds: 604801
 })

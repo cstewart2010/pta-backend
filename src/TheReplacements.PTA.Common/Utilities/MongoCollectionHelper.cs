@@ -26,6 +26,7 @@ namespace TheReplacements.PTA.Common.Utilities
             Pokemon = database.GetCollection<PokemonModel>("Pokemon");
             Trainer = database.GetCollection<TrainerModel>("Trainer");
             Npc = database.GetCollection<NpcModel>("NPC");
+            Logs = database.GetCollection<LoggerModel>("Logs");
         }
 
         /// <summary>
@@ -47,5 +48,10 @@ namespace TheReplacements.PTA.Common.Utilities
         /// Represents the Npc Collection
         /// </summary>
         public static IMongoCollection<NpcModel> Npc { get; }
+
+        /// <summary>
+        /// Represents the Logs Collection
+        /// </summary>
+        public static IMongoCollection<LoggerModel> Logs { get; }
     }
 }
