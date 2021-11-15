@@ -110,7 +110,8 @@
         required: [
           'Base',
           'Modifier',
-          'Added'
+          'Added',
+          'Total'
         ],
         properties: {
           Base: {
@@ -120,6 +121,9 @@
             bsonType: 'int'
           },
           Added: {
+            bsonType: 'int'
+          },
+          Total: {
             bsonType: 'int'
           }
         }
@@ -129,7 +133,8 @@
         required: [
           'Base',
           'Modifier',
-          'Added'
+          'Added',
+          'Total'
         ],
         properties: {
           Base: {
@@ -139,6 +144,9 @@
             bsonType: 'int'
           },
           Added: {
+            bsonType: 'int'
+          },
+          Total: {
             bsonType: 'int'
           }
         }
@@ -148,7 +156,8 @@
         required: [
           'Base',
           'Modifier',
-          'Added'
+          'Added',
+          'Total'
         ],
         properties: {
           Base: {
@@ -158,6 +167,9 @@
             bsonType: 'int'
           },
           Added: {
+            bsonType: 'int'
+          },
+          Total: {
             bsonType: 'int'
           }
         }
@@ -167,7 +179,8 @@
         required: [
           'Base',
           'Modifier',
-          'Added'
+          'Added',
+          'Total'
         ],
         properties: {
           Base: {
@@ -177,6 +190,9 @@
             bsonType: 'int'
           },
           Added: {
+            bsonType: 'int'
+          },
+          Total: {
             bsonType: 'int'
           }
         }
@@ -186,7 +202,8 @@
         required: [
           'Base',
           'Modifier',
-          'Added'
+          'Added',
+          'Total'
         ],
         properties: {
           Base: {
@@ -196,6 +213,9 @@
             bsonType: 'int'
           },
           Added: {
+            bsonType: 'int'
+          },
+          Total: {
             bsonType: 'int'
           }
         }
@@ -205,7 +225,8 @@
         required: [
           'Base',
           'Modifier',
-          'Added'
+          'Added',
+          'Total'
         ],
         properties: {
           Base: {
@@ -215,6 +236,9 @@
             bsonType: 'int'
           },
           Added: {
+            bsonType: 'int'
+          },
+          Total: {
             bsonType: 'int'
           }
         }
