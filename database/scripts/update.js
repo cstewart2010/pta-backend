@@ -1,5 +1,4 @@
 // use PTA
-db = connect("mongodb://localhost:27017/PTA")
 
 // adding missing tables
 currentCollections = db.getCollectionNames();
@@ -457,7 +456,8 @@ db.runCommand({
                         bsonType: 'object',
                         properties: {
                             Name: {
-                                bsonType: 'string'
+                                bsonType: 'string',
+                                minLength: 1
                             },
                             Amount: {
                                 bsonType: 'int',
@@ -472,8 +472,17 @@ db.runCommand({
             }
         }
     }
-})
+});
+console.log("Updating schema for Logs collection");
 db.runCommand({
     collMod: "Logs",
-    expireAfterSeconds: 604801
-})
+    validator: {
+        $jsonSchema: {
+            properties: {
+                _id: {
+                    bsonType: 'objectId'
+                }
+            }
+        }
+    }
+});
