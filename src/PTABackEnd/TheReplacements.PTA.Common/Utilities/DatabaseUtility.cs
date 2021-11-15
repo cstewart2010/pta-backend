@@ -9,8 +9,6 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     public static class DatabaseUtility
     {
-        private static readonly MongoCollectionHelper MongoCollectionHelper = new MongoCollectionHelper(27017, "localhost");
-
         public static bool DeleteGame(string id)
         {
             return MongoCollectionHelper
