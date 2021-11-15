@@ -6,11 +6,6 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     internal static class MongoCollectionHelper
     {
-        public static IMongoCollection<GameModel> Game { get; }
-        public static IMongoCollection<PokemonModel> Pokemon { get; }
-        public static IMongoCollection<TrainerModel> Trainer { get; }
-        public static IMongoCollection<NpcModel> Npc { get; }
-
         static MongoCollectionHelper()
         {
             var connectionString = Environment.GetEnvironmentVariable("MongoDBConnectionString");
@@ -32,5 +27,25 @@ namespace TheReplacements.PTA.Common.Utilities
             Trainer = database.GetCollection<TrainerModel>("Trainer");
             Npc = database.GetCollection<NpcModel>("NPC");
         }
+
+        /// <summary>
+        /// Represents the Game Collection
+        /// </summary>
+        public static IMongoCollection<GameModel> Game { get; }
+
+        /// <summary>
+        /// Represents the Pokemon Collection
+        /// </summary>
+        public static IMongoCollection<PokemonModel> Pokemon { get; }
+
+        /// <summary>
+        /// Represents the Trainer Collection
+        /// </summary>
+        public static IMongoCollection<TrainerModel> Trainer { get; }
+
+        /// <summary>
+        /// Represents the Npc Collection
+        /// </summary>
+        public static IMongoCollection<NpcModel> Npc { get; }
     }
 }

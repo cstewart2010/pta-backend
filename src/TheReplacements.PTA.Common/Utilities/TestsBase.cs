@@ -7,11 +7,11 @@ using Xunit.Abstractions;
 
 namespace TheReplacements.PTA.Common.Utilities
 {
-    public class TestsBase
+    public abstract class TestsBase
     {
-        protected ITestOutputHelper Logger { get; set; }
+        protected abstract ITestOutputHelper Logger { get; }
 
-        public static GameModel GetTestGame()
+        internal static GameModel GetTestGame()
         {
             return new GameModel
             {
@@ -22,7 +22,7 @@ namespace TheReplacements.PTA.Common.Utilities
             };
         }
 
-        public static NpcModel GetTestNpc()
+        internal static NpcModel GetTestNpc()
         {
             return new NpcModel
             {
@@ -34,7 +34,7 @@ namespace TheReplacements.PTA.Common.Utilities
             };
         }
 
-        public static PokemonModel GetTestPokemon()
+        internal static PokemonModel GetTestPokemon()
         {
             return new PokemonModel
             {
@@ -65,7 +65,7 @@ namespace TheReplacements.PTA.Common.Utilities
             };
         }
 
-        public static TrainerModel GetTestTrainer()
+        internal static TrainerModel GetTestTrainer()
         {
             return new TrainerModel
             {

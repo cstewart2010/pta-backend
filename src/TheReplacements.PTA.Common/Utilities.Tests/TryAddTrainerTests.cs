@@ -5,9 +5,12 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class TryAddTrainerTests : TestsBase
     {
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
         public TryAddTrainerTests(ITestOutputHelper output)
         {
-            Logger = output;
+            _logger = output;
         }
 
         [Fact, Trait("Category", "smoke")]

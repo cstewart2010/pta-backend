@@ -9,9 +9,19 @@ using TheReplacements.PTA.Common.Models;
 
 namespace TheReplacements.PTA.Common.Utilities
 {
+    /// <summary>
+    /// Provides a collection of methods for accessing the PokeAPI service
+    /// </summary>
     public static class PokeAPIUtility
     {
-        public static PokemonModel GetEvolved(PokemonModel currentForm, string nextForm)
+        /// <summary>
+        /// Returns an updated pokemon document for its evolution if valid, else null
+        /// </summary>
+        /// <param name="currentForm">The document for the current pokemon form</param>
+        /// <param name="nextForm">The species name for the pokemon's evolution</param>
+        public static PokemonModel GetEvolved(
+            PokemonModel currentForm,
+            string nextForm)
         {
             if (currentForm == null)
             {
@@ -74,7 +84,14 @@ namespace TheReplacements.PTA.Common.Utilities
             return evolvedForm;
         }
 
-        public static PokemonModel GetPokemon(string pokemonName, string natureName)
+        /// <summary>
+        /// Returns a pokemon document with the matching species
+        /// </summary>
+        /// <param name="pokemonName">The species name of the pokemon</param>
+        /// <param name="natureName">The name of the nature</param>
+        public static PokemonModel GetPokemon(
+            string pokemonName,
+            string natureName)
         {
             if (string.IsNullOrWhiteSpace(pokemonName))
             {

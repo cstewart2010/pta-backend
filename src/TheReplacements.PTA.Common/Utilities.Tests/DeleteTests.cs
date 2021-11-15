@@ -5,9 +5,12 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class DeleteTests : TestsBase
     {
-        public DeleteTests(ITestOutputHelper output)
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
+        public DeleteTests(ITestOutputHelper logger)
         {
-            Logger = output;
+            _logger = logger;
         }
 
         [Fact, Trait("Category", "smoke")]

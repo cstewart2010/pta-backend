@@ -8,9 +8,12 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class FindTests : TestsBase
     {
-        public FindTests(ITestOutputHelper output)
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
+        public FindTests(ITestOutputHelper logger)
         {
-            Logger = output;
+            _logger = logger;
         }
 
         [Fact, Trait("Category", "smoke")]

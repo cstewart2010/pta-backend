@@ -1,15 +1,16 @@
-﻿using System;
-using TheReplacements.PTA.Common.Models;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
 
 namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class TryAddGameTests : TestsBase
     {
-        public TryAddGameTests(ITestOutputHelper output)
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
+        public TryAddGameTests(ITestOutputHelper logger)
         {
-            Logger = output;
+            _logger = logger;
         }
 
         [Fact, Trait("Category", "smoke")]

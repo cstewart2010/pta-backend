@@ -7,9 +7,12 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class UpdateGameTests : TestsBase
     {
-        public UpdateGameTests(ITestOutputHelper output)
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
+        public UpdateGameTests(ITestOutputHelper logger)
         {
-            Logger = output;
+            _logger = logger;
         }
 
         [Theory, Trait("Category", "smoke")]

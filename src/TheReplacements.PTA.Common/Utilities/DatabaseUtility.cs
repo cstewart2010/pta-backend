@@ -7,8 +7,15 @@ using TheReplacements.PTA.Common.Models;
 
 namespace TheReplacements.PTA.Common.Utilities
 {
+    /// <summary>
+    /// Provides a Collection of CRUD methods for the PTA database
+    /// </summary>
     public static class DatabaseUtility
     {
+        /// <summary>
+        /// Searches for a game using its id, then deletes it
+        /// </summary>
+        /// <param name="id">The game session id</param>
         public static bool DeleteGame(string id)
         {
             return MongoCollectionHelper
@@ -16,6 +23,10 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndDelete(game => game.GameId == id) != null;
         }
 
+        /// <summary>
+        /// Searches for an npc using its id, then deletes it
+        /// </summary>
+        /// <param name="id">The npc id</param>
         public static bool DeleteNpc(string id)
         {
             return MongoCollectionHelper
@@ -23,24 +34,36 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndDelete(npc => npc.NPCId == id) != null;
         }
 
+        /// <summary>
+        /// Searches for a Pokemon using its id, then deletes it
+        /// </summary>
+        /// <param name="id">The Pokemon id</param>
         public static bool DeletePokemon(string id)
         {
             return MongoCollectionHelper
                 .Pokemon
-                .FindOneAndDelete(pokemon => pokemon.PokemonId == id) != null;
+                .FindOneAndDelete(Pokemon => Pokemon.PokemonId == id) != null;
         }
 
+        /// <summary>
+        /// Searches for all Pokemon using their trainer id, then deletes it
+        /// </summary>
+        /// <param name="trainerId">The trainer id</param>
         public static long DeletePokemonByTrainerId(string trainerId)
         {
             var deleteResult = MongoCollectionHelper
                 .Pokemon
-                .DeleteMany(pokemon => pokemon.TrainerId == trainerId);
+                .DeleteMany(Pokemon => Pokemon.TrainerId == trainerId);
             
             return deleteResult.IsAcknowledged
                 ? deleteResult.DeletedCount
                 : -1;
         }
 
+        /// <summary>
+        /// Searches for a trainer using their id, then deletes it
+        /// </summary>
+        /// <param name="id">The trainer id</param>
         public static bool DeleteTrainer(string id)
         {
             return MongoCollectionHelper
@@ -48,6 +71,10 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndDelete(trainer => trainer.TrainerId == id) != null;
         }
 
+        /// <summary>
+        /// Searches for all trainers using their game id, then deletes it
+        /// </summary>
+        /// <param name="gameId">The game id</param>
         public static long DeleteTrainersByGameId(string gameId)
         {
             var deleteResult =  MongoCollectionHelper
@@ -59,6 +86,10 @@ namespace TheReplacements.PTA.Common.Utilities
                 : -1;
         }
 
+        /// <summary>
+        /// Returns a game matching the game session id
+        /// </summary>
+        /// <param name="id">The game session id</param>
         public static GameModel FindGame(string id)
         {
             return MongoCollectionHelper
@@ -67,6 +98,11 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FirstOrDefault();
         }
 
+
+        /// <summary>
+        /// Returns an npc matching the npc id
+        /// </summary>
+        /// <param name="id">The npc id</param>
         public static NpcModel FindNpc(string id)
         {
             return MongoCollectionHelper
@@ -75,6 +111,11 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FirstOrDefault();
         }
 
+
+        /// <summary>
+        /// Returns all npcs matching the npc ids
+        /// </summary>
+        /// <param name="npcIds">The npc ids</param>
         public static IEnumerable<NpcModel> FindNpcs(IEnumerable<string> npcIds)
         {
             return npcIds == null
@@ -84,23 +125,35 @@ namespace TheReplacements.PTA.Common.Utilities
                 .Find(npc => npcIds.Contains(npc.NPCId))
                 .ToList();
         }
-        
+
+        /// <summary>
+        /// Returns a Pokemon matching the Pokemon id
+        /// </summary>
+        /// <param name="id">The Pokemon id</param>
         public static PokemonModel FindPokemonById(string id)
         {
             return MongoCollectionHelper
                 .Pokemon
-                .Find(pokemon => pokemon.PokemonId == id)
+                .Find(Pokemon => Pokemon.PokemonId == id)
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Returns all Pokemon matching the trainer id
+        /// </summary>
+        /// <param name="trainerId">The trainer id</param>
         public static IEnumerable<PokemonModel> FindPokemonByTrainerId(string trainerId)
         {
             return MongoCollectionHelper
                 .Pokemon
-                .Find(pokemon => pokemon.TrainerId == trainerId)
+                .Find(Pokemon => Pokemon.TrainerId == trainerId)
                 .ToList();
         }
 
+        /// <summary>
+        /// Returns a trainer matching the trainer id
+        /// </summary>
+        /// <param name="id">The trainer id</param>
         public static TrainerModel FindTrainerById(string id)
         {
             return MongoCollectionHelper
@@ -109,6 +162,10 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Returns all trainers matching the game session id
+        /// </summary>
+        /// <param name="gameId">The game session id</param>
         public static IEnumerable<TrainerModel> FindTrainersByGameId(string gameId)
         {
             return MongoCollectionHelper
@@ -117,6 +174,11 @@ namespace TheReplacements.PTA.Common.Utilities
                 .ToList();
         }
 
+        /// <summary>
+        /// Returns a trainer matching the trainer name and game session id
+        /// </summary>
+        /// <param name="username">The trainer name</param>
+        /// <param name="gameId">The game session id</param>
         public static TrainerModel FindTrainerByUsername(
             string username,
             string gameId)
@@ -128,6 +190,10 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Returns whether there is a game master for the provide game session
+        /// </summary>
+        /// <param name="gameId">The game session id</param>
         public static bool HasGM(string gameId)
         {
             return FindGame(gameId) != null && MongoCollectionHelper
@@ -136,11 +202,20 @@ namespace TheReplacements.PTA.Common.Utilities
                 .Any();
         }
 
+        /// <summary>
+        /// Encrypts a password for storage
+        /// </summary>
+        /// <param name="password">The game session id</param>
         public static string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
+        /// <summary>
+        /// Attempts to add a game using the provided document
+        /// </summary>
+        /// <param name="game">The document to add</param>
+        /// <param name="error">Any error found</param>
         public static bool TryAddGame(
             GameModel game,
             out object error)
@@ -152,6 +227,11 @@ namespace TheReplacements.PTA.Common.Utilities
             );
         }
 
+        /// <summary>
+        /// Attempts to add an npc using the provided document
+        /// </summary>
+        /// <param name="npc">The document to add</param>
+        /// <param name="error">Any error found</param>
         public static bool TryAddNpc(
             NpcModel npc,
             out object error)
@@ -163,6 +243,11 @@ namespace TheReplacements.PTA.Common.Utilities
             );
         }
 
+        /// <summary>
+        /// Attempts to add a Pokemon using the provided document
+        /// </summary>
+        /// <param name="pokemon">The document to add</param>
+        /// <param name="error">Any error found</param>
         public static bool TryAddPokemon(
             PokemonModel pokemon,
             out object error)
@@ -174,6 +259,11 @@ namespace TheReplacements.PTA.Common.Utilities
             );
         }
 
+        /// <summary>
+        /// Attempts to add a trainer using the provided document
+        /// </summary>
+        /// <param name="trainer">The document to add</param>
+        /// <param name="error">Any error found</param>
         public static bool TryAddTrainer(
             TrainerModel trainer,
             out object error)
@@ -186,10 +276,10 @@ namespace TheReplacements.PTA.Common.Utilities
         }
 
         /// <summary>
-        /// 
+        /// Searches for a game, then updates the npc list
         /// </summary>
-        /// <param name="gameId"></param>
-        /// <param name="npcIds"></param>
+        /// <param name="gameId">The game session id</param>
+        /// <param name="npcIds">The updated npc list</param>
         /// <exception cref="MongoCommandException" />
         public static bool UpdateGameNpcList(string gameId, IEnumerable<string> npcIds)
         {
@@ -202,6 +292,12 @@ namespace TheReplacements.PTA.Common.Utilities
                 ) != null;
         }
 
+        /// <summary>
+        /// Searches for a game, then updates its online status
+        /// </summary>
+        /// <param name="gameId">The game session id</param>
+        /// <param name="isOnline">The updated online status</param>
+        /// <exception cref="MongoCommandException" />
         public static bool UpdateGameOnlineStatus(
             string gameId,
             bool isOnline)
@@ -214,10 +310,10 @@ namespace TheReplacements.PTA.Common.Utilities
         }
 
         /// <summary>
-        /// 
+        /// Searches for a pokemon, then updates its stats
         /// </summary>
-        /// <param name="pokemonId"></param>
-        /// <param name="query"></param>
+        /// <param name="pokemonId">The pokemon id</param>
+        /// <param name="query">The updates to perform</param>
         /// <exception cref="ArgumentNullException" />
         /// <exception cref="MongoCommandException" />
         public static bool UpdatePokemonStats(
@@ -229,24 +325,38 @@ namespace TheReplacements.PTA.Common.Utilities
                 throw new ArgumentNullException(nameof(query));
             }
 
-            Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;
+            Expression<Func<PokemonModel, bool>> filter = Pokemon => Pokemon.PokemonId == pokemonId;
             var updates = GetPokemonUpdates(pokemonId, query);
             return MongoCollectionHelper
                 .Pokemon
                 .FindOneAndUpdate(filter, updates) != null;
         }
 
+        /// <summary>
+        /// Searches for a pokemon, then updates its trainer id
+        /// </summary>
+        /// <param name="pokemonId">The pokemon id</param>
+        /// <param name="trainerId">The trainer id/param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
         public static bool UpdatePokemonTrainerId(
             string pokemonId,
             string trainerId)
         {
-            Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;
+            Expression<Func<PokemonModel, bool>> filter = Pokemon => Pokemon.PokemonId == pokemonId;
             var update = Builders<PokemonModel>.Update.Set("TrainerId", trainerId);
             return MongoCollectionHelper
                 .Pokemon
                 .FindOneAndUpdate(filter, update) != null;
         }
 
+        /// <summary>
+        /// Searches for a pokemon, then evolves it to its next stage
+        /// </summary>
+        /// <param name="pokemonId">The pokemon id</param>
+        /// <param name="evolvedForm">The pokemon's evolution/param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
         public static bool UpdatePokemonWithEvolution(
             string pokemonId,
             PokemonModel evolvedForm)
@@ -268,13 +378,20 @@ namespace TheReplacements.PTA.Common.Utilities
                 Builders<PokemonModel>.Update.Set("Nickname", evolvedForm.Nickname)
             };
 
-            Expression<Func<PokemonModel, bool>> filter = pokemon => pokemon.PokemonId == pokemonId;
+            Expression<Func<PokemonModel, bool>> filter = Pokemon => Pokemon.PokemonId == pokemonId;
             var update = Builders<PokemonModel>.Update.Combine(updates);
             return MongoCollectionHelper
                 .Pokemon
                 .FindOneAndUpdate(filter, update) != null;
         }
 
+        /// <summary>
+        /// Searches for a trainer, then updates their item list
+        /// </summary>
+        /// <param name="trainerId">The trainer id/param>
+        /// <param name="itemList">The updated item list</param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
         public static bool UpdateTrainerItemList(
             string trainerId,
             IEnumerable<ItemModel> itemList)
@@ -296,6 +413,13 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndUpdate(filter, update) != null;
         }
 
+        /// <summary>
+        /// Searches for a trainer, then updates their online status
+        /// </summary>
+        /// <param name="trainerId">The trainer id/param>
+        /// <param name="isOnline">The updated online status</param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
         public static bool UpdateTrainerOnlineStatus(
             string trainerId,
             bool isOnline)
@@ -307,6 +431,13 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndUpdate(filter, update) != null;
         }
 
+        /// <summary>
+        /// Searches for a trainer, then updates their password
+        /// </summary>
+        /// <param name="trainerId">The trainer id/param>
+        /// <param name="password">The updated password</param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
         public static bool UpdateTrainerPassword(
             string trainerId,
             string password)
@@ -324,6 +455,13 @@ namespace TheReplacements.PTA.Common.Utilities
                 .FindOneAndUpdate(filter, update) != null;
         }
 
+        /// <summary>
+        /// Verifys that the password matches the encryption
+        /// </summary>
+        /// <param name="password">The trainer id/param>
+        /// <param name="hashPassword">The updated online status</param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
         public static bool VerifyTrainerPassword(
             string password,
             string hashPassword)
@@ -346,9 +484,9 @@ namespace TheReplacements.PTA.Common.Utilities
             }
         }
 
-        private static UpdateDefinition<PokemonModel> GetPokemonUpdates(string pokemonId, Dictionary<string, string> query)
+        private static UpdateDefinition<PokemonModel> GetPokemonUpdates(string PokemonId, Dictionary<string, string> query)
         {
-            var pokemon = FindPokemonById(pokemonId);
+            var Pokemon = FindPokemonById(PokemonId);
             var updates = new List<UpdateDefinition<PokemonModel>>();
             var currentKey = string.Empty;
             if (query.TryGetValue("experience", out currentKey) && int.TryParse(currentKey, out var experience))
@@ -357,33 +495,33 @@ namespace TheReplacements.PTA.Common.Utilities
             }
             if (query.TryGetValue("hpAdded", out currentKey) && int.TryParse(currentKey, out var added))
             {
-                pokemon.HP.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("HP", pokemon.HP));
+                Pokemon.HP.Added = added;
+                updates.Add(Builders<PokemonModel>.Update.Set("HP", Pokemon.HP));
             }
             if (query.TryGetValue("attackAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
-                pokemon.Attack.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Attack", pokemon.Attack));
+                Pokemon.Attack.Added = added;
+                updates.Add(Builders<PokemonModel>.Update.Set("Attack", Pokemon.Attack));
             }
             if (query.TryGetValue("defenseAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
-                pokemon.Defense.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Defense", pokemon.Defense));
+                Pokemon.Defense.Added = added;
+                updates.Add(Builders<PokemonModel>.Update.Set("Defense", Pokemon.Defense));
             }
             if (query.TryGetValue("specialAttackAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
-                pokemon.SpecialAttack.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("SpecialAttack", pokemon.SpecialAttack));
+                Pokemon.SpecialAttack.Added = added;
+                updates.Add(Builders<PokemonModel>.Update.Set("SpecialAttack", Pokemon.SpecialAttack));
             }
             if (query.TryGetValue("specialDefenseAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
-                pokemon.SpecialDefense.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("SpecialDefense", pokemon.SpecialDefense));
+                Pokemon.SpecialDefense.Added = added;
+                updates.Add(Builders<PokemonModel>.Update.Set("SpecialDefense", Pokemon.SpecialDefense));
             }
             if (query.TryGetValue("speedAdded", out currentKey) && int.TryParse(currentKey, out added))
             {
-                pokemon.Speed.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Speed", pokemon.Speed));
+                Pokemon.Speed.Added = added;
+                updates.Add(Builders<PokemonModel>.Update.Set("Speed", Pokemon.Speed));
             }
             if (query.TryGetValue("nickname", out currentKey) && !string.IsNullOrWhiteSpace(currentKey))
             {

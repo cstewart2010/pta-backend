@@ -5,9 +5,12 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class TryAddNpcTests : TestsBase
     {
-        public TryAddNpcTests(ITestOutputHelper output)
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
+        public TryAddNpcTests(ITestOutputHelper logger)
         {
-            Logger = output;
+            _logger = logger;
         }
 
         [Fact, Trait("Category", "smoke")]

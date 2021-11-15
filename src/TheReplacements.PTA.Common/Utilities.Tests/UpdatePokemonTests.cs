@@ -9,9 +9,12 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class UpdatePokemonTests : TestsBase
     {
-        public UpdatePokemonTests(ITestOutputHelper output)
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
+        public UpdatePokemonTests(ITestOutputHelper logger)
         {
-            Logger = output;
+            _logger = logger;
         }
 
         [Fact, Trait("Category", "smoke")]

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using TheReplacements.PTA.Common.Enums;
 using Xunit;
 using Xunit.Abstractions;
@@ -10,9 +8,12 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class PokeAPITests : TestsBase
     {
-        public PokeAPITests(ITestOutputHelper output)
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
+        public PokeAPITests(ITestOutputHelper logger)
         {
-            Logger = output;
+            _logger = logger;
         }
 
         [Fact, Trait("Category", "smoke")]

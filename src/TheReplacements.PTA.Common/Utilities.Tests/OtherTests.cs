@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
 
 namespace TheReplacements.PTA.Common.Utilities.Tests
 {
     public class OtherTests : TestsBase
     {
-        public OtherTests(ITestOutputHelper output)
+        private readonly ITestOutputHelper _logger;
+        protected override ITestOutputHelper Logger { get => _logger; }
+
+        public OtherTests(ITestOutputHelper logger)
         {
-            Logger = output;
+            _logger = logger;
         }
 
         [Theory, Trait("Category", "smoke")]
