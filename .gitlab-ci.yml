@@ -4,8 +4,8 @@ default:
 Build:
   stage: build
   script: 
-    - 'dotnet restore src/PTABackEnd/PTABackEnd.sln'
-    - 'dotnet build src/PTABackEnd/PTABackEnd.sln'    
+    - 'dotnet restore src/PTABackEnd.sln'
+    - 'dotnet build src/PTABackEnd.sln'    
   tags:
     - docker
 
