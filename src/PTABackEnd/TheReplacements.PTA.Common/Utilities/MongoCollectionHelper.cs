@@ -13,17 +13,18 @@ namespace TheReplacements.PTA.Common.Utilities
 
         static MongoCollectionHelper()
         {
-            var username = Environment.GetEnvironmentVariable("MongoUsername");
-            var password = Environment.GetEnvironmentVariable("MongoPassword");
-            if (username == null || password == null)
+            var connectionString = Environment.GetEnvironmentVariable("MongoDBConnectionString");
+            if (connectionString == null)
             {
-                throw new NullReferenceException("MongoUsername and MongoPassword environment variables need to be set to access MongoDB");
+                throw new NullReferenceException("MongoDBConnectionString environment variable need to be set to access MongoDB");
             }
-            var settings = MongoClientSettings.FromConnectionString($"mongodb+srv://{username}:{password}@ptatestcluster.1ekcs.mongodb.net/PTA?retryWrites=true&w=majority");
+
+            var settings = MongoClientSettings.FromConnectionString(connectionString);
             settings.SslSettings = new SslSettings()
             {
                 EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
             };
+
             var client = new MongoClient(settings);
             var database = client.GetDatabase("PTA");
             Game = database.GetCollection<GameModel>("Game");
