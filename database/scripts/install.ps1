@@ -19,7 +19,7 @@ if (!$isMongoShellInstall){
 
 Write-Host All tools installed
 
-if (!$env:MongoDBConnectionString){
+if ($env:MongoDBConnectionString){
     Write-Host Running mongo update script
     $CurrentDirectory = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
     Write-Host $CurrentDirectory
