@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
 using TheReplacements.PTA.Common.Enums;
 using TheReplacements.PTA.Common.Models;
 using TheReplacements.PTA.Common.Utilities;

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +13,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
     public class GameController : ControllerBase
     {
         private const MongoCollection Collection = MongoCollection.Game;
-        private readonly ILogger<GameController> _logger;
-
-        public GameController(ILogger<GameController> logger)
-        {
-            _logger = logger;
-        }
 
         private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
 

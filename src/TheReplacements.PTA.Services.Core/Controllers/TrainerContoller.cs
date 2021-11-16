@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
+using TheReplacements.PTA.Common.Enums;
 
 namespace TheReplacements.PTA.Services.Core.Controllers
 {
@@ -12,12 +12,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
     [Route("api/v1/trainer")]
     public class TrainerContoller : ControllerBase
     {
-        private readonly ILogger<TrainerContoller> _logger;
+        private const MongoCollection Collection = MongoCollection.Trainer;
 
-        public TrainerContoller(ILogger<TrainerContoller> logger)
-        {
-            _logger = logger;
-        }
+        private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
         [HttpGet("{trainerId}/{pokemonId}")]
         public ActionResult<PokemonModel> FindTrainerMon(
