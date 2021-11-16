@@ -27,6 +27,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(gameId);
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return game;
         }
 
@@ -57,6 +58,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
                 trainer.TrainerId,
@@ -71,12 +73,16 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var guid = Guid.NewGuid().ToString();
+            var nickname = Request.Query["nickname"].ToString();
             var game = new GameModel
             {
                 GameId = guid,
-                Nickname = Request.Query["nickname"].ToString() ?? guid.Split('-')[0],
+                Nickname = string.IsNullOrEmpty(nickname)
+                    ? guid.Split('-')[0]
+                    : nickname,
                 IsOnline = true,
-                PasswordHash = DatabaseUtility.HashPassword(Request.Query["gameSessionPassword"])
+                PasswordHash = DatabaseUtility.HashPassword(Request.Query["gameSessionPassword"]),
+                NPCs = Array.Empty<string>()
             };
             if (!DatabaseUtility.TryAddGame(game, out var error))
             {
@@ -105,22 +111,23 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             var trainer = CreateTrainer(game.GameId, username, password);
             trainer.IsGM = true;
-            if (DatabaseUtility.TryAddTrainer(trainer, out error))
+            if (!DatabaseUtility.TryAddTrainer(trainer, out error))
             {
-                return new
-                {
-                    game.GameId,
-                    GameMaster = new
-                    {
-                        trainer.TrainerId,
-                        trainer.TrainerName,
-                        trainer.IsGM,
-                        trainer.Items
-                    }
-                };
+                return BadRequest(error);
             }
 
-            return BadRequest(error);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return new
+            {
+                game.GameId,
+                GameMaster = new
+                {
+                    trainer.TrainerId,
+                    trainer.TrainerName,
+                    trainer.IsGM,
+                    trainer.Items
+                }
+            };
         }
 
         [HttpPost("{gameId}/new")]
@@ -173,18 +180,19 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            if (DatabaseUtility.TryAddTrainer(trainer, out var error))
+            if (!DatabaseUtility.TryAddTrainer(trainer, out var error))
             {
-                return new
-                {
-                    trainer.TrainerId,
-                    trainer.TrainerName,
-                    trainer.IsGM,
-                    trainer.Items
-                };
+                return BadRequest(error);
             }
 
-            return BadRequest(error);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return new
+            {
+                trainer.TrainerId,
+                trainer.TrainerName,
+                trainer.IsGM,
+                trainer.Items
+            };
         }
 
         [HttpPut("{gameId}/start")]
@@ -272,6 +280,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             DatabaseUtility.UpdateTrainerOnlineStatus(gameMaster.TrainerId, true);
             DatabaseUtility.UpdateGameOnlineStatus(game.GameId, true);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return Ok();
         }
 
@@ -320,6 +329,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 );
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return Ok();
         }
 
@@ -352,15 +362,16 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             var newNpcList = game.NPCs.ToList();
             newNpcList.AddRange(npcs.Select(npc => npc.NPCId));
-            if (DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
+            if (!DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
             {
-                return new
-                {
-                    updatedNpcList = newNpcList
-                };
+                return StatusCode(500);
             }
 
-            return StatusCode(500);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return new
+            {
+                updatedNpcList = newNpcList
+            };
         }
 
         [HttpPut("{gameId}/removeNpcs")]
@@ -391,15 +402,16 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             var newNpcList = game.NPCs.ToList().Except(npcs.Select(npc => npc.NPCId));
-            if (DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
+            if (!DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
             {
-                return new
-                {
-                    updatedNpcList = newNpcList
-                };
+                return StatusCode(500);
             }
 
-            return StatusCode(500);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return new
+            {
+                updatedNpcList = newNpcList
+            };
         }
 
         [HttpPut("reset")]
@@ -413,20 +425,21 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 Request.Query["password"]
             );
 
-            if (wasUpdateSucessful)
+            if (!wasUpdateSucessful)
             {
-                var trainer = DatabaseUtility.FindTrainerById(trainerId);
-                return new
-                {
-                    trainer.TrainerId,
-                    trainer.TrainerName,
-                    trainer.IsGM,
-                    trainer.Items
-                };
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
+                return NotFound();
             }
 
-            LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
-            return NotFound();
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return new
+            {
+                trainer.TrainerId,
+                trainer.TrainerName,
+                trainer.IsGM,
+                trainer.Items
+            };
         }
 
         [HttpDelete("{gameId}")]
@@ -468,6 +481,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     : $"Failed to delete {gameId}"
             };
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
                 gameDeletionResult,
@@ -517,8 +531,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             {
                 GameId = gameId,
                 TrainerId = Guid.NewGuid().ToString(),
-                TrainerName = Request.Query["trainerName"],
-                PasswordHash = DatabaseUtility.HashPassword(Request.Query["password"]),
+                TrainerName = username,
+                PasswordHash = DatabaseUtility.HashPassword(password),
                 Items = new List<ItemModel>(),
                 IsOnline = true,
                 TrainerClasses = new List<string>(),

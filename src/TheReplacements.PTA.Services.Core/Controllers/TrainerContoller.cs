@@ -38,6 +38,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
         }
 
@@ -98,12 +99,13 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 pokemon.Nickname = Request.Query["nickname"];
             }
 
-            if (DatabaseUtility.TryAddPokemon(pokemon, out var error))
+            if (!DatabaseUtility.TryAddPokemon(pokemon, out var error))
             {
-                return pokemon;
+                return BadRequest(error);
             }
 
-            return BadRequest(error);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return pokemon;
         }
 
         [HttpPut("login")]
@@ -140,6 +142,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, true);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
                 trainer.TrainerId,
@@ -171,6 +174,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return Ok();
         }
 
@@ -244,6 +248,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 }
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return DatabaseUtility.FindTrainerById(trainerId);
         }
 
@@ -315,6 +320,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 }
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return DatabaseUtility.FindTrainerById(trainerId);
         }
 
@@ -329,6 +335,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
                 message = $"Successfully deleted all pokemon associated with {trainerId}"

@@ -27,6 +27,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             pokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
         }
 
@@ -87,13 +88,14 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 pokemon.Nickname = Request.Query["nickname"];
             }
 
-            if (DatabaseUtility.TryAddPokemon(pokemon, out var error))
+            if (!DatabaseUtility.TryAddPokemon(pokemon, out var error))
             {
-                pokemon.AggregateStats();
-                return pokemon;
+                return BadRequest(error);
             }
 
-            return BadRequest(error);
+            pokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return pokemon;
         }
 
         [HttpPut("trade")]
@@ -161,6 +163,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             
             leftPokemon.AggregateStats();
             rightPokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
                 leftPokemon,
@@ -191,6 +194,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             pokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
         }
 
@@ -225,6 +229,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
             evolvedForm.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return evolvedForm;
         }
 
@@ -239,6 +244,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 NotFound(pokemonId);
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
                 message = $"Successfully deleted {pokemonId}"

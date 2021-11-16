@@ -25,6 +25,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(npcId);
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return npc;
         }
 
@@ -49,25 +50,27 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            if (DatabaseUtility.TryAddNpc(npc, out var error))
+            if (!DatabaseUtility.TryAddNpc(npc, out var error))
             {
-                return npc;
+                return BadRequest(error);
             }
 
-            return BadRequest(error);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return npc;
         }
 
         [HttpDelete("{npcId}")]
         public ActionResult DeleteNpc(string npcId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (DatabaseUtility.DeleteNpc(npcId))
+            if (!DatabaseUtility.DeleteNpc(npcId))
             {
-                return Ok();
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
+                return NotFound(npcId);
             }
 
-            LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
-            return NotFound(npcId);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return Ok();
         }
     }
 }
