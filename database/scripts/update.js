@@ -1,5 +1,4 @@
 // use PTA
-db = connect("mongodb://localhost:27017/PTA")
 
 // adding missing tables
 currentCollections = db.getCollectionNames();
@@ -7,7 +6,8 @@ updatedCollections = [
     'Game',
     'NPC',
     'Pokemon',
-    'Trainer'
+    'Trainer',
+    'Logs'
 ];
 for (collection of updatedCollections){
     if (!currentCollections.includes(collection)){
@@ -456,7 +456,8 @@ db.runCommand({
                         bsonType: 'object',
                         properties: {
                             Name: {
-                                bsonType: 'string'
+                                bsonType: 'string',
+                                minLength: 1
                             },
                             Amount: {
                                 bsonType: 'int',
@@ -471,4 +472,17 @@ db.runCommand({
             }
         }
     }
-})
+});
+console.log("Updating schema for Logs collection");
+db.runCommand({
+    collMod: "Logs",
+    validator: {
+        $jsonSchema: {
+            properties: {
+                _id: {
+                    bsonType: 'objectId'
+                }
+            }
+        }
+    }
+});

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
+using TheReplacements.PTA.Common.Enums;
 
 namespace TheReplacements.PTA.Services.Core.Controllers
 {
@@ -11,12 +11,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
     [Route("api/v1/pokemon")]
     public class PokemonController : ControllerBase
     {
-        private readonly ILogger<PokemonController> _logger;
+        private const MongoCollection Collection = MongoCollection.Pokemon;
 
-        public PokemonController(ILogger<PokemonController> logger)
-        {
-            _logger = logger;
-        }
+        private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
         [HttpGet("{pokemonId}")]
         public ActionResult<PokemonModel> GetPokemon(string pokemonId)
@@ -25,10 +22,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (pokemon == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
                 return NotFound(pokemonId);
             }
 
             pokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
         }
 
@@ -42,7 +41,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             {
                 return BadRequest(new
                 {
-                    message = "Missing the follwoing parameters in the query",
+                    message = "Missing the following parameters in the query",
                     fails
                 });
             }
@@ -89,25 +88,34 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 pokemon.Nickname = Request.Query["nickname"];
             }
 
-            if (DatabaseUtility.TryAddPokemon(pokemon, out var error))
+            if (!DatabaseUtility.TryAddPokemon(pokemon, out var error))
             {
-                pokemon.AggregateStats();
-                return pokemon;
+                return BadRequest(error);
             }
 
-            return BadRequest(error);
+            pokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return pokemon;
         }
 
         [HttpPut("trade")]
         public ActionResult<object> TradePokemon()
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var leftPokemon = DatabaseUtility.FindPokemonById(Request.Query["leftPokemonId"]);
-            var rightPokemon = DatabaseUtility.FindPokemonById(Request.Query["leftPokemonId"]);
+            var leftPokemonId = Request.Query["leftPokemonId"];
+            var rightPokemonId = Request.Query["rightPokemonId"];
+            var leftPokemon = DatabaseUtility.FindPokemonById(leftPokemonId);
+            var rightPokemon = DatabaseUtility.FindPokemonById(rightPokemonId);
 
-            if (leftPokemon == null || rightPokemon == null)
+            if (leftPokemon == null)
             {
-                return NotFound();
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {leftPokemonId}");
+                return NotFound(leftPokemonId);
+            }
+            if (rightPokemon == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {rightPokemonId}");
+                return NotFound(rightPokemonId);
             }
 
             if (leftPokemon.TrainerId == rightPokemon.TrainerId)
@@ -121,9 +129,16 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var leftTrainer = DatabaseUtility.FindTrainerById(leftPokemon.TrainerId);
             var rightTrainer = DatabaseUtility.FindTrainerById(rightPokemon.TrainerId);
 
-            if (leftTrainer == null || rightTrainer == null)
+            if (leftTrainer == null || !leftTrainer.IsOnline)
             {
-                return NotFound();
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {leftPokemon.TrainerId}");
+                return NotFound(leftPokemon.TrainerId);
+            }
+
+            if (rightTrainer == null || !rightTrainer.IsOnline)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {rightPokemon.TrainerId}");
+                return NotFound(rightPokemon.TrainerId);
             }
 
             if (leftTrainer.GameId != rightTrainer.GameId)
@@ -148,6 +163,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             
             leftPokemon.AggregateStats();
             rightPokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
                 leftPokemon,
@@ -155,10 +171,16 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             };
         }
 
-        [HttpPut("update/{pokemonId}")]
+        [HttpPut("{pokemonId}/update")]
         public ActionResult<PokemonModel> UpdatePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (DatabaseUtility.FindPokemonById(pokemonId) == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
+                return NotFound(pokemonId);
+            }
+
             var updateResult = DatabaseUtility.UpdatePokemonStats
             (
                 pokemonId,
@@ -172,20 +194,30 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             pokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
         }
 
-        [HttpPut("evolve/{pokemonId}")]
+        [HttpPut("{pokemonId}/evolve")]
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (pokemon == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
                 return NotFound(pokemonId);
             }
 
-            var evolvedFormName = Request.Query["nextForm"];
+            var evolvedFormName = Request.Query["nextForm"].ToString();
+            if (string.IsNullOrEmpty(evolvedFormName))
+            {
+                return BadRequest(new
+                {
+                    message = "Missing evolvedFormName"
+                });
+            }
+
             var evolvedForm = PokeAPIUtility.GetEvolved(pokemon, evolvedFormName);
             if (evolvedForm == null)
             {
@@ -197,6 +229,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
             evolvedForm.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return evolvedForm;
         }
 
@@ -207,9 +240,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var deleteResult = DatabaseUtility.DeletePokemon(pokemonId);
             if (!deleteResult)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
                 NotFound(pokemonId);
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
                 message = $"Successfully deleted {pokemonId}"

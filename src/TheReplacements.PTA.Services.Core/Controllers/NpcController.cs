@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
+using TheReplacements.PTA.Common.Enums;
 using TheReplacements.PTA.Common.Models;
 using TheReplacements.PTA.Common.Utilities;
 
@@ -11,23 +10,22 @@ namespace TheReplacements.PTA.Services.Core.Controllers
     [Route("api/v1/npc")]
     public class NpcController : ControllerBase
     {
-        private readonly ILogger<NpcController> _logger;
+        private const MongoCollection Collection = MongoCollection.Npc;
 
-        public NpcController(ILogger<NpcController> logger)
-        {
-            _logger = logger;
-        }
+        private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
         [HttpGet("{npcId}")]
         public ActionResult<NpcModel> GetNpcs(string npcId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var npc = DatabaseUtility.FindNpcs(new[] { npcId }).SingleOrDefault();
+            var npc = DatabaseUtility.FindNpc(npcId);
             if (npc == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
                 return NotFound(npcId);
             }
 
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return npc;
         }
 
@@ -38,8 +36,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var npc = new NpcModel
             {
                 NPCId = Guid.NewGuid().ToString(),
-                Feats = Request.Query["feats"].ToString()?.Split(',') ?? Array.Empty<string>(),
-                TrainerClasses = Request.Query["classes"].ToString()?.Split(',') ?? Array.Empty<string>(),
+                Feats = Request.Query["feats"].ToString().Split(','),
+                TrainerClasses = Request.Query["classes"].ToString().Split(','),
                 TrainerName = Request.Query["trainerName"],
                 TrainerStats = new TrainerStatsModel()
             };
@@ -52,24 +50,27 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            if (DatabaseUtility.TryAddNpc(npc, out var error))
+            if (!DatabaseUtility.TryAddNpc(npc, out var error))
             {
-                return npc;
+                return BadRequest(error);
             }
 
-            return BadRequest(error);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return npc;
         }
 
         [HttpDelete("{npcId}")]
         public ActionResult DeleteNpc(string npcId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (DatabaseUtility.DeleteNpc(npcId))
+            if (!DatabaseUtility.DeleteNpc(npcId))
             {
-                return Ok();
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
+                return NotFound(npcId);
             }
 
-            return NotFound(npcId);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return Ok();
         }
     }
 }
