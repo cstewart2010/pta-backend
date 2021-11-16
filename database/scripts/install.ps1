@@ -22,7 +22,10 @@ Write-Host All tools installed
 if ($env:MongoDBConnectionString){
     Write-Host Running mongo update script
     $CurrentDirectory = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-    Start-Process -FilePath "$env:LocalAppData\Programs\mongosh\mongosh.exe" -ArgumentList $env:MongoDBConnectionString,-f,"$CurrentDirectory\update.js" -NoNewWindow -Wait
+    $updateScript = Start-Process -FilePath "$env:LocalAppData\Programs\mongosh\mongosh.exe" -ArgumentList $env:MongoDBConnectionString,-f,"$CurrentDirectory\update.js" -NoNewWindow -PassThru -Wait
+    if ($updateScript.ExitCode -ne 0){
+        throw "Update script failed radically"
+    }
 }
 else {
     throw "MongoDBConnectionString Environment Variable has not been set"

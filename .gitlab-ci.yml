@@ -1,13 +1,13 @@
-default:
-  image: mcr.microsoft.com/dotnet/core/sdk:3.1
+# default:
+#   image: mcr.microsoft.com/dotnet/core/sdk:3.1
   
-Build:
-  stage: build
-  script: 
-    - 'dotnet restore src/PTABackEnd.sln'
-    - 'dotnet build src/PTABackEnd.sln'    
-  tags:
-    - docker
+# Build:
+#   stage: build
+#   script: 
+#     - 'dotnet restore src/PTABackEnd.sln'
+#     - 'dotnet build src/PTABackEnd.sln'    
+#   tags:
+#     - docker
 
 # Test:
 #   stage: test

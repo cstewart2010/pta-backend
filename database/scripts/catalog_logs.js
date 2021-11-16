@@ -1,4 +1,3 @@
 logCollection = db.getCollection("Logs")
-logs = logCollection.find()
-logs.forEach(console.log)
-logs.deleteMany({})
+logCollection.find().forEach(console.log)
+logCollection.deleteMany({})
