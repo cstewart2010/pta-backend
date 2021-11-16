@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
+using TheReplacements.PTA.Common.Enums;
 
 namespace TheReplacements.PTA.Services.Core.Controllers
 {
@@ -12,12 +13,15 @@ namespace TheReplacements.PTA.Services.Core.Controllers
     [Route("api/v1/game")]
     public class GameController : ControllerBase
     {
+        private const MongoCollection Collection = MongoCollection.Game;
         private readonly ILogger<GameController> _logger;
 
         public GameController(ILogger<GameController> logger)
         {
             _logger = logger;
         }
+
+        private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
         [HttpGet("{gameId}")]
         public ActionResult<GameModel> FindGame(string gameId)
@@ -26,6 +30,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var game = GetGame(gameId);
             if (game == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
                 return NotFound(gameId);
             }
 
@@ -38,17 +43,20 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             if (DatabaseUtility.FindGame(gameId) == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
                 return NotFound(gameId);
             }
 
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} Failed to retrieve trainer {trainerId}");
                 return NotFound(trainerId);
             }
 
             if (trainer.GameId != gameId)
             {
+                LoggerUtility.Error(Collection, $"{ClientIp}: Game {gameId} retrieved trainer {trainerId} who had game {trainer.GameId}");
                 return BadRequest(new
                 {
                     message = $"{trainerId} had an invalid game id",
@@ -72,7 +80,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var guid = Guid.NewGuid().ToString();
             var game = new GameModel
             {
-                //GameId = guid,
+                GameId = guid,
                 Nickname = Request.Query["nickname"].ToString() ?? guid.Split('-')[0],
                 IsOnline = true,
                 PasswordHash = DatabaseUtility.HashPassword(Request.Query["gameSessionPassword"])
@@ -80,20 +88,29 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             if (!DatabaseUtility.TryAddGame(game, out var error))
             {
                 return BadRequest(error);
-            }            
+            }
 
-            var username = Request.Query["gmName"];
-            var trainer = CreateTrainer(game.GameId);
-            if (trainer == null)
+            var username = Request.Query["gmUsername"].ToString();
+            if (string.IsNullOrWhiteSpace(username))
             {
                 return BadRequest(new
                 {
-                    message = "Missing password",
-                    game.GameId,
-                    username
+                    message = "Missing gmName",
+                    game.GameId
                 });
             }
 
+            var password = Request.Query["gmPassword"].ToString();
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return BadRequest(new
+                {
+                    message = "Missing gmPassword",
+                    game.GameId
+                });
+            }
+
+            var trainer = CreateTrainer(game.GameId, username, password);
             trainer.IsGM = true;
             if (DatabaseUtility.TryAddTrainer(trainer, out error))
             {
@@ -119,6 +136,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             if (DatabaseUtility.FindGame(gameId) == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
                 return NotFound(gameId);
             }
 
@@ -131,8 +149,27 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
+            var trainerName = Request.Query["trainerName"].ToString();
+            if (string.IsNullOrWhiteSpace(trainerName))
+            {
+                return BadRequest(new
+                {
+                    message = "Missing trainerName",
+                    gameId
+                });
+            }
 
-            var trainerName = Request.Query["trainerName"];
+            var password = Request.Query["password"].ToString();
+            if (string.IsNullOrWhiteSpace(trainerName))
+            {
+                return BadRequest(new
+                {
+                    message = "Missing password",
+                    gameId
+                });
+            }
+
+            var trainer = CreateTrainer(gameId, trainerName, password);
             if (DatabaseUtility.FindTrainerByUsername(trainerName, gameId) != null)
             {
                 return BadRequest(new
@@ -140,17 +177,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     message = "Duplicate trainerName",
                     gameId,
 
-                });
-            }
-                        
-            var trainer = CreateTrainer(gameId);
-            if (trainer == null)
-            {
-                return BadRequest(new
-                {
-                    message = "Missing password",
-                    gameId,
-                    trainerName
                 });
             }
 
@@ -175,6 +201,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var gamePassword = Request.Query["gameSessionPassword"];
 
             var game = DatabaseUtility.FindGame(gameId);
+            if (game == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
+                return NotFound(gameId);
+            }
 
             if (game.IsOnline)
             {
@@ -186,19 +217,39 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
             if (!BCrypt.Net.BCrypt.Verify(gamePassword, game.PasswordHash))
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
                 {
                     message = "Could not login in to game with provided password",
                     gameId
                 });
             }
-            var username = Request.Query["gmUsername"];
-            var password = Request.Query["gmPassword"];
+
+            var username = Request.Query["gmUsername"].ToString();
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return BadRequest(new
+                {
+                    message = "Missing gmName",
+                    game.GameId
+                });
+            }
+
+            var password = Request.Query["gmPassword"].ToString();
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return BadRequest(new
+                {
+                    message = "Missing gmPassword",
+                    game.GameId
+                });
+            }
 
             var gameMaster = DatabaseUtility.FindTrainerByUsername(username, gameId);
             if (gameMaster == null)
             {
-                return NotFound(new
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
+                return Unauthorized(new
                 {
                     message = "No username found with provided",
                     username
@@ -207,6 +258,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             if (!BCrypt.Net.BCrypt.Verify(password, game.PasswordHash))
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
                 {
                     message = "Invalid password",
@@ -216,6 +268,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             if (!gameMaster.IsGM)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
                 {
                     message = $"This user is not the GM for {game.Nickname}",
@@ -226,7 +279,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             DatabaseUtility.UpdateTrainerOnlineStatus(gameMaster.TrainerId, true);
             DatabaseUtility.UpdateGameOnlineStatus(game.GameId, true);
-
             return Ok();
         }
 
@@ -236,18 +288,22 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var trainerId = Request.Query["trainerId"];
             var game = DatabaseUtility.FindGame(gameId);
+            if (game == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
+                return NotFound(gameId);
+            }
+
             var gameMaster = DatabaseUtility.FindTrainerById(trainerId);
             if (gameMaster == null)
             {
-                return NotFound(new
-                {
-                    message = "No trainerId found with provided",
-                    trainerId
-                });
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
+                return NotFound(trainerId);
             }
 
             if (!gameMaster.IsGM)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
                 {
                     message = $"This user is not the GM for {game.Nickname}",
@@ -256,10 +312,19 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            DatabaseUtility.UpdateGameOnlineStatus(game.GameId, false);
+            DatabaseUtility.UpdateGameOnlineStatus
+            (
+                game.GameId,
+                false
+            );
+
             foreach (var trainer in DatabaseUtility.FindTrainersByGameId(gameId))
             {
-                DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
+                DatabaseUtility.UpdateTrainerOnlineStatus
+                (
+                    trainer.TrainerId,
+                    false
+                );
             }
 
             return Ok();
@@ -270,22 +335,28 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var game = DatabaseUtility.FindGame(gameId);
-            var npcIds = Request.Query["npcIds"].ToString()?.Split(',');
-            if ((npcIds?.Length).GetValueOrDefault() < 1)
+            if (game == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
+                return NotFound(gameId);
+            }
+
+            var npcIds = Request.Query["npcIds"].ToString().Split(',');
+            if (npcIds.Length < 1)
             {
                 return BadRequest(new
                 {
                     message = "No npc Ids provided"
                 });
             }
+
             var npcs = DatabaseUtility.FindNpcs(npcIds);
             if (!npcs.Any())
             {
-                return BadRequest(new
-                {
-                    message = "No valid npc Ids provided"
-                });
+                LoggerUtility.Error(MongoCollection.Npc, $"Client {ClientIp} failed to retrieve npcs {Request.Query["npcIds"]}");
+                return NotFound(npcIds);
             }
+
             var newNpcList = game.NPCs.ToList();
             newNpcList.AddRange(npcs.Select(npc => npc.NPCId));
             if (DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
@@ -304,22 +375,28 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var game = DatabaseUtility.FindGame(gameId);
-            var npcIds = Request.Query["npcIds"].ToString()?.Split(',');
-            if ((npcIds?.Length).GetValueOrDefault() < 1)
+            if (game == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
+                return NotFound(gameId);
+            }
+
+            var npcIds = Request.Query["npcIds"].ToString().Split(',');
+            if (npcIds.Length < 1)
             {
                 return BadRequest(new
                 {
                     message = "No npc Ids provided"
                 });
             }
+
             var npcs = DatabaseUtility.FindNpcs(npcIds);
             if (!npcs.Any())
             {
-                return BadRequest(new
-                {
-                    message = "No valid npc Ids provided"
-                });
+                LoggerUtility.Error(MongoCollection.Npc, $"Client {ClientIp} failed to retrieve npcs {Request.Query["npcIds"]}");
+                return NotFound(npcIds);
             }
+
             var newNpcList = game.NPCs.ToList().Except(npcs.Select(npc => npc.NPCId));
             if (DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
             {
@@ -332,8 +409,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return StatusCode(500);
         }
 
-        [HttpPut("{gameId}/reset")]
-        public ActionResult<object> ChangeTrainerPassword(string gameId)
+        [HttpPut("reset")]
+        public ActionResult<object> ChangeTrainerPassword()
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var trainerId = Request.Query["trainerId"];
@@ -342,6 +419,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 trainerId,
                 Request.Query["password"]
             );
+
             if (wasUpdateSucessful)
             {
                 var trainer = DatabaseUtility.FindTrainerById(trainerId);
@@ -354,6 +432,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 };
             }
 
+            LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
             return NotFound();
         }
 
@@ -361,35 +440,47 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> DeleteGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var trainers = DatabaseUtility.FindTrainersByGameId(gameId);
-            var results = trainers.Select
-            (
-                trainer =>
-                {
-                    if (DatabaseUtility.DeletePokemonByTrainerId(trainer.TrainerId) > -1)
+            if (DatabaseUtility.FindGame(gameId) == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
+                return NotFound(gameId);
+            }
+
+            var results = DatabaseUtility.FindTrainersByGameId(gameId)
+                .Select
+                (
+                    trainer =>
                     {
-                        return new
+                        if (DatabaseUtility.DeletePokemonByTrainerId(trainer.TrainerId) > -1)
                         {
-                            message = $"Successfully deleted all pokemon associated with {trainer.TrainerId}"
-                        };
+                            return new
+                            {
+                                message = $"Successfully deleted all pokemon associated with {trainer.TrainerId}"
+                            };
+                        }
+                        return null;
                     }
-                    return null;
-                }
-            )
-            .Where(response => response != null)
-            .ToList();
-            results.Add(new
+                )
+                .Where(response => response != null)
+                .ToList();
+
+            var trainerDeletionResult = new
             {
                 message = DeleteTrainers(gameId)
-            });
-            results.Add(new
+            };
+            var gameDeletionResult = new
             {
                 message = DatabaseUtility.DeleteGame(gameId)
                     ? $"Successfully deleted game {gameId}"
                     : $"Failed to delete {gameId}"
-            });
+            };
 
-            return results;
+            return new
+            {
+                gameDeletionResult,
+                trainerDeletionResult,
+                pokemonDeletionResult = results
+            };
         }
 
         private string DeleteTrainers(string gameId)
@@ -398,12 +489,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             if (DatabaseUtility.DeleteTrainersByGameId(gameId) > -1)
             {
                 message = $"Successfully deleted all trainers associate with {gameId}";
-                _logger.LogInformation(message);
+                LoggerUtility.Info(MongoCollection.Trainer, message);
             }
             else
             {
                 message = $"Failed to delete trainers";
-                _logger.LogWarning(message);
+                LoggerUtility.Error(MongoCollection.Trainer, message);
             }
 
             return message;
@@ -419,9 +510,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return game;
         }
 
-        private TrainerModel CreateTrainer(string gameId)
+        private TrainerModel CreateTrainer(
+            string gameId,
+            string username,
+            string password)
         {
-            if (string.IsNullOrWhiteSpace(Request.Query["password"]))
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
                 return null;
             }
@@ -431,7 +525,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 GameId = gameId,
                 TrainerId = Guid.NewGuid().ToString(),
                 TrainerName = Request.Query["trainerName"],
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Request.Query["password"]),
+                PasswordHash = DatabaseUtility.HashPassword(Request.Query["password"]),
                 Items = new List<ItemModel>(),
                 IsOnline = true,
                 TrainerClasses = new List<string>(),

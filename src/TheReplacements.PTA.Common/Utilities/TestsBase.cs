@@ -95,7 +95,7 @@ namespace TheReplacements.PTA.Common.Utilities
             logger.WriteLine($"Adding new game with game id {game.GameId}");
             Assert.False(DatabaseUtility.TryAddGame(game, out var error));
             logger.WriteLine($"Verify that error object is null");
-            Assert.NotNull(error);
+            Assert.NotNull(error?.WriteErrorJsonString);
             logger.WriteLine($"Verify no game is found with game id {game.GameId}");
             Assert.Null(DatabaseUtility.FindGame(game.GameId));
         }
@@ -115,7 +115,7 @@ namespace TheReplacements.PTA.Common.Utilities
             logger.WriteLine($"Adding new npc with npc id {npc.NPCId}");
             Assert.False(DatabaseUtility.TryAddNpc(npc, out var error));
             logger.WriteLine($"Verify that error object is null");
-            Assert.NotNull(error);
+            Assert.NotNull(error?.WriteErrorJsonString);
             logger.WriteLine($"Verify no npc is found with npc id {npc.NPCId}");
             Assert.Empty(DatabaseUtility.FindNpcs(new[] { npc.NPCId }));
         }
@@ -125,7 +125,7 @@ namespace TheReplacements.PTA.Common.Utilities
             logger.WriteLine($"Adding new pokemon with pokemon id {pokemon.PokemonId}");
             Assert.False(DatabaseUtility.TryAddPokemon(pokemon, out var error));
             logger.WriteLine($"Verify that error object is null");
-            Assert.NotNull(error);
+            Assert.NotNull(error?.WriteErrorJsonString);
             logger.WriteLine($"Verify no pokemon is found with pokemon id {pokemon.PokemonId}");
             Assert.Null(DatabaseUtility.FindPokemonById(pokemon.PokemonId));
         }
@@ -145,7 +145,7 @@ namespace TheReplacements.PTA.Common.Utilities
             logger.WriteLine($"Adding new pokemon with pokemon id {trainer.TrainerId}");
             Assert.False(DatabaseUtility.TryAddTrainer(trainer, out var error));
             logger.WriteLine($"Verify that error object is null");
-            Assert.NotNull(error);
+            Assert.NotNull(error?.WriteErrorJsonString);
             logger.WriteLine($"Verify no pokemon is found with pokemon id {trainer.TrainerId}");
             Assert.Null(DatabaseUtility.FindTrainerById(trainer.TrainerId));
         }

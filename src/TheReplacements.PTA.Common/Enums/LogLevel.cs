@@ -6,9 +6,7 @@ namespace TheReplacements.PTA.Common.Enums
 {
     internal enum LogLevel
     {
-        Debug,
         Info,
-        Warn,
         Error
     }
 }

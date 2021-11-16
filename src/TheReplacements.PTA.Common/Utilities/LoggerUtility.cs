@@ -5,18 +5,6 @@ namespace TheReplacements.PTA.Common.Utilities
 {
     public static class LoggerUtility
     {
-        public static void Debug(
-            MongoCollection affectedCollection,
-            object record)
-        {
-            LogMessage
-            (
-                LogLevel.Debug,
-                affectedCollection,
-                record
-            );
-        }
-
         public static void Info(
             MongoCollection affectedCollection,
             object record)
@@ -24,18 +12,6 @@ namespace TheReplacements.PTA.Common.Utilities
             LogMessage
             (
                 LogLevel.Info,
-                affectedCollection,
-                record
-            );
-        }
-
-        public static void Warn(
-            MongoCollection affectedCollection,
-            object record)
-        {
-            LogMessage
-            (
-                LogLevel.Warn,
                 affectedCollection,
                 record
             );

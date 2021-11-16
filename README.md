@@ -293,8 +293,8 @@ Response Type - GameModel
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
 |nickname|string|a nickname for the game session|optional|
-|gmName|string|GM's username|required|
-|password|string|GM's password|required|
+|gmUsername|string|GM's username|required|
+|gmPassword|string|GM's password|required|
 |gameSessionPassword|string|the password for the game session|required|
 
 ---
@@ -320,7 +320,7 @@ Response Type - Status(200)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|gamePassword|string|Game's password|required
+|gameSessionPassword|string|Game's password|required
 |gmUsername|string|Trainer's username|required|
 |gmPassword|string|Trainer's password|required|
 
@@ -363,7 +363,7 @@ Response Type - Status(200)
 ---
 
 ## Reset Trainer password
-Endpoint - {gameId}/reset  
+Endpoint - reset  
 Method - PUT  
 Response Type - TrainerModel  
 [Back to Game](#game)
