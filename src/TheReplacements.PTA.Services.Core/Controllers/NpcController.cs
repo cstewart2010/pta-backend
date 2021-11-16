@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using TheReplacements.PTA.Common.Enums;
 using TheReplacements.PTA.Common.Models;
 using TheReplacements.PTA.Common.Utilities;
 
@@ -11,20 +12,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
     [Route("api/v1/npc")]
     public class NpcController : ControllerBase
     {
-        private readonly ILogger<NpcController> _logger;
+        private const MongoCollection Collection = MongoCollection.Npc;
 
-        public NpcController(ILogger<NpcController> logger)
-        {
-            _logger = logger;
-        }
+        private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
         [HttpGet("{npcId}")]
         public ActionResult<NpcModel> GetNpcs(string npcId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var npc = DatabaseUtility.FindNpcs(new[] { npcId }).SingleOrDefault();
+            var npc = DatabaseUtility.FindNpc(npcId);
             if (npc == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
                 return NotFound(npcId);
             }
 
@@ -38,8 +37,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var npc = new NpcModel
             {
                 NPCId = Guid.NewGuid().ToString(),
-                Feats = Request.Query["feats"].ToString()?.Split(',') ?? Array.Empty<string>(),
-                TrainerClasses = Request.Query["classes"].ToString()?.Split(',') ?? Array.Empty<string>(),
+                Feats = Request.Query["feats"].ToString().Split(','),
+                TrainerClasses = Request.Query["classes"].ToString().Split(','),
                 TrainerName = Request.Query["trainerName"],
                 TrainerStats = new TrainerStatsModel()
             };
@@ -69,6 +68,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return Ok();
             }
 
+            LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
             return NotFound(npcId);
         }
     }
