@@ -25,6 +25,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (pokemon == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
                 return NotFound(pokemonId);
             }
             if (pokemon.TrainerId != trainerId)
@@ -118,16 +119,19 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             );
             if (trainer == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {username}");
                 return NotFound(username);
             }
 
             if (!DatabaseUtility.VerifyTrainerPassword(Request.Query["password"], trainer.PasswordHash))
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
                 return Unauthorized(username);
             }
 
             if (trainer.IsOnline)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
                 return Unauthorized(new
                 {
                     message = "User is already online",
@@ -152,11 +156,13 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
                 return NotFound(trainerId);
             }
 
             if (!trainer.IsOnline)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
                 return Unauthorized(new
                 {
                     message = "User is already offline",
@@ -177,6 +183,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
                 return NotFound(trainerId);
             }
             if (!Request.Query.Any())
@@ -249,6 +256,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
                 return NotFound(trainerId);
             }
             if (!Request.Query.Any())
@@ -315,17 +323,16 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var result = DatabaseUtility.DeleteTrainer(trainerId);
-            if (result && DatabaseUtility.DeletePokemonByTrainerId(trainerId) > -1)
+            if (!result || DatabaseUtility.DeletePokemonByTrainerId(trainerId) <= -1)
             {
-                return new
-                {
-                    message = $"Successfully deleted all pokemon associated with {trainerId}"
-                };
-            }
-            else
-            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
                 return NotFound();
             }
+
+            return new
+            {
+                message = $"Successfully deleted all pokemon associated with {trainerId}"
+            };
         }
 
         private object GetBadRequestMessage(
