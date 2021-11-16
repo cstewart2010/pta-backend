@@ -1,15 +1,15 @@
 # default:
 #   image: mcr.microsoft.com/dotnet/core/sdk:3.1
-  
+
 Build:
   stage: build
-  script: 
-    # - 'dotnet restore src/PTABackEnd.sln'
-    # - 'dotnet build src/PTABackEnd.sln'    
+  script:
+    - 'echo run jenkins build'
+    # - 'dotnet build src/PTABackEnd.sln'
   tags:
     - docker
 
 # Test:
 #   stage: test
-#   script: 
+#   script:
 #     - 'dotnet test src/PTABackEnd/PTABackEnd.sln --logger:console;verbosity=detailed'
