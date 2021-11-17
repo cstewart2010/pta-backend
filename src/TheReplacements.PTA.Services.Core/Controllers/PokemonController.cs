@@ -31,77 +31,23 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return pokemon;
         }
 
-        [HttpPost("wild")]
-        public ActionResult<PokemonModel> AddPokemon()
-        {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var fails = new[] { "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" }
-                .Where(key => string.IsNullOrWhiteSpace(Request.Query[key]));
-            if (fails.Any())
-            {
-                return BadRequest(new
-                {
-                    message = "Missing the following parameters in the query",
-                    fails
-                });
-            }
-            var parseFails = new[]
-            {
-                GetBadRequestMessage("expYield", result => result > 0, out var expYield),
-                GetBadRequestMessage("catchRate", result => result >= 0, out var catchRate),
-                GetBadRequestMessage("experience", result => result >= 0, out var experience),
-                GetBadRequestMessage("level", result => result > 0, out var level),
-            }.Where(fail => fail != null);
-            if (parseFails.Any())
-            {
-                return BadRequest(parseFails);
-            }
-
-            var naturalMoves = Request.Query["naturalMoves"].ToString().Split(",");
-            if (naturalMoves.Length < 1 || naturalMoves.Length > 4)
-            {
-                return BadRequest(naturalMoves);
-            }
-            var tmMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? Array.Empty<string>();
-            if (tmMoves.Length > 4)
-            {
-                return BadRequest(tmMoves);
-            }
-
-            var pokemonName = Request.Query["pokemon"];
-            var natureName = Request.Query["nature"];
-            var pokemon = PokeAPIUtility.GetPokemon
-            (
-                pokemonName,
-                natureName
-            );
-
-            pokemon.TrainerId = "Wild";
-            pokemon.NaturalMoves = naturalMoves;
-            pokemon.TMMoves = tmMoves;
-            pokemon.ExpYield = expYield;
-            pokemon.CatchRate = catchRate;
-            pokemon.Experience = experience;
-            pokemon.Level = level;
-            if (!string.IsNullOrWhiteSpace(Request.Query["nickname"]))
-            {
-                pokemon.Nickname = Request.Query["nickname"];
-            }
-
-            if (!DatabaseUtility.TryAddPokemon(pokemon, out var error))
-            {
-                return BadRequest(error);
-            }
-
-            pokemon.AggregateStats();
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return pokemon;
-        }
-
         [HttpPut("trade")]
         public ActionResult<object> TradePokemon()
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (gameMaster?.IsOnline != true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being an online gm");
+                return Unauthorized(gameMasterId);
+            }
+
             var leftPokemonId = Request.Query["leftPokemonId"];
             var rightPokemonId = Request.Query["rightPokemonId"];
             var leftPokemon = DatabaseUtility.FindPokemonById(leftPokemonId);
@@ -129,24 +75,36 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             var leftTrainer = DatabaseUtility.FindTrainerById(leftPokemon.TrainerId);
             var rightTrainer = DatabaseUtility.FindTrainerById(rightPokemon.TrainerId);
 
-            if (leftTrainer == null || !leftTrainer.IsOnline)
+            if (gameMaster.GameId != leftTrainer?.GameId)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade for an unknown player");
+                return Unauthorized(new
+                {
+                    gameMasterGameId = gameMasterId,
+                    trainerGameId = leftTrainer.GameId
+                });
+            }
+
+            if (leftTrainer.GameId != rightTrainer?.GameId)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade for an unknown player");
+                return Unauthorized(new
+                {
+                    gameMasterGameId = gameMasterId,
+                    rightTrainerGameId = rightTrainer.GameId
+                });
+            }
+
+            if (!leftTrainer.IsOnline)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {leftPokemon.TrainerId}");
                 return NotFound(leftPokemon.TrainerId);
             }
 
-            if (rightTrainer == null || !rightTrainer.IsOnline)
+            if (!rightTrainer.IsOnline)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {rightPokemon.TrainerId}");
                 return NotFound(rightPokemon.TrainerId);
-            }
-
-            if (leftTrainer.GameId != rightTrainer.GameId)
-            {
-                return BadRequest(new
-                {
-                    message = "Cannot trade pokemon to trainers in different games"
-                });
             }
 
             DatabaseUtility.UpdatePokemonTrainerId
@@ -175,10 +133,30 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> UpdatePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (DatabaseUtility.FindPokemonById(pokemonId) == null)
+            if (!Header.VerifyCookies(Request.Cookies))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
+                return Unauthorized();
+            }
+
+            var trainerId = Request.Query["trainerId"];
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            if (trainer?.IsOnline != true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown user");
+                return NotFound(trainerId);
+            }
+
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            if (pokemon == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
                 return NotFound(pokemonId);
+            }
+
+            if (trainer.TrainerId != pokemon.TrainerId)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
+                return Unauthorized(pokemonId);
             }
 
             var updateResult = DatabaseUtility.UpdatePokemonStats
@@ -192,7 +170,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return StatusCode(500);
             }
 
-            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             pokemon.AggregateStats();
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
@@ -202,11 +180,30 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
+            var trainerId = Request.Query["trainerId"];
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            if (trainer?.IsOnline != true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown user");
+                return NotFound(trainerId);
+            }
+
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (pokemon == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
                 return NotFound(pokemonId);
+            }
+
+            if (trainer.TrainerId != pokemon.TrainerId)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
+                return Unauthorized(pokemonId);
             }
 
             var evolvedFormName = Request.Query["nextForm"].ToString();
@@ -237,6 +234,19 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> DeletePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (!(gameMaster?.IsGM == true && gameMaster.IsOnline))
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to delete a pokemon without being a game master");
+                return NotFound(gameMasterId);
+            }
+
             var deleteResult = DatabaseUtility.DeletePokemon(pokemonId);
             if (!deleteResult)
             {
@@ -249,24 +259,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             {
                 message = $"Successfully deleted {pokemonId}"
             };
-        }
-
-        private object GetBadRequestMessage(
-            string parameter,
-            Predicate<int> check,
-            out int outVar)
-        {
-            var value = Request.Query[parameter];
-            if (!(int.TryParse(value, out outVar) && check(outVar)))
-            {
-                return new
-                {
-                    message = $"Invalid {parameter}",
-                    invalidValue = value
-                };
-            }
-
-            return null;
         }
     }
 }

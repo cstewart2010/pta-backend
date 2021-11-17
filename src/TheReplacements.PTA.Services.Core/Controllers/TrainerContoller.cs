@@ -46,6 +46,19 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> AddPokemon(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (!(gameMaster?.IsGM == true && gameMaster.IsOnline))
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being a gm");
+                return Unauthorized(gameMasterId);
+            }
+
             var fails = new[] { "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" }
                 .Where(key => string.IsNullOrWhiteSpace(Request.Query[key]));
             if (fails.Any())
@@ -119,16 +132,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 username,
                 gameId
             );
+
             if (trainer == null)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {username}");
                 return NotFound(username);
-            }
-
-            if (!DatabaseUtility.VerifyTrainerPassword(Request.Query["password"], trainer.PasswordHash))
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
-                return Unauthorized(username);
             }
 
             if (trainer.IsOnline)
@@ -141,7 +149,14 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
+            if (!DatabaseUtility.VerifyTrainerPassword(Request.Query["password"], trainer.PasswordHash))
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
+                return Unauthorized(username);
+            }
+
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, true);
+            Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -156,6 +171,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult Logout(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
@@ -184,6 +204,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (DatabaseUtility.FindTrainerById(gameMasterId)?.IsOnline != true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being a gm");
+                return Unauthorized(gameMasterId);
+            }
+
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
@@ -258,12 +290,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            if (trainer == null)
+            if (!Header.VerifyCookies(Request.Cookies))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
+                return Unauthorized();
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            if (trainer?.IsOnline == true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
                 return NotFound(trainerId);
             }
+
             if (!Request.Query.Any())
             {
                 return BadRequest(new
@@ -328,6 +366,18 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> DeleteTrainer(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (DatabaseUtility.FindTrainerById(gameMasterId) == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being a gm");
+                return Unauthorized(gameMasterId);
+            }
+
             var result = DatabaseUtility.DeleteTrainer(trainerId);
             if (!result || DatabaseUtility.DeletePokemonByTrainerId(trainerId) <= -1)
             {

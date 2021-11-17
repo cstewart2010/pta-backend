@@ -1,14 +1,18 @@
 # check environment
 if (!$env:MongoDBConnectionString){
-    throw "Missing MongoDBConnectionString"
+    throw "Missing MongoDBConnectionString Environment Variable"
 }
 
 if (!$env:MongoUsername){
-    throw "Missing MongoDBConnectionString"
+    throw "Missing MongoUsername Environment Variable"
 }
 
 if (!$env:MongoPassword){
-    throw "Missing MongoDBConnectionString"
+    throw "Missing MongoPassword Environment Variable"
+}
+
+if (!$env:CookieKey){
+    throw "Missing CookieKey Environment Variable"
 }
 
 # prebuild

@@ -32,42 +32,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return game;
         }
 
-        [HttpGet("{gameId}/export")]
-        public ActionResult ExportGame(string gameId)
-        {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var game = DatabaseUtility.FindGame(gameId);
-            if (game == null)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
-                return NotFound(gameId);
-            }
-
-            var gamePassword = Request.Query["gameSessionPassword"];
-            if (!DatabaseUtility.VerifyTrainerPassword(gamePassword, game.PasswordHash))
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
-                return Unauthorized(new
-                {
-                    message = "Could not login in to game with provided password",
-                    gameId
-                });
-            }
-
-            game.IsOnline = false;
-            DatabaseUtility.UpdateGameOnlineStatus(gameId, false);
-            var exportStream = ExportUtility.GetExportStream(game);
-
-            DeleteGame(gameId);
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return File
-            (
-                exportStream,
-                "application/octet-stream",
-                $"{game.Nickname}.json"
-            );
-        }
-
         [HttpGet("{gameId}/find/{trainerId}")]
         public ActionResult<object> FindTrainerInGame(string gameId, string trainerId)
         {
@@ -124,12 +88,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            if (ExportUtility.TryParseImport(json, out var errors))
+            if (!ExportUtility.TryParseImport(json, out var errors))
             {
-                return Ok(errors);
+                return BadRequest(errors);
             }
 
-            return BadRequest(errors);
+            return Ok(errors);
         }
 
         [HttpPost("new")]
@@ -180,6 +144,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
+            Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -249,6 +214,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
+            Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -257,6 +223,85 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 trainer.IsGM,
                 trainer.Items
             };
+        }
+
+        [HttpPost("{gameMasterId}/wild")]
+        public ActionResult<PokemonModel> AddPokemon(string gameMasterId)
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (!(gameMaster?.IsGM == true && gameMaster.IsOnline))
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrievethe online game master with {gameMasterId}");
+                return NotFound(gameMasterId);
+            }
+
+            var fails = new[] { "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" }
+                .Where(key => string.IsNullOrWhiteSpace(Request.Query[key]));
+            if (fails.Any())
+            {
+                return BadRequest(new
+                {
+                    message = "Missing the following parameters in the query",
+                    fails
+                });
+            }
+            var parseFails = new[]
+            {
+                GetBadRequestMessage("expYield", result => result > 0, out var expYield),
+                GetBadRequestMessage("catchRate", result => result >= 0, out var catchRate),
+                GetBadRequestMessage("experience", result => result >= 0, out var experience),
+                GetBadRequestMessage("level", result => result > 0, out var level),
+            }.Where(fail => fail != null);
+            if (parseFails.Any())
+            {
+                return BadRequest(parseFails);
+            }
+
+            var naturalMoves = Request.Query["naturalMoves"].ToString().Split(",");
+            if (naturalMoves.Length < 1 || naturalMoves.Length > 4)
+            {
+                return BadRequest(naturalMoves);
+            }
+            var tmMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? Array.Empty<string>();
+            if (tmMoves.Length > 4)
+            {
+                return BadRequest(tmMoves);
+            }
+
+            var pokemonName = Request.Query["pokemon"];
+            var natureName = Request.Query["nature"];
+            var pokemon = PokeAPIUtility.GetPokemon
+            (
+                pokemonName,
+                natureName
+            );
+
+            pokemon.TrainerId = gameMasterId;
+            pokemon.NaturalMoves = naturalMoves;
+            pokemon.TMMoves = tmMoves;
+            pokemon.ExpYield = expYield;
+            pokemon.CatchRate = catchRate;
+            pokemon.Experience = experience;
+            pokemon.Level = level;
+            if (!string.IsNullOrWhiteSpace(Request.Query["nickname"]))
+            {
+                pokemon.Nickname = Request.Query["nickname"];
+            }
+
+            if (!DatabaseUtility.TryAddPokemon(pokemon, out var error))
+            {
+                return BadRequest(error);
+            }
+
+            pokemon.AggregateStats();
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return pokemon;
         }
 
         [HttpPut("{gameId}/start")]
@@ -322,7 +367,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(password, game.PasswordHash))
+            if (!DatabaseUtility.VerifyTrainerPassword(password, game.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
@@ -345,6 +390,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             DatabaseUtility.UpdateTrainerOnlineStatus(gameMaster.TrainerId, true);
             DatabaseUtility.UpdateGameOnlineStatus(game.GameId, true);
+            Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return Ok();
         }
@@ -353,7 +399,11 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult EndGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var trainerId = Request.Query["trainerId"];
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
             {
@@ -361,22 +411,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(gameId);
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(trainerId);
-            if (gameMaster == null)
+            var gameMasterId = Request.Query["gameMasterId"];
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (!(gameMaster?.IsGM == true && gameMaster.IsOnline == true))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
-                return NotFound(trainerId);
-            }
-
-            if (!gameMaster.IsGM)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
-                return Unauthorized(new
-                {
-                    message = $"This user is not the GM for {game.Nickname}",
-                    trainerId,
-                    gameId
-                });
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve online game master with {gameMasterId}");
+                return NotFound(gameMasterId);
             }
 
             DatabaseUtility.UpdateGameOnlineStatus
@@ -402,11 +442,24 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> AddNPCsToGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
                 return NotFound(gameId);
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (gameMaster?.IsGM != true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game master with {gameMasterId}");
+                return NotFound(gameMasterId);
             }
 
             var npcIds = Request.Query["npcIds"].ToString().Split(',');
@@ -443,11 +496,24 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> RemovesNPCsFromGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            if (!Header.VerifyCookies(Request.Cookies))
+            {
+                return Unauthorized();
+            }
+
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
                 return NotFound(gameId);
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (gameMaster?.IsGM != true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game master with {gameMasterId}");
+                return NotFound(gameMasterId);
             }
 
             var npcIds = Request.Query["npcIds"].ToString().Split(',');
@@ -483,6 +549,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> ChangeTrainerPassword()
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+
+            // TODO: Pass a token to verify password reset
             var trainerId = Request.Query["trainerId"];
             var wasUpdateSucessful = DatabaseUtility.UpdateTrainerPassword
             (
@@ -511,10 +579,30 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> DeleteGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (DatabaseUtility.FindGame(gameId) == null)
+            var game = DatabaseUtility.FindGame(gameId);
+            if (game == null)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
                 return NotFound(gameId);
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (gameMaster?.IsGM != true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game master with {gameMasterId}");
+                return NotFound(gameMasterId);
+            }
+
+            var gamePassword = Request.Query["gameSessionPassword"];
+            if (!DatabaseUtility.VerifyTrainerPassword(gamePassword, game.PasswordHash))
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
+                return Unauthorized(new
+                {
+                    message = "Could not login in to game with provided password",
+                    gameId
+                });
             }
 
             var results = DatabaseUtility.FindTrainersByGameId(gameId)
@@ -553,6 +641,67 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 trainerDeletionResult,
                 pokemonDeletionResult = results
             };
+        }
+
+        [HttpDelete("{gameId}/export")]
+        public ActionResult ExportGame(string gameId)
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            var game = DatabaseUtility.FindGame(gameId);
+            if (game == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
+                return NotFound(gameId);
+            }
+
+            var gameMasterId = Request.Query["gameMasterId"];
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (gameMaster?.IsGM != true)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game master with {gameMasterId}");
+                return NotFound(gameMasterId);
+            }
+
+            var gamePassword = Request.Query["gameSessionPassword"];
+            if (!DatabaseUtility.VerifyTrainerPassword(gamePassword, game.PasswordHash))
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
+                return Unauthorized(new
+                {
+                    message = "Could not login in to game with provided password",
+                    gameId
+                });
+            }
+
+            DatabaseUtility.UpdateGameOnlineStatus(gameId, false);
+            var exportStream = ExportUtility.GetExportStream(game);
+
+            DeleteGame(gameId);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return File
+            (
+                exportStream,
+                "application/octet-stream",
+                $"{game.Nickname}.json"
+            );
+        }
+
+        private object GetBadRequestMessage(
+            string parameter,
+            Predicate<int> check,
+            out int outVar)
+        {
+            var value = Request.Query[parameter];
+            if (!(int.TryParse(value, out outVar) && check(outVar)))
+            {
+                return new
+                {
+                    message = $"Invalid {parameter}",
+                    invalidValue = value
+                };
+            }
+
+            return null;
         }
 
         private string DeleteTrainers(string gameId)
