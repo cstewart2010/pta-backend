@@ -311,17 +311,6 @@ namespace TheReplacements.PTA.Common.Utilities
         }
 
         /// <summary>
-        /// Encrypts a password for storage
-        /// </summary>
-        /// <param name="password">The game session id</param>
-        public static string HashPassword(string password)
-        {
-            return string.IsNullOrWhiteSpace(password)
-                ? null
-                : BCrypt.Net.BCrypt.HashPassword(password);
-        }
-
-        /// <summary>
         /// Attempts to add a game using the provided document
         /// </summary>
         /// <param name="game">The document to add</param>
@@ -678,7 +667,7 @@ namespace TheReplacements.PTA.Common.Utilities
                     .Update
                     .Combine(new[]
                     {
-                    Builders<TrainerModel>.Update.Set("PasswordHash", HashPassword(password)),
+                    Builders<TrainerModel>.Update.Set("PasswordHash", EncryptionUtility.HashSecret(password)),
                     Builders<TrainerModel>.Update.Set("IsOnline", true)
                     });
 
@@ -701,27 +690,6 @@ namespace TheReplacements.PTA.Common.Utilities
             {
                 LoggerUtility.Error(Trainer, ex.Message);
                 throw ex;
-            }
-        }
-
-        /// <summary>
-        /// Verifys that the password matches the encryption
-        /// </summary>
-        /// <param name="password">The trainer id/param>
-        /// <param name="hashPassword">The updated online status</param>
-        /// <exception cref="ArgumentNullException" />
-        /// <exception cref="MongoCommandException" />
-        public static bool VerifyTrainerPassword(
-            string password,
-            string hashPassword)
-        {
-            try
-            {
-                return BCrypt.Net.BCrypt.Verify(password, hashPassword);
-            }
-            catch
-            {
-                return false;
             }
         }
 

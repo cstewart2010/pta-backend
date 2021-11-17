@@ -109,7 +109,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     ? guid.Split('-')[0]
                     : nickname,
                 IsOnline = true,
-                PasswordHash = DatabaseUtility.HashPassword(Request.Query["gameSessionPassword"]),
+                PasswordHash = EncryptionUtility.HashSecret(Request.Query["gameSessionPassword"]),
                 NPCs = Array.Empty<string>()
             };
             if (!DatabaseUtility.TryAddGame(game, out var error))
@@ -145,6 +145,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -178,8 +179,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var trainerName = Request.Query["trainerName"].ToString();
-            if (string.IsNullOrWhiteSpace(trainerName))
+            if (Request.Query.TryGetValue("trainerName", out var trainerName))
             {
                 return BadRequest(new
                 {
@@ -188,8 +188,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var password = Request.Query["password"].ToString();
-            if (string.IsNullOrWhiteSpace(trainerName))
+            if (Request.Query.TryGetValue("password", out var password))
             {
                 return BadRequest(new
                 {
@@ -215,6 +214,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -229,7 +229,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> AddPokemon(string gameMasterId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
@@ -300,6 +300,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             pokemon.AggregateStats();
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
         }
@@ -326,7 +327,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             var gamePassword = Request.Query["gameSessionPassword"];
-            if (!DatabaseUtility.VerifyTrainerPassword(gamePassword, game.PasswordHash))
+            if (!EncryptionUtility.VerifySecret(gamePassword, game.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
@@ -367,7 +368,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            if (!DatabaseUtility.VerifyTrainerPassword(password, game.PasswordHash))
+            if (!EncryptionUtility.VerifySecret(password, game.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
@@ -391,6 +392,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             DatabaseUtility.UpdateTrainerOnlineStatus(gameMaster.TrainerId, true);
             DatabaseUtility.UpdateGameOnlineStatus(game.GameId, true);
             Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return Ok();
         }
@@ -399,24 +401,24 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult EndGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
 
-            var game = DatabaseUtility.FindGame(gameId);
-            if (game == null)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
-                return NotFound(gameId);
-            }
-
-            var gameMasterId = Request.Query["gameMasterId"];
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (!(gameMaster?.IsGM == true && gameMaster.IsOnline == true))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve online game master with {gameMasterId}");
                 return NotFound(gameMasterId);
+            }
+
+            var game = DatabaseUtility.FindGame(gameId);
+            if (game?.GameId != gameMaster.GameId)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
+                return NotFound(gameId);
             }
 
             DatabaseUtility.UpdateGameOnlineStatus
@@ -442,7 +444,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> AddNPCsToGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
@@ -454,7 +457,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(gameId);
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (gameMaster?.IsGM != true)
             {
@@ -485,6 +487,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return StatusCode(500);
             }
 
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -496,7 +499,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> RemovesNPCsFromGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
@@ -508,7 +512,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(gameId);
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (gameMaster?.IsGM != true)
             {
@@ -538,6 +541,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return StatusCode(500);
             }
 
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -565,6 +569,8 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -595,7 +601,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             var gamePassword = Request.Query["gameSessionPassword"];
-            if (!DatabaseUtility.VerifyTrainerPassword(gamePassword, game.PasswordHash))
+            if (!EncryptionUtility.VerifySecret(gamePassword, game.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
@@ -663,7 +669,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             var gamePassword = Request.Query["gameSessionPassword"];
-            if (!DatabaseUtility.VerifyTrainerPassword(gamePassword, game.PasswordHash))
+            if (!EncryptionUtility.VerifySecret(gamePassword, game.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
@@ -736,7 +742,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 GameId = gameId,
                 TrainerId = Guid.NewGuid().ToString(),
                 TrainerName = username,
-                PasswordHash = DatabaseUtility.HashPassword(password),
+                PasswordHash = EncryptionUtility.HashSecret(password),
                 Items = new List<ItemModel>(),
                 IsOnline = true,
                 TrainerClasses = new List<string>(),

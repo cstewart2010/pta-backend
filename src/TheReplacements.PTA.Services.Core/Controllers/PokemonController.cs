@@ -35,12 +35,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> TradePokemon()
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (gameMaster?.IsOnline != true)
             {
@@ -121,6 +121,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             
             leftPokemon.AggregateStats();
             rightPokemon.AggregateStats();
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -133,12 +134,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> UpdatePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var trainerId = Request.Query["trainerId"];
+            if (!Header.VerifyCookies(Request.Cookies, trainerId))
             {
                 return Unauthorized();
             }
 
-            var trainerId = Request.Query["trainerId"];
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer?.IsOnline != true)
             {
@@ -172,6 +173,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             pokemon.AggregateStats();
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
         }
@@ -180,12 +182,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var trainerId = Request.Query["trainerId"];
+            if (!Header.VerifyCookies(Request.Cookies, trainerId))
             {
                 return Unauthorized();
             }
 
-            var trainerId = Request.Query["trainerId"];
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer?.IsOnline != true)
             {
@@ -226,6 +228,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
             evolvedForm.AggregateStats();
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return evolvedForm;
         }
@@ -234,12 +237,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> DeletePokemon(string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (!(gameMaster?.IsGM == true && gameMaster.IsOnline))
             {
@@ -254,6 +257,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 NotFound(pokemonId);
             }
 
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {

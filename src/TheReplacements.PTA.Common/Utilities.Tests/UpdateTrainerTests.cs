@@ -104,7 +104,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             DatabaseUtility.DeleteTrainer(trainer.TrainerId);
 
             Logger.WriteLine($"Verifying trainer id {trainer.TrainerId} password with {updatedPassword}");
-            Assert.True(DatabaseUtility.VerifyTrainerPassword(updatedPassword, updatedTrainer.PasswordHash));
+            Assert.True(EncryptionUtility.VerifySecret(updatedPassword, updatedTrainer.PasswordHash));
         }
     }
 }

@@ -46,12 +46,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> AddPokemon(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (!(gameMaster?.IsGM == true && gameMaster.IsOnline))
             {
@@ -117,6 +117,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return pokemon;
         }
@@ -149,7 +150,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            if (!DatabaseUtility.VerifyTrainerPassword(Request.Query["password"], trainer.PasswordHash))
+            if (!EncryptionUtility.VerifySecret(Request.Query["password"], trainer.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
                 return Unauthorized(username);
@@ -157,6 +158,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, true);
             Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {
@@ -171,7 +173,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult Logout(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            if (!Header.VerifyCookies(Request.Cookies, trainerId))
             {
                 return Unauthorized();
             }
@@ -204,12 +206,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
             if (DatabaseUtility.FindTrainerById(gameMasterId)?.IsOnline != true)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being a gm");
@@ -280,6 +282,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 }
             }
 
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return DatabaseUtility.FindTrainerById(trainerId);
         }
@@ -290,7 +293,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            if (!Header.VerifyCookies(Request.Cookies, trainerId))
             {
                 return Unauthorized();
             }
@@ -358,6 +361,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 }
             }
 
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return DatabaseUtility.FindTrainerById(trainerId);
         }
@@ -366,12 +370,12 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<object> DeleteTrainer(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies))
+            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
             if (DatabaseUtility.FindTrainerById(gameMasterId) == null)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being a gm");
@@ -385,6 +389,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
+            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
             LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
             return new
             {

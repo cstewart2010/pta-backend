@@ -8,7 +8,16 @@ namespace TheReplacements.PTA.Services.Core
     {
         private static readonly string CookieKey = Environment.GetEnvironmentVariable("CookieKey");
         public static string AccessUrl => "*";
-        public static string GetCookie() => DatabaseUtility.HashPassword(CookieKey);
-        public static bool VerifyCookies(IRequestCookieCollection cookies) => cookies.TryGetValue("ptaSessionAuth", out var cookie) && DatabaseUtility.VerifyTrainerPassword(CookieKey, cookie);
+        public static string GetCookie() => EncryptionUtility.HashSecret(CookieKey);
+        public static bool VerifyCookies(IRequestCookieCollection cookies, string id)
+        {
+            if (!(cookies.TryGetValue("ptaActivityToken", out var accessToken) && EncryptionUtility.ValidateToken(accessToken)))
+            {
+                DatabaseUtility.UpdateTrainerOnlineStatus(id, false);
+                return false;
+            }
+
+            return cookies.TryGetValue("ptaSessionAuth", out var cookie) && EncryptionUtility.VerifySecret(CookieKey, cookie);
+        }
     }
 }
