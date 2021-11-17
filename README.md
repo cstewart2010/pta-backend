@@ -21,19 +21,20 @@ PTA BackEnd
   * [Add Trainer Pokemon](#add-trainer-pokemon)
   * [Add Items](#add-items)
   * [Remove Items](#remove-items)
-  * [Delete Trainer's pokemon](#delete-trainer's-pokemon)
   * [Delete Trainer](#delete-trainer)
 - [Game](#game)
   * [Find Game by Id](#find-game-by-id)
   * [Find Trainer In Game](#find-trainer-in-game)
   * [Create New Game](#create-new-game)
   * [Add New Trainer to Game](#add-new-trainer-to-game)
+  * [Import Game](#import-game)
   * [Start Game](#start-game)
   * [End Game](#end-game)
   * [Add Npcs to Game](#add-npcs-to-game)
   * [Remove Npcs from Game](#remove-npcs-from-game)
   * [Reset Trainer password](#reset-trainer-password)
   * [Delete Game](#delete-game)
+  * [Export Game](#export-game)
 - [Npc](#npc)
   * [Find Npc by Id](#find-npc-by-id)
   * [Create new Npc](#create-new-npc)
@@ -45,7 +46,8 @@ PTA BackEnd
 
 ## Environment Variables
 MongoDBConnectionString = mongodb+srv://**dbusername**:**dbPassword**@**url/to/mongo**/PTA?retryWrites=true&w=majority  
-Example: mongodb+srv://**dbAdmin**:**dbPassword**@**pokemontabletopdatabase.com**/PTA?retryWrites=true&w=majority
+Example: mongodb+srv://**dbAdmin**:**dbPassword**@**pokemontabletopdatabase.com**/PTA?retryWrites=true&w=majority  
+[Back to top](#Table-Of-Contents)
 
 ---
 
@@ -59,6 +61,7 @@ Running install.ps1 to install any missing tools
 All tools installed
 Running mongo update script
 ```
+[Back to top](#Table-Of-Contents)
 
 ---
 
@@ -71,18 +74,26 @@ dotnet build .src/PTABackend.sln # builds the solutions
 dotnet test .src/PTABackend.sln # runs the entire unit test suite
 dotnet test .src/PTABackend.sln --filter Category=smoke # only runs the smoke test
 ```
+[Back to top](#Table-Of-Contents)
 
 ---
 
 ## Run
 
-Not yet configured
+Not yet configured  
+[Back to top](#Table-Of-Contents)
 
 ---
 
 # Pokemon
-Resource - api/v1/pokemon  
-[Back to top](#PTA-BackEnd)
+*Resource - api/v1/pokemon*  
+[Back to top](#Table-Of-Contents)
+- [Find Pokemon By Id](#find-pokemon-by-id)
+- [Create Wild Pokemon](#create-wild-pokemon)
+- [Trade Pokemon](#trade-pokemon)
+- [Update Pokemon Stats](#update-pokemon-stats)
+- [Delete Pokemon by Id](#delete-pokemon-by-id)
+- [Evolve Pokemon](#evolve-pokemon)
 
 ---
 
@@ -169,8 +180,15 @@ Response Type - PokemonModel
 ---
 
 # Trainer
-Resource - api/v1/trainer  
-[Back to top](#PTA-BackEnd)
+*Resource - api/v1/trainer*  
+[Back to top](#Table-Of-Contents)
+- [Verify Login](#verify-login)
+- [Verify Logout](#verify-logout)
+- [Find Trainer Pokemon](#find-trainer-pokemon)
+- [Add Trainer Pokemon](#add-trainer-pokemon)
+- [Add Items](#add-items)
+- [Remove Items](#remove-items)
+- [Delete Trainer](#delete-trainer)
 
 ---
 
@@ -265,8 +283,20 @@ Response Type - message
 ---
 
 # Game
-Resource - api/v1/game  
-[Back to top](#PTA-BackEnd)
+*Resource - api/v1/game*  
+[Back to top](#Table-Of-Contents)
+* [Find Game by Id](#find-game-by-id)
+* [Find Trainer In Game](#find-trainer-in-game)
+* [Create New Game](#create-new-game)
+* [Add New Trainer to Game](#add-new-trainer-to-game)
+* [Import Game](#import-game)
+* [Start Game](#start-game)
+* [End Game](#end-game)
+* [Add Npcs to Game](#add-npcs-to-game)
+* [Remove Npcs from Game](#remove-npcs-from-game)
+* [Reset Trainer password](#reset-trainer-password)
+* [Delete Game](#delete-game)
+* [Export Game](#export-game)
 
 ## Find Game by Id
 Endpoint - {gameId}  
@@ -277,7 +307,7 @@ Response Type - GameModel
 ---
 
 ## Find Trainer In Game
-Endpoint - {gameId}/{trainerId}  
+Endpoint - {gameId}/find/{trainerId}  
 Method - GET  
 Response Type - GameModel  
 [Back to Game](#game)
@@ -296,6 +326,16 @@ Response Type - GameModel
 |gmUsername|string|GM's username|required|
 |gmPassword|string|GM's password|required|
 |gameSessionPassword|string|the password for the game session|required|
+
+---
+
+## Import Game
+Endpoint - import  
+Method - POST  
+Content Type - application/octet-stream  
+Response Type - Ok  
+
+Expects a .json file matching the ExportedGame schema
 
 ---
 
@@ -381,11 +421,30 @@ Method - DELETE
 Response Type - GameModel  
 [Back to Game](#game)
 
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|gameSessionPassword|string|Game's password|required|
+
+---
+
+## Export Game
+Endpoint -{gameId}/export  
+Method - Delete  
+Response Type - Ok  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|gameSessionPassword|string|Game's password|required|
+
 ---
 
 # Npc
-Resource - api/v1/npc  
-[Back to top](#PTA-BackEnd)
+*Resource - api/v1/npc*  
+[Back to top](#Table-Of-Contents)
+- [Find Npc by Id](#find-npc-by-id)
+- [Create new Npc](#create-new-npc)
+- [Delete Npc](#delete-npc)
 
 ## Find Npc by Id
 Endpoint - {npcId}  

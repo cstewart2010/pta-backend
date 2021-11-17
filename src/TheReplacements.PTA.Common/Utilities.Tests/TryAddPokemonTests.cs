@@ -7,7 +7,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
     public class TryAddPokemonTests : TestsBase
     {
         private readonly ITestOutputHelper _logger;
-        protected override ITestOutputHelper Logger { get => _logger; }
+        public override ITestOutputHelper Logger { get => _logger; }
 
         public TryAddPokemonTests(ITestOutputHelper logger)
         {

@@ -5,7 +5,7 @@ using TheReplacements.PTA.Common.Interfaces;
 
 namespace TheReplacements.PTA.Common.Models
 {
-    internal class LoggerModel : IMongoCollectionModel
+    internal class LoggerModel : IDocument
     {
         public ObjectId _id { get; set; }
         public string Message { get; set; }

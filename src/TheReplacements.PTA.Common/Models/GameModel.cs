@@ -7,7 +7,7 @@ namespace TheReplacements.PTA.Common.Models
     /// <summary>
     /// Represents a Pokemon Tabletop Adventures game session
     /// </summary>
-    public class GameModel : IAuthenticated, IMongoCollectionModel
+    public class GameModel : IAuthenticated, IDocument
     {
         /// <inheritdoc />
         public ObjectId _id { get; set; }

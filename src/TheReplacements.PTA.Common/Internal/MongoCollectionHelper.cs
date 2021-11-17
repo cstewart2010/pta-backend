@@ -2,7 +2,7 @@
 using System;
 using TheReplacements.PTA.Common.Models;
 
-namespace TheReplacements.PTA.Common.Utilities
+namespace TheReplacements.PTA.Common.Internal
 {
     internal static class MongoCollectionHelper
     {

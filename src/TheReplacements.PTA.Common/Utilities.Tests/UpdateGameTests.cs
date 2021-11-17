@@ -8,7 +8,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
     public class UpdateGameTests : TestsBase
     {
         private readonly ITestOutputHelper _logger;
-        protected override ITestOutputHelper Logger { get => _logger; }
+        public override ITestOutputHelper Logger { get => _logger; }
 
         public UpdateGameTests(ITestOutputHelper logger)
         {
