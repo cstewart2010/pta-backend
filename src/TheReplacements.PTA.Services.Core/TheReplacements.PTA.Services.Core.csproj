@@ -6,6 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="ExportedGame.schema.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ExportedGame.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TheReplacements.PTA.Common\TheReplacements.PTA.Common.csproj" />
   </ItemGroup>
 

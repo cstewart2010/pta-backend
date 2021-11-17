@@ -8,7 +8,7 @@ namespace TheReplacements.PTA.Common.Models
     /// <summary>
     /// Represents a Pokemon in Pokemon Tabletop Adventures
     /// </summary>
-    public class PokemonModel: IMongoCollectionModel
+    public class PokemonModel: IDocument
     {
         /// <inheritdoc />
         public ObjectId _id { get; set; }

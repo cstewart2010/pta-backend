@@ -5,7 +5,7 @@ namespace TheReplacements.PTA.Common.Interfaces
     /// <summary>
     /// Provides a collection of properties for MongoDB documents
     /// </summary>
-    public interface IMongoCollectionModel
+    public interface IDocument
     {
         /// <summary>
         /// MongoDB id

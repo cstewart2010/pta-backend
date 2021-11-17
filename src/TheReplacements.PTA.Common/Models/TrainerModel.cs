@@ -7,7 +7,7 @@ namespace TheReplacements.PTA.Common.Models
     /// <summary>
     /// Represents a Trainer in Pokemon Tabletop Adventures
     /// </summary>
-    public class TrainerModel : IAuthenticated, IPerson, IMongoCollectionModel
+    public class TrainerModel : IAuthenticated, IPerson, IDocument
     {
         /// <inheritdoc />
         public ObjectId _id { get; set; }

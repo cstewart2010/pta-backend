@@ -5,6 +5,7 @@ using System.Linq;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
 using TheReplacements.PTA.Common.Enums;
+using System.IO;
 
 namespace TheReplacements.PTA.Services.Core.Controllers
 {
@@ -20,7 +21,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult<GameModel> FindGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var game = GetGame(gameId);
+            var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
@@ -31,7 +32,43 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             return game;
         }
 
-        [HttpGet("{gameId}/{trainerId}")]
+        [HttpGet("{gameId}/export")]
+        public ActionResult ExportGame(string gameId)
+        {
+            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            var game = DatabaseUtility.FindGame(gameId);
+            if (game == null)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
+                return NotFound(gameId);
+            }
+
+            var gamePassword = Request.Query["gameSessionPassword"];
+            if (!DatabaseUtility.VerifyTrainerPassword(gamePassword, game.PasswordHash))
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
+                return Unauthorized(new
+                {
+                    message = "Could not login in to game with provided password",
+                    gameId
+                });
+            }
+
+            game.IsOnline = false;
+            DatabaseUtility.UpdateGameOnlineStatus(gameId, false);
+            var exportStream = ExportUtility.GetExportStream(game);
+
+            DeleteGame(gameId);
+            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
+            return File
+            (
+                exportStream,
+                "application/octet-stream",
+                $"{game.Nickname}.json"
+            );
+        }
+
+        [HttpGet("{gameId}/find/{trainerId}")]
         public ActionResult<object> FindTrainerInGame(string gameId, string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
@@ -66,6 +103,33 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 trainer.IsGM,
                 trainer.Items
             };
+        }
+
+        [HttpPost("import")]
+        public object ImportGame()
+        {
+            var jsonFile = Request.Form.Files.First(file => Path.GetExtension(file.FileName).ToLower() == ".json");
+            string json;
+            if (jsonFile.Length > 0)
+            {
+                using var reader = new StreamReader(jsonFile.OpenReadStream());
+                json = reader.ReadToEnd();
+                reader.Close();
+            }
+            else
+            {
+                return BadRequest(new
+                {
+                    message = "Empty json file"
+                });
+            }
+
+            if (ExportUtility.TryParseImport(json, out var errors))
+            {
+                return Ok(errors);
+            }
+
+            return BadRequest(errors);
         }
 
         [HttpPost("new")]
@@ -199,7 +263,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
         public ActionResult StartGame(string gameId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var gamePassword = Request.Query["gameSessionPassword"];
 
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
@@ -216,7 +279,9 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                     gameId
                 });
             }
-            if (!BCrypt.Net.BCrypt.Verify(gamePassword, game.PasswordHash))
+
+            var gamePassword = Request.Query["gameSessionPassword"];
+            if (!DatabaseUtility.VerifyTrainerPassword(gamePassword, game.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new
@@ -505,16 +570,6 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             return message;
-        }
-
-        private ActionResult<GameModel> GetGame(string id)
-        {
-            var game = DatabaseUtility.FindGame(id);
-            if (game == null)
-            {
-                return NotFound(id);
-            }
-            return game;
         }
 
         private TrainerModel CreateTrainer(

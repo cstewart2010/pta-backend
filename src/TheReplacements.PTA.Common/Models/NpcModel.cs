@@ -7,7 +7,7 @@ namespace TheReplacements.PTA.Common.Models
     /// <summary>
     /// Represents an NPC in Pokemon Tabletop Adventures
     /// </summary>
-    public class NpcModel : IPerson, IMongoCollectionModel
+    public class NpcModel : IPerson, IDocument
     {
         /// <inheritdoc />
         public ObjectId _id { get; set; }
