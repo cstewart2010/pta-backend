@@ -9,7 +9,6 @@ PTA BackEnd
   * [Run](#run)
 - [Pokemon](#pokemon)
   * [Find Pokemon By Id](#find-pokemon-by-id)
-  * [Create Wild Pokemon](#create-wild-pokemon)
   * [Trade Pokemon](#trade-pokemon)
   * [Update Pokemon Stats](#update-pokemon-stats)
   * [Delete Pokemon by Id](#delete-pokemon-by-id)
@@ -27,6 +26,7 @@ PTA BackEnd
   * [Find Trainer In Game](#find-trainer-in-game)
   * [Create New Game](#create-new-game)
   * [Add New Trainer to Game](#add-new-trainer-to-game)
+  * [Create Wild Pokemon](#create-wild-pokemon)
   * [Import Game](#import-game)
   * [Start Game](#start-game)
   * [End Game](#end-game)
@@ -89,7 +89,6 @@ Not yet configured
 *Resource - api/v1/pokemon*  
 [Back to top](#Table-Of-Contents)
 - [Find Pokemon By Id](#find-pokemon-by-id)
-- [Create Wild Pokemon](#create-wild-pokemon)
 - [Trade Pokemon](#trade-pokemon)
 - [Update Pokemon Stats](#update-pokemon-stats)
 - [Delete Pokemon by Id](#delete-pokemon-by-id)
@@ -105,34 +104,16 @@ Response Type - PokemonModel
 
 ---
 
-## Create Wild Pokemon
-Endpoint - wild  
-Method - POST  
-Response Type - PokemonModel  
-[Back to Pokemon](#pokemon)
-
-|Parameter|Type|Expected Value|Required|
-|---------|----|--------------|--------|
-|pokemon|string|A pokemon's name|required|
-|nature|string|A pokemon's nature|required|
-|naturalMoves|list|A list of Pokemon moves|At least one, no more than four|
-|expYield|int|Experience yield|>0|
-|catchRate|int|A pokemon's catch rate|>=0|
-|experience|int|Total experience|>=0|
-|level|int|Current level|>0|
-|tmMoves|list|A list of Pokemon moves|optional, no more than four|
-|nickname|string|The pokemon's nickname|optional|
-
----
-
 ## Trade Pokemon
 Endpoint - trade  
 Method - PUT  
 Response Type - { leftPokemon: PokemonModel, rightPokemon: PokemonModel }  
+Requires a ptaSessionAuth cookie  
 [Back to Pokemon](#pokemon)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
+|gameMasterId|string|GameMaster's id|required|
 |leftPokemonId|string|A pokemonId|required|
 |leftTrainerId|string|A trainerId|required|
 |rightPokemonId|string|A pokemonId|required|
@@ -144,10 +125,12 @@ Response Type - { leftPokemon: PokemonModel, rightPokemon: PokemonModel }
 Endpoint - update/{pokemonId}  
 Method - PUT  
 Response Type - PokemonModel  
+Requires a ptaSessionAuth cookie  
 [Back to Pokemon](#pokemon)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
+|trainerId|string|Trainer Id|required|
 |experience|int|Total experience|optional, >=0|
 |hpAdded|int|HP Added Value|optional, >=0|
 |attackAdded|int|AttackAdded Value|optional, >=0|
@@ -159,60 +142,43 @@ Response Type - PokemonModel
 
 ---
 
-## Delete Pokemon by Id
-Endpoint - {pokemonId}  
-Method - DELETE  
-Response Type - message  
-[Back to Pokemon](#pokemon)
-
----
-
 ## Evolve Pokemon
 Endpoint - evolve/{pokemonId}  
 Method - PUT  
 Response Type - PokemonModel  
+Requires a ptaSessionAuth cookie  
 [Back to Pokemon](#pokemon)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
+|trainerId|string|Trainer Id|required|
 |nextForm|string|Evolution species namence|required|
+
+---
+
+## Delete Pokemon by Id
+Endpoint - {pokemonId}  
+Method - DELETE  
+Response Type - message  
+Requires a ptaSessionAuth cookie  
+[Back to Pokemon](#pokemon)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|gameMasterId|string|GameMaster's id|required|
 
 ---
 
 # Trainer
 *Resource - api/v1/trainer*  
 [Back to top](#Table-Of-Contents)
+- [Find Trainer Pokemon](#find-trainer-pokemon)
 - [Verify Login](#verify-login)
 - [Verify Logout](#verify-logout)
-- [Find Trainer Pokemon](#find-trainer-pokemon)
 - [Add Trainer Pokemon](#add-trainer-pokemon)
 - [Add Items](#add-items)
 - [Remove Items](#remove-items)
 - [Delete Trainer](#delete-trainer)
-
----
-
-## Verify Login
-Endpoint - login  
-Method - GET  
-Response Type - TrainerModel  
-[Back to Trainer](#trainer)
-
----
-
-|Parameter|Type|Expected Value|Required|
-|---------|----|--------------|--------|
-|trainerName|string|Trainer's username|required|
-|password|string|Trainer's password|required|
-|gameId|string|The game id for the relevant game|required|
-
----
-
-## Verify Logout
-Endpoint - login  
-Method - GET  
-Response Type - Status(200)  
-[Back to Trainer](#trainer)
 
 ---
 
@@ -233,11 +199,12 @@ Response Type - PokemonModel
 Endpoint - {trainerId}  
 Method - POST  
 Response Type - PokemonModel  
+Requires a ptaSessionAuth cookie  
 [Back to Trainer](#trainer)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|trainerId|string|Trainer Id|required|
+|gameMasterId|string|GameMaster's id|required|
 |pokemon|string|A pokemon's name|required|
 |nature|string|A pokemon's nature|required|
 |naturalMoves|list|A list of Pokemon moves|At least one, no more than four|
@@ -250,14 +217,42 @@ Response Type - PokemonModel
 
 ---
 
+## Verify Login
+Endpoint - login  
+Method - PUT  
+Response Type - TrainerModel  
+Grant a ptaSessionAuth cookie  
+[Back to Trainer](#trainer)
+
+---
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|trainerName|string|Trainer's username|required|
+|password|string|Trainer's password|required|
+|gameId|string|The game id for the relevant game|required|
+
+---
+
+## Verify Logout
+Endpoint - login  
+Method - PUT  
+Response Type - Status(200)  
+Requires a ptaSessionAuth cookie  
+[Back to Trainer](#trainer)
+
+---
+
 ## Add Items
 Endpoint - {trainerId}/addItems  
 Method - PUT  
 Response Type - PokemonModel  
+Requires a ptaSessionAuth cookie  
 [Back to Trainer](#trainer)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
+|gameMasterId|string|GameMaster's id|required|
 |{itemName}|int|>0|at least one item|
 
 ---
@@ -266,6 +261,7 @@ Response Type - PokemonModel
 Endpoint - {trainerId}/addItems  
 Method - PUT  
 Response Type - PokemonModel  
+Requires a ptaSessionAuth cookie  
 [Back to Trainer](#trainer)
 
 |Parameter|Type|Expected Value|Required|
@@ -278,7 +274,12 @@ Response Type - PokemonModel
 Endpoint - {trainerId}  
 Method - DELETE  
 Response Type - message  
+Requires a ptaSessionAuth cookie  
 [Back to Trainer](#trainer)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|gameMasterId|string|GameMaster's id|required|
 
 ---
 
@@ -289,6 +290,7 @@ Response Type - message
 * [Find Trainer In Game](#find-trainer-in-game)
 * [Create New Game](#create-new-game)
 * [Add New Trainer to Game](#add-new-trainer-to-game)
+* [Create Wild Pokemon](#create-wild-pokemon)
 * [Import Game](#import-game)
 * [Start Game](#start-game)
 * [End Game](#end-game)
@@ -318,6 +320,7 @@ Response Type - GameModel
 Endpoint - new  
 Method - POST  
 Response Type - GameModel  
+Grants a ptaSessionAuth cookie  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -329,20 +332,11 @@ Response Type - GameModel
 
 ---
 
-## Import Game
-Endpoint - import  
-Method - POST  
-Content Type - application/octet-stream  
-Response Type - Ok  
-
-Expects a .json file matching the ExportedGame schema
-
----
-
 ## Add New Trainer to Game
 Endpoint - {gameId}/new  
 Method - PUT  
 Response Type - TrainerModel  
+Grants a ptaSessionAuth cookie  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -352,10 +346,41 @@ Response Type - TrainerModel
 
 ---
 
+## Import Game
+Endpoint - import  
+Method - POST  
+Content Type - application/octet-stream  
+Response Type - Ok  
+Expects a .json file matching the ExportedGame schema
+
+---
+
+## Create Wild Pokemon
+Endpoint - {gameMasterId}/wild  
+Method - POST  
+Response Type - PokemonModel  
+Requires a ptaSessionAuth cookie  
+[Back to Pokemon](#pokemon)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|pokemon|string|A pokemon's name|required|
+|nature|string|A pokemon's nature|required|
+|naturalMoves|list|A list of Pokemon moves|At least one, no more than four|
+|expYield|int|Experience yield|>0|
+|catchRate|int|A pokemon's catch rate|>=0|
+|experience|int|Total experience|>=0|
+|level|int|Current level|>0|
+|tmMoves|list|A list of Pokemon moves|optional, no more than four|
+|nickname|string|The pokemon's nickname|optional|
+
+---
+
 ## Start Game
 Endpoint - {gameId}/start  
 Method - PUT  
 Response Type - Status(200)  
+Grants a ptaSessionAuth cookie  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -370,11 +395,12 @@ Response Type - Status(200)
 Endpoint - {gameId}/end  
 Method - PUT  
 Response Type - Status(200)  
+Requires a ptaSessionAuth cookie  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|trainerId|string|GameMaster's id|required|
+|gameMasterId|string|GameMaster's id|required|
 
 ---
 
@@ -382,11 +408,13 @@ Response Type - Status(200)
 Endpoint - {gameId}/addNpcs  
 Method - PUT  
 Response Type - Status(200)  
+Requires a ptaSessionAuth cookie  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
-|npcId|string[]|npcs to add to the game|required|
+|gameMasterId|string|GameMaster's id|required|
+|npcIds|string[]|npcs to add to the game|required|
 
 ---
 
@@ -394,10 +422,12 @@ Response Type - Status(200)
 Endpoint - {gameId}/removeNpcs  
 Method - PUT  
 Response Type - Status(200)  
+Requires a ptaSessionAuth cookie  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
+|gameMasterId|string|GameMaster's id|required|
 |npcIds|string[]|npcs to remove from the game|required|
 
 ---
@@ -419,10 +449,12 @@ Response Type - TrainerModel
 Endpoint - {gameId}  
 Method - DELETE  
 Response Type - GameModel  
+Requires a ptaSessionAuth cookie  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
+|gameMasterId|string|GameMaster's id|required|
 |gameSessionPassword|string|Game's password|required|
 
 ---
@@ -431,10 +463,12 @@ Response Type - GameModel
 Endpoint -{gameId}/export  
 Method - Delete  
 Response Type - Ok  
+Requires a ptaSessionAuth cookie  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
 |---------|----|--------------|--------|
+|gameMasterId|string|GameMaster's id|required|
 |gameSessionPassword|string|Game's password|required|
 
 ---

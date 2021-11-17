@@ -15,6 +15,7 @@ namespace TheReplacements.PTA.Common.Utilities
     {
         public static FileStream GetExportStream(GameModel game)
         {
+            game.IsOnline = false;
             var exportedGame = new ExportedGame(game);
             var path = Path.GetTempFileName();
             var json = JsonConvert.SerializeObject
