@@ -15,88 +15,77 @@ namespace TheReplacements.PTA.Common.Utilities
     {
         public static FileStream GetExportStream(GameModel game)
         {
-            game.IsOnline = false;
-            var exportedGame = new ExportedGame(game);
-            var path = Path.GetTempFileName();
-            var json = JsonConvert.SerializeObject
-            (
-                exportedGame,
-                Formatting.Indented
-            );
-
-            using var reader = new StringReader(json);
+            var (path, json) = GetStreamParts(game);
             using var writer = new StreamWriter(path);
-            string line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                writer.WriteLine(line);
-            }
-
-            reader.Close();
+            writer.Write(json);
             writer.Close();
             return new FileStream(path, FileMode.Open);
         }
 
         public static bool TryParseImport(
             string json,
-            out IList<string> errors)
+            out List<string> errors)
         {
             var import = GetParsedImportFromExport(json, out errors);
-            if (errors.Any())
+            if (errors.Any() || !CleanyAddGame(import, out errors))
             {
                 return false;
             }
 
-            var gameId = import.GameSession.GameId;
-            var warningErrors = new List<string>();
-            if (!CleanyAddGame(import, out errors))
-            {
-                return false;
-            }
-
-            foreach (var trainer in import.Trainers)
-            {
-                CleanlyAddTrainer(trainer, gameId, out var trainerErrors);
-                warningErrors.AddRange(trainerErrors);
-            }
-
-            errors = warningErrors;
-            LoggerUtility.Info(MongoCollection.Trainer, $"Successfully imported game {gameId}");
+            LoggerUtility.Info(MongoCollection.Trainer, $"Successfully imported game {import.GameSession.GameId}");
             return true;
         }
 
         private static ExportedGame GetParsedImportFromExport(
             string json,
-            out IList<string> errors)
+            out List<string> errors)
         {
             JSchema schema = JSchema.Parse(File.ReadAllText("./ExportedGame.schema.json"));
-            var jobject = JObject.Parse(json);
-            if (!jobject.IsValid(schema, out IList<string> errorMessages))
+            var jsonObject = JObject.Parse(json);
+            errors = new List<string>(); ;
+            if (!jsonObject.IsValid(schema, out IList<string> errorMessages))
             {
-                errors = errorMessages;
+                errors.AddRange(errorMessages);
                 return null;
             }
 
-            errors = Array.Empty<string>();
-            return jobject.ToObject<ExportedGame>();
+            return jsonObject.ToObject<ExportedGame>();
         }
 
         private static bool CleanyAddGame(
             ExportedGame import,
-            out IList<string> errors)
+            out List<string> errors)
+        {
+            errors = new List<string>();
+            if (!TryAddGame(import, errors))
+            {
+                return false;
+            }
+
+            var gameId = import.GameSession.GameId;
+            foreach (var trainer in import.Trainers)
+            {
+                CleanlyAddTrainer(trainer, gameId, out var trainerErrors);
+                errors.AddRange(trainerErrors);
+            }
+
+            return true;
+        }
+
+        private static bool TryAddGame(
+            ExportedGame import,
+            List<string> errors)
         {
             var game = import.GameSession;
-            errors = new List<string>();
-
-            if (import.Trainers.Single(import => import.Trainer.IsGM) == null)
+            if (import.Trainers.SingleOrDefault(import => import.Trainer.IsGM) == null)
             {
-                errors.Add($"Multiple gms lists for game {game.GameId}");
+                errors.Add($"Exactly one gm should be listed for game {game.GameId}");
                 return false;
             }
 
             if (DatabaseUtility.FindGame(game.GameId) != null)
             {
-                errors.Add($"Game session found with id {game.GameId}");
+                errors.Add($"Found extant ame session found with id {game.GameId}");
                 return false;
             }
 
@@ -109,33 +98,27 @@ namespace TheReplacements.PTA.Common.Utilities
             return true;
         }
 
-        private static bool CleanlyAddTrainer(
+        private static void CleanlyAddTrainer(
             ExportedTrainer import,
             string gameId,
             out List<string> errors)
         {
             errors = new List<string>();
             var trainer = import.Trainer;
-            if (trainer.GameId != gameId)
-            {
-                errors.Add($"Invalid game id for trainer {trainer.TrainerId}. Skipping...");
-                return false;
-            }
-            if (!DatabaseUtility.TryAddTrainer(import.Trainer, out _))
+            if (!(trainer.GameId == gameId && DatabaseUtility.TryAddTrainer(trainer, out _)))
             {
                 errors.Add($"Failed to import trainer {import.Trainer.TrainerId}");
-                return false;
+                return;
             }
 
-            LoggerUtility.Info(MongoCollection.Trainer, $"Successfully imported trainer {import.Trainer.TrainerId}");
-            var errorList = import.Pokemon
-                .Select(pokemon => CleanlyAddPokemon(pokemon, trainer.TrainerId))
-                .Where(error => !string.IsNullOrEmpty(error));
-            errors.AddRange(errorList);
-            return true;
+            LoggerUtility.Info(MongoCollection.Trainer, $"Successfully imported trainer {trainer.TrainerId}");
+            errors = import.Pokemon
+                .Select(pokemon => AddPokemon(pokemon, trainer.TrainerId))
+                .Where(error => !string.IsNullOrEmpty(error))
+                .ToList();
         }
 
-        private static string CleanlyAddPokemon(
+        private static string AddPokemon(
             PokemonModel pokemon,
             string trainerId)
         {
@@ -150,6 +133,13 @@ namespace TheReplacements.PTA.Common.Utilities
             }
 
             return $"Invalid trainer id from pokemon {pokemon.PokemonId}. Skipping...";
+        }
+
+        private static (string Path, string Json) GetStreamParts(GameModel game)
+        {
+            game.IsOnline = false;
+            var exportedGame = new ExportedGame(game);
+            return (Path.GetTempFileName(), JsonConvert.SerializeObject(exportedGame));
         }
     }
 }

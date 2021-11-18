@@ -8,18 +8,7 @@ namespace TheReplacements.PTA.Common.Internal
     {
         static MongoCollectionHelper()
         {
-            var connectionString = Environment.GetEnvironmentVariable("MongoDBConnectionString");
-            if (connectionString == null)
-            {
-                throw new NullReferenceException("MongoDBConnectionString environment variable need to be set to access MongoDB");
-            }
-
-            var settings = MongoClientSettings.FromConnectionString(connectionString);
-            settings.SslSettings = new SslSettings()
-            {
-                EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
-            };
-
+            var settings = GetMongoClientSettings();
             var client = new MongoClient(settings);
             var database = client.GetDatabase("PTA");
             Game = database.GetCollection<GameModel>("Game");
@@ -53,5 +42,22 @@ namespace TheReplacements.PTA.Common.Internal
         /// Represents the Logs Collection
         /// </summary>
         public static IMongoCollection<LoggerModel> Logs { get; }
+
+        private static MongoClientSettings GetMongoClientSettings()
+        {
+            var connectionString = Environment.GetEnvironmentVariable("MongoDBConnectionString");
+            if (connectionString == null)
+            {
+                throw new NullReferenceException("MongoDBConnectionString environment variable need to be set to access MongoDB");
+            }
+
+            var settings = MongoClientSettings.FromConnectionString(connectionString);
+            settings.SslSettings = new SslSettings()
+            {
+                EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
+            };
+
+            return settings;
+        }
     }
 }

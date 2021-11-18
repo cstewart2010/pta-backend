@@ -46,12 +46,7 @@ namespace TheReplacements.PTA.Common.Utilities
 
             DateTime when = DateTime.FromBinary(BitConverter.ToInt64(data));
             var now = DateTime.UtcNow;
-            if (when < now.AddMinutes(-30) || when > now)
-            {
-                return false;
-            }
-
-            return true;
+            return when >= now.AddMinutes(-30) && when <= now;
         }
 
         /// <summary>

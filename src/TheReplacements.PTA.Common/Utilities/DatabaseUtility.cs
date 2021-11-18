@@ -18,6 +18,16 @@ namespace TheReplacements.PTA.Common.Utilities
         private const MongoCollection Npc = MongoCollection.Npc;
         private const MongoCollection Pokemon = MongoCollection.Pokemon;
         private const MongoCollection Trainer = MongoCollection.Trainer;
+        private static readonly Dictionary<string, string> UpdateMap = new Dictionary<string, string>()
+        {
+            { "experience", "Experience" },
+            { "hpAdded", "HP" },
+            { "attackAdded", "Attack" },
+            { "defenseAdded", "Defense" },
+            { "specialAttackAdded", "SpecialAttack" },
+            { "specialDefenseAdded", "SpecialDefense" },
+            { "speedAdded", "Speed" }
+        };
 
         /// <summary>
         /// Searches for a game using its id, then deletes it
@@ -142,7 +152,7 @@ namespace TheReplacements.PTA.Common.Utilities
             var game =  MongoCollectionHelper
                 .Game
                 .Find(game => game.GameId == id)
-                .FirstOrDefault();
+                .SingleOrDefault();
 
             if (game != null)
             {
@@ -162,7 +172,7 @@ namespace TheReplacements.PTA.Common.Utilities
             var npc = MongoCollectionHelper
                 .Npc
                 .Find(npc => npc.NPCId == id)
-                .FirstOrDefault();
+                .SingleOrDefault();
 
             if (npc != null)
             {
@@ -183,20 +193,9 @@ namespace TheReplacements.PTA.Common.Utilities
                 ? throw new ArgumentNullException(nameof(npcIds))
                 : MongoCollectionHelper
                 .Npc
-                .Find(npc => npcIds.Contains(npc.NPCId))
-                .ToList();
+                .Find(npc => npcIds.Contains(npc.NPCId));
 
-            var npcList = string.Join(',', npcIds);
-            if (npcs.Count == npcIds.Count())
-            {
-                LoggerUtility.Info(Npc, $"Retrieve a collection of npcs matching {npcList}");
-            }
-            else if (npcs.Any())
-            {
-                LoggerUtility.Info(Npc, $"Retrieved a partial collection of npcs matching {npcList}");
-            }
-
-            return npcs;
+            return npcs.ToEnumerable();
         }
 
         /// <summary>
@@ -208,7 +207,7 @@ namespace TheReplacements.PTA.Common.Utilities
             var pokemon = MongoCollectionHelper
                 .Pokemon
                 .Find(Pokemon => Pokemon.PokemonId == id)
-                .FirstOrDefault();
+                .SingleOrDefault(); ;
 
             if (pokemon != null)
             {
@@ -226,15 +225,14 @@ namespace TheReplacements.PTA.Common.Utilities
         {
             var pokemon = MongoCollectionHelper
                 .Pokemon
-                .Find(Pokemon => Pokemon.TrainerId == trainerId)
-                .ToList();
+                .Find(Pokemon => Pokemon.TrainerId == trainerId);
 
             if (pokemon.Any())
             {
-                LoggerUtility.Info(Pokemon, $"Retrieved {pokemon.Count} pokemon for trainer {trainerId}");
+                LoggerUtility.Info(Pokemon, $"Retrieved {pokemon.CountDocuments()} pokemon for trainer {trainerId}");
             }
 
-            return pokemon;
+            return pokemon.ToEnumerable();
         }
 
         /// <summary>
@@ -246,7 +244,7 @@ namespace TheReplacements.PTA.Common.Utilities
             var trainer = MongoCollectionHelper
                 .Trainer
                 .Find(trainer => trainer.TrainerId == id)
-                .FirstOrDefault();
+                .SingleOrDefault(); ;
 
             if (trainer != null)
             {
@@ -264,15 +262,14 @@ namespace TheReplacements.PTA.Common.Utilities
         {
             var trainers = MongoCollectionHelper
                 .Trainer
-                .Find(trainer => trainer.GameId == gameId)
-                .ToList();
+                .Find(trainer => trainer.GameId == gameId);
 
             if (trainers.Any())
             {
-                LoggerUtility.Info(Trainer, $"Retrieved {trainers.Count} trainers for game {gameId}");
+                LoggerUtility.Info(Trainer, $"Retrieved {trainers.CountDocuments()} trainers for game {gameId}");
             }
 
-            return trainers;
+            return trainers.ToEnumerable();
         }
 
         /// <summary>
@@ -288,7 +285,7 @@ namespace TheReplacements.PTA.Common.Utilities
             var trainer = MongoCollectionHelper
                 .Trainer
                 .Find(filter)
-                .FirstOrDefault();
+                .SingleOrDefault();
 
             if (trainer != null)
             {
@@ -390,28 +387,14 @@ namespace TheReplacements.PTA.Common.Utilities
         /// <exception cref="MongoCommandException" />
         public static bool UpdateGameNpcList(string gameId, IEnumerable<string> npcIds)
         {
-            try
-            {
-                var result = MongoCollectionHelper
-                    .Game
-                    .FindOneAndUpdate
-                    (
-                        game => game.GameId == gameId,
-                        Builders<GameModel>.Update.Set("NPCs", npcIds)
-                    ) != null;
-
-                if (result)
-                {
-                    LoggerUtility.Info(Game, $"Updated npc list for game {gameId}");
-                }
-
-                return result;
-            }
-            catch (MongoCommandException ex)
-            {
-                LoggerUtility.Error(Game, ex.Message);
-                throw ex;
-            }
+            return TryUpdateDocument
+            (
+                Game,
+                MongoCollectionHelper.Game,
+                game => game.GameId == gameId,
+                Builders<GameModel>.Update.Set("NPCs", npcIds),
+                $"Updated npc list for game {gameId}"
+            );
         }
 
         /// <summary>
@@ -424,28 +407,14 @@ namespace TheReplacements.PTA.Common.Utilities
             string gameId,
             bool isOnline)
         {
-            try
-            {
-                var result = MongoCollectionHelper
-                    .Game
-                    .FindOneAndUpdate
-                    (
-                        game => game.GameId == gameId,
-                        Builders<GameModel>.Update.Set("IsOnline", isOnline)
-                    ) != null;
-
-                if (result)
-                {
-                    LoggerUtility.Info(Game, $"Updated online status for game {gameId}");
-                }
-
-                return result;
-            }
-            catch (MongoCommandException ex)
-            {
-                LoggerUtility.Error(Game, ex.Message);
-                throw ex;
-            }
+            return TryUpdateDocument
+            (
+                Game,
+                MongoCollectionHelper.Game,
+                game => game.GameId == gameId,
+                Builders<GameModel>.Update.Set("IsOnline", isOnline),
+                $"Updated online status for game {gameId}"
+            );
         }
 
         /// <summary>
@@ -464,28 +433,14 @@ namespace TheReplacements.PTA.Common.Utilities
                 throw new ArgumentNullException(nameof(query));
             }
 
-            try
-            {
-                var result = MongoCollectionHelper
-                    .Pokemon
-                    .FindOneAndUpdate
-                    (
-                        pokemon => pokemon.PokemonId == pokemonId,
-                        GetPokemonUpdates(pokemonId, query)
-                    ) != null;
-
-                if (result)
-                {
-                    LoggerUtility.Info(Pokemon, $"Updated stats for pokemon {pokemonId}");
-                }
-
-                return result;
-            }
-            catch (MongoCommandException ex)
-            {
-                LoggerUtility.Error(Pokemon, ex.Message);
-                throw ex;
-            }
+            return TryUpdateDocument
+            (
+                Game,
+                MongoCollectionHelper.Pokemon,
+                pokemon => pokemon.PokemonId == pokemonId,
+                GetPokemonUpdates(pokemonId, query),
+                $"Updated stats for pokemon {pokemonId}"
+            );
         }
 
         /// <summary>
@@ -499,28 +454,14 @@ namespace TheReplacements.PTA.Common.Utilities
             string pokemonId,
             string trainerId)
         {
-            try
-            {
-                var result = MongoCollectionHelper
-                    .Pokemon
-                    .FindOneAndUpdate
-                    (
-                        pokemon => pokemon.PokemonId == pokemonId,
-                        Builders<PokemonModel>.Update.Set("TrainerId", trainerId)
-                    ) != null;
-
-                if (result)
-                {
-                    LoggerUtility.Info(Pokemon, $"Updated trainerId for pokemon {pokemonId}");
-                }
-
-                return result;
-            }
-            catch (MongoCommandException ex)
-            {
-                LoggerUtility.Error(Pokemon, ex.Message);
-                throw ex;
-            }
+            return TryUpdateDocument
+            (
+                Game,
+                MongoCollectionHelper.Pokemon,
+                pokemon => pokemon.PokemonId == pokemonId,
+                Builders<PokemonModel>.Update.Set("TrainerId", trainerId),
+                $"Updated trainerId for pokemon {pokemonId}"
+            );
         }
 
         /// <summary>
@@ -539,40 +480,14 @@ namespace TheReplacements.PTA.Common.Utilities
                 throw new ArgumentNullException(nameof(pokemonId));
             }
 
-            try
-            {
-                var updates = new[]
-                {
-                    Builders<PokemonModel>.Update.Set("DexNo", evolvedForm.DexNo),
-                    Builders<PokemonModel>.Update.Set("HP", evolvedForm.HP),
-                    Builders<PokemonModel>.Update.Set("Attack", evolvedForm.Attack),
-                    Builders<PokemonModel>.Update.Set("Defense", evolvedForm.Defense),
-                    Builders<PokemonModel>.Update.Set("SpecialAttack", evolvedForm.SpecialAttack),
-                    Builders<PokemonModel>.Update.Set("SpecialDefense", evolvedForm.SpecialDefense),
-                    Builders<PokemonModel>.Update.Set("Speed", evolvedForm.Speed),
-                    Builders<PokemonModel>.Update.Set("Nickname", evolvedForm.Nickname)
-                };
-
-                var result = MongoCollectionHelper
-                    .Pokemon
-                    .FindOneAndUpdate
-                    (
-                        pokemon => pokemon.PokemonId == pokemonId,
-                        Builders<PokemonModel>.Update.Combine(updates)
-                    ) != null;
-
-                if (result)
-                {
-                    LoggerUtility.Info(Pokemon, $"Evolved pokemon {pokemonId}");
-                }
-
-                return result;
-            }
-            catch (MongoCommandException ex)
-            {
-                LoggerUtility.Error(Pokemon, ex.Message);
-                throw ex;
-            }
+            return TryUpdateDocument
+            (
+                Game,
+                MongoCollectionHelper.Pokemon,
+                pokemon => pokemon.PokemonId == pokemonId,
+                GetEvolvedUpdates(evolvedForm),
+                $"Evolved pokemon {pokemonId}"
+            );
         }
 
         /// <summary>
@@ -591,28 +506,14 @@ namespace TheReplacements.PTA.Common.Utilities
                 throw new ArgumentNullException(nameof(itemList));
             }
 
-            try
-            {
-                var result = MongoCollectionHelper
-                    .Trainer
-                    .FindOneAndUpdate
-                    (
-                        trainer => trainer.TrainerId == trainerId,
-                        Builders<TrainerModel>.Update.Set("Items", itemList)
-                    ) != null;
-
-                if (result)
-                {
-                    LoggerUtility.Info(Trainer, $"Updated item list for trainer {trainerId}");
-                }
-
-                return result;
-            }
-            catch (MongoCommandException ex)
-            {
-                LoggerUtility.Error(Trainer, ex.Message);
-                throw ex;
-            }
+            return TryUpdateDocument
+            (
+                Trainer,
+                MongoCollectionHelper.Trainer,
+                trainer => trainer.TrainerId == trainerId,
+                Builders<TrainerModel>.Update.Set("Items", itemList),
+                $"Updated item list for trainer {trainerId}"
+            );
         }
 
         /// <summary>
@@ -626,28 +527,14 @@ namespace TheReplacements.PTA.Common.Utilities
             string trainerId,
             bool isOnline)
         {
-            try
-            {
-                var result = MongoCollectionHelper
-                    .Trainer
-                    .FindOneAndUpdate
-                    (
-                        trainer => trainer.TrainerId == trainerId,
-                        Builders<TrainerModel>.Update.Set("IsOnline", isOnline)
-                    ) != null;
-
-                if (result)
-                {
-                    LoggerUtility.Info(Trainer, $"Updated online status for trainer {trainerId}");
-                }
-
-                return result;
-            }
-            catch (MongoCommandException ex)
-            {
-                LoggerUtility.Error(Trainer, ex.Message);
-                throw ex;
-            }
+            return TryUpdateDocument
+            (
+                Trainer,
+                MongoCollectionHelper.Trainer,
+                trainer => trainer.TrainerId == trainerId,
+                Builders<TrainerModel>.Update.Set("IsOnline", isOnline),
+                $"Updated online status for trainer {trainerId}"
+            );
         }
 
         /// <summary>
@@ -661,40 +548,44 @@ namespace TheReplacements.PTA.Common.Utilities
             string trainerId,
             string password)
         {
-            try
-            {
-                var update = Builders<TrainerModel>
-                    .Update
-                    .Combine(new[]
-                    {
+            return TryUpdateDocument
+            (
+                Trainer,
+                MongoCollectionHelper.Trainer,
+                trainer => trainer.TrainerId == trainerId,
+                GetTrainerPasswordUpdate(password),
+                $"Updated password for trainer {trainerId}"
+            );
+        }
+
+        private static UpdateDefinition<TrainerModel> GetTrainerPasswordUpdate(string password)
+        {
+            return Builders<TrainerModel>
+                .Update
+                .Combine(new[]
+                {
                     Builders<TrainerModel>.Update.Set("PasswordHash", EncryptionUtility.HashSecret(password)),
                     Builders<TrainerModel>.Update.Set("IsOnline", true)
-                    });
+                });
+        }
 
-                var result = MongoCollectionHelper
-                    .Trainer
-                    .FindOneAndUpdate
-                    (
-                        trainer => trainer.TrainerId == trainerId,
-                        update
-                    ) != null;
-
-                if (result)
-                {
-                    LoggerUtility.Info(Trainer, $"Updated password for trainer {trainerId}");
-                }
-
-                return result;
-            }
-            catch (MongoCommandException ex)
+        private static UpdateDefinition<PokemonModel> GetEvolvedUpdates(PokemonModel evolvedForm)
+        {
+            return Builders<PokemonModel>.Update.Combine(new[]
             {
-                LoggerUtility.Error(Trainer, ex.Message);
-                throw ex;
-            }
+                Builders<PokemonModel>.Update.Set("DexNo", evolvedForm.DexNo),
+                Builders<PokemonModel>.Update.Set("HP", evolvedForm.HP),
+                Builders<PokemonModel>.Update.Set("Attack", evolvedForm.Attack),
+                Builders<PokemonModel>.Update.Set("Defense", evolvedForm.Defense),
+                Builders<PokemonModel>.Update.Set("SpecialAttack", evolvedForm.SpecialAttack),
+                Builders<PokemonModel>.Update.Set("SpecialDefense", evolvedForm.SpecialDefense),
+                Builders<PokemonModel>.Update.Set("Speed", evolvedForm.Speed),
+                Builders<PokemonModel>.Update.Set("Nickname", evolvedForm.Nickname)
+            });
         }
 
         private static bool TryAddDocument(
-            MongoCollection collection,
+            MongoCollection dbCollection,
             string id,
             Action action,
             out MongoWriteError error)
@@ -703,64 +594,126 @@ namespace TheReplacements.PTA.Common.Utilities
             {
                 action();
                 error = null;
-                LoggerUtility.Info(collection, $"Added game {id}");
+                LoggerUtility.Info(dbCollection, $"Added {dbCollection} {id}");
                 return true;
             }
             catch (MongoWriteException exception)
             {
                 error = new MongoWriteError(exception.WriteError.Details.GetValue("details").AsBsonDocument.ToString());
-                LoggerUtility.Error(collection, error.WriteErrorJsonString);
+                LoggerUtility.Error(dbCollection, error.WriteErrorJsonString);
                 return false;
             }
         }
 
-        private static UpdateDefinition<PokemonModel> GetPokemonUpdates(string PokemonId, Dictionary<string, string> query)
+        private static bool TryUpdateDocument<TMongoCollection>(
+            MongoCollection dbCollection,
+            IMongoCollection<TMongoCollection> collection,
+            Expression<Func<TMongoCollection, bool>> filter,
+            UpdateDefinition<TMongoCollection> update,
+            string successMessage)
         {
-            var Pokemon = FindPokemonById(PokemonId);
+            try
+            {
+                if (collection.FindOneAndUpdate(filter, update) == null)
+                {
+                    return false;
+                }
+
+                LoggerUtility.Info(dbCollection, successMessage);
+                return true;
+            }
+            catch (MongoCommandException ex)
+            {
+                LoggerUtility.Error(dbCollection, ex.Message);
+                throw ex;
+            }
+        }
+
+        private static UpdateDefinition<PokemonModel> GetPokemonUpdates(
+            string pokemonId,
+            Dictionary<string, string> query)
+        {
+            var pokemon = FindPokemonById(pokemonId);
             var updates = new List<UpdateDefinition<PokemonModel>>();
-            var currentKey = string.Empty;
-            if (query.TryGetValue("experience", out currentKey) && int.TryParse(currentKey, out var experience))
+            foreach (var pair in query)
             {
-                updates.Add(Builders<PokemonModel>.Update.Set("Experience", experience));
-            }
-            if (query.TryGetValue("hpAdded", out currentKey) && int.TryParse(currentKey, out var added))
-            {
-                Pokemon.HP.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("HP", Pokemon.HP));
-            }
-            if (query.TryGetValue("attackAdded", out currentKey) && int.TryParse(currentKey, out added))
-            {
-                Pokemon.Attack.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Attack", Pokemon.Attack));
-            }
-            if (query.TryGetValue("defenseAdded", out currentKey) && int.TryParse(currentKey, out added))
-            {
-                Pokemon.Defense.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Defense", Pokemon.Defense));
-            }
-            if (query.TryGetValue("specialAttackAdded", out currentKey) && int.TryParse(currentKey, out added))
-            {
-                Pokemon.SpecialAttack.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("SpecialAttack", Pokemon.SpecialAttack));
-            }
-            if (query.TryGetValue("specialDefenseAdded", out currentKey) && int.TryParse(currentKey, out added))
-            {
-                Pokemon.SpecialDefense.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("SpecialDefense", Pokemon.SpecialDefense));
-            }
-            if (query.TryGetValue("speedAdded", out currentKey) && int.TryParse(currentKey, out added))
-            {
-                Pokemon.Speed.Added = added;
-                updates.Add(Builders<PokemonModel>.Update.Set("Speed", Pokemon.Speed));
-            }
-            if (query.TryGetValue("nickname", out currentKey) && !string.IsNullOrWhiteSpace(currentKey))
-            {
-                updates.Add(Builders<PokemonModel>.Update.Set("Nickname", query["nickname"]));
+                var stat = GetPokemonStat
+                (
+                    pokemon,
+                    pair.Key
+                );
+                AddPokemonUpdate
+                (
+                    updates,
+                    pair,
+                    stat
+                );
             }
 
             return updates.Any()
                 ? Builders<PokemonModel>.Update.Combine(updates.ToArray())
                 : null;
+        }
+
+        private static void AddPokemonUpdate(
+            List<UpdateDefinition<PokemonModel>> updates,
+            KeyValuePair<string, string> pair,
+            PokemonStatModel stat)
+        {
+            if (pair.Key == "nickname")
+            {
+                updates.Add(Builders<PokemonModel>.Update.Set("Nickname", pair.Value));
+            }
+            else if (UpdateMap.TryGetValue(pair.Key, out var currentKey) && int.TryParse(pair.Value, out var value))
+            {
+                PerformConditionAdd
+                (
+                    updates,
+                    currentKey,
+                    stat,
+                    value
+                );
+            }
+            else
+            {
+                throw new KeyNotFoundException(pair.ToString());
+            }
+        }
+
+        private static void PerformConditionAdd(
+            List<UpdateDefinition<PokemonModel>> updates,
+            string currentKey,
+            PokemonStatModel stat,
+            int value)
+        {
+            if (stat == null)
+            {
+                updates.Add(Builders<PokemonModel>.Update.Set(currentKey, value));
+            }
+            else
+            {
+                stat.Added = value;
+                updates.Add(Builders<PokemonModel>.Update.Set(currentKey, stat));
+            }
+            return;
+        }
+
+        private static PokemonStatModel GetPokemonStat
+        (
+            PokemonModel pokemon,
+            string key
+        )
+        {
+            return key switch
+            {
+                "hpAdded" => pokemon.HP,
+                "attackAdded" => pokemon.Attack,
+                "defenseAdded" => pokemon.Defense,
+                "specialAttackAdded" => pokemon.SpecialAttack,
+                "specialDefenseAdded" => pokemon.SpecialDefense,
+                "speedAdded" => pokemon.Speed,
+                _ => null
+            };
         }
     }
 }
