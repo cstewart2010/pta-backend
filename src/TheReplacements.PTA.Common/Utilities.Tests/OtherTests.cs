@@ -31,7 +31,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             Logger.WriteLine($"Verifying whether the game has a GM");
-            Assert.Equal(hasGM, DatabaseUtility.HasGM(game.GameId));
+            Assert.Equal(hasGM, DatabaseUtility.HasGM(game.GameId, out _));
             DatabaseUtility.DeleteGame(game.GameId);
             if (hasGM)
             {

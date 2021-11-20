@@ -1,40 +1,41 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Linq;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
 using TheReplacements.PTA.Common.Enums;
+using TheReplacements.PTA.Services.Core.Extensions;
 
 namespace TheReplacements.PTA.Services.Core.Controllers
 {
     [ApiController]
     [Route("api/v1/pokemon")]
-    public class PokemonController : ControllerBase
+    public class PokemonController : PtaControllerBase
     {
-        private const MongoCollection Collection = MongoCollection.Pokemon;
+        protected override MongoCollection Collection { get; }
 
-        private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
+        public PokemonController()
+        {
+            Collection = MongoCollection.Pokemon;
+        }
 
         [HttpGet("{pokemonId}")]
         public ActionResult<PokemonModel> GetPokemon(string pokemonId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
-            if (pokemon == null)
+            Response.UpdateAccessControl();
+            var document = GetDocument(pokemonId, Collection, out var notFound);
+            if (!(document is PokemonModel pokemon))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
-                return NotFound(pokemonId);
+                return notFound;
             }
 
             pokemon.AggregateStats();
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return pokemon;
+            return ReturnSuccessfully(pokemon);
         }
 
         [HttpPut("trade")]
         public ActionResult<object> TradePokemon()
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
@@ -49,19 +50,17 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
 
             var leftPokemonId = Request.Query["leftPokemonId"];
-            var rightPokemonId = Request.Query["rightPokemonId"];
-            var leftPokemon = DatabaseUtility.FindPokemonById(leftPokemonId);
-            var rightPokemon = DatabaseUtility.FindPokemonById(rightPokemonId);
-
-            if (leftPokemon == null)
+            var leftDocument = GetDocument(leftPokemonId, Collection, out var notFound);
+            if (!(leftDocument is PokemonModel leftPokemon))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {leftPokemonId}");
-                return NotFound(leftPokemonId);
+                return notFound;
             }
-            if (rightPokemon == null)
+
+            var rightPokemonId = Request.Query["rightPokemonId"];
+            var rightDocument = GetDocument(rightPokemonId, Collection, out notFound);
+            if (!(rightDocument is PokemonModel rightPokemon))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {rightPokemonId}");
-                return NotFound(rightPokemonId);
+                return notFound;
             }
 
             if (leftPokemon.TrainerId == rightPokemon.TrainerId)
@@ -72,27 +71,22 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            var leftTrainer = DatabaseUtility.FindTrainerById(leftPokemon.TrainerId);
-            var rightTrainer = DatabaseUtility.FindTrainerById(rightPokemon.TrainerId);
-
-            if (gameMaster.GameId != leftTrainer?.GameId)
+            if (!(GetDocument(leftPokemon.TrainerId, MongoCollection.Trainer, out notFound) is TrainerModel leftTrainer))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade for an unknown player");
-                return Unauthorized(new
-                {
-                    gameMasterGameId = gameMasterId,
-                    trainerGameId = leftTrainer.GameId
-                });
+                return notFound;
+            }
+            if (!(GetDocument(rightPokemon.TrainerId, MongoCollection.Trainer, out notFound) is TrainerModel rightTrainer))
+            {
+                return notFound;
             }
 
-            if (leftTrainer.GameId != rightTrainer?.GameId)
+            if (!TradeCheck(gameMaster.GameId, leftTrainer?.GameId, out var authError))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade for an unknown player");
-                return Unauthorized(new
-                {
-                    gameMasterGameId = gameMasterId,
-                    rightTrainerGameId = rightTrainer.GameId
-                });
+                return authError;
+            }
+            if (!TradeCheck(gameMaster.GameId, rightTrainer?.GameId, out authError))
+            {
+                return authError;
             }
 
             if (!leftTrainer.IsOnline)
@@ -121,43 +115,28 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             
             leftPokemon.AggregateStats();
             rightPokemon.AggregateStats();
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return new
+            Response.RefreshToken();
+            return ReturnSuccessfully(new
             {
                 leftPokemon,
                 rightPokemon
-            };
+            });
         }
 
         [HttpPut("{pokemonId}/update")]
         public ActionResult<PokemonModel> UpdatePokemon(string pokemonId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var trainerId = Request.Query["trainerId"];
             if (!Header.VerifyCookies(Request.Cookies, trainerId))
             {
                 return Unauthorized();
             }
 
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            if (trainer?.IsOnline != true)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown user");
-                return NotFound(trainerId);
-            }
-
-            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            var pokemon = GetPokemonFromTrainer(trainerId, pokemonId, out var error);
             if (pokemon == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
-                return NotFound(pokemonId);
-            }
-
-            if (trainer.TrainerId != pokemon.TrainerId)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
-                return Unauthorized(pokemonId);
+                return error;
             }
 
             var updateResult = DatabaseUtility.UpdatePokemonStats
@@ -173,96 +152,139 @@ namespace TheReplacements.PTA.Services.Core.Controllers
 
             pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             pokemon.AggregateStats();
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return pokemon;
+            Response.RefreshToken();
+            return ReturnSuccessfully(pokemon);
         }
 
         [HttpPut("{pokemonId}/evolve")]
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var trainerId = Request.Query["trainerId"];
             if (!Header.VerifyCookies(Request.Cookies, trainerId))
             {
                 return Unauthorized();
             }
 
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            if (trainer?.IsOnline != true)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown user");
-                return NotFound(trainerId);
-            }
-
-            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            var pokemon = GetPokemonFromTrainer(trainerId, pokemonId, out var error);
             if (pokemon == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
-                return NotFound(pokemonId);
+                return error;
             }
 
-            if (trainer.TrainerId != pokemon.TrainerId)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
-                return Unauthorized(pokemonId);
-            }
-
-            var evolvedFormName = Request.Query["nextForm"].ToString();
-            if (string.IsNullOrEmpty(evolvedFormName))
-            {
-                return BadRequest(new
-                {
-                    message = "Missing evolvedFormName"
-                });
-            }
-
-            var evolvedForm = PokeAPIUtility.GetEvolved(pokemon, evolvedFormName);
+            var evolvedForm = GetEvolved(Request.Query["nextForm"], pokemon, out var badRequest);
             if (evolvedForm == null)
             {
-                return BadRequest(new
-                {
-                    message = $"Could not evolve {pokemon.Nickname} to {evolvedFormName}"
-                });
+                return badRequest;
             }
 
             DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
             evolvedForm.AggregateStats();
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return evolvedForm;
+            Response.RefreshToken();
+            return ReturnSuccessfully(pokemon);
         }
 
         [HttpDelete("{pokemonId}")]
         public ActionResult<object> DeletePokemon(string pokemonId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            if (!(gameMaster?.IsGM == true && gameMaster.IsOnline))
+            if (!IsGMOnline(gameMasterId))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to delete a pokemon without being a game master");
                 return NotFound(gameMasterId);
             }
 
-            var deleteResult = DatabaseUtility.DeletePokemon(pokemonId);
-            if (!deleteResult)
+            if (!DatabaseUtility.DeletePokemon(pokemonId))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
                 NotFound(pokemonId);
             }
 
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return new
+            Response.RefreshToken();
+            return ReturnSuccessfully(new
             {
                 message = $"Successfully deleted {pokemonId}"
-            };
+            });
+        }
+
+        private bool TradeCheck(string gameMasterGameId, string trainerGameId, out ActionResult authError)
+        {
+            authError = null;
+            var result = gameMasterGameId == trainerGameId;
+            if (gameMasterGameId == trainerGameId)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade for an unknown player");
+                authError = Unauthorized(new
+                {
+                    gameMasterGameId,
+                    trainerGameId
+                });
+            }
+
+            return result;
+        }
+
+        private PokemonModel GetPokemonFromTrainer(
+            string trainerId,
+            string pokemonId,
+            out ActionResult error)
+        {
+            error = null;
+
+            var trainerDocument = GetDocument(trainerId, MongoCollection.Trainer, out var notFound);
+            if (!(trainerDocument is TrainerModel trainer))
+            {
+                error = notFound;
+                return null;
+            }
+
+            var pokemonDocument = GetDocument(pokemonId, MongoCollection.Pokemon, out notFound);
+            if (!(pokemonDocument is PokemonModel pokemon))
+            {
+                error = notFound;
+                return null;
+            }
+
+            if (trainer.TrainerId != pokemon.TrainerId)
+            {
+                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
+                error = Unauthorized(pokemonId);
+                return null;
+            }
+
+            return pokemon;
+        }
+        private PokemonModel GetEvolved(
+            string evolvedFormName,
+            PokemonModel currentForm,
+            out BadRequestObjectResult badRequest)
+        {
+            badRequest = null;
+            if (string.IsNullOrEmpty(evolvedFormName))
+            {
+                badRequest = BadRequest(new
+                {
+                    message = "Missing evolvedFormName"
+                });
+
+                return null;
+            }
+
+            var evolvedForm = PokeAPIUtility.GetEvolved(currentForm, evolvedFormName);
+            if (evolvedForm == null)
+            {
+                badRequest = BadRequest(new
+                {
+                    message = $"Could not evolve {currentForm.Nickname} to {evolvedFormName}"
+                });
+            }
+
+            return evolvedForm;
         }
     }
 }

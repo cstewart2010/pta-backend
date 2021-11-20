@@ -5,16 +5,20 @@ using System.Linq;
 using TheReplacements.PTA.Common.Utilities;
 using TheReplacements.PTA.Common.Models;
 using TheReplacements.PTA.Common.Enums;
+using TheReplacements.PTA.Services.Core.Extensions;
 
 namespace TheReplacements.PTA.Services.Core.Controllers
 {
     [ApiController]
     [Route("api/v1/trainer")]
-    public class TrainerContoller : ControllerBase
+    public class TrainerContoller : PtaControllerBase
     {
-        private const MongoCollection Collection = MongoCollection.Trainer;
+        protected override MongoCollection Collection { get; }
 
-        private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
+        public TrainerContoller()
+        {
+            Collection = MongoCollection.Trainer;
+        }
 
         [HttpGet("{trainerId}/{pokemonId}")]
         public ActionResult<PokemonModel> FindTrainerMon(
@@ -22,11 +26,10 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             string pokemonId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
-            if (pokemon == null)
+            var document = GetDocument(pokemonId, MongoCollection.Pokemon, out var notFound);
+            if (!(document is PokemonModel pokemon))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
-                return NotFound(pokemonId);
+                return notFound;
             }
             if (pokemon.TrainerId != trainerId)
             {
@@ -38,166 +41,81 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 });
             }
 
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return pokemon;
+            return ReturnSuccessfully(pokemon);
         }
 
         [HttpPost("{trainerId}")]
         public ActionResult<PokemonModel> AddPokemon(string trainerId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
             {
                 return Unauthorized();
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            if (!(gameMaster?.IsGM == true && gameMaster.IsOnline))
+            if (!IsGMOnline(gameMasterId))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being a gm");
-                return Unauthorized(gameMasterId);
+                return NotFound(gameMasterId);
             }
 
-            var fails = new[] { "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" }
-                .Where(key => string.IsNullOrWhiteSpace(Request.Query[key]));
-            if (fails.Any())
-            {
-                return BadRequest(new
-                {
-                    message = "Missing the following parameters in the query",
-                    fails
-                });
-            }
-            var parseFails = new[]
-            {
-                    GetBadRequestMessage("expYield", result => result > 0, out var expYield),
-                    GetBadRequestMessage("catchRate", result => result >= 0, out var catchRate),
-                    GetBadRequestMessage("experience", result => result >= 0, out var experience),
-                    GetBadRequestMessage("level", result => result > 0, out var level),
-                }.Where(fail => fail != null);
-            if (parseFails.Any())
-            {
-                return BadRequest(parseFails);
-            }
-
-            var naturalMoves = Request.Query["naturalMoves"].ToString().Split(",");
-            if (naturalMoves.Length < 1 || naturalMoves.Length > 4)
-            {
-                return BadRequest(naturalMoves);
-            }
-            var tmMoves = Request.Query["tmMoves"].ToString()?.Split(",") ?? Array.Empty<string>();
-            if (tmMoves.Length > 4)
-            {
-                return BadRequest(tmMoves);
-            }
-
-            var pokemonName = Request.Query["pokemon"];
-            var natureName = Request.Query["nature"];
-            var pokemon = PokeAPIUtility.GetPokemon
-            (
-                pokemonName,
-                natureName
-            );
-
-            pokemon.TrainerId = trainerId;
-            pokemon.NaturalMoves = naturalMoves;
-            pokemon.TMMoves = tmMoves;
-            pokemon.ExpYield = expYield;
-            pokemon.CatchRate = catchRate;
-            pokemon.Experience = experience;
-            pokemon.Level = level;
-            if (!string.IsNullOrWhiteSpace(Request.Query["nickname"]))
-            {
-                pokemon.Nickname = Request.Query["nickname"];
-            }
-
-            if (!DatabaseUtility.TryAddPokemon(pokemon, out var error))
+            var pokemon = Request.BuildPokemon(trainerId, out var error);
+            if (pokemon == null)
             {
                 return BadRequest(error);
             }
+            if (!DatabaseUtility.TryAddPokemon(pokemon, out var writeError))
+            {
+                return BadRequest(writeError);
+            }
 
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return pokemon;
+            Response.RefreshToken();
+            return ReturnSuccessfully(pokemon);
         }
 
         [HttpPut("login")]
         public ActionResult<object> Login()
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            var username = Request.Query["trainerName"];
-            var gameId = Request.Query["gameId"];
-            var trainer = DatabaseUtility.FindTrainerByUsername
-            (
-                username,
-                gameId
-            );
-
-            if (trainer == null)
+            Response.UpdateAccessControl();
+            var (gameId, username, password) = Request.GetTrainerCredentials(out var credentialErrors);
+            if (credentialErrors.Any())
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {username}");
-                return NotFound(username);
+                return BadRequest(credentialErrors);
             }
 
-            if (trainer.IsOnline)
+            if (!IsTrainerAuthenticated(username, password, gameId, false, out var authError))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
-                return Unauthorized(new
-                {
-                    message = "User is already online",
-                    username
-                });
+                return authError;
             }
 
-            if (!EncryptionUtility.VerifySecret(Request.Query["password"], trainer.PasswordHash))
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
-                return Unauthorized(username);
-            }
-
-            DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, true);
-            Response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return new
+            var trainer = DatabaseUtility.FindTrainerByUsername(username, gameId);
+            Response.AssignAuthAndToken();
+            return ReturnSuccessfully(new
             {
                 trainer.TrainerId,
                 trainer.TrainerName,
                 trainer.IsGM,
                 trainer.Items
-            };
+            });
         }
 
         [HttpPut("{trainerId}/logout")]
         public ActionResult Logout(string trainerId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             if (!Header.VerifyCookies(Request.Cookies, trainerId))
             {
                 return Unauthorized();
             }
 
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            if (trainer == null)
+            var trainerDocument = GetDocument(trainerId, Collection, out var notFound);
+            if (!(trainerDocument is TrainerModel trainer))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
-                return NotFound(trainerId);
-            }
-
-            if (!trainer.IsOnline)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
-                return Unauthorized(new
-                {
-                    message = "User is already offline",
-                    trainer.TrainerName
-                });
+                return notFound;
             }
 
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return Ok();
+            return ReturnSuccessfully(Ok());
         }
 
         [HttpPut("{trainerId}/addItems")]
@@ -282,9 +200,15 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 }
             }
 
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return DatabaseUtility.FindTrainerById(trainerId);
+            Response.RefreshToken();
+            trainer = DatabaseUtility.FindTrainerById(trainerId);
+            return ReturnSuccessfully(new
+            {
+                trainer.TrainerId,
+                trainer.TrainerName,
+                trainer.IsGM,
+                trainer.Items
+            });
         }
 
         [HttpPut("{trainerId}/removeItems")]
@@ -361,9 +285,15 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 }
             }
 
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return DatabaseUtility.FindTrainerById(trainerId);
+            Response.RefreshToken();
+            trainer = DatabaseUtility.FindTrainerById(trainerId);
+            return ReturnSuccessfully(new
+            {
+                trainer.TrainerId,
+                trainer.TrainerName,
+                trainer.IsGM,
+                trainer.Items
+            });
         }
 
         [HttpDelete("{trainerId}")]
@@ -376,53 +306,32 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            if (DatabaseUtility.FindTrainerById(gameMasterId) == null)
+            if (!(GetDocument(gameMasterId, Collection, out var error) is TrainerModel gameMaster && gameMaster.IsGM))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being a gm");
-                return Unauthorized(gameMasterId);
+                return error;
             }
 
-            var result = DatabaseUtility.DeleteTrainer(trainerId);
-            if (!result || DatabaseUtility.DeletePokemonByTrainerId(trainerId) <= -1)
+            if (!(DatabaseUtility.DeleteTrainer(trainerId) && DatabaseUtility.FindTrainerById(trainerId) == null))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
+                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to delete trainer {trainerId}");
                 return NotFound();
             }
 
-            Response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return new
+            Response.RefreshToken();
+            return ReturnSuccessfully(new
             {
                 message = $"Successfully deleted all pokemon associated with {trainerId}"
-            };
+            });
         }
 
-        private object GetBadRequestMessage(
-            string parameter,
-            Predicate<int> check,
-            out int outVar)
-        {
-            var value = Request.Query[parameter];
-            if (!(int.TryParse(value, out outVar) && check(outVar)))
-            {
-                return new
-                {
-                    message = $"Invalid {parameter}",
-                    invalidValue = value
-                };
-            }
-
-            return null;
-        }
-
-        private Tuple<int, object> GetCleanData(
+        private (int UpdatedAmount, object Error) GetCleanData(
             string gameId,
             string itemName)
         {
             var change = Request.Query[itemName];
             if (!int.TryParse(change, out var itemChange))
             {
-                return new Tuple<int, object>
+                return
                 (
                     0,
                     new
@@ -435,7 +344,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
             }
             if (itemChange < 1)
             {
-                return new Tuple<int, object>
+                return
                 (
                     0,
                     new
@@ -451,11 +360,7 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 itemChange = 100;
             }
 
-            return new Tuple<int, object>
-            (
-                itemChange,
-                null
-            );
+            return (itemChange, null);
         }
     }
 }

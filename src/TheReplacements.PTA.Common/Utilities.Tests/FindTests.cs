@@ -70,7 +70,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             Logger.WriteLine($"Retrieving npc ids {string.Join(",", npcIds)}");
-            var retrievedNpcsIds = DatabaseUtility.FindNpcs(npcIds).Select(npc => npc.NPCId);
+            var retrievedNpcsIds = DatabaseUtility.FindNpcs(npcIds).Select(npc => npc.NPCId).ToList();
             foreach (var npcId in retrievedNpcsIds)
             {
                 DatabaseUtility.DeleteNpc(npcId);
@@ -126,7 +126,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             Logger.WriteLine($"Retrieving list of pokemonIds with trainer id {trainer.TrainerId}");
-            var retrievedPokemonIds = DatabaseUtility.FindPokemonByTrainerId(trainer.TrainerId).Select(pokemon => pokemon.PokemonId);
+            var retrievedPokemonIds = DatabaseUtility.FindPokemonByTrainerId(trainer.TrainerId).Select(pokemon => pokemon.PokemonId).ToList();
             DatabaseUtility.DeleteTrainer(trainer.TrainerId);
             foreach (var pokemonId in retrievedPokemonIds)
             {
@@ -186,7 +186,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             }
 
             Logger.WriteLine($"Retrieving list of trainerIds with game id {game.GameId}");
-            var retrievedTrainerIds = DatabaseUtility.FindTrainersByGameId(game.GameId).Select(trainer => trainer.TrainerId);
+            var retrievedTrainerIds = DatabaseUtility.FindTrainersByGameId(game.GameId).Select(trainer => trainer.TrainerId).ToList();
             DatabaseUtility.DeleteGame(game.GameId);
             foreach (var trainerId in retrievedTrainerIds)
             {

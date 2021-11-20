@@ -3,21 +3,25 @@ using System;
 using TheReplacements.PTA.Common.Enums;
 using TheReplacements.PTA.Common.Models;
 using TheReplacements.PTA.Common.Utilities;
+using TheReplacements.PTA.Services.Core.Extensions;
 
 namespace TheReplacements.PTA.Services.Core.Controllers
 {
     [ApiController]
     [Route("api/v1/npc")]
-    public class NpcController : ControllerBase
+    public class NpcController : PtaControllerBase
     {
-        private const MongoCollection Collection = MongoCollection.Npc;
+        protected override MongoCollection Collection { get; }
 
-        private string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
+        public NpcController()
+        {
+            Collection = MongoCollection.Npc;
+        }
 
         [HttpGet("{npcId}")]
         public ActionResult<NpcModel> GetNpcs(string npcId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var npc = DatabaseUtility.FindNpc(npcId);
             if (npc == null)
             {
@@ -25,14 +29,13 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return NotFound(npcId);
             }
 
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return npc;
+            return ReturnSuccessfully(npc);
         }
 
         [HttpPost("new")]
         public ActionResult<NpcModel> CreateNewNpc()
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var npc = new NpcModel
             {
                 NPCId = Guid.NewGuid().ToString(),
@@ -55,22 +58,20 @@ namespace TheReplacements.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return npc;
+            return ReturnSuccessfully(npc);
         }
 
         [HttpDelete("{npcId}")]
         public ActionResult DeleteNpc(string npcId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             if (!DatabaseUtility.DeleteNpc(npcId))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
                 return NotFound(npcId);
             }
 
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return Ok();
+            return ReturnSuccessfully(Ok());
         }
     }
 }

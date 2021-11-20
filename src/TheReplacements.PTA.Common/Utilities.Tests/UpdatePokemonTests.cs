@@ -83,7 +83,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
         }
 
         [Fact]
-        public void UpdatePokemonStats_PartialUpdatesWithInvalidData_True()
+        public void UpdatePokemonStats_PartialUpdatesWithInvalidData_ThrowsKeyNotFoundException()
         {
             var pokemon = GetTestPokemon();
             var query = new Dictionary<string, string>
@@ -98,23 +98,23 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             DatabaseUtility.TryAddPokemon(pokemon, out _);
 
             Logger.WriteLine($"Updating pokemon id {pokemon.PokemonId} with {query.Aggregate("", (prev, curr) => $"{curr.Key}: {curr.Value}\n")}");
-            Assert.True(DatabaseUtility.UpdatePokemonStats(pokemon.PokemonId, query));
+            Assert.Throws<KeyNotFoundException>(() => DatabaseUtility.UpdatePokemonStats(pokemon.PokemonId, query));
             var updatedPokemon = DatabaseUtility.FindPokemonById(pokemon.PokemonId);
             DatabaseUtility.DeletePokemon(pokemon.PokemonId);
 
             Logger.WriteLine($"Verify pokemon id {pokemon.PokemonId} was updated properly");
-            Assert.Equal(2000, updatedPokemon.Experience);
+            Assert.Equal(pokemon.Experience, updatedPokemon.Experience);
             Assert.Equal(pokemon.HP.Added, updatedPokemon.HP.Added);
             Assert.Equal(pokemon.Attack.Added, updatedPokemon.Attack.Added);
             Assert.Equal(pokemon.Defense.Added, updatedPokemon.Defense.Added);
             Assert.Equal(pokemon.SpecialAttack.Added, updatedPokemon.SpecialAttack.Added);
             Assert.Equal(pokemon.SpecialDefense.Added, updatedPokemon.SpecialDefense.Added);
-            Assert.Equal(13, updatedPokemon.Speed.Added);
-            Assert.Equal("UpdateTest", updatedPokemon.Nickname);
+            Assert.Equal(pokemon.Speed.Added, updatedPokemon.Speed.Added);
+            Assert.Equal(pokemon.Nickname, updatedPokemon.Nickname);
         }
 
         [Fact]
-        public void UpdatePokemonStats_InvalidUpdates_ThrowsArgumentNullException()
+        public void UpdatePokemonStats_InvalidUpdates_ThrowsKeyNotFoundException()
         {
             var pokemon = GetTestPokemon();
             var query = new Dictionary<string, string>
@@ -126,7 +126,7 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             DatabaseUtility.TryAddPokemon(pokemon, out _);
 
             Logger.WriteLine($"Updating pokemon id {pokemon.PokemonId} with {query.Aggregate("", (prev, curr) => $"{curr.Key}: {curr.Value}\n")}");
-            Assert.Throws<ArgumentNullException>(() => DatabaseUtility.UpdatePokemonStats(pokemon.PokemonId, query));
+            Assert.Throws<KeyNotFoundException>(() => DatabaseUtility.UpdatePokemonStats(pokemon.PokemonId, query));
             var updatedPokemon = DatabaseUtility.FindPokemonById(pokemon.PokemonId);
             DatabaseUtility.DeletePokemon(pokemon.PokemonId);
 
@@ -233,10 +233,10 @@ namespace TheReplacements.PTA.Common.Utilities.Tests
             var flabebe = GetTestPokemon();
             flabebe.DexNo = 669;
             Logger.WriteLine($"Adding pokemon id {flabebe.PokemonId}");
-            DatabaseUtility.TryAddPokemon(flabebe, out _);
 
             Logger.WriteLine($"Updating pokemon id {flabebe.PokemonId} by evolving it to Floette");
-            var floette = PokeAPIUtility.GetEvolved(DatabaseUtility.FindPokemonById(flabebe.PokemonId), "Floette");
+            var floette = PokeAPIUtility.GetEvolved(flabebe, "Floette");
+            DatabaseUtility.TryAddPokemon(flabebe, out _);
             Assert.True(DatabaseUtility.UpdatePokemonWithEvolution(flabebe.PokemonId, floette));
 
             Logger.WriteLine($"Verify pokemon id {flabebe.PokemonId} evolved to floette");

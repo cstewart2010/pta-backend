@@ -186,7 +186,7 @@ namespace TheReplacements.PTA.Common.Utilities
                 pokemon,
                 nextForm
             );
-            if (isDataValid)
+            if (!isDataValid)
             {
                 return null;
             }

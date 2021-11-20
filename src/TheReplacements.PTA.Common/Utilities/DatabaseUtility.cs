@@ -299,8 +299,16 @@ namespace TheReplacements.PTA.Common.Utilities
         /// Returns whether there is a game master for the provide game session
         /// </summary>
         /// <param name="gameId">The game session id</param>
-        public static bool HasGM(string gameId)
+        public static bool HasGM(
+            string gameId,
+            out object error)
         {
+            error = new
+            {
+                message = "No GM has been made",
+                gameId
+            };
+
             return FindGame(gameId) != null && MongoCollectionHelper
                 .Trainer
                 .Find(trainer => trainer.IsGM && trainer.GameId == gameId)
@@ -477,7 +485,7 @@ namespace TheReplacements.PTA.Common.Utilities
         {
             if (evolvedForm == null)
             {
-                throw new ArgumentNullException(nameof(pokemonId));
+                throw new ArgumentNullException(nameof(evolvedForm));
             }
 
             return TryUpdateDocument
