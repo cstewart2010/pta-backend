@@ -46,6 +46,10 @@ namespace TheReplacement.PTA.Common.Models
 
         /// <inheritdoc />
         public IEnumerable<string> Feats { get; set; }
+
+        /// <summary>
+        /// The trainer's money (or debt)
+        /// </summary>
         public int Money { get; set; }
 
         /// <inheritdoc />

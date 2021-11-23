@@ -344,13 +344,6 @@ namespace TheReplacement.PTA.Common.Utilities
             );
         }
 
-        private static JObject InvokePokeAPI(
-            string endpoint,
-            string query)
-        {
-            return InvokePokeAPI($"{endpoint}?{query}");
-        }
-
         private static JObject InvokePokeAPI(string endpoint)
         {
             HttpWebRequest request = CreateHttpRequest($"https://pokeapi.co/api/v2/{endpoint}");
