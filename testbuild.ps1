@@ -23,7 +23,7 @@ Set-Location -Path $repository
 mongosh $env:MongoDBConnectionString -f database\scripts\update.js
 
 # build
-$env:MongoDBConnectionString = "mongodb+srv://$($env:MongoUsername):$($env:MongoPassword)@ptatestcluster.1ekcs.mongodb.net/test?retryWrites=true&w=majority"
+$env:Database = "test"
 dotnet build src/PTABackend.sln
 mongosh $env:MongoDBConnectionString -f  .\database\scripts\update.js
 dotnet test .\src\PTABackEnd.sln --logger:"trx;LogFileName=C:\Users\zachagrey\.jenkins\workspace\PTA backend develop build/TestOutput.trx" --filter:Category=smoke
