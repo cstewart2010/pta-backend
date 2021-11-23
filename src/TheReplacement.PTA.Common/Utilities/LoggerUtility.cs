@@ -50,8 +50,8 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             MongoCollectionHelper.Logs.InsertOne(new Models.LoggerModel
             {
-                AffectedCollection = affectedCollection,
-                LogLevel = level,
+                AffectedCollection = affectedCollection.ToString(),
+                LogLevel = level.ToString(),
                 Timestamp = DateTime.Now,
                 Message = record.ToString()
             });
