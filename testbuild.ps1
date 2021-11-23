@@ -29,5 +29,6 @@ mongosh $env:MongoDBConnectionString -f  .\database\scripts\update.js
 dotnet test .\src\PTABackEnd.sln --logger:"trx;LogFileName=C:\Users\zachagrey\.jenkins\workspace\PTA backend develop build/TestOutput.trx" --filter:Category=smoke
 
 # postbuild
+$env:MongoDBConnectionString = "mongodb+srv://$($env:MongoUsername):$($env:MongoPassword)@ptatestcluster.1ekcs.mongodb.net/test?retryWrites=true&w=majority"
 mongosh $env:MongoDBConnectionString -f .\database\scripts\catalog_logs.js
 Set-Location -Path $currentDirectory
