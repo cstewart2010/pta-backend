@@ -36,6 +36,9 @@
         bsonType: 'string',
         minLength: 1
       },
+      ActivityToken: {
+        bsonType: 'string'
+      },
       TrainerClasses: {
         bsonType: 'array',
         items: {

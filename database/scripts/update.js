@@ -54,9 +54,9 @@ db.runCommand({
                 NPCs: {
                     bsonType: 'array',
                     items: {
-                    bsonType: 'string',
-                    minLength: 36,
-                    maxLength: 36
+                        bsonType: 'string',
+                        minLength: 36,
+                        maxLength: 36
                     }
                 }
             }
@@ -93,7 +93,7 @@ db.runCommand({
                 TrainerClasses: {
                     bsonType: 'array',
                     items: {
-                    bsonType: 'string'
+                        bsonType: 'string'
                     },
                     maxItems: 4
                 },
@@ -122,6 +122,7 @@ db.runCommand({
             'TrainerId',
             'Nickname',
             'Ability',
+            'PokemonStatus',
             'Gender',
             'NaturalMoves',
             'TMMoves',
@@ -164,8 +165,13 @@ db.runCommand({
                     minimum: 0,
                     maximum: 2
                 },
+                PokemonStatus: {
+                    bsonType: 'int',
+                    minimum: -1,
+                    maximum: 6
+                },
                 Nickname: {
-                bsonType: 'string',
+                    bsonType: 'string',
                     minLength: 1,
                     maxLength: 18
                 },
@@ -179,14 +185,14 @@ db.runCommand({
                     minItems: 1,
                     maxItems: 4,
                     items: {
-                    bsonType: 'string'
+                        bsonType: 'string'
                     }
                 },
                 TMMoves: {
                     bsonType: 'array',
                     maxItems: 4,
                     items: {
-                    bsonType: 'string'
+                        bsonType: 'string'
                     }
                 },
                 Type: {
@@ -403,6 +409,9 @@ db.runCommand({
                 PasswordHash: {
                     bsonType: 'string',
                     minLength: 1
+                },
+                ActivityToken: {
+                  bsonType: 'string'
                 },
                 TrainerClasses: {
                     bsonType: 'array',

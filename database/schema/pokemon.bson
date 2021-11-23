@@ -7,6 +7,7 @@
       'Nickname',
       'Ability',
       'Gender',
+      'PokemonStatus',
       'NaturalMoves',
       'TMMoves',
       'Type',
@@ -47,6 +48,11 @@
         bsonType: 'int',
         minimum: 0,
         maximum: 2
+      },
+      PokemonStatus: {
+        bsonType: 'int',
+        minimum: -1,
+        maximum: 6
       },
       Nickname: {
         bsonType: 'string',
