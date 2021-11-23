@@ -46,6 +46,7 @@ namespace TheReplacement.PTA.Common.Internal
         private static MongoClientSettings GetMongoClientSettings()
         {
             var connectionString = Environment.GetEnvironmentVariable("MongoDBConnectionString", EnvironmentVariableTarget.Process);
+            Console.WriteLine(connectionString);
             if (connectionString == null)
             {
                 throw new NullReferenceException("MongoDBConnectionString environment variable need to be set to access MongoDB");
