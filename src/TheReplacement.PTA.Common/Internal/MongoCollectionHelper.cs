@@ -10,7 +10,8 @@ namespace TheReplacement.PTA.Common.Internal
         {
             var settings = GetMongoClientSettings();
             var client = new MongoClient(settings);
-            var database = client.GetDatabase("PTA");
+            var databaseName = Environment.GetEnvironmentVariable("Database", EnvironmentVariableTarget.Process);
+            var database = client.GetDatabase(databaseName);
             Game = database.GetCollection<GameModel>("Game");
             Pokemon = database.GetCollection<PokemonModel>("Pokemon");
             Trainer = database.GetCollection<TrainerModel>("Trainer");
@@ -45,8 +46,7 @@ namespace TheReplacement.PTA.Common.Internal
 
         private static MongoClientSettings GetMongoClientSettings()
         {
-            var connectionString = Environment.GetEnvironmentVariable("MongoDBConnectionString", EnvironmentVariableTarget.Process);
-            Console.WriteLine(connectionString);
+            var connectionString = Environment.GetEnvironmentVariable("MongoDBConnectionString");
             if (connectionString == null)
             {
                 throw new NullReferenceException("MongoDBConnectionString environment variable need to be set to access MongoDB");
