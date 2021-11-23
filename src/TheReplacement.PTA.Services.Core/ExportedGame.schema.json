@@ -84,6 +84,9 @@
           "type": "string",
           "minLength": 1
         },
+        "ActivityToken": {
+          "type": "string"
+        },
         "TrainerClasses": {
           "type": "array",
           "items": {
