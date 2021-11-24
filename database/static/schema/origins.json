@@ -1,0 +1,66 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "Name",
+        "Skill",
+        "Lifestyle",
+        "Saving",
+        "Equipment",
+        "Pokemon",
+        "Feature"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Skill": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Lifestyle": {
+          "bsonType": "string",
+          "enum": [
+              "Difficult",
+              "Modest",
+              "Comfortable",
+              "Wealthy"
+          ]
+        },
+        "Savings": {
+            "bsonType": "int",
+            "minimum": 0
+        },
+        "Equipment": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Pokemon": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Feature": {
+            "bsonType": "object",
+            "required": [
+                "Name",
+                "Effect"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "Name": {
+                    "bsonType": "string",
+                    "minLength": 1
+                },
+                "Effect": {
+                    "bsonType": "string",
+                    "minLength": 1
+                }
+            }
+        }
+      }
+    }
+  }

@@ -258,7 +258,7 @@ namespace TheReplacement.PTA.Common.Utilities
             Nature nature)
         {
             var modifier = Attribute.GetCustomAttribute(typeof(Nature).GetField(nature.ToString()), typeof(NatureModifierAttribute)) as NatureModifierAttribute;
-            pokemon.HP = GetStat(stats, "hp", modifier.HpModifier);
+            pokemon.HP = GetStat(stats, "hp", 0);
             pokemon.Attack = GetStat(stats, "attack", modifier.AttackModifier);
             pokemon.Defense = GetStat(stats, "defense", modifier.DefenseModifier);
             pokemon.SpecialAttack = GetStat(stats, "special-attack", modifier.SpecialAttackModifier);

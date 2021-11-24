@@ -192,7 +192,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             string trainerId,
             out ActionResult badResult)
         {
-            if (!(GetDocument(trainerId, MongoCollection.Trainer, out badResult) is TrainerModel trainer))
+            if (!(GetDocument(trainerId, MongoCollection.Trainers, out badResult) is TrainerModel trainer))
             {
                 return false;
             }
@@ -282,7 +282,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             string pokemonId,
             out ActionResult error)
         {
-            var trainerDocument = GetDocument(trainerId, MongoCollection.Trainer, out error);
+            var trainerDocument = GetDocument(trainerId, MongoCollection.Trainers, out error);
             if (!(trainerDocument is TrainerModel trainer))
             {
                 return null;

@@ -12,17 +12,17 @@ namespace TheReplacement.PTA.Common.Internal
             var client = new MongoClient(settings);
             var databaseName = Environment.GetEnvironmentVariable("Database", EnvironmentVariableTarget.Process);
             var database = client.GetDatabase(databaseName);
-            Game = database.GetCollection<GameModel>("Game");
+            Games = database.GetCollection<GameModel>("Games");
             Pokemon = database.GetCollection<PokemonModel>("Pokemon");
-            Trainer = database.GetCollection<TrainerModel>("Trainer");
-            Npc = database.GetCollection<NpcModel>("NPC");
+            Trainers = database.GetCollection<TrainerModel>("Trainers");
+            Npcs = database.GetCollection<NpcModel>("NPCs");
             Logs = database.GetCollection<LoggerModel>("Logs");
         }
 
         /// <summary>
         /// Represents the Game Collection
         /// </summary>
-        public static IMongoCollection<GameModel> Game { get; }
+        public static IMongoCollection<GameModel> Games { get; }
 
         /// <summary>
         /// Represents the Pokemon Collection
@@ -32,12 +32,12 @@ namespace TheReplacement.PTA.Common.Internal
         /// <summary>
         /// Represents the Trainer Collection
         /// </summary>
-        public static IMongoCollection<TrainerModel> Trainer { get; }
+        public static IMongoCollection<TrainerModel> Trainers { get; }
 
         /// <summary>
         /// Represents the Npc Collection
         /// </summary>
-        public static IMongoCollection<NpcModel> Npc { get; }
+        public static IMongoCollection<NpcModel> Npcs { get; }
 
         /// <summary>
         /// Represents the Logs Collection

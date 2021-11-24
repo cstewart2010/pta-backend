@@ -16,7 +16,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         public NpcController()
         {
-            Collection = MongoCollection.Npc;
+            Collection = MongoCollection.Npcs;
         }
 
         [HttpGet("{npcId}")]

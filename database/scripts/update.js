@@ -3,11 +3,25 @@
 // adding missing tables
 currentCollections = db.getCollectionNames();
 updatedCollections = [
-    'Game',
-    'NPC',
+    'Games',
+    'NPCs',
     'Pokemon',
-    'Trainer',
-    'Logs'
+    'Trainers',
+    'Logs',
+    'BasePokemon',
+    "Berries",
+    'Features',
+    "KeyItems",
+    'LegendaryFeatures',
+    "MedicalItems",
+    'Moves',
+    "Origins",
+    'Passives',
+    "Pokeballs",
+    "PokemonItems",
+    'Skills',
+    'TrainerClasses',
+    "TrainerEquipment"
 ];
 for (collection of updatedCollections){
     if (!currentCollections.includes(collection)){

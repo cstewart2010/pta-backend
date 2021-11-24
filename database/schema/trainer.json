@@ -108,6 +108,9 @@
             "Name": {
               "bsonType": "string"
             },
+            "Effect": {
+              "bsonType": "string"
+            },
             "Amount": {
               "bsonType": "int",
               "minimum": 1

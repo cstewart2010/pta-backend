@@ -1,0 +1,62 @@
+﻿Item,Price,Effect,Flavor,Rarity
+Oran,55,Heals a Pokémon 5 HP.,Spicy Dry Bitter Sour,Common
+Sitrus,120,Heals a Pokémon 12 HP.,Dry Sweet Bitter Sour,Uncommon
+Aguav,850,"Heals 1/3 of a Pokémon’s max HP, then confuses them.",Bitter,Uncommon
+Figy,850,"Heals 1/3 of a Pokémon’s max HP, then confuses them.",Spicy,Uncommon
+Iapapa,850,"Heals 1/3 of a Pokémon’s max HP, then confuses them.",Sour,Uncommon
+Mago,850,"Heals 1/3 of a Pokémon’s max HP, then confuses them.",Sweet,Uncommon
+Wiki,850,"Heals 1/3 of a Pokémon’s max HP, then confuses them.",Dry,Uncommon
+Aspear,120,Cures Freezing,Sour,Common
+Cheri,120,Cures Paralysis,Spicy,Common
+Chesto,120,Cures Sleep,Dry,Common
+Pecha,120,Cures Poison and Toxin,Sweet,Common
+Persim,180,Cures Confusion,Spicy Dry Sweet Sour,Common
+Rawst,120,Cures Burns,Bitter,Common
+Lum,580,Cures all Afflictions,Spicy Dry Sweet Bitter,Uncommon
+Grepa,680,Can lower Special Defense 1.,Dry Sweet Sour,Rare
+Hondew,680,Can lower Special Attack 1.,Spicy Dry Bitter,Rare
+Kelpsy,680,Can lower Attack 1.,Dry Bitter Sour,Rare
+Pomeg,680,Can lower max HP 4.,Spicy Sweet Bitter,Rare
+Qualot,680,Can lower Defense 1.,Spicy Sweet Sour,Rare
+Tomato,680,Can lower Speed 1.,Spicy Dry,Rare
+Babiri,980,Protection from Steel.,Spicy Dry,Uncommon
+Charti,980,Protection from Rock.,Spicy Dry,Uncommon
+Chilan,980,Protection from Normal.,Dry Sweet,Uncommon
+Chople,980,Protection from Fighting.,Dry Sour,Uncommon
+Coba,980,Protection from Flying.,Spicy Sweet,Uncommon
+Colbur,980,Protection from Dark.,Sweet Sour,Uncommon
+Rindo,980,Protection from Grass.,Spicy Bitter,Uncommon
+Roseli,980,Protection from Fairy.,Dry Sweet,Uncommon
+Shuca,980,Protection from Ground.,Spicy Sweet,Uncommon
+Tanga,980,Protection from Bug.,Spicy Sour,Uncommon
+Wacan,980,Protection from Electric.,Sweet Sour,Uncommon
+Yache,980,Protection from Ice.,Dry Sour,Uncommon
+Apicot,1880,"At half HP or lower, increase Sp. Def by 1 for 2 mins. This effect does not stack.",Spicy Dry Sour,Rare
+Ganlon,1880,"At half HP or lower, increase Defense by 1 for 2 mins. This effect does not stack.",Dry Sweet Bitter,Rare
+Lansat,1880,"At half HP or lower, you score critical hits on natural 18-20 for 1 min.",Spicy Dry Sweet Bitter Sour,Rare
+Liechi,1880,"At half HP or lower, increase Attack by 1 for 2 mins. This effect does not stack.",Spicy Dry Sweet,Rare
+Micle,1880,"At half HP or lower, increase your accuracy checks by 2 for 1 round.",Dry Sweet,Rare
+Petaya,1880,"At half HP or lower, increase Sp. Atk by 1 for 2 mins. This effect does not stack.",Spicy Bitter Sour,Rare
+Salac,1880,"At half HP or lower, increase Speed by 1 for 2 mins. This effect does not stack.",Sweet Bitter Sour,Rare
+Starf,1280,"At half HP or lower, increase a random stat by 1 for 2 mins.",Spicy Dry Sweet Bitter Sour,Rare
+Custap,-1,"When at 5 HP or less, your next At-Will attack has priority.",Sweet Bitter,Rare
+Enigma,-1,"When hit by a super-effective or extremely effective attack, restore HP equal to 1/4th of your max HP.",Spicy Dry,Rare
+Jacoba,-1,"When hit by a melee Attack move, the offender loses HP equal to 1/4th the damage you just took.",Bitter Sour,Rare
+Kee,-1,"When hit by an Attack move, increase Defense by 1 for 2 mins",Dry Sweet,Rare
+Leppa,-1,Restore the use of one 3/day frequency move as if you’ve had a long rest.,Spicy Sweet Bitter Sour,Rare
+Maranga,-1,"When hit by an Sp. Atk move, increase Sp. Def by 1 for 2 mins",Dry Sour,Rare
+Rowap,-1,"When hit by a ranged Sp. Atk move, the offender loses HP equal to 1/4th the damage you just took.",Dry Sweet,Rare
+Belue,120,,Spicy Sour,Common
+Bluk,120,,Dry Sweet,Common
+Cornn,120,,Dry Sweet,Common
+Durin,120,,Bitter Sour,Common
+Magost,120,,Sweet Bitter,Common
+Nanab,120,,Sweet Bitter,Common
+Nomel,120,,Spicy Sour,Common
+Pamtre,120,,Dry Sweet,Common
+Pinap,120,,Spicy Sour,Common
+Rabuta,120,,Bitter Sour,Common
+Razz,120,,Spicy Dry,Common
+Spelon,120,,Spicy Dry,Common
+Watmel,120,,Sweet Bitter,Common
+Wepear,120,,Bitter Sour,Common

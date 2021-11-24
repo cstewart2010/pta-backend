@@ -1,0 +1,39 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "Name",
+        "Price",
+        "Effects",
+        "Flavors",
+        "Rarity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Price": {
+            "bsonType": "int"
+        },
+        "Effects": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Flavors": {
+            "bsonType": "int"
+        },
+        "Rarity": {
+            "bsonType": "string",
+            "enum": [
+                "Common",
+                "Uncommon",
+                "Rare"
+            ]
+        }
+      }
+    }
+  }
