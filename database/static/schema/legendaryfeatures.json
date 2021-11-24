@@ -1,14 +1,15 @@
 {
     "$jsonSchema": {
       "required": [
-        "Name"
+        "Name",
+        "Effect"
       ],
       "properties": {
         "Name": {
           "bsonType": "string",
           "minLength": 1
         },
-        "Description": {
+        "Effect": {
           "bsonType": "string",
           "minLength": 1
         }

@@ -2,6 +2,7 @@
     "$jsonSchema": {
       "required": [
         "Name",
+        "PokemonStats",
         "Type",
         "Size",
         "Weight",
@@ -20,6 +21,49 @@
           "bsonType": "string",
           "minLength": 1
         },
+        "PokemonStats": {
+          "bsonType": "object",
+          "required": [
+            "HP",
+            "Attack",
+            "Defense",
+            "SpecialAttack",
+            "SpecialDefense",
+            "Speed"
+          ],
+          "properties": {
+            "HP": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "Attack": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "Defense": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "SpecialAttack": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "SpecialDefense": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "Speed": {
+              "bsonType": "int",
+              "minimum": 1
+            }
+          }
+        },
+        "Moves": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
         "Type": {
           "bsonType": "array",
           "items": {
@@ -29,30 +73,24 @@
         "Size": {
           "bsonType": "string",
           "enum": [
+            "Tiny",
             "Small",
             "Medium",
             "Large",
+            "Large (Dynamic)",
             "Huge",
-            "Gigantic",
-            "Dynamic"
+            "Gigantic"
           ]
         },
         "Weight": {
           "bsonType": "string",
           "enum": [
+            "Featherweight",
             "Light",
             "Medium",
             "Heavy",
-            "Superweight",
-            "Dynamic"
-          ]
-        },
-        "Rarity": {
-          "bsonType": "string",
-          "enum": [
-            "Common",
-            "Uncommon",
-            "Rare"
+            "Heavy (Dynamic)",
+            "Superweight"
           ]
         },
         "Skills": {
@@ -67,7 +105,7 @@
             "bsonType": "string"
           }
         },
-        "Moves": {
+        "Proficiencies": {
           "bsonType": "array",
           "items": {
             "bsonType": "string"
@@ -83,25 +121,23 @@
           "bsonType": "string",
           "minLength": 1
         },
-        "Diet": {
-          "bsonType": "string",
-          "minLength": 1
-        },
         "Habitats": {
           "bsonType": "array",
           "items": {
             "bsonType": "string"
           }
         },
-        "Proficiencies": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
-          }
-        },
-        "EvolvesFrom": {
+        "Diet": {
           "bsonType": "string",
           "minLength": 1
+        },
+        "Rarity": {
+          "bsonType": "string",
+          "enum": [
+            "Common",
+            "Uncommon",
+            "Rare"
+          ]
         },
         "SpecialFormName": {
           "bsonType": "string",
@@ -117,6 +153,40 @@
         "GMaxMove": {
           "bsonType": "string",
           "minLength": 1
+        },
+        "EvolvesFrom": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "LegendaryStats": {
+          "HP": {
+            "bsonType": "int",
+            "minimum": 1
+          },
+          "Moves": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string"
+            }
+          },
+          "LegendaryMoves": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string"
+            }
+          },
+          "Passives": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string"
+            }
+          },
+          "Features": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string"
+            }
+          }
         }
       }
     }

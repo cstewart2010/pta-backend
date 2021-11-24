@@ -31,10 +31,6 @@
                 "bsonType": "string",
                 "minLength": 1
               },
-              "Description": {
-                "bsonType": "string",
-                "minLength": 1
-              },
               "Frequency": {
                 "bsonType": "string",
                 "minLength": 1
