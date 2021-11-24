@@ -1,0 +1,123 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "Name",
+        "Type",
+        "Size",
+        "Weight",
+        "Rarity",
+        "Skills",
+        "Passives",
+        "Moves",
+        "EggGroups",
+        "EggHatchRate",
+        "Diet",
+        "Habitats",
+        "Proficiencies"
+      ],
+      "properties": {
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Type": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Size": {
+          "bsonType": "string",
+          "enum": [
+            "Small",
+            "Medium",
+            "Large",
+            "Huge",
+            "Gigantic",
+            "Dynamic"
+          ]
+        },
+        "Weight": {
+          "bsonType": "string",
+          "enum": [
+            "Light",
+            "Medium",
+            "Heavy",
+            "Superweight",
+            "Dynamic"
+          ]
+        },
+        "Rarity": {
+          "bsonType": "string",
+          "enum": [
+            "Common",
+            "Uncommon",
+            "Rare"
+          ]
+        },
+        "Skills": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Passives": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Moves": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "EggGroups": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "EggHatchRate": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Diet": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Habitats": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Proficiencies": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "EvolvesFrom": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "SpecialFormName": {
+          "bsonType": "string",
+          "enum": [
+            "Mega",
+            "Gigantamax"
+          ]
+        },
+        "BaseFormName": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "GMaxMove": {
+          "bsonType": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }

@@ -1,0 +1,17 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "Name"
+      ],
+      "properties": {
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Description": {
+          "bsonType": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }

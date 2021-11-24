@@ -1,0 +1,44 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "Name",
+        "Range",
+        "Type",
+        "Stat",
+        "Frequency"
+      ],
+      "properties": {
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Range": {
+          "bsonType": "int",
+          "minimum": 0
+        },
+        "Type": {
+          "bsonType": "int"
+        },
+        "Stat": {
+          "bsonType": "string",
+          "enum": [
+            "Attack",
+            "Special Attack",
+            "Effect"
+          ]
+        },
+        "Frequency": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "DiceRoll": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Description": {
+          "bsonType": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
