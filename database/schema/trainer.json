@@ -1,0 +1,127 @@
+{
+  "$jsonSchema": {
+    "required": [
+      "GameId",
+      "TrainerId",
+      "Honors",
+      "TrainerName",
+      "PasswordHash",
+      "TrainerClasses",
+      "TrainerStats",
+      "Feats",
+      "Money",
+      "IsOnline",
+      "Items",
+      "IsGM",
+      "Origin"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "_id": {
+        "bsonType": "objectId"
+      },
+      "GameId": {
+        "bsonType": "string"
+      },
+      "TrainerId": {
+        "bsonType": "string"
+      },
+      "Honors": {
+        "bsonType": "array",
+        "items": {
+          "bsonType": "string",
+          "minLength": 1
+        }
+      },
+      "TrainerName": {
+        "bsonType": "string"
+      },
+      "PasswordHash": {
+        "bsonType": "string",
+        "minLength": 1
+      },
+      "ActivityToken": {
+        "bsonType": "string"
+      },
+      "TrainerClasses": {
+        "bsonType": "array",
+        "items": {
+          "bsonType": "string"
+        },
+        "maxItems": 4
+      },
+      "TrainerStats": {
+        "bsonType": "object",
+        "required": [
+          "HP",
+          "Attack",
+          "Defense",
+          "SpecialAttack",
+          "SpecialDefense",
+          "Speed"
+        ],
+        "properties": {
+          "HP": {
+            "bsonType": "int",
+            "minimum": 20,
+            "maximum": 32
+          },
+          "Attack": {
+            "bsonType": "int",
+            "minimum": 1
+          },
+          "Defense": {
+            "bsonType": "int",
+            "minimum": 1
+          },
+          "SpecialAttack": {
+            "bsonType": "int",
+            "minimum": 1
+          },
+          "SpecialDefense": {
+            "bsonType": "int",
+            "minimum": 1
+          },
+          "Speed": {
+            "bsonType": "int",
+            "minimum": 1
+          }
+        }
+      },
+      "Feats": {
+        "bsonType": "array",
+        "items": {
+          "bsonType": "string"
+        }
+      },
+      "Money": {
+        "bsonType": "int"
+      },
+      "IsOnline": {
+        "bsonType": "bool"
+      },
+      "Items": {
+        "bsonType": "array",
+        "items": {
+          "bsonType": "object",
+          "properties": {
+            "Name": {
+              "bsonType": "string"
+            },
+            "Amount": {
+              "bsonType": "int",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "IsGM": {
+        "bsonType": "bool"
+      },
+      "Origin": {
+        "bsonType": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

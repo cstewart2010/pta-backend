@@ -193,7 +193,7 @@ Oblivious,You are immune to Infatuation.
 Overcoat,You are immune to damage from weather.
 Overgrow,"When you are below 20 HP, your Grass-type attacks deal +4 damage"
 Own Tempo,You are immune to being Confused.
-Parental Bond,"After attacking, Mega Kangas-khan may immediately make the same attack again. If they hit with the second attack, do not add any die rolls to your damage, instead only using your modifier and any non-dice bonuses as damage."
+Parental Bond,"After attacking, Mega Kangaskhan may immediately make the same attack again. If they hit with the second attack, do not add any die rolls to your damage, instead only using your modifier and any non-dice bonuses as damage."
 Pastel Veil,You and your allies within 10ft of you are immune to being Poisoned or Toxified.
 Perish Body,"When you are hit by a melee attack, the offender receives 3 Perish Coats. The Coat has the following ability: After acting, destroy one of your Perish Coats. If this is the third Perish coat you’ve destroyed during this encounter, set your HP to 0."
 Pickpocket,"When you are hit by a melee attack, you steal the offender’s held item, if any."
@@ -358,22 +358,22 @@ Steelworker,Your Steel-type attacks deal +4 damage.
 Stoneskin,Your Rock-type attacks deal +4 damage.
 Watery,Your Water-type attacks deal +4 damage.
 Winged,Your Flying-type attacks deal +4 damage.
-Buggy Spirit,Bug-type attacks used within 10ft of you by your-self or allies deal +4 damage.
+Buggy Spirit,Bug-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Dark Spirit,Dark-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Draconian Spirit,Dragon-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Fairy Spirit,Fairy-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Fiery Spirit,Fire-type attacks used within 10ft of you by yourself or allies deal +4 damage.
-Fighting Spirit,Fighting-type attacks used within 10ft of you by your-self or allies deal +4 damage.
+Fighting Spirit,Fighting-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Flighty Spirit,Flying-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Ghastly Spirit,Ghost-type attacks used within 10ft of you by yourself or allies deal +4 damage.
-Grassy Spirit,Grass-type attacks used within 10ft of you by your-self or allies deal +4 damage.
+Grassy Spirit,Grass-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Grounded Spirit,Ground-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Icy Spirit,Ice-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Normy Spirit,Poison-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Poisonous Spirit,Poison-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Psychy Spirit,Psychic-type attacks used within 10ft of you by yourself or allies deal +4 damage.
-Rocky Spirit,Rock-type attacks used within 10ft of you by your-self or allies deal +4 damage.
-Steely Spirit,Steel-type attacks used within 10ft of you by your-self or allies deal +4 damage.
+Rocky Spirit,Rock-type attacks used within 10ft of you by yourself or allies deal +4 damage.
+Steely Spirit,Steel-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Watery Spirit,Water-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Zappy Spirit,Electric-type attacks used within 10ft of you by yourself or allies deal +4 damage.
 Alacrity,Your Speed cannot be lowered by a foe’s effects.
@@ -389,7 +389,7 @@ Escape Artist,You are immune to being bound and cannot have your movement restri
 Gassy,As a free action you may deplete one use of Smoke Screen and use Smoke Screen.
 Gravitoid,As a free action you may deplete one use of Stealth Rock and use Stealth Rock.
 Gritty,"While afflicted, you have +1 Defense and +1 Special Defense."
-Haymaker,"When calculating damage, apply your relevant modi-fier twice."
+Haymaker,"When calculating damage, apply your relevant modifier twice."
 Herald,"If any allies within 10ft have no stat passives, they have your stat passives."
 Impervious,Your stats cannot be lowered.
 Jackstones,As a free action you may deplete one use of Spikes and use Spikes.
@@ -397,7 +397,7 @@ Last Breath,"When knocked out by an attack, all adjacent allies recover 1d12 HP.
 No Quarter,Your attacks made against Stunned or bound target deal +4 damage.
 Reformation,"The first time you take damage during combat, recover 1d12 HP."
 Resilience,You cannot receive any afflictions if you’ve already been cured of an affliction during the same combat.
-Resistance Up,"While below half HP, you have +2 Special De-fense."
+Resistance Up,"While below half HP, you have +2 Special Defense."
 Restoration,"Whenever you recover HP, recover an additional 1d6 HP."
 Ridicure,"Whenever a foe fails to hit an attack where you were a possible target, recover 1d4 HP."
 Sand Shelter,You take no damage from Sandstorming weather.

@@ -1,6 +1,7 @@
 {
     "$jsonSchema": {
       "required": [
+        "DexNo",
         "Name",
         "PokemonStats",
         "Type",
@@ -16,7 +17,14 @@
         "Habitats",
         "Proficiencies"
       ],
+      "additionalProperties": false,
       "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "DexNo": {
+          "bsonType": "int"
+        },
         "Name": {
           "bsonType": "string",
           "minLength": 1
@@ -159,32 +167,36 @@
           "minLength": 1
         },
         "LegendaryStats": {
-          "HP": {
-            "bsonType": "int",
-            "minimum": 1
-          },
-          "Moves": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string"
-            }
-          },
-          "LegendaryMoves": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string"
-            }
-          },
-          "Passives": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string"
-            }
-          },
-          "Features": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string"
+          "bsonType": "object",
+          "additionalProperties": false,
+          "properties": {
+            "HP": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "Moves": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            },
+            "LegendaryMoves": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            },
+            "Passives": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            },
+            "Features": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
             }
           }
         }
