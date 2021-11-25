@@ -32,7 +32,10 @@ if ($proc.ExitCode -ne 0){
 # test
 $env:Database = "test"
 mongosh $env:MongoDBConnectionString -f  .\database\scripts\update.js
-dotnet run --project "D:\Development\PTANet\backend-29\pta-backend\src\MongoDbImportTool\MongoDbImportTool.csproj"
+$proc = Start-Process -FilePath ".\src\MongoDbImportTool\bin\Debug\netcoreapp3.1\MongoDbImportTool.exe" -PassThru -Wait
+if ($proc.ExitCode -ne 0){
+    return 1
+}
 dotnet test .\src\PTABackEnd.sln --logger:"trx;LogFileName=C:\Users\zachagrey\.jenkins\workspace\PTA backend develop build/TestOutput.trx" --filter:Category=smoke
 
 # postbuild
