@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using TheReplacement.PTA.Common.Enums;
+using TheReplacement.PTA.Common.Interfaces;
 using TheReplacement.PTA.Common.Internal;
 using TheReplacement.PTA.Common.Models;
 
@@ -17,6 +18,7 @@ namespace TheReplacement.PTA.Common.Utilities
         private const MongoCollection Game = MongoCollection.Games;
         private const MongoCollection Npc = MongoCollection.Npcs;
         private const MongoCollection Pokemon = MongoCollection.Pokemon;
+
         private const MongoCollection Trainer = MongoCollection.Trainers;
         private static readonly Dictionary<string, string> UpdateMap = new Dictionary<string, string>()
         {
@@ -141,6 +143,21 @@ namespace TheReplacement.PTA.Common.Utilities
             {
                 return -1;
             }
+        }
+
+        public static BasePokemon FindBasePokemonByDexNo(int dexNo)
+        {
+            var pokemon = MongoCollectionHelper
+                .BasePokemon
+                .Find(pokemon => pokemon.DexNo == dexNo)
+                .SingleOrDefault(); ;
+
+            if (pokemon != null)
+            {
+                LoggerUtility.Info(Pokemon, $"Retrieved pokemon {dexNo}");
+            }
+
+            return pokemon;
         }
 
         /// <summary>
@@ -314,6 +331,24 @@ namespace TheReplacement.PTA.Common.Utilities
                 .Trainers
                 .Find(trainer => trainer.IsGM && trainer.GameId == gameId)
                 .Any();
+        }
+
+        /// <summary>
+        /// Attempts to add a game using the provided document
+        /// </summary>
+        /// <param name="pokemon">The document to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryAddBasePokemon(
+            BasePokemon pokemon,
+            out MongoWriteError error)
+        {
+            return TryAddDocument
+            (
+                Game,
+                pokemon.DexNo.ToString(),
+                () => MongoCollectionHelper.BasePokemon.InsertOne(pokemon),
+                out error
+            );
         }
 
         /// <summary>

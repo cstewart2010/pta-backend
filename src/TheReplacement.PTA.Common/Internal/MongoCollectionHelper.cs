@@ -17,7 +17,13 @@ namespace TheReplacement.PTA.Common.Internal
             Trainers = database.GetCollection<TrainerModel>("Trainers");
             Npcs = database.GetCollection<NpcModel>("NPCs");
             Logs = database.GetCollection<LoggerModel>("Logs");
+            BasePokemon = database.GetCollection<BasePokemon>("BasePokemon");
         }
+
+        /// <summary>
+        /// Represents the Npc Collection
+        /// </summary>
+        public static IMongoCollection<BasePokemon> BasePokemon { get; }
 
         /// <summary>
         /// Represents the Game Collection

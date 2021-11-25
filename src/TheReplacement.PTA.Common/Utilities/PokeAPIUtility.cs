@@ -104,6 +104,17 @@ namespace TheReplacement.PTA.Common.Utilities
             return pokemon;
         }
 
+        public static int GetDexNo(string pokemonName)
+        {
+            var pokemonData = InvokePokeAPI($"pokemon-species/{pokemonName.ToLower()}");
+            if (pokemonData == null)
+            {
+                throw new ArgumentException("Could not find pokemon using PokeAPI", nameof(pokemonName));
+            }
+
+            return (int)pokemonData["id"];
+        }
+
         private static PokemonModel GetEvolvedPokemon(
             PokemonModel currentForm,
             JToken evolvedPokemon,
