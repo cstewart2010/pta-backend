@@ -4,339 +4,345 @@
 currentCollections = db.getCollectionNames();
 const updatedValidators = {
   Games: {
-    "$jsonSchema": {
-      "required": [
-        "GameId",
-        "Nickname",
-        "IsOnline",
-        "PasswordHash",
-        "NPCs"
+    $jsonSchema: {
+      required: [
+        'GameId',
+        'Nickname',
+        'IsOnline',
+        'PasswordHash',
+        'NPCs'
       ],
-      "additionalProperties": false,
-      "properties": {
-      "_id": {
-        "bsonType": "objectId"
-      },
-      "GameId": {
-        "bsonType": "string",
-        "minLength": 36,
-        "maxLength": 36
-      },
-      "Nickname": {
-        "bsonType": "string",
-        "minLength": 1,
-        "maxLength": 18
-      },
-      "IsOnline": {
-        "bsonType": "bool"
-      },
-      "PasswordHash": {
-        "bsonType": "string",
-        "minLength": 1
-      },
-      "NPCs": {
-        "bsonType": "array",
-        "items": {
-        "bsonType": "string",
-        "minLength": 36,
-        "maxLength": 36
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
+        },
+        GameId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
+        Nickname: {
+          bsonType: 'string',
+          minLength: 1,
+          maxLength: 18
+        },
+        IsOnline: {
+          bsonType: 'bool'
+        },
+        PasswordHash: {
+          bsonType: 'string',
+          minLength: 1
+        },
+        NPCs: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string',
+            minLength: 36,
+            maxLength: 36
+          }
         }
-      }
       }
     }
   },
   NPCs: {
-    "$jsonSchema": {
-      "required": [
-        "NPCId",
-        "TrainerName",
-        "TrainerClasses",
-        "TrainerStats",
-        "Feats"
+    $jsonSchema: {
+      required: [
+        'NPCId',
+        'TrainerName',
+        'TrainerClasses',
+        'TrainerStats',
+        'Feats'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "NPCId": {
-          "bsonType": "string",
-          "minLength": 36,
-          "maxLength": 36
+        NPCId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
         },
-        "TrainerName": {
-          "bsonType": "string",
-          "minLength": 1,
-          "maxLength": 18
+        TrainerName: {
+          bsonType: 'string',
+          minLength: 1,
+          maxLength: 18
         },
-        "TrainerClasses": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        TrainerClasses: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           },
-          "maxItems": 4
+          maxItems: 4
         },
-        "TrainerStats": {
-          "bsonType": "object"
+        TrainerStats: {
+          bsonType: 'object'
         },
-        "Feats": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        Feats: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           }
         }
       }
     }
   },
   Pokemon: {
-    "$jsonSchema": {
-      "required": [
-        "PokemonId",
-        "DexNo",
-        "SpeciesName",
-        "TrainerId",
-        "Nickname",
-        "Gender",
-        "PokemonStatus",
-        "Moves",
-        "Type",
-        "CatchRate",
-        "Nature",
-        "IsShiny",
-        "IsOnActiveTeam",
-        "PokemonStats",
-        "Size",
-        "Weight",
-        "Rarity",
-        "Skills",
-        "Passives",
-        "EggGroups",
-        "EggHatchRate",
-        "Diet",
-        "Habitats",
-        "Proficiencies"
+    $jsonSchema: {
+      required: [
+        'PokemonId',
+        'DexNo',
+        'SpeciesName',
+        'TrainerId',
+        'Nickname',
+        'Gender',
+        'PokemonStatus',
+        'Moves',
+        'Type',
+        'CatchRate',
+        'Nature',
+        'IsShiny',
+        'IsOnActiveTeam',
+        'PokemonStats',
+        'Size',
+        'Weight',
+        'Rarity',
+        'Skills',
+        'Passives',
+        'EggGroups',
+        'EggHatchRate',
+        'Diet',
+        'Habitats',
+        'Proficiencies'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "PokemonId": {
-          "bsonType": "string",
-          "minLength": 36,
-          "maxLength": 36
+        PokemonId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
         },
-        "DexNo": {
-          "bsonType": "int",
-          "minimum": 1
+        DexNo: {
+          bsonType: 'int',
+          minimum: 1
         },
-        "TrainerId": {
-          "bsonType": "string",
-          "minLength": 36,
-          "maxLength": 36
+        SpeciesName: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Gender": {
-          "bsonType": "int",
-          "minimum": 0,
-          "maximum": 2
+        TrainerId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
         },
-        "PokemonStatus": {
-          "bsonType": "int",
-          "minimum": -1,
-          "maximum": 6
+        Gender: {
+          bsonType: 'string',
+          'enum': [
+            'Male',
+            'Female',
+            'Genderless'
+          ]
         },
-        "Nickname": {
-          "bsonType": "string",
-          "minLength": 1,
-          "maxLength": 18
+        PokemonStatus: {
+          bsonType: 'string'
         },
-        "Ability": {
-          "bsonType": "int",
-          "minimum": 1,
-          "maximum": 3
+        Nickname: {
+          bsonType: 'string',
+          minLength: 1,
+          maxLength: 18
         },
-        "Moves": {
-          "bsonType": "array",
-          "minItems": 1,
-          "maxItems": 6,
-          "items": {
-            "bsonType": "string"
+        Moves: {
+          bsonType: 'array',
+          minItems: 1,
+          maxItems: 6,
+          items: {
+            bsonType: 'string'
           }
         },
-        "Type": {
-          "bsonType": "int"
+        Type: {
+          bsonType: 'string'
         },
-        "CatchRate": {
-          "bsonType": "int",
-          "minimum": 0,
-          "maximum": 255
+        CatchRate: {
+          bsonType: 'int',
+          minimum: 0,
+          maximum: 255
         },
-        "IsOnActiveTeam": {
-          "bsonType": "bool"
+        IsOnActiveTeam: {
+          bsonType: 'bool'
         },
-        "IsShiny": {
-          "bsonType": "bool"
+        IsShiny: {
+          bsonType: 'bool'
         },
-        "Nature": {
-          "bsonType": "int",
-          "minimum": 1,
-          "maximum": 20
+        Nature: {
+          bsonType: 'string',
+          'enum': [
+            'Lonely',
+            'Brave',
+            'Adamant',
+            'Naughty',
+            'Bold',
+            'Relaxed',
+            'Impish',
+            'Lax',
+            'Timid',
+            'Hasty',
+            'Jolly',
+            'Naive',
+            'Modest',
+            'Mild',
+            'Quiet',
+            'Rash',
+            'Calm',
+            'Gentle',
+            'Sassy',
+            'Careful'
+          ]
         },
-        "PokemonStats": {
-          "bsonType": "object",
-          "required": [
-            "HP",
-            "Attack",
-            "Defense",
-            "SpecialAttack",
-            "SpecialDefense",
-            "Speed"
+        PokemonStats: {
+          bsonType: 'object',
+          required: [
+            'HP',
+            'Attack',
+            'Defense',
+            'SpecialAttack',
+            'SpecialDefense',
+            'Speed'
           ],
-          "properties": {
-            "HP": {
-              "bsonType": "int",
-              "minimum": 1
+          properties: {
+            HP: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "Attack": {
-              "bsonType": "int",
-              "minimum": 1
+            Attack: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "Defense": {
-              "bsonType": "int",
-              "minimum": 1
+            Defense: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "SpecialAttack": {
-              "bsonType": "int",
-              "minimum": 1
+            SpecialAttack: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "SpecialDefense": {
-              "bsonType": "int",
-              "minimum": 1
+            SpecialDefense: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "Speed": {
-              "bsonType": "int",
-              "minimum": 1
+            Speed: {
+              bsonType: 'int',
+              minimum: 1
             }
           }
         },
-        "Size": {
-          "bsonType": "string",
-          "enum": [
-            "Tiny",
-            "Small",
-            "Medium",
-            "Large",
-            "Dynamic",
-            "Huge",
-            "Gigantic"
+        Size: {
+          bsonType: 'string',
+          'enum': [
+            'Tiny',
+            'Small',
+            'Medium',
+            'Large',
+            'Dynamic',
+            'Huge',
+            'Gigantic'
           ]
         },
-        "Weight": {
-          "bsonType": "string",
-          "enum": [
-            "Featherweight",
-            "Light",
-            "Medium",
-            "Heavy",
-            "Dynamic",
-            "Superweight"
+        Weight: {
+          bsonType: 'string',
+          'enum': [
+            'Featherweight',
+            'Light',
+            'Medium',
+            'Heavy',
+            'Dynamic',
+            'Superweight'
           ]
         },
-        "Skills": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        Skills: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           }
         },
-        "Passives": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        Passives: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           }
         },
-        "Proficiencies": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        Proficiencies: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           }
         },
-        "EggGroups": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        EggGroups: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           }
         },
-        "EggHatchRate": {
-          "bsonType": "string",
-          "minLength": 1
+        EggHatchRate: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Habitats": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        Habitats: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           }
         },
-        "Diet": {
-          "bsonType": "string",
-          "minLength": 1
+        Diet: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Rarity": {
-          "bsonType": "string",
-          "enum": [
-            "Common",
-            "Uncommon",
-            "Rare"
+        Rarity: {
+          bsonType: 'string',
+          'enum': [
+            'Common',
+            'Uncommon',
+            'Rare'
           ]
         },
-        "SpecialFormName": {
-          "bsonType": "string",
-          "enum": [
-            "Mega",
-            "Gigantamax"
-          ]
+        GMaxMove: {
+          bsonType: 'string'
         },
-        "BaseFormName": {
-          "bsonType": "string",
-          "minLength": 1
+        EvolvedFrom: {
+          bsonType: 'string'
         },
-        "GMaxMove": {
-          "bsonType": "string",
-          "minLength": 1
-        },
-        "EvolvesFrom": {
-          "bsonType": "string",
-          "minLength": 1
-        },
-        "LegendaryStats": {
-          "bsonType": "object",
-          "additionalProperties": false,
-          "properties": {
-            "HP": {
-              "bsonType": "int",
-              "minimum": 1
+        LegendaryStats: {
+          bsonType: 'object',
+          additionalProperties: false,
+          properties: {
+            HP: {
+              bsonType: 'int'
             },
-            "Moves": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string"
+            Moves: {
+              bsonType: 'array',
+              items: {
+                bsonType: 'string'
               }
             },
-            "LegendaryMoves": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string"
+            LegendaryMoves: {
+              bsonType: 'array',
+              items: {
+                bsonType: 'string'
               }
             },
-            "Passives": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string"
+            Passives: {
+              bsonType: 'array',
+              items: {
+                bsonType: 'string'
               }
             },
-            "Features": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string"
+            Features: {
+              bsonType: 'array',
+              items: {
+                bsonType: 'string'
               }
             }
           }
@@ -345,131 +351,131 @@ const updatedValidators = {
     }
   },
   Trainers: {
-    "$jsonSchema": {
-      "required": [
-        "GameId",
-        "TrainerId",
-        "Honors",
-        "TrainerName",
-        "PasswordHash",
-        "TrainerClasses",
-        "TrainerStats",
-        "Feats",
-        "Money",
-        "IsOnline",
-        "Items",
-        "IsGM",
-        "Origin"
+    $jsonSchema: {
+      required: [
+        'GameId',
+        'TrainerId',
+        'Honors',
+        'TrainerName',
+        'PasswordHash',
+        'TrainerClasses',
+        'TrainerStats',
+        'Feats',
+        'Money',
+        'IsOnline',
+        'Items',
+        'IsGM',
+        'Origin'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "GameId": {
-          "bsonType": "string"
+        GameId: {
+          bsonType: 'string'
         },
-        "TrainerId": {
-          "bsonType": "string"
+        TrainerId: {
+          bsonType: 'string'
         },
-        "Honors": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string",
-            "minLength": 1
+        Honors: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string',
+            minLength: 1
           }
         },
-        "TrainerName": {
-          "bsonType": "string"
+        TrainerName: {
+          bsonType: 'string'
         },
-        "PasswordHash": {
-          "bsonType": "string",
-          "minLength": 1
+        PasswordHash: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "ActivityToken": {
-          "bsonType": "string"
+        ActivityToken: {
+          bsonType: 'string'
         },
-        "TrainerClasses": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        TrainerClasses: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           },
-          "maxItems": 4
+          maxItems: 4
         },
-        "TrainerStats": {
-          "bsonType": "object",
-          "required": [
-            "HP",
-            "Attack",
-            "Defense",
-            "SpecialAttack",
-            "SpecialDefense",
-            "Speed"
+        TrainerStats: {
+          bsonType: 'object',
+          required: [
+            'HP',
+            'Attack',
+            'Defense',
+            'SpecialAttack',
+            'SpecialDefense',
+            'Speed'
           ],
-          "properties": {
-            "HP": {
-              "bsonType": "int",
-              "minimum": 20,
-              "maximum": 32
+          properties: {
+            HP: {
+              bsonType: 'int',
+              minimum: 20,
+              maximum: 32
             },
-            "Attack": {
-              "bsonType": "int",
-              "minimum": 1
+            Attack: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "Defense": {
-              "bsonType": "int",
-              "minimum": 1
+            Defense: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "SpecialAttack": {
-              "bsonType": "int",
-              "minimum": 1
+            SpecialAttack: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "SpecialDefense": {
-              "bsonType": "int",
-              "minimum": 1
+            SpecialDefense: {
+              bsonType: 'int',
+              minimum: 1
             },
-            "Speed": {
-              "bsonType": "int",
-              "minimum": 1
+            Speed: {
+              bsonType: 'int',
+              minimum: 1
             }
           }
         },
-        "Feats": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string"
+        Feats: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           }
         },
-        "Money": {
-          "bsonType": "int"
+        Money: {
+          bsonType: 'int'
         },
-        "IsOnline": {
-          "bsonType": "bool"
+        IsOnline: {
+          bsonType: 'bool'
         },
-        "Items": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "object",
-            "properties": {
-              "Name": {
-                "bsonType": "string"
+        Items: {
+          bsonType: 'array',
+          additionalProperties: false,
+          items: {
+            bsonType: 'object',
+            properties: {
+              Name: {
+                bsonType: 'string'
               },
-              "Effect": {
-                "bsonType": "string"
+              Effects: {
+                bsonType: 'string'
               },
-              "Amount": {
-                "bsonType": "int",
-                "minimum": 1
+              Amount: {
+                bsonType: 'int',
+                minimum: 1
               }
             }
           }
         },
-        "IsGM": {
-          "bsonType": "bool"
+        IsGM: {
+          bsonType: 'bool'
         },
-        "Origin": {
-          "bsonType": "string",
-          "minLength": 1
+        Origin: {
+          bsonType: 'string'
         }
       }
     }
