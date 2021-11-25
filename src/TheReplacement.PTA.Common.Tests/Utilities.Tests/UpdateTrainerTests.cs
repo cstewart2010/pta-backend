@@ -30,6 +30,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
                 new ItemModel
                 {
                     Name = "Potion",
+                    Effects= "Restores 20 HPs",
                     Amount = 5
                 }
             };

@@ -2,7 +2,6 @@
 {
     public interface IItem
     {
-        public string Name { get; set; }
         public int Price { get; set; }
         public string Effect { get; set; }
     }

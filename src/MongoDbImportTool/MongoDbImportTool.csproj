@@ -50,7 +50,7 @@
     <None Update="json\skills.min.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="json\trainer_classess.min.json">
+    <None Update="json\trainer_classes.min.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="json\trainer_equipment.min.json">

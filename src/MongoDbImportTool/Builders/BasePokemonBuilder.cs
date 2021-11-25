@@ -9,7 +9,7 @@ using TheReplacement.PTA.Common.Utilities;
 
 namespace MongoDbImportTool.Builders
 {
-    public static class BasePokemonBuilder
+    internal static class BasePokemonBuilder
     {
         private static readonly IEnumerable<string> FirstThreeMoves = new[]
         {
@@ -24,18 +24,31 @@ namespace MongoDbImportTool.Builders
             "Move 6"
         };
 
+        private static readonly string BasePokemonJson = $"{JsonHelper.CurrentDirectory}/json/base_pokemon.min.json";
         private static int _incrementor = 0;
 
-        public static BasePokemon Build(JToken pokemonToken)
+        public static void AddBasePokemon()
         {
-            _incrementor++;
+            DatabaseHelper.AddDocuments("BasePokemon", GetPokemon(BasePokemonJson));
+        }
 
-            var pokemon = new BasePokemon
+        private static IEnumerable<BasePokemonModel> GetPokemon(string path)
+        {
+            foreach (var child in JsonHelper.GetToken(path))
+            {
+                _incrementor++;
+                yield return Build(child);
+            }
+        }
+
+        private static BasePokemonModel Build(JToken pokemonToken)
+        {
+            var pokemon = new BasePokemonModel
             {
                 Name = BuildPokemonName(pokemonToken),
                 BaseFormName = BuildBaseForm(pokemonToken),
-                Type = BuildType(pokemonToken).ToString().Replace('_', '/'),
-                Skills = BuildSkills(pokemonToken),
+                Type = JsonHelper.BuildType(pokemonToken),
+                Skills = JsonHelper.BuildSkills(pokemonToken),
                 PokemonStats = BuildStats(pokemonToken),
                 Moves = BuildMoves(pokemonToken),
                 Passives = BuildPassives(pokemonToken),
@@ -54,18 +67,17 @@ namespace MongoDbImportTool.Builders
             (pokemon.Size, pokemon.Weight) = GetSizeAndWeight(pokemonToken);
             pokemon.SpecialFormName = BuildSpecialFormName(pokemonToken, pokemon.BaseFormName);
             pokemon.GMaxMove = BuildGmaxMove(pokemonToken, pokemon.SpecialFormName);
-
             return pokemon;
         }
 
         private static string BuildBaseForm(JToken pokemonToken)
         {
-            return GetStringFromTokenOrDefault(pokemonToken, "Base Form");
+            return JsonHelper.GetStringFromTokenOrDefault(pokemonToken, "Base Form");
         }
 
         private static string BuildPokemonName(JToken pokemonToken)
         {
-            return GetStringFromToken(pokemonToken, "Pokemon");
+            return JsonHelper.GetStringFromToken(pokemonToken, "Pokemon");
         }
 
         private static StatsModel BuildStats(JToken pokemonToken)
@@ -81,42 +93,16 @@ namespace MongoDbImportTool.Builders
             };
         }
 
-        private static PokemonTypes BuildType(JToken pokemonToken)
-        {
-            return pokemonToken.Children<JProperty>()
-                .Where(child => child.Name.StartsWith("Type"))
-                .Select(child => child.Value.ToString())
-                .Aggregate(PokemonTypes.None, (prev, curr) =>
-                {
-                    if (string.IsNullOrEmpty(curr))
-                    {
-                        return prev;
-                    }
-
-                    if (!Enum.TryParse(curr, out PokemonTypes type))
-                    {
-                        throw new ArgumentOutOfRangeException
-                        (
-                            "type",
-                            curr,
-                            $"Expected one of {string.Join(',', Enum.GetNames(typeof(PokemonTypes)))}"
-                        );
-                    }
-
-                    return prev | type;
-                });
-        }
-
         private static (string Size, string Weight) GetSizeAndWeight(JToken pokemonToken)
         {
             var size = pokemonToken["Size"]?.ToString();
-            if (!IsStringWithValue(size))
+            if (!JsonHelper.IsStringWithValue(size))
             {
                 throw new MissingJsonPropertyException("Size");
             }
 
             var weight = pokemonToken["Weight"]?.ToString();
-            if (!IsStringWithValue(weight))
+            if (!JsonHelper.IsStringWithValue(weight))
             {
                 throw new MissingJsonPropertyException("Weight");
             }
@@ -147,15 +133,7 @@ namespace MongoDbImportTool.Builders
             return pokemonToken.Children<JProperty>()
                 .Where(child => FirstThreeMoves.Contains(child.Name))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue);
-        }
-
-        private static IEnumerable<string> BuildSkills(JToken pokemonToken)
-        {
-            return pokemonToken.Children<JProperty>()
-                .Where(child => child.Name.StartsWith("Skill"))
-                .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue);
+                .Where(JsonHelper.IsStringWithValue);
         }
 
         private static IEnumerable<string> BuildPassives(JToken pokemonToken)
@@ -163,7 +141,7 @@ namespace MongoDbImportTool.Builders
             return pokemonToken.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("Passive"))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue);
+                .Where(JsonHelper.IsStringWithValue);
         }
 
         private static IEnumerable<string> BuildProficiencies(JToken pokemonToken)
@@ -171,7 +149,7 @@ namespace MongoDbImportTool.Builders
             return pokemonToken.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("Proficiency"))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue);
+                .Where(JsonHelper.IsStringWithValue);
         }
 
         private static IEnumerable<string> BuildEggGroups(JToken pokemonToken)
@@ -179,7 +157,7 @@ namespace MongoDbImportTool.Builders
             return pokemonToken.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("EggGroup"))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue);
+                .Where(JsonHelper.IsStringWithValue);
         }
 
         private static IEnumerable<string> BuildHabitats(JToken pokemonToken)
@@ -187,22 +165,22 @@ namespace MongoDbImportTool.Builders
             return pokemonToken.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("Habitat"))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue);
+                .Where(JsonHelper.IsStringWithValue);
         }
 
         private static string BuildDiet(JToken pokemonToken)
         {
-            return GetStringFromToken(pokemonToken, "Diet");
+            return JsonHelper.GetStringFromToken(pokemonToken, "Diet");
         }
 
         private static string BuildRarity(JToken pokemonToken)
         {
-            return GetStringFromToken(pokemonToken, "Rarity");
+            return JsonHelper.GetStringFromToken(pokemonToken, "Rarity");
         }
 
         private static string BuildEggHatchRate(JToken pokemonToken)
         {
-            return GetStringFromToken(pokemonToken, "Egg Hatch Rate");
+            return JsonHelper.GetStringFromToken(pokemonToken, "Egg Hatch Rate");
         }
 
         private static string BuildSpecialFormName(
@@ -211,7 +189,7 @@ namespace MongoDbImportTool.Builders
         {
             return string.IsNullOrEmpty(baseForm)
                 ? string.Empty
-                : GetStringFromToken(pokemonToken, "Special Form Type");
+                : JsonHelper.GetStringFromToken(pokemonToken, "Special Form Type");
         }
 
         private static string BuildGmaxMove(
@@ -219,23 +197,23 @@ namespace MongoDbImportTool.Builders
             string specialForm)
         {
             return specialForm == "Gigantamax"
-                ? GetStringFromToken(pokemonToken, "Gigantamax Move")
+                ? JsonHelper.GetStringFromToken(pokemonToken, "Gigantamax Move")
                 : string.Empty;
         }
 
         private static string BuildEvolvesFrom(JToken pokemonToken)
         {
-            return GetStringFromTokenOrDefault(pokemonToken, "Evolves From");
+            return JsonHelper.GetStringFromTokenOrDefault(pokemonToken, "Evolves From");
         }
 
         private static int BuildStage(JToken pokemonToken)
         {
-            return GetIntFromToken(pokemonToken, "Stage");
+            return JsonHelper.GetIntFromToken(pokemonToken, "Stage");
         }
 
         private static LegendaryStatsModel BuildLegendaryStats(JToken pokemonToken)
         {
-            var hp = GetStringFromTokenOrDefault(pokemonToken, "Legendary HP");
+            var hp = JsonHelper.GetStringFromTokenOrDefault(pokemonToken, "Legendary HP");
             if (string.IsNullOrEmpty(hp))
             {
                 return LegendaryStatsModel.GetNonLegendaryStats();
@@ -247,55 +225,20 @@ namespace MongoDbImportTool.Builders
                 Moves = pokemonToken.Children<JProperty>()
                 .Where(child => SecondThreeMoves.Contains(child.Name))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue),
+                .Where(JsonHelper.IsStringWithValue),
                 LegendaryMoves = pokemonToken.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("Legendary Move"))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue),
+                .Where(JsonHelper.IsStringWithValue),
                 Passives = pokemonToken.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("Legendary Passive"))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue),
+                .Where(JsonHelper.IsStringWithValue),
                 Features = pokemonToken.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("Legendary Feature"))
                 .Select(child => child.Value.ToString())
-                .Where(IsStringWithValue),
+                .Where(JsonHelper.IsStringWithValue),
             };
-        }
-
-        private static string GetStringFromTokenOrDefault(
-            JToken token,
-            string property)
-        {
-            return token[property]?.ToString() ?? string.Empty;
-        }
-
-        private static string GetStringFromToken(
-            JToken token,
-            string property)
-        {
-            return token[property]?.ToString()
-                ?? throw new MissingJsonPropertyException(property);
-        }
-
-        private static int GetIntFromToken(
-            JToken token,
-            string property)
-        {
-            var propertyValue = token[property]?.ToString()
-                ?? throw new MissingJsonPropertyException(property);
-
-            if (!int.TryParse(propertyValue, out var result))
-            {
-                throw new InvalidJsonPropertyException((JProperty)token, typeof(int));
-            }
-
-            return result;
-        }
-
-        private static bool IsStringWithValue(string value)
-        {
-            return !string.IsNullOrWhiteSpace(value);
         }
     }
 }

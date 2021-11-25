@@ -29,7 +29,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return notFound;
             }
 
-            pokemon.AggregateStats();
             return ReturnSuccessfully(pokemon);
         }
 
@@ -80,39 +79,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             });
         }
 
-        [HttpPut("{pokemonId}/update")]
-        public ActionResult<PokemonModel> UpdatePokemon(string pokemonId)
-        {
-            Response.UpdateAccessControl();
-            var trainerId = Request.Query["trainerId"];
-            if (!Header.VerifyCookies(Request.Cookies, trainerId))
-            {
-                return Unauthorized();
-            }
-
-            var pokemon = GetPokemonFromTrainer(trainerId, pokemonId, out var error);
-            if (pokemon == null)
-            {
-                return error;
-            }
-
-            var updateResult = DatabaseUtility.UpdatePokemonStats
-            (
-                pokemonId,
-                Request.Query.ToDictionary(pair => pair.Key, pair => pair.Value.ToString())
-            );
-
-            if (!updateResult)
-            {
-                return StatusCode(500);
-            }
-
-            pokemon = DatabaseUtility.FindPokemonById(pokemonId);
-            pokemon.AggregateStats();
-            Response.RefreshToken();
-            return ReturnSuccessfully(pokemon);
-        }
-
         [HttpPut("{pokemonId}/evolve")]
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
@@ -136,7 +102,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
-            evolvedForm.AggregateStats();
             Response.RefreshToken();
             return ReturnSuccessfully(pokemon);
         }
@@ -221,14 +186,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 rightPokemon.TrainerId
             );
 
-            leftPokemon.AggregateStats();
             DatabaseUtility.UpdatePokemonTrainerId
             (
                 rightPokemon.PokemonId,
                 leftPokemon.TrainerId
             );
 
-            rightPokemon.AggregateStats();
             Response.RefreshToken();
         }
 
@@ -312,21 +275,35 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             badRequest = null;
             if (string.IsNullOrEmpty(evolvedFormName))
             {
-                badRequest = BadRequest(new
-                {
-                    message = "Missing evolvedFormName"
-                });
-
+                badRequest = BadRequest(new GenericMessage("Missing evolvedFormName"));
                 return null;
             }
 
-            var evolvedForm = PokeAPIUtility.GetEvolved(currentForm, evolvedFormName);
+            var keptMoves = Request.Query["keptMoves"].ToString()?.Split(',');
+            var newMoves = Request.Query["newMoves"].ToString()?.Split(',');
+            var total = keptMoves.Length + newMoves.Length;
+            if (total < 3)
+            {
+                badRequest = BadRequest(new GenericMessage("Too few moves"));
+                return null;
+            }
+            if (total > 6)
+            {
+                badRequest = BadRequest(new GenericMessage("Too many moves"));
+                return null;
+            }
+
+            var moveComparer = currentForm.Moves.Select(move => move.ToLower());
+            if (!keptMoves.All(move => moveComparer.Contains(move.ToLower())))
+            {
+                badRequest = BadRequest(new GenericMessage($"{currentForm.Nickname} doesn't contain one of {Request.Query["keptMoves"]}"));
+                return null;
+            }
+
+            var evolvedForm = StaticDocumentUtility.GetEvolved(currentForm, keptMoves, Request.Query["nextForm"], newMoves);
             if (evolvedForm == null)
             {
-                badRequest = BadRequest(new
-                {
-                    message = $"Could not evolve {currentForm.Nickname} to {evolvedFormName}"
-                });
+                badRequest = BadRequest(new GenericMessage($"Could not evolve {currentForm.Nickname} to {evolvedFormName}"));
             }
 
             return evolvedForm;

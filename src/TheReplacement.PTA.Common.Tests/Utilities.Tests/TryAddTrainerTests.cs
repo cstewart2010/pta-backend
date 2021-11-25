@@ -21,14 +21,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
         }
 
         [Fact]
-        public void TryAddTrainer_LevelOutOfRange_False()
-        {
-            var trainer = GetTestTrainer();
-            trainer.Level = -1;
-            PerformTryAddTrainerFailTest(trainer, Logger);
-        }
-
-        [Fact]
         public void TryAddTrainer_StatsNull_False()
         {
             var trainer = GetTestTrainer();
@@ -129,6 +121,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             trainer.Items.Add(new ItemModel
             {
                 Name = "Test Item",
+                Effects = "",
                 Amount = 5
             });
             PerformTryAddTrainerPassTest(trainer, Logger);

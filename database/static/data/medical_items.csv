@@ -1,4 +1,4 @@
-﻿Item,Price,Effect
+﻿Name,Price,Effects
 Potion,100,Heals a Pokémon 10 hit points.
 Super Potion,300,Heals a Pokémon 20 hit points.
 Hyper Potion,550,Heals a Pokémon 30 hit points.

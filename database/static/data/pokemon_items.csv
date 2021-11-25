@@ -1,4 +1,4 @@
-﻿Item,Price,Effect
+﻿Name,Price,Effects
 Accessory,-1,"Once per day, during the introduction appeal of a contest, add 1d4. If the result of that d4 is a 3 or 4, the Accessory cannot be used this way again unless repaired with the Accessorize feature. A Pokémon can only benefit from one accessory at a time."
 Bright Charm,-1,When you appeal to a judge you may use the Bright Charm to raise the judge’s voltage +1. The Bright Charm cannot be used this way again unless repaired with the Bright Charm feature. A Pokémon can only benefit from one accessory at a time.
 Flawless Accessory,-1,"3/day per day, during any appeal of a contest, add 1d4. If the result of that d4 is a 3 or 4, the Accessory cannot be anymore during this contest. A Pokémon can only benefit from one accessory at a time."

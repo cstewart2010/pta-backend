@@ -681,298 +681,297 @@ const updatedValidators = {
     }
   },
   Berries: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Price",
-        "Effects",
-        "Flavors",
-        "Rarity"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Price',
+        'Effects',
+        'Flavors',
+        'Rarity'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Price": {
-            "bsonType": "int"
+        Price: {
+          bsonType: 'int'
         },
-        "Effects": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         },
-        "Flavors": {
-            "bsonType": "int"
+        Flavors: {
+          bsonType: 'string'
         },
-        "Rarity": {
-            "bsonType": "string",
-            "enum": [
-                "Common",
-                "Uncommon",
-                "Rare"
-            ]
+        Rarity: {
+          bsonType: 'string',
+          'enum': [
+            'Common',
+            'Uncommon',
+            'Rare'
+          ]
         }
       }
     }
   },
   Features: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Effects"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Effects": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }
   },
   KeyItems: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Price",
-        "Effects"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Price',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Price": {
-            "bsonType": "int"
+        Price: {
+          bsonType: 'int'
         },
-        "Effects": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }
   },
   LegendaryFeatures: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Effect"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Effect": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }
   },
   MedicalItems: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Price",
-        "Effects"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Price',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Price": {
-            "bsonType": "int"
+        Price: {
+          bsonType: 'int'
         },
-        "Effects": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }
   },
   Moves: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Range",
-        "Type",
-        "Stat",
-        "Frequency"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Range',
+        'Type',
+        'Stat',
+        'Frequency'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Range": {
-          "bsonType": "int",
-          "minimum": 0
+        Range: {
+          bsonType: 'string'
         },
-        "Type": {
-          "bsonType": "int"
+        Type: {
+          bsonType: 'string'
         },
-        "Stat": {
-          "bsonType": "string",
-          "enum": [
-            "Attack",
-            "Special Attack",
-            "Effect",
-            "Variable"
+        Stat: {
+          bsonType: 'string',
+          'enum': [
+            'Attack',
+            'Special',
+            'Effect',
+            '(Variable)',
+            'Varies'
           ]
         },
-        "Frequency": {
-          "bsonType": "string",
-          "minLength": 1
+        Frequency: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "DiceRoll": {
-          "bsonType": "string",
-          "minLength": 1
+        DiceRoll: {
+          bsonType: 'string'
         },
-        "Effect": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         },
-        "GrantedSkills": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "string",
-            "minLength": 1
+        GrantedSkills: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
           }
         },
-        "ContestStat": {
-          "bsonType": "string",
-          "enum": [
-            "Beauty",
-            "Clever",
-            "Cool",
-            "Cute",
-            "Tough"
+        ContestStat: {
+          bsonType: 'string',
+          'enum': [
+            '',
+            'Beauty',
+            'Clever',
+            'Cool',
+            'Cute',
+            'Tough'
           ]
         },
-        "ContestKeyword": {
-          "bsonType": "string",
-          "enum": [
-            "Appeal",
-            "Attention Grabber",
-            "Big Show",
-            "Catching Up",
-            "Crowd Pleaser",
-            "End Set",
-            "Excitement",
-            "Final Appeal",
-            "Get Ready!",
-            "Good Show!",
-            "Hold That Thought",
-            "Incredible",
-            "Incentives",
-            "Interrupting Appeal",
-            "Inversed Appeal",
-            "Quick Set",
-            "Reflective Appeal",
-            "Reliable",
-            "Round Ender",
-            "Round Starter",
-            "Scrambler",
-            "Seen Nothing Yet",
-            "Slow Set",
-            "Special Attention",
-            "Start Set",
-            "Torrential Appeal",
-            "Unsettling"
+        ContestKeyword: {
+          bsonType: 'string',
+          'enum': [
+            '',
+            'Appeal',
+            'Attention Grabber',
+            'Big Show',
+            'Catching Up',
+            'Crowd Pleaser',
+            'End Set',
+            'Excitement',
+            'Final Appeal',
+            'Get Ready!',
+            'Good Show!',
+            'Hold That Thought',
+            'Incredible',
+            'Incentives',
+            'Interrupting Appeal',
+            'Inversed Appeal',
+            'Quick Set',
+            'Reflective Appeal',
+            'Reliable',
+            'Round Ender',
+            'Round Starter',
+            'Scrambler',
+            'Seen Nothing Yet',
+            'Slow Set',
+            'Special Attention',
+            'Start Set',
+            'Torrential Appeal',
+            'Unsettling'
           ]
         }
       }
     }
   },
   Origins: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Skill",
-        "Lifestyle",
-        "Saving",
-        "Equipment",
-        "Pokemon",
-        "Feature"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Skill',
+        'Lifestyle',
+        'Savings',
+        'Equipment',
+        'StartingPokemon',
+        'Feature'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Skill": {
-          "bsonType": "string",
-          "minLength": 1
+        Skill: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Lifestyle": {
-          "bsonType": "string",
-          "enum": [
-            "Difficult",
-            "Modest",
-            "Comfortable",
-            "Wealthy"
+        Lifestyle: {
+          bsonType: 'string',
+          'enum': [
+            'Difficult',
+            'Modest',
+            'Comfortable',
+            'Wealthy',
+            'Special',
+            'Variable',
+            'You just hatched!'
           ]
         },
-        "Savings": {
-          "bsonType": "int",
-          "minimum": 0
+        Savings: {
+          bsonType: 'int',
+          minimum: 0
         },
-        "Equipment": {
-          "bsonType": "string",
-          "minLength": 1
+        Equipment: {
+          bsonType: 'string'
         },
-        "Pokemon": {
-          "bsonType": "string",
-          "minLength": 1
+        StartingPokemon: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Feature": {
-          "bsonType": "object",
-          "required": [
-            "Name",
-            "Effect"
+        Feature: {
+          bsonType: 'object',
+          required: [
+            'Name',
+            'Effects'
           ],
-          "additionalProperties": false,
-          "properties": {
-            "Name": {
-              "bsonType": "string",
-              "minLength": 1
+          additionalProperties: false,
+          properties: {
+            _id: {
+              bsonType: 'objectId'
             },
-            "Effect": {
-              "bsonType": "string",
-              "minLength": 1
+            Name: {
+              bsonType: 'string',
+              minLength: 1
+            },
+            Effects: {
+              bsonType: 'string',
+              minLength: 1
             }
           }
         }
@@ -980,175 +979,174 @@ const updatedValidators = {
     }
   },
   Passives: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Effect"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Effect": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }
   },
   Pokeballs: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Price",
-        "Effects"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Price',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Price": {
-            "bsonType": "int"
+        Price: {
+          bsonType: 'int'
         },
-        "Effects": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }
   },
   PokemonItems: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Price",
-        "Effects"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Price',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Price": {
-            "bsonType": "int"
+        Price: {
+          bsonType: 'int'
         },
-        "Effects": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }
   },
   Skills: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Effect"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Effect": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }
   },
   TrainerClasses: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "IsBaseClass",
-        "Feats"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'BaseClass',
+        'IsBaseClass',
+        'Feats',
+        'PrimaryStat',
+        'SecondaryStat',
+        'Skills'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "BaseClass": {
-          "bsonType": "string",
-          "minLength": 1
+        BaseClass: {
+          bsonType: 'string'
         },
-        "IsBaseClass": {
-          "bsonType": "bool"
+        IsBaseClass: {
+          bsonType: 'bool'
         },
-        "Feats": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "object",
-            "required": [
-              "Name",
-              "Frequency",
-              "LevelLearned"
-            ],
-            "properties": {
-              "Name": {
-                "bsonType": "string",
-                "minLength": 1
+        Feats: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'object',
+            additionalProperties: false,
+            properties: {
+              Name: {
+                bsonType: 'string',
+                minLength: 1
               },
-              "Frequency": {
-                "bsonType": "string",
-                "minLength": 1
-              },
-              "LevelLearned": {
-                "bsonType": "int",
-                "minimum": 1,
-                "maximum": 15
+              LevelLearned: {
+                bsonType: 'int',
+                minimum: 1,
+                maximum: 15
               }
             }
           }
+        },
+        PrimaryStat: {
+          bsonType: 'string'
+        },
+        SecondaryStat: {
+          bsonType: 'string'
+        },
+        Skills: {
+          bsonType: 'string'
         }
       }
     }
   },
   TrainerEquipment: {
-    "$jsonSchema": {
-      "required": [
-        "Name",
-        "Price",
-        "Effects"
+    $jsonSchema: {
+      required: [
+        'Name',
+        'Price',
+        'Effects'
       ],
-      "additionalProperties": false,
-      "properties": {
-        "_id": {
-          "bsonType": "objectId"
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
         },
-        "Name": {
-          "bsonType": "string",
-          "minLength": 1
+        Name: {
+          bsonType: 'string',
+          minLength: 1
         },
-        "Price": {
-            "bsonType": "int"
+        Price: {
+          bsonType: 'int'
         },
-        "Effects": {
-          "bsonType": "string",
-          "minLength": 1
+        Effects: {
+          bsonType: 'string'
         }
       }
     }

@@ -1,4 +1,4 @@
-﻿Name,Range,Type,Stat,Frequency,DiceRoll,Effect,Granted Skills,Contest Stat,Contest Keyword
+﻿Name,Range,Type,Stat,Frequency,DiceRoll,Effects,Granted Skills,Contest Stat,Contest Keyword
 (Elemental Attack),Varies,(Variable),Varies,Varies,,"Mechanical Rotom will have an attack related to whatever machine they’ve inhabiting while using their Wired passives. It may have an Ice-type attack while inhabiting a fridge or icebox, or a Fire-type attack while inhabiting an oven or microwave.",,,
 Absolutely Breathtaking,Ranged(20ft burst),Normal,Effect,1/day,,"On hit, all enemy Pokémon targets are stunned. As long as you do not move or make another attack during the next three rounds of combat, the targets remained stunned. If you are moved, the effects of Absolutely Breathtaking ends.",,,
 Absorb,Melee,Grass,Special,3/day,2d8,"On hit, you regain HP equal to half of the damage dealt.",,Clever,Good Show!
@@ -362,7 +362,7 @@ King’s Strike,Ranged (30ft beam),(Variable),Attack,1/day,3d12,"King’s Strike
 Knight’s Strike,Melee,(Variable),Attack,At-Will,2d6,"Knight’s Strike is the type your Knight’s Sword is attuned to. Choose one each time you use Knight’s Strike:-On a hit, the target takes a -2 penalty to Attack, Defense, Special Attack, Special Defense, or Speed for one round. This cannot be stacked.-On a hit, gain a +2 bonus to Attack, Defense, Special Attack, Special Defense, or Speed for one round. You take a -1 penalty to skill checks related to the relevant stat for one round (netting no overall bonus or penalty to skills). This cannot be stacked.-Knight’s Sword deals 2d8 instead.-Knight’s Sword is ranged (15 ft beam).",,,
 Knock Off,Melee,Dark,Attack,3/day,3d8,"On hit, the target drops any held items or weapons.",,Clever,Appeal
 Land's Wrath,Ranged(40ft),Ground,Attack,3/day,5d12,,,,
-Language,Self,Normal,Effect,,,"Language takes up a move slot, but is not an attack or move with any affect in battle. Language can be learned multiple times. When Language is acquired, chose a human language. You are capable of speaking basic sentences in the chosen languages. If the same human language is chosen by multiple instances of Language, you can speak that language at any level complexity.",,,
+Language,Self,Normal,Effect,At-Will,,"Language takes up a move slot, but is not an attack or move with any affect in battle. Language can be learned multiple times. When Language is acquired, chose a human language. You are capable of speaking basic sentences in the chosen languages. If the same human language is chosen by multiple instances of Language, you can speak that language at any level complexity.",,,
 Laser Focus,Ranged(30ft),Normal,Effect,3/day,,"On hit, your next attack against the same target will be a Critical Hit. You still need to make an Accuracy Check.",,Clever,Good Show!
 Lash Out,Melee,Dark,Attack,1/day,3d12,"If your stats were lowered this round by the target, use 6d12 for damage instead.",,Cute,Inversed Appeal
 Lava Plume,Ranged(20ft burst),Fire,Special,1/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, targets are burned.",,Tough,Round Starter
@@ -601,7 +601,7 @@ Shell Smash,Self,Normal,Effect,1/day,,"As a free action, your Defense and Specia
 Shell Trap,Self,Fire,Effect,1/day,,"Shell Trap is used as a Reaction. If you are hit by an enemy with an attack that makes contact with you, take the damage and any effects of the attack and then deal 3d12 Fire-type special attack damage to the attacker even if you are knocked out. You do not need to roll an accuracy check to hit the offender.",,Cool,Hold That Thought
 Shield Protect,Self,Normal,Effect,3/day,,"Shield Protect is used as a Reaction. If you are hit by an attack, ignore the damage and any effects of the attack.",,,
 Shock Wave,Ranged(20ft),Electric,Special,3/day,3d8,You can’t miss targets with less than 15 Special Defense.,Zapper,Cool,Round Starter
-Shore Up,Self,Ground,Effect,1/day,,"You are healed HP equal to half of the target’s Max HP. If you are within Sandstorming Weather, you are healed HP equal to 3/4ths of your Max HP instead.",,Beauty,MESSAGE ZEPH#1048
+Shore Up,Self,Ground,Effect,1/day,,"You are healed HP equal to half of the target’s Max HP. If you are within Sandstorming Weather, you are healed HP equal to 3/4ths of your Max HP instead.",,Beauty,Reflective Appeal
 Signal Beam,Ranged(15ft beam),Bug,Special,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Confused.",,Beauty,Incentives
 Silver Wind,Ranged(10ft),Bug,Special,1/day,2d8,"On hit, your Attack, Special Attack, Defense, Special Defense, and Speed are each raised +1 for 1 hour.",,Beauty,Incentives
 Sing,Ranged(30ft burst),Normal,Effect,1/day,,"Sing has -8 during Accuracy Check. On hit, all targets fall Asleep.",,Cute,Excitement

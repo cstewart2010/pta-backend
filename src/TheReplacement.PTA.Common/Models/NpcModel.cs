@@ -24,7 +24,7 @@ namespace TheReplacement.PTA.Common.Models
         public IEnumerable<string> TrainerClasses { get; set; }
 
         /// <inheritdoc />
-        public TrainerStatsModel TrainerStats { get; set; }
+        public StatsModel TrainerStats { get; set; }
 
         /// <inheritdoc />
         public IEnumerable<string> Feats { get; set; }

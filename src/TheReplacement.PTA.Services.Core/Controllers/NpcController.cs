@@ -79,7 +79,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 Feats = Request.Query["feats"].ToString().Split(','),
                 TrainerClasses = Request.Query["classes"].ToString().Split(','),
                 TrainerName = trainerName,
-                TrainerStats = new TrainerStatsModel()
+                TrainerStats = new StatsModel()
             };
         }
     }
