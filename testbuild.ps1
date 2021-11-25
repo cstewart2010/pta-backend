@@ -32,6 +32,7 @@ if ($proc.ExitCode -ne 0){
 # test
 $env:Database = "test"
 mongosh $env:MongoDBConnectionString -f  .\database\scripts\update.js
+Write-Host "Updating the Test Environment"
 $proc = Start-Process -FilePath ".\src\MongoDbImportTool\bin\Debug\netcoreapp3.1\MongoDbImportTool.exe" -PassThru -Wait
 if ($proc.ExitCode -ne 0){
     return 1
