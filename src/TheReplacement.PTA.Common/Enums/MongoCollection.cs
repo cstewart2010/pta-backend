@@ -6,23 +6,23 @@
     public enum MongoCollection
     {
         /// <summary>
-        /// Represents the Game collection
+        /// Represents the Games collection
         /// </summary>
-        Game,
+        Games = 1,
 
         /// <summary>
-        /// Represents the Npc collection
+        /// Represents the Npcs collection
         /// </summary>
-        Npc,
+        Npcs = 2,
 
         /// <summary>
         /// Represents the Pokemon collection
         /// </summary>
-        Pokemon,
+        Pokemon = 3,
 
         /// <summary>
-        /// Represents the Trainer collection
+        /// Represents the Trainers collection
         /// </summary>
-        Trainer
+        Trainers = 4
     }
 }

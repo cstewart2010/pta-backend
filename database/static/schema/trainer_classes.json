@@ -1,0 +1,52 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "Name",
+        "IsBaseClass",
+        "Feats"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "BaseClass": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "IsBaseClass": {
+          "bsonType": "bool"
+        },
+        "Feats": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "required": [
+              "Name",
+              "Frequency",
+              "LevelLearned"
+            ],
+            "properties": {
+              "Name": {
+                "bsonType": "string",
+                "minLength": 1
+              },
+              "Frequency": {
+                "bsonType": "string",
+                "minLength": 1
+              },
+              "LevelLearned": {
+                "bsonType": "int",
+                "minimum": 1,
+                "maximum": 15
+              }
+            }
+          }
+        }
+      }
+    }
+  }

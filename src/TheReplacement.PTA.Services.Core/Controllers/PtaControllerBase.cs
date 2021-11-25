@@ -30,10 +30,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             IDocument document = Collection switch
             {
-                MongoCollection.Game => DatabaseUtility.FindGame(id),
-                MongoCollection.Npc => DatabaseUtility.FindNpc(id),
+                MongoCollection.Games => DatabaseUtility.FindGame(id),
+                MongoCollection.Npcs => DatabaseUtility.FindNpc(id),
                 MongoCollection.Pokemon => DatabaseUtility.FindPokemonById(id),
-                MongoCollection.Trainer => DatabaseUtility.FindTrainerById(id),
+                MongoCollection.Trainers => DatabaseUtility.FindTrainerById(id),
                 _ => throw new ArgumentOutOfRangeException(),
             };
 

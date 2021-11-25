@@ -1,0 +1,205 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "DexNo",
+        "Name",
+        "PokemonStats",
+        "Type",
+        "Size",
+        "Weight",
+        "Rarity",
+        "Skills",
+        "Passives",
+        "Moves",
+        "EggGroups",
+        "EggHatchRate",
+        "Diet",
+        "Habitats",
+        "Proficiencies"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "DexNo": {
+          "bsonType": "int"
+        },
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "PokemonStats": {
+          "bsonType": "object",
+          "required": [
+            "HP",
+            "Attack",
+            "Defense",
+            "SpecialAttack",
+            "SpecialDefense",
+            "Speed"
+          ],
+          "properties": {
+            "HP": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "Attack": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "Defense": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "SpecialAttack": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "SpecialDefense": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "Speed": {
+              "bsonType": "int",
+              "minimum": 1
+            }
+          }
+        },
+        "Moves": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Type": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Size": {
+          "bsonType": "string",
+          "enum": [
+            "Tiny",
+            "Small",
+            "Medium",
+            "Large",
+            "Large (Dynamic)",
+            "Huge",
+            "Gigantic"
+          ]
+        },
+        "Weight": {
+          "bsonType": "string",
+          "enum": [
+            "Featherweight",
+            "Light",
+            "Medium",
+            "Heavy",
+            "Heavy (Dynamic)",
+            "Superweight"
+          ]
+        },
+        "Skills": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Passives": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Proficiencies": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "EggGroups": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "EggHatchRate": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Habitats": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          }
+        },
+        "Diet": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Rarity": {
+          "bsonType": "string",
+          "enum": [
+            "Common",
+            "Uncommon",
+            "Rare"
+          ]
+        },
+        "SpecialFormName": {
+          "bsonType": "string",
+          "enum": [
+            "Mega",
+            "Gigantamax"
+          ]
+        },
+        "BaseFormName": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "GMaxMove": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "EvolvesFrom": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "LegendaryStats": {
+          "bsonType": "object",
+          "additionalProperties": false,
+          "properties": {
+            "HP": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "Moves": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            },
+            "LegendaryMoves": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            },
+            "Passives": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            },
+            "Features": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }

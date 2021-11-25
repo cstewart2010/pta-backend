@@ -44,7 +44,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 return false;
             }
 
-            LoggerUtility.Info(MongoCollection.Trainer, $"Successfully imported game {import.GameSession.GameId}");
+            LoggerUtility.Info(MongoCollection.Trainers, $"Successfully imported game {import.GameSession.GameId}");
             return true;
         }
 
@@ -123,7 +123,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 return;
             }
 
-            LoggerUtility.Info(MongoCollection.Trainer, $"Successfully imported trainer {trainer.TrainerId}");
+            LoggerUtility.Info(MongoCollection.Trainers, $"Successfully imported trainer {trainer.TrainerId}");
             errors = import.Pokemon
                 .Select(pokemon => AddPokemon(pokemon, trainer.TrainerId))
                 .Where(error => !string.IsNullOrEmpty(error))

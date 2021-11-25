@@ -18,7 +18,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         public TrainerContoller()
         {
-            Collection = MongoCollection.Trainer;
+            Collection = MongoCollection.Trainers;
         }
 
         [HttpGet("{trainerId}/{pokemonId}")]

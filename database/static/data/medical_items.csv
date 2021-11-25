@@ -1,0 +1,38 @@
+﻿Name,Price,Effects
+Potion,100,Heals a Pokémon 10 hit points.
+Super Potion,300,Heals a Pokémon 20 hit points.
+Hyper Potion,550,Heals a Pokémon 30 hit points.
+Max Potion,850,Heals a Pokémon to their Max HP.
+Full Restore,1200,Heals a Pokémon to their Max HP and cures them of any afflictions.
+Potion Water,100,Heals a Human10 hit points.
+Super Soda,300,Heals a Human 20 hit points.
+Hyper Lemonade,550,Heals a Human 30 hit points.
+Antidote,120,Cures a Pokémon or human of Poisoning or Toxification.
+Paralyze Heal,120,Cures a Pokémon or human or Paralysis.
+Awakening,120,Cures a Pokémon or human of being unnaturally Asleep.
+Burn Heal,120,Cures a Pokémon or human of Burns.
+Ice Heal,120,Cures a Pokémon or human of Freezing.
+Full Heal,520,Cures a Pokémon or human of all afflictions (excluding Curses).
+Ether,480,A Pokémon’s strength is partially restored and can again use one of its 1/day or 3/day frequency moves as if it has taken an extended rest.
+Elixer,1280,A Pokémon’s strength is restored and can again use its 1/day or 3/day frequency moves as if it taken an extended rest.
+HP Up,9800,Permanently increase HP by 4.
+Protein,9800,Permanently increase Attack by 1.
+Iron,9800,Permanently increase Defense by 1.
+Calcium,9800,Permanently increase Sp. Attack by 1.
+Zinc,9800,Permanently increase Sp. Def by 1.
+Carbos,9800,Permanently increase speed by 1.
+Revive,1350,Restore an unconscious Pokémon to half of its max HP.
+Max Revive,1950,Restore an unconscious Pokémon to its max HP.
+Repel,150,"Wild Pokémon find the smell repul- sive for one hour after applied, but may ignore it to protect something precious to them."
+Super Repel,400,"Wild Pokémon find the smell repul- sive for three hours after applied, but may ignore it to protect something precious to them."
+Heal Powder,480,Removes any affliction
+Energy Powder,125,Recovers 15 Hit Points (Pokémon)
+Energy Root,400,Recovers 30 Hit Points (Pokémon)
+Revival Herb,1000,Recovers an unconscious Pokémon to half of their max HP.
+Made Mint,-1,"When consumed by a Pokémon, this mint will change a stat to be positively or negatively affected for the Pokémon. Change the Pokémon’s nature to match the new positive or negatively affected stat, adjusting the other stat that is no longer tied to nature. You cannot neutralize a nature with Made Mint, instead they must always affect different stats."
+X Attack,-1,Increases a Pokémon's Attack by 1 for 2 mins. This effect does not stack.
+X Defend,-1,Increases a Pokémon's Defense by 1 for 2 mins. This effect does not stack.
+X Special,-1,Increases a Pokémon's Special Attack by 1 for 2 mins. This effect does not stack.
+X Special Defend,-1,Increases a Pokémon's Special Defense by 1 for 2 mins. This effect does not stack.
+X Speed,-1,Increases a Pokémon's Speedby 1 for 2 mins. This effect does not stack.
+X Accuracy,-1,Increases a Pokémon's accuracy checkby 1 for 1 min. This effect does not stack.

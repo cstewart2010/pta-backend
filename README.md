@@ -45,8 +45,11 @@ PTA BackEnd
 # First Time User Setup
 
 ## Environment Variables
-MongoDBConnectionString = mongodb+srv://**dbusername**:**dbPassword**@**url/to/mongo**/PTA?retryWrites=true&w=majority  
-Example: mongodb+srv://**dbAdmin**:**dbPassword**@**pokemontabletopdatabase.com**/PTA?retryWrites=true&w=majority  
+MongoUsername = **dbusername**  
+MongoPassword = **dbPassword**  
+Database = **db**  
+MongoDBConnectionString = mongodb+srv://**$env:MongoUsername**:**$env:MongoPassword**@**url/to/mongo**/**$env:Database**?retryWrites=true&w=majority  
+Example: mongodb+srv://**dbAdmin**:**dbPassword**@**pokemontabletopdatabase.com**/**PTA**?retryWrites=true&w=majority  
 [Back to top](#Table-Of-Contents)
 
 ---

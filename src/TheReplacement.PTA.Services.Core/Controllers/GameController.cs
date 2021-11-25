@@ -17,7 +17,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         public GameController()
         {
-            Collection = MongoCollection.Game;
+            Collection = MongoCollection.Games;
         }
 
         [HttpGet("{gameId}")]
@@ -43,7 +43,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return notFound;
             }
 
-            var trainerDocument = GetDocument(trainerId, MongoCollection.Trainer, out notFound);
+            var trainerDocument = GetDocument(trainerId, MongoCollection.Trainers, out notFound);
             if (!(trainerDocument is TrainerModel trainer))
             {
                 return notFound;
@@ -301,7 +301,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameMasterId = Request.Query["gameMasterId"];
-            var trainerDocument = GetDocument(gameMasterId, MongoCollection.Trainer, out notFound);
+            var trainerDocument = GetDocument(gameMasterId, MongoCollection.Trainers, out notFound);
             if (!(trainerDocument is TrainerModel trainer && trainer.IsGM))
             {
                 return notFound;
@@ -369,7 +369,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return null;
             }
 
-            var trainerDocument = GetDocument(gameMasterId, MongoCollection.Trainer, out notFound);
+            var trainerDocument = GetDocument(gameMasterId, MongoCollection.Trainers, out notFound);
             if (!(trainerDocument is TrainerModel trainer && trainer.IsGM))
             {
                 return null;
@@ -430,12 +430,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             if (DatabaseUtility.DeleteTrainersByGameId(gameId) > -1)
             {
                 message = $"Successfully deleted all trainers associate with {gameId}";
-                LoggerUtility.Info(MongoCollection.Trainer, message);
+                LoggerUtility.Info(MongoCollection.Trainers, message);
             }
             else
             {
                 message = $"Failed to delete trainers";
-                LoggerUtility.Error(MongoCollection.Trainer, message);
+                LoggerUtility.Error(MongoCollection.Trainers, message);
             }
 
             return new GenericMessage(message);

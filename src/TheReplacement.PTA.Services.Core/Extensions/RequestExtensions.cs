@@ -3,14 +3,26 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
+using TheReplacement.PTA.Services.Core.Messages;
 
 namespace TheReplacement.PTA.Services.Core.Extensions
 {
     internal static class RequestExtensions
     {
-        private static readonly IEnumerable<string> MandatoryPokemonKeys = new[] { "pokemon", "nature", "naturalMoves", "expYield", "catchRate", "experience", "level" };
+        private static readonly IEnumerable<string> MandatoryPokemonKeys = new[] { "pokemon", "nature", "gender", "status", };
+
+        private static readonly IEnumerable<string> MandatoryTrainerKeys = new[]
+        {
+            "attack",
+            "defense",
+            "specialAttack",
+            "specialDefense",
+            "speed"
+        };
+
         public static string GetJsonFromRequest(this HttpRequest request)
         {
             var jsonFile = request.Form.Files.First(file => Path.GetExtension(file.FileName).ToLower() == ".json");
@@ -44,7 +56,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         public static TrainerModel BuildGM(
             this HttpRequest request,
             string gameId,
-            out object badRequestMessage)
+            out AbstractMessage badRequestMessage)
         {
             var trainer =  BuildTrainer
             (
@@ -66,7 +78,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         public static TrainerModel BuildTrainer(
             this HttpRequest request,
             string gameId,
-            out object badRequestMessage)
+            out AbstractMessage badRequestMessage)
         {
             var trainer =  BuildTrainer
             (
@@ -79,12 +91,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
             if (!(trainer == null || DatabaseUtility.FindTrainerByUsername(trainer.TrainerName, gameId) == null))
             {
-                badRequestMessage = new
-                {
-                    message = "Duplicate trainerName",
-                    gameId,
-
-                };
+                badRequestMessage = new GenericMessage($"Duplicate trainerName found in {gameId}");
             }
 
             return trainer;
@@ -93,31 +100,23 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         public static PokemonModel BuildPokemon(
             this HttpRequest request,
             string trainerId,
-            out object badRequestMessage)
+            out AbstractMessage badRequestMessage)
         {
-            if (ValidateMandatoryPokemonKeys(request, out badRequestMessage))
+            if (ValidateMandatoryPokemonKeys(request, out var invalid))
             {
+                badRequestMessage = invalid;
                 return null;
             }
 
-            var pokemon = BuildDefaultPokemon(request, out badRequestMessage);
+            var pokemon = BuildDefaultPokemon(request, out var error);
             if (pokemon == null)
             {
+                badRequestMessage = error;
                 return null;
             }
 
-            if (!TryCompletePokemon(request, pokemon, out badRequestMessage))
-            {
-                return null;
-            }
-
-            if (!string.IsNullOrWhiteSpace(request.Query["nickname"]))
-            {
-                pokemon.Nickname = request.Query["nickname"];
-            }
-
+            badRequestMessage = null;
             pokemon.TrainerId = trainerId;
-            pokemon.AggregateStats();
             return pokemon;
         }
 
@@ -173,59 +172,51 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         }
 
         private static bool ValidateMandatoryPokemonKeys(HttpRequest request,
-            out object error)
+            out InvalidQueryStringMessage error)
         {
             var fails = MandatoryPokemonKeys.Where(key => string.IsNullOrWhiteSpace(request.Query[key]));
-            error = new
+            error = new InvalidQueryStringMessage
             {
-                message = "Missing the following parameters in the query",
-                fails
+                MissingParameters = fails
             };
             return fails.Any();
         }
 
-        private static bool TryCompletePokemon(
-            HttpRequest request,
-            PokemonModel pokemon,
-            out object error)
-        {
-            (pokemon.ExpYield, pokemon.CatchRate, pokemon.Experience, pokemon.Level) = GetNumerics(request, out var numberErrors);
-            (pokemon.NaturalMoves, pokemon.TMMoves) = GetMoveLists(request, out var movesErrors);
-            if (numberErrors.Any() || movesErrors.Any())
-            {
-                error = new
-                {
-                    numberErrors,
-                    movesErrors
-                };
-
-                return false;
-            }
-
-            error = null;
-            return true;
-        }
-
         private static PokemonModel BuildDefaultPokemon(
             HttpRequest request,
-            out object error)
+            out GenericMessage error)
         {
             error = null;
-            var pokemonName = request.Query["pokemon"];
-            var natureName = request.Query["nature"];
-            var pokemon = PokeAPIUtility.GetPokemon
+            if (!Enum.TryParse(request.Query["gender"], true, out Gender gender))
+            {
+                error = new GenericMessage($"Invalid gender in request");
+                return null;
+            }
+
+            if (!Enum.TryParse(request.Query["nature"], true, out Nature nature))
+            {
+                error = new GenericMessage($"Invalid nature in request");
+                return null;
+            }
+
+            if (!Enum.TryParse(request.Query["status"], true, out Status status))
+            {
+                error = new GenericMessage($"Invalid status in request");
+                return null;
+            }
+
+            var pokemon = StaticDocumentUtility.GetNewPokemon
             (
-                pokemonName,
-                natureName
+                request.Query["pokemon"],
+                nature,
+                gender,
+                status,
+                request.Query["nickname"]
             );
 
             if (pokemon == null)
             {
-                error = new
-                {
-                    message = "Failed to build pokemon"
-                };
-
+                error = new GenericMessage("Failed to build pokemon");
                 return null;
             }
 
@@ -237,120 +228,71 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             string gameId,
             string userKey,
             string passKey,
-            out object badRequestMessage)
+            out AbstractMessage error)
         {
+            var fails = MandatoryTrainerKeys.Where(key =>
+                !(request.Query.ContainsKey(key) && int.TryParse(request.Query[key], out var result) && result > 0 && result < 10));
+            if (fails.Any())
+            {
+                error = new InvalidQueryStringMessage
+                {
+                    MissingParameters = fails
+                };
+                return null;
+            }
             var username = request.Query[userKey].ToString();
-            badRequestMessage = null;
             if (string.IsNullOrWhiteSpace(username))
             {
-                badRequestMessage = new
-                {
-                    message = $"Missing {userKey}",
-                    gameId
-                };
+                error = new GenericMessage($"Missing {userKey} for {gameId}");
                 return null;
             }
 
             var password = request.Query[passKey].ToString();
-            if (string.IsNullOrWhiteSpace(username))
+            if (string.IsNullOrWhiteSpace(password))
             {
-                badRequestMessage = new
-                {
-                    message = $"Missing {passKey}",
-                    gameId
-                };
+                error = new GenericMessage($"Missing {passKey} for {gameId}");
                 return null;
             }
 
-            return CreateTrainer(gameId, username, password);
+            error = null;
+            var stats = GetStatsFromRequest(request.Query);
+            return CreateTrainer(gameId, username, password, stats);
+        }
+
+        private static StatsModel GetStatsFromRequest(IQueryCollection query)
+        {
+            return new StatsModel
+            {
+                HP = 20,
+                Attack = int.Parse(query["attack"]),
+                Defense = int.Parse(query["defense"]),
+                SpecialAttack = int.Parse(query["specialAttack"]),
+                SpecialDefense = int.Parse(query["specialDefense"]),
+                Speed = int.Parse(query["speed"])
+            };
         }
 
         private static TrainerModel CreateTrainer(
             string gameId,
             string username,
-            string password)
+            string password,
+            StatsModel stats)
         {
             return new TrainerModel
             {
                 GameId = gameId,
                 TrainerId = Guid.NewGuid().ToString(),
+                Honors = Array.Empty<string>(),
                 TrainerName = username,
                 PasswordHash = EncryptionUtility.HashSecret(password),
-                Items = new List<ItemModel>(),
+                TrainerClasses = Array.Empty<string>(),
+                Feats = Array.Empty<string>(),
                 IsOnline = true,
-                TrainerClasses = new List<string>(),
-                TrainerStats = new TrainerStatsModel(),
-                Level = 1,
-                Feats = new List<string>(),
-                ActivityToken = EncryptionUtility.GenerateToken()
+                Items = new List<ItemModel>(),
+                TrainerStats = stats,
+                ActivityToken = EncryptionUtility.GenerateToken(),
+                Origin = string.Empty
             };
-        }
-
-        private static (int ExpYield, int CatchRate, int Experience, int Level) GetNumerics(
-            HttpRequest request,
-            out IEnumerable<object> parsingFailures)
-        {
-            parsingFailures = new[]
-            {
-                GetBadRequestMessage(request, "expYield", result => result > 0, out var expYield),
-                GetBadRequestMessage(request, "catchRate", result => result >= 0, out var catchRate),
-                GetBadRequestMessage(request, "experience", result => result >= 0, out var experience),
-                GetBadRequestMessage(request, "level", result => result > 0, out var level),
-            }.Where(fail => fail != null);
-
-            return (expYield, catchRate, experience, level);
-        }
-
-        private static (IEnumerable<string> NaturalMoves, IEnumerable<string> TMMoves) GetMoveLists(
-            HttpRequest request,
-            out IEnumerable<object> parsingFailures)
-        {
-            var fails = new List<object>();
-            var naturalMoves = GetMoves(request, "naturalMoves", out var naturalMovesError);
-            if (naturalMoves.Count() < 1 || naturalMoves.Count() > 4)
-            {
-                fails.Add(naturalMovesError);
-            }
-            var tmMoves = GetMoves(request, "tmMoves", out var tmMovesError);
-            if (tmMoves.Count() > 4)
-            {
-                fails.Add(tmMovesError);
-            }
-            parsingFailures = fails;
-            return (naturalMoves, tmMoves);
-        }
-
-        private static IEnumerable<string> GetMoves(
-            HttpRequest request,
-            string moveType,
-            out object error)
-        {
-            error = new
-            {
-                message = $"Invalid move list count",
-                moveList = moveType
-            };
-
-            return request.Query[moveType].ToString().Split(",");
-        }
-
-        private static object GetBadRequestMessage(
-            HttpRequest request,
-            string parameter,
-            Predicate<int> check,
-            out int outVar)
-        {
-            var value = request.Query[parameter];
-            if (!(int.TryParse(value, out outVar) && check(outVar)))
-            {
-                return new
-                {
-                    message = $"Invalid {parameter}",
-                    invalidValue = value
-                };
-            }
-
-            return null;
         }
     }
 }

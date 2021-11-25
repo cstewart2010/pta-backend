@@ -31,39 +31,15 @@ namespace TheReplacement.PTA.Common.Tests
                 Feats = Array.Empty<string>(),
                 TrainerClasses = Array.Empty<string>(),
                 TrainerName = "Test Trainername",
-                TrainerStats = new TrainerStatsModel()
+                TrainerStats = new StatsModel()
             };
         }
 
         public static PokemonModel GetTestPokemon()
         {
-            return new PokemonModel
-            {
-                HP = new PokemonStatModel(),
-                Attack = new PokemonStatModel(),
-                Defense = new PokemonStatModel(),
-                SpecialAttack = new PokemonStatModel(),
-                SpecialDefense = new PokemonStatModel(),
-                Speed = new PokemonStatModel(),
-                Ability = 1,
-                CatchRate = 180,
-                DexNo = 143,
-                Experience = 1000,
-                ExpYield = 35,
-                Gender = Gender.Male,
-                IsShiny = false,
-                Level = 8,
-                NaturalMoves = new[]
-{
-                    "A Move"
-                },
-                Nature = 18,
-                Nickname = "Snorlax",
-                PokemonId = Guid.NewGuid().ToString(),
-                TMMoves = Array.Empty<string>(),
-                TrainerId = Guid.NewGuid().ToString(),
-                Type = (int)PokemonTypes.Normal
-            };
+            var pokemon = StaticDocumentUtility.GetNewPokemon("Flabébé", Nature.Modest, Gender.Female, Status.Normal, "");
+            pokemon.TrainerId = Guid.NewGuid().ToString();
+            return pokemon;
         }
 
         public static TrainerModel GetTestTrainer()
@@ -77,8 +53,18 @@ namespace TheReplacement.PTA.Common.Tests
                 TrainerClasses = Array.Empty<string>(),
                 TrainerId = Guid.NewGuid().ToString(),
                 TrainerName = "Test Trainer",
-                TrainerStats = new TrainerStatsModel(),
-                ActivityToken = string.Empty
+                TrainerStats = new StatsModel
+                {
+                    HP = 20,
+                    Attack = 1,
+                    Defense = 1,
+                    SpecialAttack = 1,
+                    SpecialDefense = 1,
+                    Speed = 1
+                },
+                ActivityToken = string.Empty,
+                Honors = Array.Empty<string>(),
+                Origin = string.Empty
             };
         }
 

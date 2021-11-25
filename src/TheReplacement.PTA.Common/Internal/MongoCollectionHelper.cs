@@ -11,18 +11,35 @@ namespace TheReplacement.PTA.Common.Internal
             var settings = GetMongoClientSettings();
             var client = new MongoClient(settings);
             var databaseName = Environment.GetEnvironmentVariable("Database", EnvironmentVariableTarget.Process);
-            var database = client.GetDatabase(databaseName);
-            Game = database.GetCollection<GameModel>("Game");
-            Pokemon = database.GetCollection<PokemonModel>("Pokemon");
-            Trainer = database.GetCollection<TrainerModel>("Trainer");
-            Npc = database.GetCollection<NpcModel>("NPC");
-            Logs = database.GetCollection<LoggerModel>("Logs");
+            Database = client.GetDatabase(databaseName);
+            Games = Database.GetCollection<GameModel>("Games");
+            Pokemon = Database.GetCollection<PokemonModel>("Pokemon");
+            Trainers = Database.GetCollection<TrainerModel>("Trainers");
+            Npcs = Database.GetCollection<NpcModel>("NPCs");
+            Logs = Database.GetCollection<LoggerModel>("Logs");
+            BasePokemon = Database.GetCollection<BasePokemonModel>("BasePokemon");
+            Berries = Database.GetCollection<BerryModel>("Berries");
         }
+
+        /// <summary>
+        /// Represents the BasePokemon Collection
+        /// </summary>
+        public static IMongoDatabase Database { get; }
+
+        /// <summary>
+        /// Represents the BasePokemon Collection
+        /// </summary>
+        public static IMongoCollection<BasePokemonModel> BasePokemon { get; }
+
+        /// <summary>
+        /// Represents the BasePokemon Collection
+        /// </summary>
+        public static IMongoCollection<BerryModel> Berries { get; }
 
         /// <summary>
         /// Represents the Game Collection
         /// </summary>
-        public static IMongoCollection<GameModel> Game { get; }
+        public static IMongoCollection<GameModel> Games { get; }
 
         /// <summary>
         /// Represents the Pokemon Collection
@@ -32,12 +49,12 @@ namespace TheReplacement.PTA.Common.Internal
         /// <summary>
         /// Represents the Trainer Collection
         /// </summary>
-        public static IMongoCollection<TrainerModel> Trainer { get; }
+        public static IMongoCollection<TrainerModel> Trainers { get; }
 
         /// <summary>
         /// Represents the Npc Collection
         /// </summary>
-        public static IMongoCollection<NpcModel> Npc { get; }
+        public static IMongoCollection<NpcModel> Npcs { get; }
 
         /// <summary>
         /// Represents the Logs Collection

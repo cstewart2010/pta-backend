@@ -1,0 +1,22 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "Name",
+        "Effects"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Effects": {
+          "bsonType": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }

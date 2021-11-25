@@ -22,11 +22,6 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         public string TrainerId { get; set; }
 
-        /// <summary>
-        /// The trainer's Level
-        /// </summary>
-        public int Level { get; set; }
-
         /// <inheritdoc />
         public string TrainerName { get; set; }
 
@@ -42,7 +37,7 @@ namespace TheReplacement.PTA.Common.Models
         public IEnumerable<string> TrainerClasses { get; set; }
 
         /// <inheritdoc />
-        public TrainerStatsModel TrainerStats { get; set; }
+        public StatsModel TrainerStats { get; set; }
 
         /// <inheritdoc />
         public IEnumerable<string> Feats { get; set; }
@@ -64,5 +59,12 @@ namespace TheReplacement.PTA.Common.Models
         /// Whether the trainer is the Game Master of the session
         /// </summary>
         public bool IsGM { get; set; }
+
+        /// <summary>
+        /// Trainer's achievements
+        /// </summary>
+        public IEnumerable<string> Honors { get; set; }
+
+        public string Origin { get; set; }
     }
 }

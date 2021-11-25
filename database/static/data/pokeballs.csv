@@ -1,0 +1,49 @@
+﻿Name,Price,Effects
+Basic Ball,300,+5 to your capture roll.
+Great Ball,600,+0 to your capture roll.
+Ultra Ball,1000,-5 from your capture roll.
+Master Ball,-1,-100 from your capture roll. The Master Ball can and will often fail when thrown at legendary Pokémon.
+Park Ball,550,-20 from your capture roll against domesticated wild Pokémon.
+Safari Ball,550,-20 from your capture roll against domesticated wild Pokémon.
+Sport Ball,550,-20 from your capture roll against domesticated wild Pokémon.
+Cherish Ball,1500,-5 from your capture roll. Captured Pokémon are more easily befriended.
+Luxury Ball,1500,-5 from your capture roll. Captured Pokémon are more easily befriended.
+Premier Ball,1500,-5 from your capture roll. Captured Pokémon are more easily befriended.
+Dive Ball,1250,-12 from your capture roll if the Pokémon is in water.
+Dusk Ball,1150,-7 from your capture roll if it’s night time (no sunlight).
+Fast Ball,1250,-8 from your capture roll on a Pokémon that acts before your Pokémon.
+Lure Ball,1250,-10 from your capture roll if you lured the wild Pokémon into combat.
+Quick Ball,1550,-20 from your capture roll if thrown as your first action during combat.
+Repeat Ball,1250,-10 from your capture roll the Pokémon already had a Poké Ball thrown at it this encounter.
+Timer Ball,1550,-10 from your capture roll if the encounter has lasted at least one min; -25 from your capture roll if the en- counter has lasted at least two mins.
+Friend Ball,1000,+0 to your capture roll. Captured Pokémon are more easily befriended.
+Heal Ball,1000,+0 to your capture roll. Captured Pokémon are healed 20 hit points.
+Dream Ball,1250,-10 from your capture roll if the Pokémon is afflicted.
+Heavy Ball,1250,-15 from your capture roll if the Pokémon is Heavy or Superweight.
+Level Ball,1250,"-10 from your capture roll if the Pokémon can evolve, but is not evolved."
+Love Ball,1250,-10 from your capture roll if the target is the opposite sex of your Pokémon.
+Moon Ball,1250,-10 from your capture roll if the Pokémon evolves with an evolution stone.
+Nest Ball,1250,"-10 from your capture roll if the Pokémon can evolve, but is not evolved."
+Net Ball,1550,-15 from your capture roll when used against a Bug or Water type Pokémon.
+Save Ball,-1,-10 from your capture roll against an unconscious Pokémon. The Save Ball will not negatively affect the cap-tured Pokémon’s loyalty.
+Earth Ball,-1,-15 from your capture roll when used against a Grass or Ground type Pokémon.
+Haunt Ball,-1,-15 from your capture roll when used against a Dark or Ghost type Pokémon.
+Solid Ball,-1,-15 from your capture roll when used against a Rock or Steel type Pokémon.
+Heat Ball,-1,-15 from your capture roll when used against a Electric or Fire type Pokémon.
+Mystic Ball,-1,-15 from your capture roll when used against a Dragon or Psychic type Pokémon.
+Air Ball,-1,-15 from your capture roll when used against a Flying or Ice type Pokémon.
+Mold Ball,-1,-15 from your capture roll when used against a Poison or Fighting type Pokémon.
+Fine Ball,-1,-15 from your capture roll when used against a Normal or Fairy type Pokémon.
+Arctic Ball,-1,-12 from your capture roll if within an Arctic environment.
+Mountain Ball,-1,-12 from your capture roll if within a Mountain environment.
+Desert Ball,-1,-12 from your capture roll if within a Desert environment.
+Grassland Ball,-1,-12 from your capture roll if within a Grassland environment.
+Rainforest Ball,-1,-12 from your capture roll if within a Rainforest environment.
+Forest Ball,-1,-12 from your capture roll if within a Forest environment.
+Tundra Ball,-1,-12 from your capture roll if within a Tundra environment.
+Taiga Ball,-1,-12 from your capture roll if within a Taiga environment.
+Marsh Ball,-1,-12 from your capture roll if within a Marsh environment.
+Beach Ball,-1,-12 from your capture roll if within a Beach environment.
+Freshwater Ball,-1,-12 from your capture roll if within a Freshwater environment.
+Urban Ball,-1,-12 from your capture roll if within an Urban environment.
+Cave Ball,-1,-12 from your capture roll if within a Cave environment.

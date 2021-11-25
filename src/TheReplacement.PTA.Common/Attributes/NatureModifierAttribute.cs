@@ -1,18 +1,21 @@
 ﻿using System;
+using TheReplacement.PTA.Common.Enums;
 
 namespace TheReplacement.PTA.Common.Attributes
 {
     internal class NatureModifierAttribute : Attribute
     {
         public NatureModifierAttribute(
-            int hpModifier = 0,
+            Flavors likedFlavor,
+            Flavors dislikedFlavor,
             int attackModifier = 0,
             int defenseModifier = 0,
             int specialAttackModifier = 0,
             int specialDefenseModifier = 0,
             int speedModifier = 0)
         {
-            HpModifier = hpModifier;
+            LikedFlavor = likedFlavor;
+            DislikedFlavor = dislikedFlavor;
             AttackModifier = attackModifier;
             DefenseModifier = defenseModifier;
             SpecialAttackModifier = specialAttackModifier;
@@ -20,10 +23,9 @@ namespace TheReplacement.PTA.Common.Attributes
             SpeedModifier = speedModifier;
         }
 
-        /// <summary>
-        /// Returns the HP nature modifier
-        /// </summary>
-        public int HpModifier { get; }
+        public Flavors LikedFlavor { get; }
+
+        public Flavors DislikedFlavor { get; }
 
         /// <summary>
         /// Returns the Attack nature modifier

@@ -1,0 +1,785 @@
+﻿Name,Range,Type,Stat,Frequency,DiceRoll,Effects,Granted Skills,Contest Stat,Contest Keyword
+(Elemental Attack),Varies,(Variable),Varies,Varies,,"Mechanical Rotom will have an attack related to whatever machine they’ve inhabiting while using their Wired passives. It may have an Ice-type attack while inhabiting a fridge or icebox, or a Fire-type attack while inhabiting an oven or microwave.",,,
+Absolutely Breathtaking,Ranged(20ft burst),Normal,Effect,1/day,,"On hit, all enemy Pokémon targets are stunned. As long as you do not move or make another attack during the next three rounds of combat, the targets remained stunned. If you are moved, the effects of Absolutely Breathtaking ends.",,,
+Absorb,Melee,Grass,Special,3/day,2d8,"On hit, you regain HP equal to half of the damage dealt.",,Clever,Good Show!
+Accelerock,Melee,Rock,Attack,At-Will,2d6,Accelerock has Priority.,,Cool,Quick Set
+Acid Downpour,"Ranged(60ft, 20ft blast)",Poison,(Variable),1/day,8d12,,,,
+Acid Spray,Ranged(20ft),Poison,Special,3/day,1d20,"On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",,Clever,Unsettling
+Acrobatics,Melee,Flying,Attack,1/day,3d12,Acrobatics cannot be used if you have a held item.,,Clever,Incentives
+Acupressure,Melee,Normal,Effect,3/day,,"Target an ally or yourself. The target’s Attack, Special Attack, Defense, Special Defense, or Speed is raised +2 for five mins. This effect cannot be stacked.",,Cool,Get Ready!
+Aerial Ace,Melee,Flying,Attack,3/day,3d8,You can’t miss targets with less than 15 Defense.,,Cool,Round Starter
+Aerial Whip,Ranged(30ft),Flying,Special,3/day,3d8,Aerial Whip - Ranged(30ft) Flying Special Attack: 3/day 3d8. You can’t miss targets with less than 10 Special Defense.,,,
+Aeroblast,Ranged(100ft beam),Flying,Special,3/day,5d20,"On hit, if you got 15 or higher on Accuracy Check, Aeroblast is a critical hit.",,,
+After You,Ranged(20ft),Normal,Effect,3/day,,"For the rest of the encounter, your turn will be after the target’s turn.",,Clever,Slow Set
+Air Cutter,Ranged(15ft),Flying,Special,At-Will,2d8,"Air Cutter has -1 during Accuracy Check. On hit, if you got 18 or higher on Accuracy Check, Air Cutter is a critical hit.",,Cool,Appeal
+Air Dart,Ranged(10ft),Flying,Attack,At-Will,2d6,,,,
+Air Slash,Ranged(15ft),Flying,Special,1/day,3d12,"Air Slash has -1 during Accuracy Check. On hit, if you got 14 or higher on Accuracy Check, the target is Stunned.",,Cool,Round Starter
+All-Out Pummeling,Melee(25ft burst),Fighting,(Variable),1/day,8d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Ally Switch,Self,Psychic,Effect,1/day,,"Ally Switch is used as a Reaction. If you are hit by an attack, you and a willing ally within 60ft switch places and the ally is hit by the attack instead.",,Cool,Scrambler
+Anchor Shot,Melee,Steel,Attack,1/day,3d12,"On hit, the target is bound to you for 1d6 rounds.",,Beauty,Unsettling
+Ancient Power,Ranged(10ft),Rock,Special,1/day,2d8,"On hit, your Attack, Special Attack, Defense, Special Defense, and Speed are each raised +1 for 1 hour.",,Tough,Round Ender
+Apple Acid,Ranged(15ft),Grass,Special,3/day,3d10,"On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",,Tough,Inversed Appeal
+Aqua Jet,Melee,Water,Attack,At-Will,2d6,Aqua Jet has Priority.,,Beauty,Quick Set
+Aqua Ring,Self,Water,Effect,1/day,,"Put a Ring Coat on yourself. The Coat has the following ability: At the beginning of your turn, recover 1d10 HP. This Coat lasts for 1 min. If it’s raining, the Coat lasts for 2 mins.",,Beauty,Torrential Appeal
+Aqua Tail,Melee,Water,Attack,1/day,3d12.,,,Cute,Appeal
+Arm Thrust,Melee,Fighting,Attack,At-Will,1d4,Arm Thrust has -2 during Accuracy Check. Arm Thrust is a Scatter attack. Up to 5 attacks.,,Tough,Reliable
+Aromatherapy,Melee,Grass,Effect,3/day,,Target an ally or yourself. Target is cured of all afflictions.,Alluring,Clever,Reflective Appeal
+Arrow Cut,Ranged(25ft),Normal,Attack,At-Will,2d6,,,,
+Assurance,Melee,Dark,Attack,3/day,3d8,"If the target was already attacked this round, Assurance deals +1d8 damage.",,Beauty,Final Appeal
+Astonish,Melee,Ghost,Attack,At-Will,1d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Clever,Appeal
+Astral Barrage,Ranged(50ft burst),Ghost,Special,3/day,5d20,,,,
+Attack Order,Ranged(10ft),Bug,Attack,1/day,3d12,"On hit, if you got 17 or higher on Accuracy Check, Attack Order is a critical hit.",,,
+Attract,Ranged(10ft),Normal,Effect,1/day,,"On hit, the target is Infatuated with you.",,Cute,Excitement
+Aura Sphere,Ranged(30ft),Fighting,Special,1/day,3d12,You can’t miss targets with less than 20 Special Defense.,,Beauty,Round Starter
+Aura Wheel,Melee,Electric,Attack,1/day,5d12,"On hit, your Attack is +1 for 10 mins. This effect cannot be stacked. If you are Hangry, Aura Wheel is Dark-type.",,Cute,Incredible
+Aurora Beam,Ranged(15ft beam),Ice,Special,3/day,3d8,"On hit, all target’s Attack are -1 for 10 mins. This effect cannot be stacked.",Freezer,Beauty,Round Starter
+Aurora Veil,Melee,Ice,Effect,1/day,,"Put a Veil Coat on the target or yourself. The Coat has the following ability: If within Hail, you only take half the damage from successful attacks. This Coat lasts for 2 mins.",,Beauty,Hold That Thought
+Avalanche,Melee,Ice,Attack,3/day,3d8,"If the target was already attacked this round, Avalanche deals +1d8 damage.",,Cool,Final Appeal
+Baneful Bunker,Self,Poison,Effect,1/day,,"Baneful Bunker is used as a Reaction. If you are hit by an enemy with an attack that makes contact with you, ignore the damage and any effects of the attack and Poison the attacker.",,Tough,Appeal
+Barrage,Ranged(10ft),Normal,Attack,At-Will,1d4,Barrage has -2 during Accuracy Check. Barrage is a Scatter attack. Up to 5 attacks.,,Tough,Reliable
+Bash,Melee,Normal,Attack,3/day,3d10,Bash has -2 during Accuracy Check. Your energy shield shatters and may not be used for 1 min.,,,
+Beak Blast,Melee,Flying,Attack,1/day,5d12,"When you use this attack, you immediately end your turn. Until your next turn if a Pokémon hits with a melee ranged attack, the offender is Burned. During your next turn your movement speed is doubled and then you may roll Beak Blast’s Accuracy Check and damage.",,Tough,Special Attention
+Behemoth Bash,Ranged(20ft),Steel,Attack,3/day,3d10,"If the target is Dynamax, Gigantamax, or Eternamax, Behemoth Blade deals +250 damage.",,,
+Behemoth Blade,Ranged(20ft),Steel,Attack,3/day,3d10,"If the target is Dynamax, Gigantamax, or Eternamax, Behemoth Blade deals +250 damage.",,,
+Belch,Ranged(15ft),Poison,Special,1/day,5d12,Belch cannot be used unless you’ve eaten within the last minute.,,Tough,Appeal
+Belly Drum,Self,Normal,Effect,3/day,,"You lose HP equal to half of your Max HP, then your Attack is +6 for 10 mins. This effect cannot be stacked.",,Cute,Get Ready!
+Bide,Ranged(25ft burst),Normal,Effect,1/day,,"When you use this attack, you immediately end your turn. During your next turn, you can’t act. On the round after that, when it’s your turn, you release energy, dealing damage equal to twice the damage you’ve taken since initiating Bide.",,Tough,Final Appeal
+Bind,Melee,Normal,Attack,At-Will,1d4,"On hit, the target is bound to you for 1d4 rounds. For each round the target is bound, it takes 1d4 physical damage on its turns.",,Tough,Torrential Appeal
+Bite,Melee,Dark,Attack,At-Will,2d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Tough,Appeal
+Black Hole Eclipse,"Ranged(60ft, 20ft blast)",Dark,(Variable),1/day,8d12,,,,
+Blast Burn,"Ranged(30ft, 10ft blast)",Fire,Special,1/day,5d20,Blast Burn has -2 during Accuracy Check. You may not act during their next turn.,Firestarter,Beauty,Seen Nothing Yet
+Blaze Kick,Melee,Fire,Attack,1/day,3d12,"On hit, if you got 16 or higher on Accuracy Check, the target is Burned.",Firestarter,Beauty,Round Starter
+Blizzard,"Ranged(20ft, 10ft wave)",Ice,Special,1/day,5d12,"Blizzard has -2 during Accuracy Check unless it’s Hailing. On hit, if you got 18 or higher on Accuracy Check, the targets are Frozen.",Freezer,Beauty,Round Starter
+Block,Melee,Normal,Effect,3/day,,"On hit, the target is bound to you for 1d6 rounds.",,Cute,Hold That Thought
+Bloom Doom,"Ranged(60ft, 20ft blast)",Grass,(Variable),1/day,8d12,,,,
+Blue Flare,Ranged(50ft),Fire,Special,3/day,5d12,"On hit, if you got 14 or higher on Accuracy Check, the target is Burned.",,,
+Body Press,Melee,Fighting,Attack,3/day,3d8,Body Press deals +2 damage for every point of Defense you have above the target.,,Tough,Incentives
+Body Slam,Melee,Normal,Attack,1/day,3d12,"On hit, if you got 14 or higher on Accuracy Check, the target is Paralyzed.",,Tough,Appeal
+Bolt Beak,Melee,Electric,Attack,1/day,3d8,"If the target has not already acted this round, Bolt Beak deals +2d8 damage.",,Cool,Final Appeal
+Bolt Strike,Melee,Electric,Attack,3/day,5d12,"On hit, if you got 14 or higher on Accuracy Check, the target is Paralyzed.",,,
+Bone Club,Melee,Ground,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Tough,Appeal
+Bone Rush,Melee,Ground,Attack,At-Will,1d4,Bone Rush has -2 during Accuracy Check. Bone Rush is a Scatter attack. Up to 5 attacks.,,Tough,Reliable
+Bonemerang,Ranged(15ft),Ground,Attack,3/day,1d20,Bonemerang is a Scatter attack. It has two attacks.,,Tough,Reliable
+Boomburst,Ranged(25ft burst),Normal,Special,1/day,3d12,Anyone within range of Boomburst is cured of Sleep.,,Clever,Appeal
+Bounce,Melee,Flying,Attack,1/day,3d12,"When you use this attack, you raise yourself 40 ft into the air, then you immediately end your turn. During your next turn, return to the ground, then your movement speed is doubled and then you may roll Bounce’s Accuracy Check and damage. On hit, if you got 14 or higher on Accuracy Check, the target is Paralyzed.",,Cute,Special Attention
+Branch Poke,Melee,Grass,Attack,At-Will,2d6,,,Cute,Appeal
+Brave Bird,Melee,Flying,Attack,1/day,5d12,"On hit, you lose HP equal to 1/3rd of the damage you deal.",,Cute,Round Ender
+Breaking Swipe,Melee,Dragon,Attack,3/day,3d8,"On hit, the target’s Attack is -1 for 10 mins. This effect cannot be stacked.",,Cool,Appeal
+Breakneck Blitz,Melee(25ft burst),Normal,(Variable),1/day,8d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Brick Break,Melee,Fighting,Attack,3/day,3d8,Destroy any Walls within 5 ft. You may target Walls with Brick Break without needing to roll Accuracy Check or damage.,,Cool,Appeal
+Brine,Ranged(20ft),Water,Special,3/day,3d8,"If you are at less than half of your Max HP, Brine has 5d8 for damage instead.",,Clever,Incentives
+Brutal Hit,Melee,Dark,Attack,At-Will,2d6,,,,
+Brutal Swing,Melee(5ft burst),Dark,Attack,At-Will,2d8,,,Tough,Excitement
+Bubble,Ranged(15ft),Water,Special,At-Will,1d12,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",,Cute,Slow Set
+Bubble Beam,Ranged(20ft beam),Water,Special,3/day,3d8,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",,Beauty,Slow Set
+Bug Bite,Melee,Bug,Attack,At-Will,2d8,"On hit, if the target is holding a Berry, you steal it and immediately consume it.",,Tough,Attention Grabber
+Bug Buzz,Ranged(20ft),Bug,Special,1/day,3d12,"On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",,Cute,Incentives
+Bulldoze,Ranged(20ft burst),Ground,Attack,3/day,3d8,"On hit, all target’s Speed are -1 for 10 mins. This effect cannot be stacked.",Groundshaper,Cool,Appeal
+Bullet Punch,Melee,Steel,Attack,At-Will,2d6,Bullet Punch has Priority.,,Clever,Quick Set
+Bullet Seed,Ranged(10ft),Grass,Attack,At-Will,1d4,Bullet Seed has -2 during Accuracy Check. Bullet Seed is a Scatter attack. Up to 5 attacks.,,Cool,Reliable
+Burn Up,Ranged(25ft burst),Fire,Special,1/day,5d12,"After use, if the user is only Fire type it becomes Normal type, and if the user is Fire type and another type it loses its Fire typing. This effect lasts for 10 mins.",,Beauty,Round Ender
+Burning Jealousy,"Ranged(30ft, 10ft wave)",Fire,Special,1/day,2d12,"If any targets have had any stats raised in the past 2 mins, Burning Jealousy Burns the target.",,Cute,Incredible
+Camouflage,Self,Normal,Effect,At-Will,,"Your Type changes to reflect your current surroundings for one min. (If you are in a grassy field, Grass type; if you are in water, Water type; if you are on a mountain, Rock type; etc.)",,Clever,Hold That Thought
+Catastropika,Melee,Electric,Attack,1/day,10d12,"Immediately move next to your target, then roll your accuracy check. On hit, the target is Paralyzed.",,,
+Celebrate,Ranged(25ft burst),Normal,Effect,3/day,,"Roll 1d20. On 20, in addition to your own stats, each ally within range has their Attack, Special Attack, Defense, Special Defense, and Speed raised +1 for 10 mins. This effect cannot be stacked.",,Cute,Inversed Appeal
+Charge,Self,Electric,Effect,At-Will,,"Your next Electric attack will deal +2d8 damage. Until then, your Special Defense is +1. This effect cannot be stacked. This effect wears off after one min.",Zapper,Clever,Get Ready!
+Charge Beam,Ranged(10ft beam),Electric,Special,At-Will,1d12,"On hit, your Special Attack is +1 for 10 mins. This effect cannot be stacked.",Zapper,Beauty,Round Starter
+Charge on Through,Melee,Normal,Attack,3/day,3d6,"Charge on Through can only be made against enemies that you passed through while moving during your turn. If you were, you are no longer bound. Any Pokémon making this attack may still use a move during their turn.",,,
+Chatter,Ranged(10ft burst),Flying,Special,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, all targets are Confused.",,Clever,Catching Up
+Chip Away,Melee,Normal,Attack,3/day,3d8,Chip Away has +2 on Accuracy Check if used against a target with a Defense or Special Defense raising passive.,,Tough,Reliable
+Chosen Metronome,Self,Normal,Effect,At-Will,,"Immediately use any attack of your choice. You cannot use the same attack this way more than once per combat. You also may not use the same elemental type of attack with Chosen Metronome two turns or actions in a row. You must use an attack, no status affecting or self-targeting moves.",,,
+Circle Throw,Melee,Fighting,Attack,3/day,3d8,"On hit, move the target 40ft away.",,Tough,Big Show
+Clamp,Melee,Water,Attack,At-Will,1d4,Clamp has -2 during Accuracy Check. Clamp is a Scatter attack. Up to 5 attacks.,,Tough,Appeal
+Clanging Scales,Ranged(10ft burst),Dragon,Special,3/day,3d10,"On hit, the target’s Defense is -2 for 10 mins. This effect cannot be stacked.",,Clever,Incentives
+Clangorous Soul,Self,Dragon,Effect,1/day,,"You lose HP equal to 1/6th of your Max HP. Your Attack, Special Attack, Defense, Special Defense, and Speed are each raised +1 for 10 mins. This effect cannot be stacked.",,Beauty,Incredible
+Clangorous Soulblaze,Melee(40ft burst),Dragon,Special,1/day,8d12,"Your Attack, and Special Attack are +2 for 10 mins.",,,
+Clear Smog,Ranged(5ft burst),Poison,Special,At-Will,1d12,,,Clever,Hold That Thought
+Clearing Smog,Ranged(20ft),Poison,Special,At-Will,1d12,,,,
+Close Combat,Melee,Fighting,Attack,1/day,5d12,"On hit, your Defense and Special Defense is -2 for 10 mins. This effect cannot be stacked.",,Clever,Seen Nothing Yet
+Coaching,Melee,Fighting,Effect,3/day,,Target ally has +2 Attack and +2 Defense for 2 mins. This effect cannot be stacked.,,Cute,Good Show!
+Comet Punch,Melee,Normal,Attack,At-Will,1d4,Comet Punch has -2 during Accuracy Check. Comet Punch is a Scatter attack. Up to 5 attacks.,,Tough,Reliable
+Confuse Ray,Ranged(20ft),Ghost,Effect,1/day,,"On hit, the target becomes Confused.",,Clever,Unsettling
+Confusion,Ranged(10ft),Psychic,Special,At-Will,1d12,"On hit, if you got 19 or higher on Accuracy Check, the target is Confused.",Telekinetic,Clever,Appeal
+Confusioning,Ranged(20ft),Psychic,Special,At-Will,1d12,,,,
+Constrict,Melee,Normal,Attack,At-Will,1d6,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",,Tough,Torrential Appeal
+Continental Crush,"Ranged(60ft, 20ft blast)",Rock,(Variable),1/day,8d12,,,,
+Conversion,Self,Normal,Effect,At-Will,,Put a Type Coat on yourself. The Coat has the following ability: Your Type changes to a type matching one of your known moves for two minutes or your Type changes to a type that resists that last attack you were hit by for two minutes.,,Beauty,Catching Up
+Conversion 2,Self,Normal,Effect,At-Will,,Your Type changes to a type that resists that last attack you were hit by for two minutes.,,Beauty,Catching Up
+Core Enforcer,"Ranged(40ft, 10ft blast)",Dragon,Special,3/day,3d12,"If any targets acted before you this turn, they lose all ability passives for 10 mins.",,,
+Corkscrew Crash,Melee(25ft burst),Steel,(Variable),1/day,8d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Corrosive Gas,Melee,Poison,Effect,3/day,,"On hit, destroy the target’s held item, if any. Corrosive Gas cannot destroy Mega Stones.",Repulsive,Clever,Unsettling
+Counter,Melee,Fighting,Effect,1/day,,"Counter is used as a Reaction. After an enemy hits you with a melee Attack move that deals damage, use Counter to deal exactly twice the damage to the enemy that you received. Do not apply weakness or resistances.",,Tough,Final Appeal
+Covet,Melee,Normal,Attack,3/day,2d8,"On hit, steals the target’s held item, if any.",,Cute,Attention Grabber
+Crabhammer,Melee,Water,Attack,3/day,3d10,"Crabhammer has -2 during Accuracy Check. On hit, if you got 18 or higher on Accuracy Check, Crabhammer is a critical hit.",,Tough,Round Starter
+Crafty Shield,Ranged(20ft burst),Fairy,Effect,3/day,,Put a Crafty Coat on all allies and yourself. The Coat has the following ability: You cannot become afflicted or have any stats altered by enemies. This Coat lasts for 2 rounds.,,Clever,Inversed Appeal
+Cross Chop,Melee,Fighting,Attack,1/day,5d12,"Cross Chop has -2 during Accuracy Check. On hit, if you got 16 or higher on Accuracy Check, Cross Chop is a critical hit.",,Cool,Round Ender
+Cross Poison,Melee,Poison,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, Cross Poison is a critical hit and the target is Poisoned.",,Cool,Appeal
+Crunch,Melee,Dark,Attack,3/day,3d10,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Tough,Round Starter
+Crush Claw,Melee,Normal,Attack,3/day,3d8,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Cool,Appeal
+Crush Grip,Melee,Normal,Attack,1/day,2d10,"If you are at Max HP, Crush Grip has 5d12 for damage instead.",,Tough,Final Appeal
+Curative Barrage,Melee,Normal,Effect,At-Will,,"Curative Barrage cannot miss an ally. If Curative Barrage was used against the same human target during your last action as well, the human target is cured of Sleep, a Burn, Confusion, Paralysis, Poisoning or Toxification.",,,
+Curse,Ranged(20ft),Ghost,Effect,1/day,,"Curse can only be used by Ghost-Type Pokémon. On hit, you lose hit points equal to 1/3rd of your max HP, then the target is Cursed.",,Tough,Torrential Appeal
+Cut,Melee,Normal,Attack,At-Will,2d6,,,Cool,Appeal
+Cutesy Coercion,Ranged(10ft),Normal,Effect,1/day,,"If the target is a Pokémon and has not acted yet during this round of combat, you choose where it moves, what it targets, and what attack it uses this round (You may not use the controlled Pokémon to attack a non-Pokémon target; you know the controlled Pokémon’s move list during this turn).",,,
+Dark Pulse,Ranged(10ft),Dark,Special,3/day,3d10,"On hit, if you got 16 or higher on Accuracy Check, the target is Stunned.",,Cool,Round Starter
+Dark Sign,Ranged(10ft),Dark,Effect,1/day,,"On hit, the target is put Asleep.",,,
+Darkest Lariat,Melee,Dark,Attack,3/day,3d10,,,Cool,Special Attention
+Dark Void,Ranged(40ft burst),Dark,Effect,3/day,,"All targets are put to Endless Sleep. Endless Sleep’s check starts at 19 and does not lower each turn like the normal Sleep affliction. Endless Sleep can only be cured with a successful check. If anyone is knocked unconscious while afflicted with Endless Sleep, they are cured of Endless Sleep.",,,
+Dazzling Gleam,"Ranged(15 ft, 10 ft wave)",Fairy,Special,3/day,3d8,,,Beauty,Reflective Appeal
+Decorate,Melee,Normal,Effect,3/day,,"Target an ally or yourself. The target’s Attack, Special Attack, Defense, Special Defense, or Speed is raised +2 for five mins. This effect cannot be stacked.",,,
+Defog,Ranged(30ft burst),Flying,Effect,3/day,,"Any Walls, Hazards, Weather, or Terrains within range are destroyed.",,Beauty,Hold That Thought
+Destiny Bond,Ranged(50ft),Ghost,Effect,1/day,,"If you are knocked out before your next turn, the offender who caused you to get knocked out has its HP set to 0.",,Clever,Big Show
+Detect,Self,Fighting,Effect,1/day,,"Detect is used as a Reaction. When you would be hit by a move, use Detect to instead ignore the damage and any effects of the attack.",,Cool,Inversed Appeal
+Devastating Drake,Melee(25ft burst),Dragon,(Variable),1/day,8d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Diamond Storm,Ranged(40ft burst),Rock,Attack,3/day,3d20,"On hit, your Defense is +2 for 10 mins. This effect cannot be stacked.",,,
+Dig,Melee,Ground,Attack,3/day,3d10,"When you use this at-tack, dig into the ground so that you are concealed, then you immediately end your turn. During your next turn, your movement speed underground is +40 ft, and when you emerge from the ground you may roll Dig’s Accuracy Check and damage.",Burrow,Clever,Special Attention
+Disable,Ranged(20ft),Normal,Effect,1/day,,"For 1 minute, the attack last used by the target may not be used again.",,Clever,Excitement
+Disarming Voice,Ranged(10ft),Fairy,Special,At-Will,1d12,You can’t miss targets with less than 15 Special Defense.,,Cute,Unsettling
+Discharge,Ranged(10ft burst),Electric,Special,3/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, all targets are Paralyzed.",Zapper,Cool,Round Starter
+Dive,Melee,Water,Attack,3/day,3d10,"When you use this at-tack, dive into water so that you are concealed, then you immediately end your turn. During your next turn, your movement speed underwater is +40ft, and when you emerge from the wa-ter you may roll Dive’s Accuracy Check and damage.",,Beauty,Special Attention
+Divine Verdict,"Ranged(30ft, 5ft blast)",Normal,Special,1/day,5d12,Divine Verdict’s type is chosen when its used and may use Attack for accuracy check and damage instead of Special Attack.,,,
+Dizzy Punch,Melee,Normal,Attack,3/day,3d8,"On hit, if you got 16 or higher on Accuracy Check, the target is Confused.",,Cool,Inversed Appeal
+Doom Desire,Ranged(30ft blast),Steel,Special,3/day,5d20,"When you use this attack you immediately end your turn. In two rounds, you may roll Doom Desire’s Accuracy Check and damage.",,,
+Double Edge,Melee,Normal,Attack,1/day,5d12,"On hit, you lose HP equal to 1/3rd of the damage you deal.",,Tough,Big Show
+Double Hit,Melee,Normal,Attack,3/day,1d20,Double Hit is a Scatter attack. It has two attacks.,,Clever,Reliable
+Double Iron Bash,Melee,Steel,Attack,3/day,1d20,"Double Iron Bash is a Scatter attack. It has two attacks. On either hit, if you got 14 or higher on Accuracy Check, the target is Stunned.",,,
+Double Kick,Melee,Fighting,Attack,3/day,1d20,Double Kick is a Scatter attack. It has two attacks.,,Cool,Reliable
+Double Slap,Melee,Normal,Attack,At-Will,1d4,Double Slap has -2 during Accuracy Check. Double Slap is a Scatter attack. Up to 5 attacks.,,Tough,Reliable
+Double Team,Self,Normal,Effect,1/day,,"You create 3 copies of yourself. You may attack from any copy and copies may inhabit spaces up to 25 ft away from each other, though none can be more than 25 ft from any other copies or the original. If a copy is hit, it disappears and you take 1/4th of the damage it would have taken. If your copy is hit by a non-damaging attack the copy is dismissed and you are unaffected by the attack. If you are hit, all copies disappear.",,Cool,Reliable
+Draco Meteor,"Ranged(20ft, 10ft blast)",Dragon,Special,1/day,5d12,"After use, your Special Attack is -4 for 10 mins. This effect cannot be stacked.",,Clever,Seen Nothing Yet
+Dragon Ascent,Melee,Dragon,Attack,3/day,5d12,,,,
+Dragon Breath,Ranged(10ft),Dragon,Attack,At-Will,2d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Paralyzed.",,Cool,Round Starter
+Dragon Claw,Melee,Dragon,Attack,3/day,3d10,,,Cool,Round Starter
+Dragon Darts,Ranged(10ft),Dragon,Attack,3/day,1d20,Dragon Darts is a Scatter attack. It has two attacks.,,Cute,Reliable
+Dragon Energy,Ranged(30ft burst),Dragon,Special,1/day,3d10,"If you are at Max HP, Dragon energy has 5d12 for damage instead.",,,
+Dragon Hammer,Melee,Dragon,Attack,1/day,3d12,,,Cool,Round Starter
+Dragon Pulse,Ranged(10ft),Dragon,Special,3/day,3d10,,,Clever,Incentives
+Dragon Rage,Ranged(5ft),Dragon,Special,3/day,,"On hit, the target loses exactly 25 HP.",,Cool,Appeal
+Dragon Rush,Melee,Dragon,Attack,3/day,3d10,"Dragon Rush has -2 during Accuracy Check. On hit, if you got 16 or higher on Accuracy Check, the target is Stunned.",,Cool,Round Ender
+Dragon Tail,Melee,Dragon,Attack,3/day,3d8,"On hit, move the target 40ft away.",,Clever,Appeal
+Drain Punch,Melee,Fighting,Attack,3/day,2d8,"On hit, you regain HP equal to half of the damage dealt.",,Beauty,Good Show!
+Draining Kiss,Melee,Fairy,Special,3/day,2d8,"On hit, you regain HP equal to half of the damage dealt.",,Cute,Unsettling
+Dream Eater,Melee,Psychic,Special,1/day,5d12,"Dream Eater can only hit Sleeping targets. On hit, you regain HP equal to half of the damage dealt.",,Clever,Good Show!
+Drill Peck,Melee,Flying,Attack,3/day,3d10,,,Cool,Appeal
+Drill Run,Melee,Ground,Attack,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, Drill Run is a critical hit.",,Cool,Appeal
+Drum Beating,Melee,Grass,Attack,3/day,3d10,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",,Tough,Appeal
+Dual Chop,Melee,Dragon,Attack,3/day,1d20,Dual Chop is a Scatter attack. It has two attacks.,,Tough,Reliable
+Dual Wingbeat,Melee,Flying,Attack,3/day,1d20,Dual Wingbeat is a Scatter attack. It has two attacks.,,Cool,Reliable
+Dynamax Cannon,Ranged(100ft),Dragon,Special,3/day,3d10,"If the target is Dynamax, Gigantamax, or Eternamax, Dynamax Cannon deals +250 damage.",,,
+Dynamic Punch,Melee,Fighting,Attack,1/day,5d12,"Dynamic Punch has -5 during Accuracy Check. On hit, the target is Confused.",,Cool,Round Ender
+Earth Power,Ranged(15ft),Ground,Special,3/day,3d10,"On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",Groundshaper,Clever,Round Ender
+Earthquake,Ranged(30ft burst),Ground,Attack,1/day,5d12,,Groundshaper,Tough,Round Ender
+Echoed Voice,Ranged(10ft),Normal,Special,At-Will,1d12,Echoed Voice deals +5 damage if you used it during the previous round.,,Clever,Reliable
+Eerie Spell,Ranged(30ft),Psychic,Special,3/day,3d8,"On hit, the attack last used by the target may not be used again for 1 minute.",,,
+Egg Bomb,Ranged(15ft),Normal,Attack,3/day,3d10,Egg Bomb has -2 during Accuracy Check.,,Tough,Appeal
+Electric Terrain,Field,Electric,Effect,3/day,,"You create a circle of Electrified Terrain with a 60ft diameter. Anyone touching the ground within the Electrified terrain is immune to being put to Sleep. Within the Electrified Terrain, Electric-type attacks deal an additional 8 damage. This terrain disappears after 2 mins.",,Clever,Unsettling
+Electrify,Melee,Electric,Effect,3/day,,"The next time the target uses an attack, the attack is treated as being Electric-type.",Zapper,Clever,Hold That Thought
+Electro Ball,Ranged(15ft),Electric,Special,3/day,3d10,Electro Ball can only be used against targets slower than you.,Zapper,Beauty,Final Appeal
+Electroweb,Ranged(10ft),Electric,Special,3/day,3d8,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",Threaded,Clever,Hold That Thought
+Ember,Ranged(10ft),Fire,Special,At-Will,1d12,"On hit, if you got 18 or higher on Accuracy Check, the target is Burned.",Firestarter,Beauty,Appeal
+Emberish,Ranged(20ft),Fire,Special,At-Will,1d12,,,,
+Encore,Ranged(10ft),Normal,Effect,3/day,,"If the target can, it must use the last move it did for the next 3 rounds or until it no longer can.",,Cute,Good Show!
+Endeavor,Melee,Normal,Attack,3/day,,"On hit, if the target has more HP than you, the target’s HP is set to equal your HP.",,Tough,Final Appeal
+Endure,Self,Normal,Effect,1/day,,"Endure is used as a Reac-tion. If you are hit by an attack and would be knocked out, instead you are still at 1 HP.",,Tough,Hold That Thought
+Energy Ball,Ranged(20ft),Grass,Special,3/day,3d10,"On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",,Beauty,Round Starter
+Enigma Transformation,Ranged(25ft),Normal,Effect,At-Will,,"You transform into another non-legendary Pokémon then recover 25 HP. You can use any of the Pokémon’s moves and have all of its passives. You may also use any move that the Pokémon could feasibly learn while transformed. Mew retains all of its moves and passives, but may replace its non-HP stats when Mew transforms with the Pokémon Mew transformed into. 3/day Enigma Transformation can be used as a free action. Enigma Transformation lasts as long as Mew wants it to. Enigma Transformation fails if used by anything but a Mew.",,,
+Eruption,Ranged(30ft burst),Fire,Special,1/day,3d10,"If you are at Max HP, Eruption has 5d12 for damage instead.",,Beauty,Round Ender
+Eternabeam,Ranged(100ft),Dragon,Special,3/day,7d10,You cannot act during the next round.,,,
+Expanding Force,Ranged(30ft),Psychic,Special,1/day,3d12,"If you are within Psychic Terrain while using Expanding Force, it deals +2d12 damage on hit.",,Clever,Appeal
+Explosion,Ranged(30ft burst),Normal,Attack,1/day,10d20,"Set your HP to 0, then roll 1d20. On 15 or less, your HP is set to -100% HP and you must make a death savings throw.",,Beauty,Big Show
+Extrasensory,Ranged(10ft),Psychic,Special,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",Telekinetic,Cool,Round Starter
+Extreme Evoboost,Self,Normal,Effect,1/day,,"Your Attack, Defense, Special Attack, Special Defense, and Speed are +6 for 10 mins.",,,
+Extreme Speed,Melee,Normal,Attack,3/day,3d10,Extreme Speed has Priority and cannot be contested for Priority.,,Cool,Quick Set
+Facade,Melee,Normal,Attack,1/day,3d8,"If you have an afflic-tion, use 5d12 as damage instead.",,Cute,Final Appeal
+Fairy Lock,Ranged(30ft burst),Fairy,Effect,1/day,,"Until your next turn, Pokémon within range cannot be returned to Poke Balls, nor can they be caught by Poke Balls.",,Cute,Hold That Thought
+Fairy Wind,Ranged(20ft),Fairy,Special,At-Will,1d12,,,Beauty,Appeal
+Fake Out,Melee,Normal,Attack,At-Will,2d6,"Fake Out has Priority. Fake Out can only be used as the first action during an encounter. On hit, the target is Stunned.",,Cute,Round Starter
+False Surrender,Melee,Dark,Attack,1/day,3d12,You can’t miss targets with less than 20 Defense.,,Cute,Round Starter
+Feint Attack,Melee,Dark,Attack,3/day,3d8,You can’t miss targets with less than 15 Defense.,,Clever,Round Ender
+Fell Stinger,Melee,Bug,Attack,At-Will,2d8,"If you knock out a target with Fell Stinger, your Attack is +2 for 10 mins. This effect cannot be stacked.",,Clever,Get Ready!
+Fiery Dance,Ranged(20ft),Fire,Special,1/day,3d12,"On hit, your Special Attack is +2 for 10 mins. This effect cannot be stacked.",Firestarter,Cool,Round Ender
+Fiery Wrath,Ranged(20ft),Fire,Special,1/day,3d10,"On hit, if you got 16 or higher on Accuracy Check, the target is Stunned.",,,
+Final Gambit,Melee,Fighting,Special,1/day,,"On hit, your HP is set to 0, dealing damage equal to the HP you lost.",,Tough,Big Show
+Fire Blast,"Ranged(40ft, 10ft blast)",Fire,Special,1/day,5d12,"Fire Blast has -2 during Accuracy Check unless it’s Sunny. On hit, if you got 18 or higher on Accuracy Check, the targets are Burned.",Firestarter,Beauty,Round Starter
+Fire Fang,Melee,Fire,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, the target is randomly either Stunned or Burned.",Firestarter,Beauty,Appeal
+Fire Lash,Melee,Fire,Attack,1/day,3d12,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",Firestarter,Beauty,Round Starter
+Fire Punch,Melee,Fire,Attack,3/day,3d8,"On hit, if you got 17 or higher on Accuracy Check, the target is Burned.",,Beauty,Round Starter
+Fire Spin,Ranged(20ft),Fire,Special,3/day,1d4,"On hit, the target is bound in place for 1d4 rounds. For each round the target is bound, it takes 1d4 special damage on its turns.",Firestarter,Beauty,Torrential Appeal
+First Impression,Melee,Bug,Attack,1/day,3d10,"First Impression has Priority. First Impression can only be used as the first action during an encounter. On hit, the target is Stunned.",,Cute,Round Starter
+Fishious Rend,Melee,Water,Attack,1/day,3d8,"If the target has not already acted this round, Fishious Rend deals +2d8 damage.",,Tough,Incentives
+Fissure,Ranged(25ft beam),Ground,Attack,1/day,,"On hit, roll 1d20. On a natural result of 17, 18, 19, or 20, the target is set to 0 HP.",,Tough,Big Show
+Flail,Melee,Normal,Attack,1/day,1d10,"If you are at less than half of your Max HP, Flail has 1d20 for damage instead. If you are at less than 5 HP, Flail has 5d12 for damage instead.",,Cute,Final Appeal
+Flame Burst,"Ranged(20ft, 5ft burst)",Fire,Special,3/day,3d8,,Firestarter,Beauty,Round Starter
+Flame Charge,Melee,Fire,Attack,At-Will,2d8,"On hit, your Speed is +1 for 10 mins. This effect cannot be stacked.",Firestarter,Tough,Excitement
+Flame Wheel,Melee,Fire,Attack,At-Will,2d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Burned.",Firestarter,Beauty,Reliable
+Flamethrower,Ranged(20ft beam),Fire,Special,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Burned.",Firestarter,Beauty,Round Starter
+Flare Blitz,Melee,Fire,Attack,1/day,5d12,"On hit, you lose HP equal to 1/3rd of the damage you deal and if you got 18 or higher on Accuracy Check, the target is Burned.",Firestarter,Clever,Seen Nothing Yet
+Flash,Ranged(10ft),Normal,Effect,At-Will,,"On hit, the target’s Accuracy Checks are -1 during their next turn. This effect cannot be stacked.",Glow,Beauty,Unsettling
+Flash Cannon,Ranged(20ft),Steel,Special,3/day,3d10,"On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",,Clever,Round Starter
+Flash Kick,Melee,Electric,Attack,1/day,3d12,"On hit, if you got 16 or higher on Accuracy Check, the target is Paralyzed.",,,
+Flatter,Ranged(10ft),Normal,Effect,1/day,,"On hit, the target is Confused and the target’s Special Attack is +4 until they are no longer Confused.",,Clever,Excitement
+Fleur Cannon,"Ranged(40ft, 20ft blast)",Fairy,Attack,3/day,5d20,,,,
+Floral Healing,Melee,Fairy,Effect,1/day,,"Target an ally or yourself. The target is healed HP equal to half of the target’s Max HP. If you are within Grassy Terrain, the target is healed HP equal to 3/4ths of the target’s Max HP instead.",,Beauty,Reflective Appeal
+Flower Shield,Field,Fairy,Effect,3/day,,"You create a circle of Flowery Terrain with a 60ft diameter. While within the Flowery terrain, all Grass-types and Fairy-types have +1 Defense and +1 Special Defense. This terrain disappears after 2 mins.",,Beauty,Seen Nothing Yet
+Fly,Melee,Flying,Attack,1/day,3d12,"When you use this attack, you raise yourself 40ft into the air, then you immediately end your turn. During your next turn, your movement speed is tripled and after getting to a target you may roll Fly’s Accuracy Check and damage.",Flight,Clever,Special Attention
+Flying Press,Melee,Fighting/Flying,Attack,1/day,5d12,Flying Press counts as both a Flying and Fighting type move for effectiveness.,,Beauty,Good Show!
+Focus Blast,Ranged(30 ft),Fighting,Special,1/day,5d12,"Focus Blast has -2 during Accuracy Check. On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",,Cool,Round Starter
+Focus Punch,Melee,Fighting,Attack,3/day,5d12,"When you use this attack you immediately end your turn. If are hit with an attack before your next turn, you are Stunned. On your next turn, if you were not Stunned your movement speed is doubled and after getting to a target you may roll Focus Punch’s Accuracy Check and damage.",,Tough,Special Attention
+Follow Me,Ranged(30ft burst),Normal,Effect,3/day,,"On hit, all affected foes will only attack you until you are knocked out.",,Cute,Scrambler
+Force Palm,Melee,Fighting,Attack,3/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, the target is Paralyzed.",,Cool,Round Ender
+Foresight,Self,Normal,Effect,At-Will,,You can hit Ghost-types with Normal and Fighting type moves as if they are not immune to those types of attacks for two mins.,,Clever,Good Show!
+Forest's Curse,Ranged(15ft),Grass,Effect,3/day,,"On hit, put a Forest Coat on the target. The Coat has the following ability: You lose your current Types and become only Grass-type for 10 mins.",,Clever,Torrential Appeal
+Freeze-Dry,Ranged(10ft),Ice,Special,3/day,3d8,"Freeze-Dry is Super effective against Water types. On hit, if you got 18 or higher on Accuracy Check, the target is Frozen.",Freezer,Beauty,Round Starter
+Freeze Shock,"Ranged(40ft, 20ft blast)",Ice,Attack,3/day,3d12,"On hit, if you got 12 or higher on Accuracy Check, the targets are Paralyzed.",,,
+Freezing Glare,Ranged(20ft),Psychic,Special,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Frozen.",,,
+Frenzy Plant,Ranged(25ft beam),Grass,Special,1/day,5d20,Frenzy Plant has -2 during Accuracy Check. You cannot act during the next round.,Sprouter,Cool,Seen Nothing Yet
+Frost Breath,Ranged(10ft),Ice,Special,3/day,2d8,"Frost Breath has -2 during Accuracy Check. On hit, Frost Breath always counts as a critical hit.",Freezer,Beauty,Appeal
+Frost Kick,Melee,Ice,Attack,1/day,3d12,"On hit, if you got 16 or higher on Accuracy Check, the target is Frozen.",,,
+Frustration,Melee,Normal,Attack,3/day,3d10,Frustration can only be used if you have less than 1 loyalty.,,Cute,Round Ender
+Fury Attack,Melee,Normal,Attack,At-Will,1d4,Fury Attack has -2 during Accuracy Check. Fury Attack is a Scatter attack. Up to 5 attacks.,,Cool,Reliable
+Fury Cutter,Melee,Bug,Attack,At-Will,1d4,"For each time you’ve successfully used Fury Cutter against the same target during the encounter, add 1d8 to Fury Cutter’s damage.",,Cool,Reliable
+Fury Swipes,Melee,Normal,Attack,At-Will,1d4,Fury Swipes has -2 during Accuracy Check. Fury Swipes is a Scatter attack. Up to 5 attacks.,,Tough,Reliable
+Future Sight,Ranged(30ft),Psychic,Special,1/day,5d12,"When you use this attack you immediately end your turn. In two rounds, select any target within 30ft of you to target with Future Sight then you may roll Future Sight’s Accuracy Check and damage.",,Clever,Round Starter
+Fusion Bolt,Ranged(20ft),Electric,Attack,3/day,3d12,"If Fusion Flare was used by anyone during the last 20 seconds, Fusion Bolt has 7d12 for damage instead.",,,
+Fusion Flare,Ranged(20ft),Fire,Special,3/day,3d12,"If Fusion Bolt was used by anyone during the last 20 seconds, Fusion Flare has 7d12 for damage instead.",,,
+G-Max Befuddle,"Ranged(80ft, 30ft blast)",Bug,(Variable),At-Will,3d12,"On hit, all targets are randomly Poisoned, Paralyzed, or put to Sleep. You cannot act during the next round.",,,
+G-Max Cannonade,"Ranged(80ft, 30ft blast)",Water,(Variable),At-Will,4d12,"On hit, all targets take 1d4 damage when they act until you are no longer Gigantamaxed. You cannot act during the next round.",,,
+G-Max Centiferno,"Ranged(80ft, 30ft blast)",Fire,(Variable),At-Will,2d12,"On hit, all targets are bound to the ground for 1d4 turns. You cannot act during the next round.",,,
+G-Max Chi Strike,"Ranged(80ft, 30ft blast)",Fighting,(Variable),At-Will,2d12,"On hit, all allies within 60ft heal score critical hits on naturally rolled 19 and 20 until you are no longer Gigantamaxed. You cannot act during the next round",,,
+G-Max Cuddle,"Ranged(80ft, 30ft blast)",Normal,(Variable),At-Will,3d12,"On hit, all targets are Infatuated. You cannot act during the next round.",,,
+G-Max Depletion,"Ranged(80ft, 30ft blast)",Dragon,(Variable),At-Will,3d12,"On hit, all targets cannot use whatever move they last used until you are no longer Gigantamaxed. You cannot act during the next round.",,,
+G-Max Drum Solo,"Ranged(80ft, 30ft blast)",Grass,(Variable),At-Will,6d12,You cannot act during the next round.,,,
+G-Max Finale,"Ranged(80ft, 30ft blast)",Fairy,(Variable),At-Will,2d12,"On hit, all allies within 60ft heal 1d12 HP. You cannot act during the next round.",,,
+G-Max Fireball,"Ranged(80ft, 30ft blast)",Fire,(Variable),At-Will,6d12,You cannot act during the next round.,,,
+G-Max Flavorful,"Ranged(80ft, 30ft blast)",Grass,(Variable),At-Will,2d12,"On hit, all allies within 60ft are cured of any afflictions. You cannot act during the next round.",,,
+G-Max Foam Burst,"Ranged(80ft, 30ft blast)",Water,(Variable),At-Will,4d12,"On hit, all targets Speed is -2 for 2 mins. You cannot act during the next round.",,,
+G-Max Gold Rush,"Ranged(80ft, 30ft blast)",Normal,(Variable),At-Will,3d12,"On hit, all targets are Confused. You cannot act during the next round.",,,
+G-Max Gravitas,"Ranged(80ft, 30ft blast)",Psychic,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Gravity Terrain with a 60ft diameter. Within the terrain, Pokémon may not leave the ground and any Pokémon that are in the air are brought down to the ground. This terrain disappears after 2 mins. You cannot act during the next round.",,,
+G-Max Hydrosnipe,"Ranged(80ft, 30ft blast)",Water,(Variable),At-Will,6d12,You cannot act during the next round.,,,
+G-Max Malodor,"Ranged(80ft, 30ft blast)",Poison,(Variable),At-Will,3d12,"On hit, all targets are Poisoned. You cannot act during the next round.",,,
+G-Max Meltdown,"Ranged(80ft, 30ft blast)",Steel,(Variable),At-Will,3d12,"On hit, all targets cannot use a move that they used during their previous action for 1 min.",,,
+G-Max Replenish,"Ranged(80ft, 30ft blast)",Normal,(Variable),At-Will,3d12,"On hit, all allies within 60ft recover any berries they may have used during this combat, unless they have already recovered a berry this combat. You cannot act during the next round.",,,
+G-Max Resonance,"Ranged(80ft, 30ft blast)",Water,(Variable),At-Will,2d12,"On hit, your Defense and Special Defense are +1 for 1 min. You cannot act during the next round.",,,
+G-Max Sandblast,"Ranged(80ft, 30ft blast)",Ground,(Variable),At-Will,2d12,"On hit, all targets are bound to the ground for 1d4 turns. You cannot act during the next round.",,,
+G-Max Smite,"Ranged(80ft, 30ft blast)",Fairy,(Variable),At-Will,3d12,"On hit, all targets are Confused. You cannot act during the next round.",,,
+G-Max Snooze,"Ranged(80ft, 30ft blast)",Dark,(Variable),At-Will,3d12,"On hit, all targets fall Asleep after their next turns. You cannot act during the next round.",,,
+G-Max Steelsurge,"Ranged(80ft, 30ft blast)",Steel,(Variable),At-Will,2d12,"On hit, place the Spikes Hazard in the blast area. Spikes Hazard has the following ability: When a foe moves through Spikes Hazard during their turn and are on the ground, they lose 1/8th of their Max HP. This Hazard disappears after 2 mins. You cannot act during the next round.",,,
+G-Max Stonesurge,"Ranged(80ft, 30ft blast)",Water,(Variable),At-Will,2d12,"On hit, place the 2 Stealth Rock Hazards in the blast zone. Stealth Rock Hazard has the following ability: If a foe moves within 20 ft of Stealth Rock Hazard, it will hurl itself at the foe, destroying itself and dealing 2d12 Rock-type damage to the foe without needing an Accuracy Check. You cannot act during the next round.",,,
+G-Max Stun Shock,"Ranged(80ft, 30ft blast)",Electric,(Variable),At-Will,3d12,"On hit, all targets are randomly Poisoned or Paralyzed. You cannot act during the next round.",,,
+G-Max Terror,"Ranged(80ft, 30ft blast)",Ghost,(Variable),At-Will,2d12,"On hit, all targets are bound to the ground for 1d4 turns. You cannot act during the next round.",,,
+G-Max Vine Lash,"Ranged(80ft, 30ft blast)",Grass,(Variable),At-Will,4d12,"On hit, all targets take 1d4 damage when they act until you are no longer Gigantamaxed. You cannot act during the next round.",,,
+G-Max Volt Crash,"Ranged(80ft, 30ft blast)",Electric,(Variable),At-Will,3d12,"On hit, all targets are Paralyzed. You cannot act during the next round.",,,
+G-Max Wildfire,"Ranged(80ft, 30ft blast)",Fire,(Variable),At-Will,4d12,"On hit, all targets take 1d4 damage when they act until you are no longer Gigantamaxed. You cannot act during the next round.",,,
+G-Max Volcalith,"Ranged(80ft, 30ft blast)",Rock,(Variable),At-Will,4d12,"On hit, all targets take 1d4 damage when they act until you are no longer Gigantamaxed. You cannot act during the next round.",,,
+G-Max Wind Rage,"Ranged(80ft, 30ft blast)",Flying,(Variable),At-Will,4d12,"On hit, remove all weather, terrain, hazards, coats, from the battlefield. You cannot act during the next round.",,,
+Gastro Acid,Ranged(10ft),Poison,Effect,3/day,,"On hit, the target cannot benefit from any passives unless it’s a passive that raises its stats for 10 mins.",Repulsive,Beauty,Hold That Thought
+Gear Grind,Melee,Steel,Attack,3/day,1d20,Gear Grind is a Scatter attack. It has two attacks.,,Cool,Reliable
+Geomancy,Self,Fairy,Effect,3/day,,"Your Special Attack, Special Defense, and Speed are +4 for 10 mins.",,,
+Giga Drain,Melee,Grass,Special,1/day,3d12,"On hit, you regain HP equal to half of the damage dealt.",,Clever,Good Show!
+Giga Impact,Melee(10ft burst),Normal,Attack,1/day,5d20,Giga Impact has -2 during Accuracy Check. You cannot act during the next round.,,Beauty,Seen Nothing Yet
+Gigavolt Havoc,"Ranged(60ft, 20ft blast)",Electric,(Variable),1/day,8d12,,,,
+Glacial Lance,Ranged(50ft burst,Ice,Attack,3/day,5d20,,,,
+Glaciate,Ranged(40ft),Ice,Attack,3/day,3d12,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",Freezer,Beauty,Appeal
+Glare,Ranged(20ft),Normal,Effect,1/day,,"On hit, the target becomes Paralyzed.",,Tough,Excitement
+Grass Knot,Melee,Grass,Special,3/day,3d10,Grass Knot can only target heavier targets.,Sprouter,Clever,Incentives
+Grass Whistle,Ranged(20ft burst),Grass,Effect,1/day,,"Grass Whistle has -5 during Accuracy Check. On hit, all targets fall Asleep.",,Clever,Excitement
+Grassy Glide,Melee,Grass,Attack,3/day,3d8,Grassy Glide has priority if you’re in Grassy Terrain.,,Cool,Appeal
+Grassy Terrain,Field,Grass,Effect,3/day,,"You create a circle of Grassy Terrain with a 60ft diameter. Anyone who acts within the Grassy terrain recovers 1d12 HP after acting. Within the Grassy Terrain, Grass-type attacks deal an additional 8 damage. This terrain disappears after 2 mins.",,Cute,Good Show!
+Grav Apple,Ranged(15ft),Grass,Attack,3/day,3d10,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Cool,Inversed Appeal
+Gravity,Field,Psychic,Effect,3/day,,"You create a circle of Gravity Terrain with a 60ft diameter. Within the terrain, Pokémon may not leave the ground and any Pokémon that are in the air are brought down to the ground. This terrain disappears after 2 mins.",,Beauty,Hold That Thought
+Guardian Sign,Ranged(25ft),Normal,Effect,1/day,,"Guardian Sign is used as a Reaction (as your action if you hAvian’t acted yet this round). If one of your Pokémon, your Helpful Pokémon, or your Companion Pokémon is hit by an attack, ignore the damage and any effects of the attack.",,,
+Guillotine,Melee,Normal,Attack,1/day,,"On hit, roll 1d20. On a natural result of 17, 18, 19, or 20, the target is set to 0 HP.",,Cool,Big Show
+Gunk Shot,"Ranged(20ft, 10ft blast)",Poison,Attack,1/day,5d12,"On hit, if you got 14 or higher on Accuracy Check, the target is Poisoned.",Repulsive,Cool,Appeal
+Gust,Ranged(20ft),Flying,Special,At-Will,1d12,"If the target is at least 20 ft off the ground airborne, Gust deals +1d20 damage.",Guster,Clever,Appeal
+Gyro Ball,Melee,Steel,Attack,3/day,3d10,Gyro Ball can only target faster targets.,,Beauty,Final Appeal
+Hail,Field,Ice,Effect,3/day,,You create a circle of Hailing Weather with a 60ft diameter. Anyone who acts within the Hailing weather takes 2d4 damage after acting unless they are Ice Type. This weather disappears after 2 mins.,,Beauty,Hold That Thought
+Hammer Arm,Melee,Fighting,Attack,1/day,5d12,"On hit, your Speed is -1 for 10 mins. This effect cannot be stacked.",,Tough,Slow Set
+Haze,Field,Ice,Effect,3/day,,"You create a circle of Hazy Weather with a 60ft diameter. Within the Hazy weather, all stat altering passives are disabled. Stats cannot be altered by anything within the Hazy weather. This weather disappears after 2 mins.",,Beauty,Hold That Thought
+Head Charge,Melee,Normal,Attack,3/day,3d10,"On hit, you lose HP equal to 1/4th of the damage you deal.",,Tough,Appeal
+Head Smash,Melee,Rock,Attack,1/day,7d12,"On hit, you lose HP equal to half of the damage you deal. Head Smash has -2 during Accuracy Check.",,Tough,Seen Nothing Yet
+Headbutt,Melee,Normal,Attack,At-Will,2d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Tough,Appeal
+Heal Bell,Ranged(10ft burst),Normal,Effect,1/day,,You and all allies within range are cured of all afflictions.,,Beauty,Reflective Appeal
+Heal Block,Ranged(30ft burst),Psychic,Effect,1/day,,All affected targets cannot be healed or heal for 1 minute.,,Cute,Hold That Thought
+Heal Order,Self,Bug,Effect,1/day,,You are healed HP equal to half of your Max HP.,,Clever,Reflective Appeal
+Heal Pulse,Ranged(10ft),Psychic,Effect,1/day,,Target an ally or yourself. The target is healed HP equal to half of the target’s Max HP.,,Beauty,Reflective Appeal
+Healing Wish,Melee,Psychic,Effect,1/day,,"Your HP is set to 0, then target ally is healed to Max HP and cured of any afflictions.",,Cute,Torrential Appeal
+Heart Stamp,Melee,Psychic,Attack,At-Will,2d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Cute,Appeal
+Heat Crash,Melee,Fire,Attack,3/day,3d10,Heat Crash can only target lighter targets.,Firestarter,Tough,Incentives
+Heat Flash,Ranged(10ft),Fire,Effect,At-Will,1d4,"On hit, the target’s Accuracy Checks are -1 during their next turn. This effect cannot be stacked.",,,
+Heat Wave,Ranged(25ft burst),Fire,Special,1/day,3d12,"On hit, if you got 17 or higher on Accuracy Check, targets are Burned.",Firestarter,Beauty,Round Starter
+Heavy Slam,Melee,Steel,Attack,3/day,3d10,Heavy Slam can only target lighter targets.,,Tough,Incentives
+Helping Hand,Melee,Normal,Effect,3/day,,Target ally’s next attack during this round will deal +1d20 damage.,,Clever,Good Show!
+Hex,Ranged(15ft),Ghost,Special,3/day,3d8,"If the target is afflicted, Hex has 5d8 for damage instead.",,Clever,Incentives
+Hidden Power,Ranged(25ft),(Variable),Special,3/day,3d8,"When Hidden Power is added to a move list, assign a random Type to it.",,Clever,Catching Up
+High Horsepower,Melee,Ground,Attack,3/day,3d10,,,Clever,Round Ender
+High Jump Kick,Melee,Fighting,Attack,1/day,5d12,"High Jump Kick has -2 during Accuracy Check. If you miss, you lose HP equal to half of your Max HP.",,Cool,Appeal
+Hold Back,Melee,Normal,Attack,At-Will,2d6,"Hold Back cannot be used to knock out a target. Instead, the target will still have 1 HP.",,Cool,Inversed Appeal
+Horn Attack,Melee,Normal,Attack,At-Will,2d8,,,Cool,Appeal
+Horn Drill,Melee,Normal,Attack,1/day,,"On hit, roll 1d20. On a natural result of 17, 18, 19, or 20, the target is set to 0 HP.",,Cool,Big Show
+Horn Leech,Melee,Grass,Attack,1/day,3d12,"On hit, you regain HP equal to half of the damage dealt.",,Clever,Good Show!
+Hurricane,"Ranged(25ft, 10ft blast)",Flying,Special,1/day,5d12,"Hurricane has -2 during Accuracy Check unless it’s Raining. On hit, if you got 14 or higher on Accuracy Check, the targets are Confused.",Guster,Cool,Round Starter
+Hydro Cannon,Ranged(25ft beam),Water,Special,1/day,5d20,Hydro Cannon has -2 during Accuracy Check. You cannot act during the next round.,Fountain,Beauty,Seen Nothing Yet
+Hydro Pump,Ranged(30ft beam),Water,Special,1/day,5d12,Hydro Pump has -2 during Accuracy Check unless it’s Raining.,Fountain,Beauty,Round Starter
+Hydro Surge,"Ranged(30ft beam, 10ft blast)",Water,Special,1/day,5d12,"If it’s Raining, Hydro Surge has +2 during Accuracy Check.",,,
+Hydro Vortex,"Ranged(60ft, 20ft blast)",Water,(Variable),1/day,8d12,,,,
+Hyper Beam,Ranged(25ft beam),Normal,Special,1/day,5d20,Hyper Beam has -2 during Accuracy Check. You cannot act during the next round.,,Cool,Seen Nothing Yet
+Hyper Blast,Ranged(25ft beam),Normal,Special,1/day,5d20,Hyper Blast has -2 during Accuracy Check. You may have Hyper Blast be a Psychic-type attack.,,,
+Hyper Fang,Melee,Normal,Attack,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Cool,Round Ender
+Hyperspace Fury,"Ranged(40ft, 10ft blast)",Dark,Special,3/day,3d12,Hyperspace Fury cannot miss.,,,
+Hyperspace Hole,"Ranged(40ft, 10ft blast)",Ghost,Attack,3/day,3d12,Hyperspace Hole cannot miss,,,
+Hyper Voice,Ranged(30ft beam),Normal,Special,1/day,3d12,,,Cool,Appeal
+Hypnosis,Ranged(10ft),Psychic,Effect,3/day,,"Hypnosis has -4 during Accuracy Check. On hit, the target is put Asleep.",,Clever,Excitement
+Ice Ball,Melee,Ice,Attack,At-Will,1d4,"For each time you’ve successfully used Ice Ball against the same target during the encounter, add 1d8 to Ice Ball’s damage.",,Beauty,Round Starter
+Ice Beam,Ranged(20ft beam),Ice,Special,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Frozen.",Freezer,Beauty,Round Starter
+Ice Burn,"Ranged(40ft, 20ft blast)",Ice,Special,3/day,3d12,"On hit, if you got 12 or higher on Accuracy Check, the targets are Burned.",,,
+Ice Fang,Melee,Ice,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, the target is randomly either Stunned or Frozen.",Freezer,Cool,Appeal
+Ice Hammer,Melee,Ice,Attack,1/day,5d12,"On hit, your Speed is -1 for 10 mins. This effect cannot be stacked.",,Cool,Slow Set
+Ice Punch,Melee,Ice,Attack,3/day,3d8,"On hit, if you got 17 or higher on Accuracy Check, the target is Frozen.",,Beauty,Round Starter
+Ice Shard,Ranged(15ft),Ice,Attack,At-Will,2d6,"At-Will 2d6. Ice Shard has Priority, but not when used as Pester Ball D.",,Beauty,Quick Set
+Icicle Crash,Ranged(15ft),Ice,Attack,3/day,3d10,"On hit, if you got 14 or higher on Accuracy Check, the target is Stunned.",,Tough,Appeal
+Icicle Spear,Ranged(10ft),Ice,Attack,At-Will,1d4,Icicle Spear has -2 during Accuracy Check. Icicle Spear is a Scatter attack. Up to 5 attacks.,,Beauty,Reliable
+Icy Breeze,Ranged(20ft),Ice,Special,At-Will,2d6,,,,
+Icy Wind,Ranged(10ft),Ice,Special,At-Will,2d8,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",Freezer,Beauty,Slow Set
+Impenetrable Stance,Ranged(40ft),Normal,Effect,1/day,,"Impenetrable Stance is used as a Reaction. If you are hit by an attack, ignore the damage and any effects of the attack. As long as you do not move or make another attack during the next three rounds of combat, you are immune to any damage from attacks, you cannot be given afflictions, and you do not take damage from the effects of any moves. If you are moved, the effects of Impenetrable Stance ends.",,,
+Incinerate,Ranged(10ft),Fire,Special,At-Will,1d10,"On hit, if the target is holding a Berry, you destroy it.",Firestarter,Beauty,Appeal
+Inferno,Ranged(40ft),Fire,Special,1/day,5d12,"Inferno has -5 during Accuracy Check. On hit, the target is Burned.",,Beauty,Incredible
+Inferno Overdrive,"Ranged(60ft, 20ft blast)",Fire,(Variable),1/day,8d12,,,,
+Infestation,Ranged(20ft),Bug,Special,At-Will,1d4,"On hit, the target is bound in place for 1d4 rounds. For each round the target is bound, it takes 1d4 special damage on its turns.",,Clever,Torrential Appeal
+Ingrain,Self,Grass,Effect,1/day,,"Put a Root Coat on yourself. The Coat has the following ability: At the beginning of your turn, recover 1d12 HP. You may not move. This Coat lasts for 2 mins.",Sprouter,Clever,Torrential Appeal
+Instruct,Ranged(15ft),Psychic,Effect,3/day,,Targeted ally may immediately act if they hAvian’t this round.,,Cute,Good Show!
+Ion Deluge,Field,Electric,Effect,3/day,,"You create a circle of Ionic Terrain with a 60ft diameter. Within the Ionic terrain, all Normal-type attacks become Electric-type attacks. This terrain disappears after 2 mins.",,Clever,Unsettling
+Iron Head,Melee,Steel,Attack,3/day,3d10,"On hit, if you got 14 or higher on Accuracy Check, the target is Stunned.",,Tough,Round Ender
+Iron Tail,Melee,Steel,Attack,3/day,3d10,"Iron Tail has -2 during Accuracy Check. On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Tough,Round Ender
+Jaw Lock,Melee,Dark,Attack,3/day,3d8,"On hit, the target is bound to you for 1d6 rounds.",,Tough,Special Attention
+Judgement,"Ranged(50ft, 10ft blast)",(Variable),Special,3/day,5d20,Judgement’s type is chosen when its used.,,,
+Jump Kick,Melee,Fighting,Attack,3/day,3d10,"Jump Kick has -2 during Accuracy Check. If you miss, you lose HP equal to half of your Max HP.",,Cool,Appeal
+Jungle Healing,Ranged(20ft),Grass,Effect,3/day,,You and any allies in range are each healed HP equal to 1/3 rd of your Max HP and are cured of any afflictions.,,,
+Karate Chop,Melee,Fighting,Attack,At-Will,2d6,"On hit, if you got 18 or higher on Accuracy Check, Karate Chop is a critical hit.",,Tough,Appeal
+Karate Slap,Melee,Fighting,Attack,At-Will,2d6,,,,
+Kinesis,Ranged(10ft),Psychic,Effect,At-Will,,"On hit, the target’s Accuracy Checks are -1 during their next turn. This effect cannot be stacked.",,Clever,Get Ready!
+King’s Shield,Self,Steel,Effect,1/day,,"King’s Shield is used as a Reaction. If you are hit by an enemy with an attack that makes contact with you, ignore the damage and any effects of the attack and the attacker’s Attack is -4 for 10 mins. This effect cannot be stacked.",,Tough,Appeal
+King’s Strike,Ranged (30ft beam),(Variable),Attack,1/day,3d12,"King’s Strike is the type your Knight’s Sword is attuned to. Choose one:-King’s Strike deals 4d12 damage instead.-You and all your allies within 100 ft gain a +2 bonus to Attack, Defense, Special Attack, Special Defense, or Speed for one round. This cannot be stacked.-The range of King’s Strike is 60ft, 10 ft wave",,,
+Knight’s Strike,Melee,(Variable),Attack,At-Will,2d6,"Knight’s Strike is the type your Knight’s Sword is attuned to. Choose one each time you use Knight’s Strike:-On a hit, the target takes a -2 penalty to Attack, Defense, Special Attack, Special Defense, or Speed for one round. This cannot be stacked.-On a hit, gain a +2 bonus to Attack, Defense, Special Attack, Special Defense, or Speed for one round. You take a -1 penalty to skill checks related to the relevant stat for one round (netting no overall bonus or penalty to skills). This cannot be stacked.-Knight’s Sword deals 2d8 instead.-Knight’s Sword is ranged (15 ft beam).",,,
+Knock Off,Melee,Dark,Attack,3/day,3d8,"On hit, the target drops any held items or weapons.",,Clever,Appeal
+Land's Wrath,Ranged(40ft),Ground,Attack,3/day,5d12,,,,
+Language,Self,Normal,Effect,At-Will,,"Language takes up a move slot, but is not an attack or move with any affect in battle. Language can be learned multiple times. When Language is acquired, chose a human language. You are capable of speaking basic sentences in the chosen languages. If the same human language is chosen by multiple instances of Language, you can speak that language at any level complexity.",,,
+Laser Focus,Ranged(30ft),Normal,Effect,3/day,,"On hit, your next attack against the same target will be a Critical Hit. You still need to make an Accuracy Check.",,Clever,Good Show!
+Lash Out,Melee,Dark,Attack,1/day,3d12,"If your stats were lowered this round by the target, use 6d12 for damage instead.",,Cute,Inversed Appeal
+Lava Plume,Ranged(20ft burst),Fire,Special,1/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, targets are burned.",,Tough,Round Starter
+Leaf Blade,Melee,Grass,Attack,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, Leaf Blade is a critical hit.",,Cool,Round Starter
+Leaf Storm,Ranged(30ft beam),Grass,Special,1/day,5d12,"After use, your Special Attack is -4 for 10 mins. This effect cannot be stacked.",,Cute,Seen Nothing Yet
+Leaf Tornado,Ranged(10ft),Grass,Special,At-Will,2d8,,,Beauty,Good Show!
+Leafage,Ranged(20ft),Grass,Special,At-Will,1d12,,,Cute,Appeal
+Leech Life,Melee,Bug,Attack,3/day,2d8,"On hit, you regain HP equal to half of the damage dealt.",,Clever,Good Show!
+Leech Seed,Ranged(10ft),Grass,Effect,1/day,,"On hit, the target gets a Seed Coat. The Coat has the following ability: At the beginning of your turn, if you are within 20 ft of the enemy who gave you the Seed Coat, you lose 1d12 HP. The enemy who gave you the Seed Coat will gain the same amount of HP that you lost. This Coat lasts for 3 mins, or until you are at 0 or less HP.",Sprouter,Clever,Torrential Appeal
+Let’s Snuggle Forever,Melee,Fairy,Attack,1/day,10d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Lick,Melee,Ghost,Attack,At-Will,1d8,"On hit, if you got 15 or higher on Accuracy Check, the target is Paralyzed.",,Tough,Inversed Appeal
+Licking,Melee,Ghost,Attack,At-Will,2d6,,,,
+Life Dew,Ranged(20ft burst),Water,Effect,1/day,,You and any allies in range are each healed HP equal to 1/6th of your Max HP.,,Beauty,Incredible
+Light Screen,Ranged(30ft),Normal,Effect,3/day,,"Place 40ft of contiguous Light Screen Wall. Light Screen Wall is see through, 12 ft tall, and has the following ability: Special Attacks that target through this wall deal 10 less damage. This Wall disappears after 2 mins.",,Beauty,Hold That Thought
+Liquidation,Ranged(10ft),Water,Attack,3/day,3d10,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",Fountain,Tough,Round Ender
+Lock-On,Ranged(40ft),Normal,Effect,1/day,,Your next attack against the same target will not miss.,,Clever,Good Show!
+Lovely Kiss,Melee,Normal,Effect,3/day,,"Lovely Kiss has -3 during Accuracy Check. On hit, the target is put Asleep.",,Beauty,Excitement
+Low Kick,Melee,Fighting,Attack,3/day,3d10,Low Kick can only target heavier targets.,,Tough,Appeal
+Low Sweep,Melee,Fighting,Attack,At-Will,2d8,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",,Tough,Appeal
+Lucky Chant,Ranged(30ft burst),Normal,Effect,3/day,,"Put a Lucky Coat on all allies and yourself. The Coat has the following ability: If you are hit by a Critical Hit, treat the hit as a regular successful hit. This Coat lasts for 2 rounds.",,Cute,Hold That Thought
+Lunar Dance,Ranged(100ft),Psychic,Effect,1/day,,"Your HP is set to 100 unless it’s below 100, the target recovers 500 HP and is cured of any afflictions.",,,
+Lunge,Melee,Bug,Attack,3/day,3d8,"On hit, the target’s Attack is -1 for 10 mins. This effect cannot be stacked.",,Tough,Attention Grabber
+Luster Purge,Ranged(20 ft),Psychic,Special,3/day,5d10,"On hit, the target’s Special Defense is -10 for 10 mins. This effect cannot be stacked.",,,
+Mach Punch,Melee,Fighting,Attack,At-Will,2d6,Mach Punch has Priority.,,Cool,Quick Set
+Mach Speeds,Self,Normal,Effect,3/day,,"Your Speed is +8 for 10 mins, your Defense and Special Defense is -3 for 10 mins. This effect cannot be stacked.",,,
+Magic Coat,Melee,Psychic,Effect,3/day,,"Put a Magic Coat on the target or yourself. The Coat has the following ability: If you would be given an affliction by a foe, instead that foe receives the affliction. This Coat lasts for 2 rounds.",,Beauty,Final Appeal
+Magic Powder,Melee,Psychic,Effect,3/day,,"On hit, put a Weird Coat on the target. The Coat has the following ability: You lose your Types and become only Psychic-type for 10 mins.",,Cute,Excitement
+Magic Room,Field,Psychic,Effect,3/day,,"You create a circle of Magical Terrain with a 60ft diameter. If within the Magical terrain, Pokémon cannot use any held items. This terrain disappears after 2 mins.",,Cute,Scrambler
+Magical Leaf,Ranged(25ft),Grass,Special,3/day,3d8,You can’t miss targets with less than 15 Special Defense.,,Beauty,Round Starter
+Magma Storm,"Ranged(30ft, 20ft blast)",Fire,Special,1/day,5d20,"On hit, all targets are bound to ground for 1d4 turns. For each turn the target is bound, it takes 1d20 damage.",,,
+Magnet Bomb,Ranged(25ft),Steel,Attack,3/day,3d8,You can’t miss targets with less than 15 Defense.,Magnetic,Cool,Appeal
+Magnet Pull,Ranged(10ft),Electric,Effect,3/day,,"Magnet Pull can’t miss. On hit, the Steel type target is bound to you.",Magnetic,Clever,Slow Set
+Magnet Rise,Self,Electric,Effect,3/day,,You gain an immunity to Ground type attacks and gain a flight movement speed equal to half your land speed for two mins.,Magnetic AND Hover,Cute,Hold That Thought
+Malicious Moonsault,Melee(40ft burst),Dark,Attack,1/day,8d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Mat Block,Ranged(10ft),Fighting,Effect,1/day,,"Mat Block is used as a Reaction. If an ally within range is hit by an attack, move to that ally and ignore the damage and any effects of the attack.",,Cool,Inversed Appeal
+Max Airstream,"Ranged(80ft, 30ft blast)",Flying,(Variable),At-Will,4d12,"On hit, all allies within 60ft have +1 speed for 2 mins. You cannot act during the next round.",,,
+Max Darkness,"Ranged(80ft, 30ft blast)",Dark,(Variable),At-Will,4d12,"On hit, all targets Special Defense is -1 for 2 mins. You cannot act during the next round.",,,
+Max Flare,"Ranged(80ft, 30ft blast)",Fire,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Sunny Weather with a 60ft diameter. Within the Sunny weather, Fire-type attacks deal an additional 8 damage and Water-type attacks deal 8 less damage. This weather disappears after 2 mins. You cannot act during the next round.",,,
+Max Flutterby,"Ranged(80ft, 30ft blast)",Bug,(Variable),At-Will,4d12,"On hit, all targets Special Attack is -1 for 2 mins. You cannot act during the next round.",,,
+Max Geyser,"Ranged(80ft, 30ft blast)",Water,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Raining Weather with a 60ft diameter. Within the Raining weather, Water-type attacks deal an additional 8 damage and Fire-type attacks deal 8 less damage. This weather disappears after 2 mins. You cannot act during the next round.",,,
+Max Guard,Self,Normal,Effect,3/day,,Prevent the next 30 damage you would receive until your next action.,,,
+Max Hailstorm,"Ranged(80ft, 30ft blast)",Ice,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Hailing Weather with a 60ft diameter. Anyone who acts within the Hailing weather takes 2d4 damage after acting unless they are Ice Type. This weather disappears after 2 mins. You cannot act during the next round.",,,
+Max Knuckle,"Ranged(80ft, 30ft blast)",Fighting,(Variable),At-Will,4d12,"On hit, all allies within 60ft have +1 Attack for 2 mins. You cannot act during the next round.",,,
+Max Lightning,"Ranged(80ft, 30ft blast)",Electric,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Electrified Terrain with a 60ft diameter. Anyone touching the ground within the Electrified terrain is immune to being put to Sleep. This terrain disappears after 2 mins. You cannot act during the next round",,,
+Max Mindstorm,"Ranged(80ft, 30ft blast)",Psychic,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Psychic Terrain with a 60ft diameter. If touching the ground, within the Psychic Terrain, Priority and Reaction moves may not be used. This terrain disappears after 2 mins. You cannot act during the next round",,,
+Max Ooze,"Ranged(80ft, 30ft blast)",Poison,(Variable),At-Will,4d12,"On hit, all allies within 60ft have +1 Special Attack for 2 mins. You cannot act during the next round.",,,
+Max Overgrowth,"Ranged(80ft, 30ft blast)",Grass,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Grassy Terrain with a 60ft diameter. Anyone who acts within the Grassy terrain recovers 1d12 HP after acting. This terrain disappears after 2 mins. You cannot act during the next round.",,,
+Max Phantasm,"Ranged(80ft, 30ft blast)",Ghost,(Variable),At-Will,4d12,"On hit, all targets Defense is -1 for 2 mins. You cannot act during the next round.",,,
+Max Quake,"Ranged(80ft, 30ft blast)",Ground,(Variable),At-Will,4d12,"On hit, all allies within 60ft have +1 Special Defense for 2 mins. You cannot act during the next round.",,,
+Max Rockfall,"Ranged(80ft, 30ft blast)",Rock,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Sandstorming Weather with a 60ft diameter. Anyone who acts within the Sandstorming weather takes 2d4 damage after acting unless they are Rock-type, Ground-type, or Steel-type. This weather disappears after 2 mins. You cannot act during the next round.",,,
+Max Starfall,"Ranged(80ft, 30ft blast)",Fairy,(Variable),At-Will,4d12,"At the center of the blast, you create a circle of Misty Terrain with a 60ft diameter. Within the Misty terrain, Dragon-type attacks are resisted by anyone who is not already resistant to Dragon-type attacks and afflictions cannot be given to anyone. This terrain disappears after 2 mins. You cannot act during the next round",,,
+Max Steelspike,"Ranged(80ft, 30ft blast)",Steel,(Variable),At-Will,4d12,"On hit, all allies within 60ft have +1 Defense for 2 mins. You cannot act during the next round.",,,
+Max Strike,"Ranged(80ft, 30ft blast)",Normal,(Variable),At-Will,4d12,"On hit, all targets Speed is -1 for 2 mins. You cannot act during the next round.",,,
+Max Wyrmwind,"Ranged(80ft, 30ft blast)",Dragon,(Variable),At-Will,4d12,"On hit, all targets Attack is -1 for 2 mins. You cannot act during the next round",,,
+Mean Look,Ranged(10ft),Normal,Effect,1/day,,"On hit, the target is bound in place for 2 mins. Ghost Pokémon are immune to Mean Look.",,Beauty,Unsettling
+Mega Drain,Melee,Grass,Special,3/day,2d10,"On hit, you regain HP equal to half of the damage dealt.",,Clever,Good Show!
+Mega Evolution,Self,Normal,Effect,3/day,,"As a free action, Mega Evolve into Mega Mewtwo X or Mega Mewtwo Y if Mewtwo possesses a Mega Stone for 10 mins.",,,
+Mega Kick,Melee,Normal,Attack,1/day,5d12,Mega Kick has -3 during Accuracy Check.,,Cool,Round Ender
+Mega Punch,Melee,Normal,Attack,3/day,3d8,,,Tough,Round Ender
+Megahorn,Melee,Bug,Attack,1/day,5d12,,,Cool,Round Ender
+Memento,Melee,Dark,Effect,1/day,,"Your HP is set to 0, then the target’s Attack and Special Attack are set to 0 for 10 mins.",,Tough,Big Show
+Metal Burst,Ranged(40ft),Steel,Effect,1/day,,"Metal Burst is used as a Reaction. If you are hit by an enemy with an attack and the enemy is within range, deal exactly 1.5x the damage to the enemy that you received after taking damage. Do not apply weakness or resistances.",,Beauty,Final Appeal
+Metal Claw,Melee,Steel,Attack,At-Will,2d6,"On hit, your Attack is +1 for 10 mins. This effect cannot be stacked.",,Cool,Incentives
+Metal Cut,Melee,Steel,Attack,At-Will,2d6,,,,
+Meteor Assault,Melee,Fighting,Attack,1/day,5d12,"On hit, the target is Stunned.",,Cool,Big Show
+Meteor Beam,Ranged(30ft beam),Rock,Special,1/day,5d12,"When you use this attack you immediately end your turn. During your next turn you may move then roll Meteor Beam’s accuracy check and damage. During Meteor Beam’s accuracy check and damage, your Special Attack is +4.",,Clever,Round Starter
+Meteor Mash,Melee,Steel,Attack,3/day,3d10,"On hit, your Attack is +1 for 10 mins. This effect cannot be stacked.",,Cool,Round Ender
+Meteor Rain,"Ranged(20ft, 10ft blast)",Steel,Special,1/day,5d12,"After use, your Special Attack is -4 for 10 mins. This effect cannot be stacked.",,,
+Metronome,Varies,Normal,Effect,3/day,,Immediately use a random attack (non-Legendary).,,Cute,Scrambler
+Migraine,Self,Normal,Effect,3/day,,"You lose HP equal to half of your Max HP, then your Special Attack is +6 for 10 mins. This effect cannot be stacked.",,,
+Milk Drink,Melee,Normal,Effect,1/day,,Target an ally or yourself. The target is healed HP equal to half of the target’s Max HP.,,Cute,Reflective Appeal
+Mind Blown,Ranged(20ft burst),Fire,Special,1/day,5d20,"On hit, you lose HP equal to ½ of the damage you deal.",,,
+Mind Reader,Ranged(40ft),Normal,Effect,1/day,,"Mind Reader can’t miss. Your next attack against the same target will not 
+miss.",Telepath,Clever,Good Show!
+Mind Rise,Self,Psychic,Effect,3/day,,You gain an immunity to Ground type attacks and gain a flight movement speed equal to your land speed for two mins.,,,
+Mind-reading Disable,Ranged(20ft),Normal,Effect,3/day,,Chose an attack the target knows. That move cannot be used by the target for 5 mins.,,,
+Minimize,Self,Normal,Effect,3/day,,"Until your next turn, attacks made against you have -2 during Accuracy Check. This effect cannot be stacked.",Shrinkable,Cute,Hold That Thought
+Miracle Eye,Self,Psychic,Effect,3/day,,You can hit Dark-types with Psychic type moves as if they are not immune to that type of attacks for two mins.,,Cute,Good Show!
+Mirror Coat,Ranged(40ft),Psychic,Effect,1/day,,"Mirror Coat is used as a Reaction. After an enemy hits you with a ranged Special Attack move that deals damage, use Mirror Coat to deal exactly twice the damage to the enemy that you received. Do not apply weakness or resistances.",,Beauty,Final Appeal
+Mirror Move,Ranged(30ft),Flying,Effect,1/day,,"You perform the same attack that was just used against you, even if it missed.",,Clever,Final Appeal
+Mirror Shot,Ranged(20ft),Steel,Special,At-Will,2d8,,,Cute,Round Starter
+Mist,Field,Ice,Effect,3/day,,"You create a circle of Misty Weather with a 60ft diameter. Within the Misty weather, Stats cannot be lowered. This weather disappears after 2 mins.",,Beauty,Hold That Thought
+Mist Ball,Ranged(30ft),Psychic,Special,3/day,5d10,"On hit, target’s Special Attack is -10 for 10 mins.",,,
+Misty Explosion,Ranged(30ft burst),Fairy,Special,1/day,7d20,"Set your HP to 0, then roll 1d20. On 10 or less, your HP is set to -100% HP and you must make a death savings throw.",,Cute,Big Show
+Misty Terrain,Field,Fairy,Effect,3/day,,"You create a circle of Misty Terrain with a 60ft diameter. Within the Misty terrain, Dragon-type attacks are resisted by anyone who is not already resistant to Dragon-type attacks and afflictions cannot be given to anyone. This terrain disappears after 2 mins.",,Cute,Scrambler
+Moonblast,Ranged(20ft),Fairy,Special,3/day,3d10,"On hit, the target’s Special Attack is -1 for 10 mins. This effect cannot be stacked.",,Beauty,Reflective Appeal
+Moongeist Beam,Ranged(40ft beam),Ghost,Special,3/day,5d20,Moongeist Beam has +2 during Accuracy Check.,,,
+Moonlight,Melee,Fairy,Effect,1/day,,"Target an ally or yourself. The target is healed HP equal to half of the target’s Max HP. If you are within Sunny Weather, the target is healed HP equal to 3/4ths of the target’s Max HP instead.",,Beauty,Reflective Appeal
+Moonwrecker,"Ranged(20ft, 10ft blast)",Fairy,Special,1/day,5d12,"After use, your Special Attack is -4 for 10 mins. This effect cannot be stacked.",,,
+Morning Sun,Melee,Normal,Effect,1/day,,"Target an ally or yourself. The target is healed HP equal to half of the target’s Max HP. If you are within Sunny Weather, the target is healed HP equal to 3/4ths of the target’s Max HP instead.",,Beauty,Reflective Appeal
+Mud Bomb,Ranged(10ft),Ground,Special,3/day,3d8,"On hit, the target’s Accuracy Checks are -1 during their next turn. This effect cannot be stacked.",,Clever,Round Ender
+Mud Shot,Ranged(10ft),Ground,Special,At-Will,2d8,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",,Tough,Slow Set
+Mud Sport,Melee,Ground,Effect,At-Will,,Put a Mud Coat on the target or yourself. The Coat has the following ability: Reduce damage from Electric attacks that hit you by 10. This Coat lasts for 2 mins.,,Cute,Hold That Thought
+Mud Throw,Ranged(20ft),Ground,Special,At-Will,2d6,,,,
+Mud-Slap,Ranged(5ft),Ground,Special,At-Will,1d6,"On hit, the target’s Accuracy Checks are -1 during their next turn. This effect cannot be stacked.",,Cute,Appeal
+Muddy Water,"Ranged(20ft, 10ft wave)",Water,Special,1/day,3d12,"On hit, any target’s Accuracy Checks are -2 during their next turn. This effect cannot be stacked.",,Tough,Round Ender
+Multi-Attack,Melee,Normal,Attack,3/day,3d10,Multi-Attack’s Type changes depending on what kind of item Type: Null or Sil-vally is holding.,,Clever,Incentives
+Mystical Fire,Ranged(20ft),Fire,Special,3/day,3d8,"On hit, the target’s Special Attack is -1 for 10 mins. This effect cannot be stacked.",,Beauty,Seen Nothing Yet
+Nature Power(homebrew),Ranged(20 ft),(Variable),Special,3/day,3d8,"Nature Power’s type depends on the environment you are in.
+Ocean, Beach, Marsh, Freshwater: Water-type
+Tundra or Taiga: Ice-type
+Cavern, Mountains: Rock-type
+Desert, Grasslands: Ground-type
+Rainforest, Forest: Grass-type
+Urban: Normal-type
+In the area of a Terrain move: Same as Terrain",,Beauty,Reflective Appeal
+Nature’s Madness,Ranged(25ft),Fairy,Special,1/day,,"On hit, the target’s current HP is halved.",,Tough,Appeal
+Needle Arm,Melee,Grass,Attack,3/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, the target is Stunned.",,Clever,Appeal
+Never-Ending Nightmare,"Ranged(60ft, 20ft blast)",Ghost,(Variable),1/day,8d12,,,,
+Night Daze,Ranged(10ft),Dark,Special,3/day,3d10,"On hit, the target’s Accuracy Checks are -1 during their next turn. This effect cannot be stacked.",,Tough,Unsettling
+Nightmare,Ranged(40ft burst),Ghost,Effect,1/day,,"All Sleeping targets are given Nightmare Coats. The Nightmare Coat has the following ability: At the end of your turn, lose 1/3rd of your Max HP. Nightmare Coat is destroyed if the wearer is cured of Sleep or knocked out.",,,
+Night Slash,Melee,Dark,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, Night Slash is a critical hit.",,Beauty,Appeal
+No Retreat,Self,Fighting,Effect,3/day,,"As a free action, as long as you can see a foe, you cannot move away from them, or be returned to a Poke Ball until you are knocked out. Your Attack, Special Attack, Defense, Special Defense, and Speed are each raised +1 for 10 mins. This effect cannot be stacked.",,Tough,Get Ready!
+Nuzzle,Melee,Electric,Attack,3/day,1d10,"On hit, the target is Paralyzed.",,Cute,Appeal
+Oblivion Wing,Ranged(25ft burst),Dark,Special,3/day,3d12,"On hit, you regain HP equal to the damage dealt.",,,
+Obstruct,Self,Dark,Effect,1/day,,"Obstruct is used as a Reaction. If you are hit by an attack, ignore the damage and any effects of the attack. If the ignored attack was a melee attack, the attacker’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Tough,Inversed Appeal
+Oceanic Operetta,"Ranged(100ft, 30ft blast)",Water,Special,1/day,8d12,,,,
+Octolock,Melee,Fighting,Effect,3/day,,"On hit, the target is bound to you for 1d6 rounds. While the target is bound, the target’s Defense and Special Defense is -1.",,Tough,Round Ender
+Octazooka,Ranged(15ft),Water,Special,3/day,3d8,"On hit, the target’s Accuracy Checks are -3 during their next turn. This effect cannot be stacked.",,Tough,Incentives
+Odor Sleuth,Self,Normal,Effect,At-Will,,You can hit Ghost-types with Normal and Fighting type moves as if they are not immune to those types of attacks for two mins.,Tracker,Clever,Good Show!
+Ominous Wind,Ranged(10ft),Ghost,Special,1/day,2d8,"On hit, your Attack, Special Attack, Defense, Special Defense, and Speed are each raised +1 for 1 hour.",,Clever,Get Ready!
+Origin Pulse,"Ranged(40ft, 30 ft wave)",Water,Special,3/day,5d12,,,,
+Outrage,Melee,Dragon,Attack,1/day,5d12,"Move to and attack the nearest possible target within 25ft. During your next action, move to and attack the nearest possible target within 25ft, then you become Confused. Outrage can and will target allies if possible.",,Cool,Reliable
+Overdrive,Ranged(10ft burst),Electric,Special,3/day,3d10,,,Cool,Attention Grabber
+Overheat,Ranged(30ft burst),Fire,Special,1/day,5d12,"After use, your Special Attack is -4 for 10 mins. This effect cannot be stacked.",,Beauty,Seen Nothing Yet
+Pack Mon,Ranged(20ft burst),Normal,Effect,1/day,,"Pack Mon cannot miss. All wild Pokémon targets that share an egg group with you follow your lead for 1 hour. Wild Pokémon following you will attack with you, defend with you, help to accomplish tasks, and lead others through wild areas when asked to do so by an allied Trainer. Wild Pokémon following you will not attack their own kind, actively destroy their homes, nor leave the wilds following you into a town or city.",,,
+Pain Split,Melee,Normal,Effect,1/day,,"On hit, you and target’s current HPs are added together and halved, assigning both you and the target that new value. Neither can have their new HPs be more than their Max.",,Clever,Unsettling
+Parabolic Charge,Melee,Electric,Special,1/day,3d12,"On hit, you regain HP equal to half of the damage dealt.",Zapper,Cool,Appeal
+Payback,Melee,Dark,Attack,3/day,3d8,"If you were attacked by the target this round, use 3d12 for damage instead.",,Cool,Special Attention
+Peck,Melee,Flying,Attack,At-Will,2d6,,,Cool,Appeal
+Perish Song,Ranged(40ft burst),Normal,Effect,1/day,,"All possible Pokémon targets including yourself receive 3 Perish Coats. The Coats have the following ability: After acting, destroy one of your Perish Coats. If this is the third Perish Coat you’ve destroyed this way during this encounter, set your HP to 0.",,Beauty,Unsettling
+Petal Blizzard,Ranged(10ft burst),Grass,Attack,3/day,3d10,,,Clever,Appeal
+Petal Dance,Ranged(5ft burst),Grass,Special,1/day,5d12,"Move to and attack the nearest possible target within 25ft. During your next action, move to and attack the nearest possible target within 25ft, then you become Confused. Petal Dance can and will target allies if possible.",,Beauty,Torrential Appeal
+Phantom Force,Melee,Ghost,Attack,1/day,3d12,"When you use this attack, you vanish, then you immediately end your turn. During your next turn, you reappear anywhere within 25ft of where you vanished then your movement speed is doubled and after getting to a target you may roll Phantom Force’s Accuracy Check and damage.",,Clever,Seen Nothing Yet
+Photon Geyser,Ranged(160 ft beam),Psychic,Special,3/day,12d12,You cannot act during the next two rounds,,,
+Pin Missile,Ranged(10ft),Bug,Attack,At-Will,1d4,Pin Missile has -2 during Accuracy Check. Pin Missile is a Scatter attack. Up to 5 attacks.,,Cool,Reliable
+Plasma Fists,Melee,Electric,Attack,3/day,3d12,"For 10 mins, if you are hit by a melee attack, the attack is treated as an Electric-type attack.",,,
+Play Rough,Melee,Fairy,Attack,3/day,3d10,"On hit, the target’s Attack is -1 for 10 mins. This effect cannot be stacked.",,Cute,Unsettling
+Poison Fang,Melee,Poison,Attack,3/day,1d20,"On hit, if you got 10 or higher on Accuracy Check, the target is Toxified.",,Clever,Incentives
+Poison Gas,Ranged(5ft burst),Poison,Effect,3/day,,"Poison Gas has -2 during Accuracy Check. On hit, all targets are Poisoned.",Repulsive,Clever,Appeal
+Poison Jab,Melee,Poison,Attack,3/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, the target is Poisoned.",,Clever,Incentives
+Poison Powder,Melee,Poison,Effect,At-Will,,"Poison Powder has -5 during Accuracy Check. On hit, the target is Poisoned.",,Clever,Excitement
+Poison Sting,Melee,Poison,Attack,At-Will,1d4,"On hit, if you got 15 or higher on Accuracy Check, the target is Poisoned.",,Clever,Excitement
+Poison Tail,Melee,Poison,Attack,3/day,1d20,"On hit, if you got 14 or higher on Accuracy Check, the target is Poisoned; if you got 18 or higher on Accuracy Check, Poison Tail is a critical hit.",,Clever,Incentives
+Pollen Puff,Ranged(10ft),Bug,Special,1/day,3d12,"On hit, you may choose to deal damage with Pollen Puff or heal the target’s HP equal to the amount of damage Pollen Puff would have dealt.",,Tough,Torrential Appeal
+Poltergeist,Ranged(20ft),Ghost,Attack,1/day,5d12,Poltergeist cannot be used if the target has no held item.,,Cute,Unsettling
+Pound,Melee,Normal,Attack,At-Will,2d6,,,Tough,Appeal
+Powder,Melee,Bug,Effect,1/day,,"Powder is used as a Reaction. If you are hit by an enemy within melee range with a Fire type attack, the enemy loses HP equal to 25% of its Max HP and you ignore the damage and any effects of the Fire type attack.",,Clever,Scrambler
+Powder Bomb,"Ranged(20ft, 10ft blast)",Poison,Effect,3/day,,"On hit, any targets are Poisoned.",,,
+Powder Snow,Ranged(5ft burst),Ice,Special,At-Will,1d12,"On hit, if you got 19 or higher on Accuracy Check, the target is Frozen.",Freezer,Beauty,Appeal
+Power Gem,Ranged(20ft),Rock,Special,3/day,3d10,,,Beauty,Appeal
+Power Trip,Melee,Dark,Attack,3/day,1d20,Power Trip deals an additional 1d10 damage for each stat buff Passive the target has.,,Tough,Incentives
+Power Whip,Melee,Grass,Attack,1/day,5d12,Power Whip has -2 during Accuracy Check.,Threaded,,
+Power-Up Punch,Melee,Fighting,Attack,At-Will,2d6,"On hit, your Attack is +1 for 10 mins. This effect cannot be stacked.",,Tough,Appeal
+Precipice Blades,Ranged(35ft burst),Ground,Attack,3/day,5d12,,,,
+Present,Ranged(10ft),Normal,Attack,3/day,3d8,"On hit, you may choose to deal damage with Present or heal the target’s HP equal to the amount of damage Present would have dealt.",,Cute,Inversed Appeal
+Prismatic Laser,Ranged(80ft beam),Psychic,Special,3/day,8d12,You cannot act during the next round,,,
+Protect,Self,Normal,Effect,1/day,,"Protect is used as a Reaction. When you would be hit by a move, use Protect to instead ignore the damage and any effects of the attack.",,Cute,Inversed Appeal
+Psybeam,Ranged(15ft beam),Psychic,Special,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Confused.",,Beauty,Round Starter
+Psychic,Ranged(25ft),Psychic,Special,3/day,3d10,"On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",Telekinetic,Clever,Round Starter
+Psychic Fangs,Melee,Psychic,Attack,3/day,3d10,"On hit, Psychic Fangs destroys all walls within melee range. Psychic Fangs can target walls.",,Cool,Appeal
+Psychic Force,Ranged(40ft),Psychic,Special,1/day,5d12,"On hit, the target’s Special Defense is -1 for 10 mins. Your Defense and Special Defense is -1 for 10 mins. These effects cannot be stacked.",,,
+Psychic Terrain,Field,Psychic,Effect,3/day,,"You create a circle of Psychic Terrain with a 60ft diameter. If touching the ground, within the Psychic Terrain, Priority and Reaction moves may not be used. Within the Psychic Terrain, Psychic-type attacks deal an additional 8 damage This terrain disappears after 2 mins.",,Cute,Good Show!
+Psycho Cut,Ranged(20ft),Psychic,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, Psycho Cut is a critical hit.",,Cool,Round Starter
+Psycho Rage,Self,Psychic,Effect,3/day,,"Choose two other different moves except for Recover to use as your attack, ignoring their frequencies. Mewtwo may only use Psycho Rage while below 100 HP.",,,
+Psycho Shift,Melee,Psychic,Effect,1/day,,"On hit, you are cured of all afflictions and the target receives each affliction you were cured of.",,Cool,Inversed Appeal
+Psyshock,Ranged(20ft),Psychic,Special,3/day,3d10,Psyshock’s Accuracy Check is made against the target’s Defense.,,Clever,Incentives
+Psyspikes,Ranged(10ft),Normal,Attack,At-Will,1d4,Psi Spikes has -2 during Accuracy Check. Psi Spikes is a Scatter attack. Up to 5 attacks.,,,
+Psystrike,Ranged(20ft),Psychic,Special,1/day,5d12,Psystrike’s Accuracy Check is made against the target’s Defense.,,Clever,Incentives
+Pulverizing Pancake,Melee,Normal,Attack,1/day,10d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Punishment,Melee,Dark,Attack,3/day,1d20,Punishment deals an additional 1d10 damage for each stat buff Passive the target has.,,Clever,Catching Up
+Purify,Melee,Poison,Effect,3/day,,"Target an ally or yourself. Target is cured of Poison and Toxin, then if they were cured of Poison or Toxin they are healed 1d20 HP.",,Clever,Incredible
+Pursuit,Melee,Dark,Attack,At-Will,2d6,Pursuit deals +6 damage to a target if they moved away from you during their last action.,,Clever,Good Show!
+Pyro Ball,Melee,Fire,Attack,1/day,5d12,"Pyro Ball has -2 during Accuracy Check. On hit, if you got 18 or higher on Accuracy Check, the target is Burned.",,Beauty,Torrential Appeal
+Quash,Melee,Dark,Effect,3/day,,"On hit, the target will act last during each round for two mins. Its Speed is unaffected.",,Clever,Quick Set
+Quick Attack,Melee,Normal,Attack,At-Will,2d6,Quick Attack has Priority.,,Cool,Quick Set
+Rage,Melee,Normal,Attack,At-Will,2d6,"On hit, your Attack is +1 for 10 mins. This effect cannot be stacked.",,Cool,Get Ready!
+Rage Powder,Ranged(10ft),Bug,Effect,3/day,,"Rage Powder is used as a Reaction. If an ally would be attacked, you may target the attacking enemy and they will only want to attack you instead, for 2 mins.",,Clever,Scrambler
+Rain Dance,Field,Water,Effect,3/day,,"You create a circle of Raining Weather with a 60ft diameter. Within the Raining weather, Water-type attacks deal an additional 8 damage and Fire-type attacks deal 8 less damage. This weather disappears after 2 mins.",,Tough,Hold That Thought
+Rapid Spin,Melee,Normal,Attack,At-Will,1d8,"Destroy any Hazards or Coats, and free bound allies within 5 ft. You may target Hazards, Coats, or bound allies with Rapid Spin without needing to roll Accuracy Check or damage.",,Cool,Round Starter
+Razor Leaf,Ranged(25ft),Grass,Attack,At-Will,2d8,"On hit, if you got 18 or higher on Accuracy Check, Razor Leaf is a critical hit.",,Cool,Appeal
+Razor Shell,Melee,Water,Attack,3/day,3d8,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Cool,Appeal
+Razor Wind,"Ranged(30ft, 10ft wave)",Normal,Attack,3/day,3d10,"When you use this attack you immediately end your turn. During your next turn you may roll Razor Wind’s Accuracy Check and damage. On hit, if you got 18 or higher on Accuracy Check, Razor Wind is a critical hit.",,Cool,Special Attention
+Recover,Self,Normal,Effect,1/day,,You are healed HP equal to half of your Max HP.,,Clever,Reflective Appeal
+Reflect,Melee,Psychic,Effect,3/day,,Put a Reflect Coat on the target or yourself. The Coat has the following ability: Reduce damage from attacks that use the attack stat that hit you by 10. This Coat lasts for 2 mins.,,Clever,Excitement
+Reflect Type,Ranged(30ft),Normal,Effect,At-Will,,Your Type changes to any one type that the target is. This effect lasts for 10 mins.,,Beauty,Attention Grabber
+Relic Song,Ranged(20ft burst),Normal,Special,At-Will,3d8,"On hit, if you got 18 or higher on Accuracy Check, all targets are put to Sleep. On hit or miss, Meloetta may change from Aria Form to Pirouette Form, or back from Pirouette Form to Aria Form.",,,
+Refresh,Melee,Normal,Effect,3/day,,Target an ally or yourself. Target is cured of all afflictions.,,Cute,Reflective Appeal
+Rest,Self,Psychic,Effect,1/day,,"You recover your HP to Max HP, are cured of all afflictions, and then fall Asleep. You cannot attempt to wake up or be awoken naturally for 3 rounds.",,Cute,Reflective Appeal
+Retaliate,Melee,Normal,Attack,1/day,1d20,"If the target knocked out an ally during this round, Retaliate has 5d12 for damage instead.",,Cool,Appeal
+Return,Melee,Normal,Attack,3/day,3d10,Return can only be used if you have 3 or more loyalty.,,Cute,Round Starter
+Revelation Dance,Ranged(10ft burst),(Variable),Special,1/day,3d12,This attack’s type is dependent on your primary type.,,Cute,Attention Grabber
+Revenge,Melee,Fighting,Attack,3/day,3d8,"If you were attacked by the target this round, use 3d12 for damage instead.",,Tough,Final Appeal
+Reversal,Melee,Fighting,Attack,1/day,1d10,"If you are at less than half of your Max HP, Reversal has 1d20 for damage instead. If you are at less than 5 HP, Reversal has 5d12 for damage instead.",,Cool,Final Appeal
+Rising Voltage,Ranged(30ft),Electric,Special,1/day,3d12,"If you are within Electric Terrain while using Rising Voltage, it deals +2d12 damage on hit.",,Cool,Torrential Appeal
+Roar,Ranged(30ft burst),Normal,Effect,1/day,,"On hit, Pokémon that are smaller than you will not want to fight and will attempt to run away from you.",,Cool,Excitement
+Roar of Time,Ranged(80ft burst),Dragon,Special,3/day,5d20,You cannot act during the next round,,,
+Rock Blast,Ranged(10ft),Rock,Attack,At-Will,1d4,Rock Blast has -2 during Accuracy Check. Rock Blast is a Scatter attack. Up to 5 attacks.,,Tough,Reliable
+Rock Climb,Melee,Normal,Attack,3/day,3d10,"On hit, if you got 16 or higher on Accuracy Check, the target is Confused.",,Cool,Round Ender
+Rock Slide,"Ranged(20ft, 10ft wave)",Rock,Attack,1/day,5d12,"Rock Slide has -2 during Accuracy Check. On hit, if you got 14 or higher on Accuracy Check, the target is Stunned.",,Tough,Appeal
+Rock Smash,Melee,Fighting,Attack,At-Will,2d6,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Tough,Round Ender
+Rock Throw,Ranged(20ft),Rock,Attack,At-Will,2d6,,,Tough,Appeal
+Rock Tomb,Ranged(15ft),Rock,Attack,3/day,3d8,"On hit, the target’s Speed is -1 for 10 mins. This effect cannot be stacked.",,Clever,Slow Set
+Rock Wrecker,"Ranged(25ft, 10ft blast)",Rock,Attack,1/day,5d20,Rock Wrecker has -2 during Accuracy Check. You cannot act during the next round.,,Tough,Seen Nothing Yet
+Rolling Kick,Melee,Fighting,Attack,3/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, the target is Stunned.",,Cool,Appeal
+Rollout,Melee,Rock,Attack,At-Will,1d4,"For each time you’ve successfully used Rollout against the same target during the encounter, add 1d8 to Rollout’s damage.",,Tough,Reliable
+Roost,Self,Flying,Effect,1/day,,You must be on the ground to use Roost. You are healed HP equal to half of your Max HP.,,Cool,Torrential Appeal
+Round,Ranged(15ft burst),Normal,Special,3/day,3d8,"For every time anyone has used Round before you during this round of combat, Round deals +1d10 damage.",,Tough,Reliable
+Sacred Fire,"Ranged(40ft, 25ft blast)",Fire,Attack,3/day,5d20,"On hit, all targets are Burned.",,,
+Sacred Sword,Melee,Fighting,Attack,3/day,3d10,Sacred Sword has +2 during Accuracy Check.,,Cool,Appeal
+Safeguard,Ranged(10ft),Normal,Effect,1/day,,Put a Safe Coat on all allies and yourself. The Coat has the following ability: You cannot become afflicted. This Coat lasts for 2 mins.,,Beauty,Hold That Thought
+Sand Attack,Ranged(10ft),Ground,Effect,At-Will,,"On hit, the target’s Accuracy Checks are -1 during their next turn. This effect cannot be stacked.",,Cute,Excitement
+Sand Tomb,Ranged(10ft),Ground,Attack,3/day,1d4,"On hit, the target is bound in place for 1d4 rounds. For each round the target is bound, it takes 1d4 physical damage on its turns.",Groundshaper,Clever,Torrential Appeal
+Sandstorm,Field,Rock,Effect,3/day,,"You create a circle of Sandstorming Weather with a 60ft diameter. Anyone who acts within the Sandstorming weather takes 2d4 damage after acting unless they are Rock-type, Ground-type, or Steel-type. This weather disappears after 2 mins.",,Tough,Hold That Thought
+Savage Spin Out,Melee(25ft burst),Bug,(Variable),1/day,8d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Scald,Ranged(10ft),Water,Special,3/day,3d10,"On hit, if you got 14 or higher on Accuracy Check, the target is Burned.",Fountain,Clever,Appeal
+Scale Shot,Ranged(10ft),Dragon,Attack,At-Will,1d4,Scale Shot has -2 during Accuracy Check. Scale Shot is a Scatter attack. Up to 5 attacks.,,Beauty,Reliable
+Scorching Sands,Ranged(10ft),Ground,Special,3/day,3d10,"On hit, if you got 14 or higher on Accuracy Check, the target is Burned.",,Cute,Appeal
+Scratch,Melee,Normal,Attack,At-Will,2d6,,,Tough,Appeal
+Secret Sword,Melee,Fighting,Special,3/day,3d10,Secret Sword’s Accuracy Check is made against the target’s Defense.,,Cool,Appeal
+Seed Bomb,Ranged(15ft),Grass,Attack,3/day,3d10,,,Clever,Appeal
+Seed Flare,"Ranged(30ft, 10ft blast)",Grass,Special,3/day,5d20,"On hit, all target’s Special Defense is -5 for 10 mins",,,
+Seismic Toss,Melee,Fighting,Attack,3/day,,"On hit, the target is moved 10ft then loses exactly 25 HP.",,Tough,Appeal
+Self-Destruct,Ranged(30ft burst),Normal,Attack,1/day,7d20,"Set your HP to 0, then roll 1d20. On 10 or less, your HP is set to -100% HP and you must make a death savings throw.",,Beauty,Big Show
+Shadow Ball,Ranged(20ft),Ghost,Special,3/day,3d10,"On hit, the target’s Special Defense is -1 for 10 mins. This effect cannot be stacked.",,Clever,Round Starter
+Shadow Bone,Melee,Ghost,Attack,3/day,3d10,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Tough,Round Ender
+Shadow Claw,Melee,Ghost,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, Shadow Claw is a critical hit.",,Cute,Round Starter
+Shadow Force,Ranged(20ft burst),Ghost,Attack,3/day,5d12,"When you use this attack, you vanish, then you immediately end your turn. During your next turn, you reappear, your movement speed is doubled and you may roll Shadow Force’s Accuracy Check and damage. Priority attacks cannot be used out of turn order while Shadow Force is being used.",,,
+Shadow Punch,Melee,Ghost,Attack,3/day,3d8,You can’t miss targets with less than 15 Defense.,,Clever,Round Starter
+Shadow Sneak,Melee,Ghost,Attack,At-Will,2d6,Shadow Sneak has Priority.,,Clever,Quick Set
+Shadow Tag,Ranged(10ft),Psychic,Effect,1/day,,"On hit, the target is bound in place for 2 mins. Ghost Pokémon are immune to Shadow Tag.",,Clever,Hold That Thought
+Shattered Psyche,"Ranged(60ft, 20ft blast)",Psychic,(Variable),1/day,8d12,,,,
+Sheer Cold,"Ranged(15ft, 10ft wave)",Ice,Special,1/day,,"On hit, roll 1d20. On a natural result of 17, 18, 19, or 20, the target is set to 0 HP.",Freezer,Beauty,Big Show
+Shell Side Arm,Ranged(20ft),Poison,(Variable),3/day,3d10,"Shell Side Arm’s Accuracy Check is made against the target’s Defense or Special Defense and Shell Side Arm’s Accuracy Check is made with your Attack or Special Attack, both chosen before Accuracy Check. On hit, if you got 18 or higher on Accuracy Check, the target is Poisoned.",,Cool,Appeal
+Shell Smash,Self,Normal,Effect,1/day,,"As a free action, your Defense and Special Defense are -3, then your Attack, Special Attack and Speed are +3 for 10 mins. This effect cannot be stacked.",,Tough,Get Ready!
+Shell Trap,Self,Fire,Effect,1/day,,"Shell Trap is used as a Reaction. If you are hit by an enemy with an attack that makes contact with you, take the damage and any effects of the attack and then deal 3d12 Fire-type special attack damage to the attacker even if you are knocked out. You do not need to roll an accuracy check to hit the offender.",,Cool,Hold That Thought
+Shield Protect,Self,Normal,Effect,3/day,,"Shield Protect is used as a Reaction. If you are hit by an attack, ignore the damage and any effects of the attack.",,,
+Shock Wave,Ranged(20ft),Electric,Special,3/day,3d8,You can’t miss targets with less than 15 Special Defense.,Zapper,Cool,Round Starter
+Shore Up,Self,Ground,Effect,1/day,,"You are healed HP equal to half of the target’s Max HP. If you are within Sandstorming Weather, you are healed HP equal to 3/4ths of your Max HP instead.",,Beauty,Reflective Appeal
+Signal Beam,Ranged(15ft beam),Bug,Special,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Confused.",,Beauty,Incentives
+Silver Wind,Ranged(10ft),Bug,Special,1/day,2d8,"On hit, your Attack, Special Attack, Defense, Special Defense, and Speed are each raised +1 for 1 hour.",,Beauty,Incentives
+Sing,Ranged(30ft burst),Normal,Effect,1/day,,"Sing has -8 during Accuracy Check. On hit, all targets fall Asleep.",,Cute,Excitement
+Sinister Arrow Raid,"Ranged(100ft, 30ft blast)",Ghost,Special,1/day,8d12,,,,
+Sketch,Ranged(25ft),Normal,Effect,1/day,,"You permanently learn the target's last-used move. If Sketch is used to learn a Move when you already know 6 Moves, the new move replaces Sketch.",,Clever,Catching Up
+Skitter Smack,Melee,Bug,Attack,3/day,3d8,"On hit, the target’s Special Attack is -1 for 10 mins. This effect cannot be stacked.",,Cute,Appeal
+Skull Bash,Melee,Normal,Attack,1/day,5d12,"When you use this attack you immediately end your turn. Your Defense is 15 until your next turn (unless your Defense is higher than 15). During your next turn, your movement speed is doubled and after getting to a target you may roll Skull Bash’s Accuracy Check and damage.",,Tough,Special Attention
+Sky Attack,Melee,Flying,Attack,1/day,5d12,"When you use this attack, you raise yourself 40 ft into the air, then you immediately end your turn. During your next turn, your movement speed is tripled and after getting to a target you may roll Sky Attack’s Accuracy Check and damage. On hit, if you got 16 or higher on Accuracy Check, the target is Stunned.",,Tough,Special Attention
+Sky Drop,Melee,Flying,Attack,1/day,3d12,"When you use this attack, you raise yourself and an adjacent target 40 ft into the air, then you immediately end your turn. The target may only make melee attacks until your next turn. During your next turn, you return to the ground, letting go of the target and you may roll Sky Drop’s Accuracy Check and damage.",,Clever,Special Attention
+Sky Uppercut,Melee,Fighting,Attack,3/day,3d10,You may leap up to 60ft upwards to hit a target while using Sky Uppercut.,,Cool,Round Starter
+Slack Off,Self,Normal,Effect,1/day,,You are healed HP equal to half of your Max HP.,,Cute,Reflective Appeal
+Slam,Melee,Normal,Attack,3/day,3d10,Slam has -2 during Accuracy Check.,,Tough,Appeal
+Slash,Melee,Normal,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, Slash is a critical hit.",,Cool,Appeal
+Sleep Dust,Melee,Grass,Effect,3/day,,"On hit, the target is put to Sleep.",,,
+Sleep Gas,"Ranged(15ft, 10ft burst)",Grass,Effect,3/day,,"Sleep Gas has -2 during Accuracy Check. On hit, the target is put to Sleep.",,,
+Sleep Powder,Melee,Grass,Effect,At-Will,,"Sleep Powder has -5 during Accuracy Check. On hit, the target is put to Sleep.",,Clever,Inversed Appeal
+Sleep Talk,Self,Normal,Effect,3/day,,Sleep Talk may only be used while you are Asleep. You randomly use another move that you know. You may move at half speed while using Sleep Talk.,,Cute,Appeal
+Sludge,Ranged(15ft),Poison,Special,3/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, the target is Poisoned.",Repulsive,Cool,Appeal
+Sludge Bomb,"Ranged(25ft, 5ft blast)",Poison,Special,1/day,3d12,"On hit, if you got 14 or higher on Accuracy Check, all targets are Poisoned.",Repulsive,Tough,Round Ender
+Sludge Wave,"Ranged(20ft, 10ft wave)",Poison,Special,1/day,3d12,"On hit, if you got 18 or higher on Accuracy Check, all targets are Poisoned.",Repulsive,Cool,Appeal
+Smack Down,Ranged(25ft),Rock,Attack,3/day,1d20,"On hit, Smack Down knocks the target out of the air, removing any Ground-type immunities and disabling the target’s ability to move in the air for 2 mins.",,Tough,Appeal
+Smart Strike,Melee,Steel,Attack,3/day,3d8,You can’t miss targets with less than 15 Defense.,,Clever,Inversed Appeal
+Smelling Salt,Melee,Normal,Attack,3/day,3d8,"If Smelling Salt is used against a Paralyzed target, Smelling Salt deals 5d8 for damage instead, then cures the target of Paralysis. If you choose not to roll damage while using Smelling Salt, you do not need to roll an Accuracy Check.",,Clever,Unsettling
+Smite,Ranged(20ft),Normal,Special,3/day,3d8,"Smite uses your Defense or Speed modifier during accuracy check and damage. Smite cannot be resisted, nor can a target be immune to it.",,,
+Smog,Ranged(5ft),Poison,Special,At-Will,1d4,"On hit, if you got 13 or higher on Accuracy Check, the target is Poisoned.",Repulsive,Tough,Appeal
+Smoke Screen,Ranged(10ft),Normal,Effect,3/day,,"Place up to 25 contiguous ft of Smoke Screen Wall. Smoke Screen Wall has not thickness, is 12 ft tall and has the following ability: Attacks that target through or within the wall have -2 during Accuracy Check. This Wall disappears after 2 mins.",,Clever,Unsettling
+Snap Trap,Melee,Grass,Attack,3/day,2d6,"On hit, the target is bound to you for 1 min.",,Cute,Unsettling
+Snipe Shot,Ranged(40ft),Water,Special,3/day,3d10,"Snipe Shot cannot be redirected by passives or any other ability, instead only hitting a target it was directed at.",,Cool,Incredible
+Snore,Melee,Normal,Special,At-Will,1d12,"Snore can only be used while you’re Asleep. You may move at half of your normal Speed if you use Snore during your action. On hit, if you got 16 or higher on Accuracy Check, the target is Stunned.",,Cute,Appeal
+Soak,Melee,Water,Effect,3/day,,"On hit, put a Soak Coat on the target. The Coat has the following ability: You lose your Types and become only Water-type for 10 mins.",Fountain,Beauty,Torrential Appeal
+Soft Song,Ranged(10ft),Normal,Effect,1/day,,"Soft Song has -4 during Accuracy Check. On hit, the target falls Asleep. If the target is Sleeping, you wake them instead.",,,
+Softboiled,Melee,Normal,Effect,1/day,,Target an ally or yourself. The target is healed HP equal to half of the target’s Max HP.,,Cute,Reflective Appeal
+Solar Beam,Ranged(30ft beam),Grass,Special,1/day,5d12,"When you use this attack you immediately end your turn unless it’s Sunny. During your next turn, or immediately if it’s Sunny, you may target with and roll Solar Beam’s Accuracy Check and damage.",,Cool,Special Attention
+Solar Blade,Melee,Grass,Attack,1/day,5d12,"When you use this attack you immediately end your turn unless it’s Sunny. During your next turn, or immediately if it’s Sunny, you may target with and roll Solar Blade’s Accuracy Check and damage.",,Cool,Special Attention
+Sonic Boom,Ranged(5ft),Normal,Special,At-Will,,"10. On hit, the target loses exactly 10 HP.",,Cool,Appeal
+Spacial Rend,"Ranged(40ft, 10ft blast)",Dragon,Special,3/day,5d12,"On hit, if you got 14 or higher on Accuracy Check, Spatial Rend is a critical hit",,,
+Spark,Melee,Electric,Attack,3/day,3d8,"On hit, if you got 14 or higher on Accuracy Check, the target is Paralyzed.",Zapper,Cool,Appeal
+Sparkling Aria,Ranged(20ft burst),Water,Special,1/day,3d12,Sparkling Aria cures any ally’s Burns within range without damaging them.,,Beauty,Round Starter
+Spectral Thief,Melee,Ghost,Attack,3/day,5d8,"On hit, your target’s stat passives are disabled. For the next ten minutes, you gain those passives. You may have any amount of stat passives through your uses of Spectral Thief.",,,
+Spider Web,Ranged(20ft),Bug,Effect,1/day,,"On hit, the target is bound in place for 1d6 turns.",Threaded,Clever,Hold That Thought
+Spider Webbing,"Ranged(20ft, 10ft burst)",Bug,Effect,3/day,,"On hit, the target is bound in place for 1d6 turns.",,,
+Spike Cannon,Ranged(10ft),Normal,Attack,At-Will,1d4,Spike Cannon has -2 during Accuracy Check. Spike Cannon is a Scatter attack. Up to 5 attacks.,,Cool,Reliable
+Spikes,Ranged(20ft burst),Ground,Effect,3/day,,"Place the Spikes Hazard in the area surrounding you. Spikes Hazard has the following ability: When a foe moves through Spikes Hazard during their turn and are on the ground, they lose 1/6th of their Max HP. This Hazard disappears after 2 mins.",,Clever,Hold That Thought
+Spiky Shield,Self,Grass,Effect,1/day,,"Spiky Shield is used as a Reaction. If you are hit by an enemy within melee range with an attack, the enemy loses HP equal to 1/6th of its Max HP and you ignore the damage and any effects of the attack.",,Cute,Inversed Appeal
+Spirit Break,Melee,Fairy,Attack,3/day,3d10,"On hit, the target’s Special Attack is -1 for 10 mins. This effect cannot be stacked.",,Tough,Unsettling
+Spirit Shackle,Ranged(25ft),Ghost,Special,3/day,3d10,"On hit, the target is bound to the ground for 1d6 rounds.",,Beauty,Unsettling
+Spit Up,Ranged(15ft),Normal,Special,1/day,,"Destroy up to 3 of your Coats of Stuff. For every Coat of Stuff you destroy, Spit Up deals an additional 2d10 damage.",,Tough,Round Ender
+Splash,Melee,Normal,Effect,At-Will,,"Instead of making an Accuracy Check, roll 1d20. On 18 or higher, all adjacent foes are moved 5 ft away from the user.",,Cute,Inversed Appeal
+Splintered Stormshards,"Ranged(60ft, 20ft blast)",Rock,Attack,1/day,8d12,Remove any weather or field effects from the field.,,,
+Spook,Melee,Ghost,Attack,At-Will,2d6,,,,
+Spore,Melee,Grass,Effect,1/day,,"On hit, the target is put to Sleep.",,Beauty,Get Ready!
+Stampede,Melee,Normal,Attack,1/day,3d12,"Stampede can only be made against enemies that you passed through while moving during your turn. While moving with Stampede, it rolls an accuracy check to hit every foe you and any allied mounted Pokémon moves through with you. Stampede deals +1d12 damage for every allied mounted Pokémon that is moving with you. If all mounted Pokémon moving with Stampede share a type, Stampede’s type may be changed from Normal to that type. If you or any allied mounted Pokémon were, they are no longer bound. Any Pokémon involved in making this attack may still use a move during their turn.",,,
+Stealth Rock,Ranged(5ft),Rock,Effect,3/day,,"Place a Stealth Rock Hazard adjacent to you. Stealth Rock Hazard has the following ability: If a foe moves within 20 ft of Stealth Rock Hazard, it will hurl itself at the foe, destroying itself and dealing 2d12 Rock-type damage to the foe without needing an",,Cool,Hold That Thought
+Steam Eruption,Ranged(20ft burst),Water,Special,3/day,5d12,"On hit, if you got 14 or higher on Accuracy Check, all targets are Burned.",,,
+Steamroller,Melee,Bug,Attack,At-Will,2d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Tough,Appeal
+Steel Beam,Ranged(30ft),Steel,Special,1/day,7d12,"On hit, you lose HP equal to half of the damage you deal.",,Clever,Seen Nothing Yet
+Steel Roller,Melee,Steel,Attack,1/day,5d12,"Steel Roller can only be used if you are in the area of a Terrain move, and destroys that Terrain when used.",,Clever,Unsettling
+Steel Strike,Melee,Steel,Attack,At-Will,2d6,,,,
+Steel Wing,Melee,Steel,Attack,At-Will,2d8,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,Cool,Appeal
+Sticky Web,Ranged(25ft burst),Bug,Effect,3/day,,"Place the Sticky Web Hazard in the area surrounding you. Sticky Wed Hazard has the following ability: Foes moving through Sticky Web Hazard on the ground have -25ft movement per turn, to a minimum of 5ft. This Hazard disappears after 2 mins.",,Clever,Hold That Thought
+Stockpile,Self,Normal,Effect,At-Will,,"Put a Stuff Coat on yourself, unless you already have 3 Coats of Stuff. The Coat has the following ability: Your Defense and Special Defense are +1 if you have 1 or 2 Coats of Stuff. If you have 3 Coats of Stuff, your Defense and Special Defense are +2. These Coats last for 2 mins.",Inflatable,Tough,Round Ender
+Stoked Sparksurfer,Ranged(100ft),Electric,Special,1/day,8d12,"On hit, the target is Paralyzed.",,,
+Stomp,Melee,Normal,Attack,At-Will,2d8,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Tough,Appeal
+Stomping Tantrum,Melee,Ground,Attack,1/day,3d12,"If you missed with your last attack during the last round, Stomping Tantrum has 5d12 for damage instead.",Groundshaper,Tough,Round Ender
+Stone Edge,Ranged(25ft),Rock,Attack,1/day,5d12,"Stone Edge has -2 during Accuracy Check. On hit, if you got 18 or higher on Accuracy Check, Stone Edge is a critical hit.",,Tough,Incentives
+Stone Fall,Ranged(35ft),Rock,Special,1/day,5d12,"On hit, if you got 18 or higher on Accuracy Check, Stone Fall is a critical hit.",,,
+Stone Smash,Melee,Rock,Attack,At-Will,2d6,,,,
+Storm Throw,Melee,Fighting,Attack,3/day,2d8,"Storm Throw has -2 during Accuracy Check. On hit, Storm Throw always counts as a critical hit and moves the target 5ft away from you.",,Cool,Appeal
+Strange Steam,Ranged(10ft burst),Fairy,Special,3/day,3d10,"On hit, if you got 16 or higher on Accuracy Check, any targets are Confused.",,Cute,Appeal
+Strength,Melee,Normal,Attack,3/day,3d10,"On hit, the target is moved 15ft away from you.",Strength,Tough,Appeal
+Strength Sap,Melee,Grass,Effect,1/day,,"On hit, you are healed HP equal to the target's Attack stat, then the target’s Attack is -2 for 10 mins. This effect cannot be stacked.",,Clever,Inversed Appeal
+Struggle,Melee,No-Type,Attack,At-Will,2d8,"Struggle is used if you can’t use any other attacks. Struggle has no type. After use, you lose HP equal to 1/4th of your Max HP.",,,
+Struggle Bug,Ranged(5ft burst),Bug,Special,At-Will,2d6,"On hit, the target’s Special Attack is -1 for 10 mins. This effect cannot be stacked.",,Clever,Excitement
+Struggling Bug,Ranged(20 ft),Bug,Special,At-Will,2d6,,,,
+Stuff Cheeks,Self,Normal,Effect,At-Will,,"As a free action, consume your held Berry. Your Defense is +2 for 10 mins. This effect cannot be stacked.",,Cute,Get Ready!
+Stun Gas,"Ranged(15ft, 10ft burst)",Grass,Effect,3/day,,"Stun Gas has -2 during Accuracy Check. On hit, the target is Paralyzed.",,,
+Stun Spore,Melee,Grass,Effect,At-Will,,"Stun Spore has -5 during Accuracy Check. On hit, the target is Paralyzed.",,Clever,Excitement
+Stylish Spin,Ranged(10ft),Normal,Effect,3/day,,"On hit, the target is Confused.",,,
+Submission,Melee,Fighting,Attack,3/day,3d10,"On hit, you lose HP equal to 1/4th of the damage you deal.",,Cool,Appeal
+Substitute,Self,Normal,Effect,1/day,,"Substitute is used as a Reaction. If you would take more than 1/6th of your Max HP in damage from an attack, instead lose HP equal to 1/6th of your Max HP.",,Clever,Catching Up
+Subzero Slammer,"Ranged(60ft, 20ft blast)",Ice,(Variable),1/day,8d12,,,,
+Sucker Punch,Melee,Dark,Attack,1/day,3d8,"Sucker Punch is used as a Reaction. When you are a targeted of a melee move, use Sucker Punch to attack the attacker before the enemy rolls their Accuracy Check against you. You must still roll an accuracy check for Sucker Punch.",,Clever,Quick Set
+Sunny Day,Field,Fire,Effect,3/day,,"You create a circle of Sunny Weather with a 60ft diameter. Within the Sunny weather, Fire-type attacks deal an additional 8 damage and Water-type at-tacks deal 8 less damage. This weather disappears after 2 mins.",,Beauty,Hold That Thought
+Sunsteel Strike,Ranged(20ft burst),Steel,Attack,3/day,5d20,Sunsteel Strike has +2 during Accuracy Check.,,,
+Super Fang,Melee,Normal,Attack,1/day,,"On hit, the target’s current HP is halved.",,Tough,Appeal
+Superpower,Melee,Fighting,Attack,1/day,5d12,"On hit, your Attack and Defense is -2 for 10 mins. This effect cannot be stacked.",,Tough,Round Ender
+Supersonic,Ranged(10ft),Normal,Effect,At-Will,,"Supersonic has -8 during Accuracy Check. On hit, the target is Confused.",,Clever,Excitement
+Supersonic Skystrike,Melee(25ft burst),Flying,(Variable),1/day,8d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Surf,"Ranged(30ft, 10ft wave)",Water,Special,1/day,5d12,,,Beauty,Round Starter
+Surging Strikes,Melee,Water,Attack,3/day,1d12,"Surging Strikes is a Scatter attack. It has three attacks. On hit, Surging Strikes always counts as a critical hit.",,,
+Swagger,Ranged(10ft),Normal,Effect,1/day,,"On hit, the target is Confused and the target’s Attack is +4 until they are no longer Confused.",,Cute,Excitement
+Swallow,Self,Normal,Effect,1/day,,"Destroy up to 3 of your Coats of Stuff. For every Coat of Stuff you destroy, Swallow heals you 25 HP.",,Tough,Reflective Appeal
+Sweet Kiss,Melee,Normal,Effect,3/day,,"Sweet Kiss has -4 during Accuracy Check. On hit, the target is Confused.",,Cute,Excitement
+Sweet Scent,Ranged(10ft),Normal,Effect,At-Will,,"On hit, your next attack against the same target has +1 during Accuracy Check.",Alluring,Cute,Excitement
+Swift,Ranged(20ft),Normal,Special,3/day,3d8,You can’t miss targets with less than 15 Special Defense.,,Cool,Round Starter
+Switcheroo,Melee,Dark,Effect,1/day,,"On hit, you and the target trade any held items. If only you or the target has an item, take or give the item to exchange who has possession of it.",,Cool,Attention Grabber
+Sync Move,Ranged(30ft beam),No-Type,(Variable),1/day,3d12,"You can’t miss targets with less than 15 Defense or Special Defense. Sync Move has no type which means it can’t be resisted and can’t be super-effective. However, if both participating attackers share a type, they may have Sync Move’s type be that type and be affected by weakness and resistance. Sync Move checks its accuracy against Defense or Special Defense, decided when declared as an attack. Sync Move’s attackers apply both Attack or both Special Attack modifiers to Sync Move’s damage. Sync Move takes up both attacker’s turns during that round of combat.",,,
+Synchronoise,Ranged(50ft burst),Psychic,Special,3/day,5d8,Synchronoise can’t hit targets unless they share at least one type with you.,,Clever,Incentives
+Synthesis,Self,Grass,Effect,1/day,,"You are healed HP equal to half of your Max HP. If you are within Sunny Weather, you are healed HP equal to 3/4ths of your Max HP instead.",Sprouter,Clever,Reflective Appeal
+Tackle,Melee,Normal,Attack,At-Will,2d6,,,Tough,Appeal
+Tail Slap,Melee,Normal,Attack,At-Will,1d4,Tail Slap has -2 during Accuracy Check. Tail Slap is a Scatter attack. Up to 5 attacks.,,Cute,Reliable
+Take Down,Melee,Normal,Attack,3/day,3d10,"On hit, you lose HP equal to 1/4th of the damage you deal.",,Tough,Appeal
+Tar Shot,Ranged(20ft),Rock,Effect,3/day,,"Put a Tar Coat on the target. The Coat has the following ability: Your Speed is -2. If you are hit by a Fire-type attack, you take +8 damage. This Coat lasts for 2 mins.",,Cool,Round Ender
+Taunt,Ranged(20ft),Dark,Effect,3/day,,"On hit, the target may only use attacks that target you or your allies for 1 min.",,Clever,Inversed Appeal
+Tea Time,Ranged(40ft burst),Normal,Effect,3/day,,Any target holding a Berry immediately consumes it.,,Cute,Incredible
+Techno Blast,"Ranged(40ft, 20ft blast)",Normal,Special,At-Will,3d8,"Techno Blast’s type can be changed to Ice, Electric, Fire, or Water when used.",,,
+Tectonic Rage,"Ranged(60ft, 20ft blast)",Ground,(Variable),1/day,8d12,,,,
+Teeter Dance,Ranged(30ft burst),Normal,Effect,1/day,,"On hit, all targets are Confused.",,Cute,Scrambler
+Teleport,Self,Psychic,Effect,1/day,,"Teleport may be used as a Reaction. Teleport moves you 50ft away in your line of sight. After an enemy hits you with a move that deals damage, you may use Teleport as a Reaction to move up to 50ft away in your line of sight. You take only 1/4 th the damage you would have taken from the attack.",,Cool,Quick Set
+Ten-Million Volt Thunderbolt,Ranged(100ft),Electric,Special,1/day,10d12,"On hit, the target is Paralyzed.",,,
+Terrain Pulse,Ranged(25ft),Normal,Attack,3/day,3d8,"If used if you are in the area of a Terrain move , Terrain Pulse has 5d8 for damage instead and its type changes to match the terrain.",,Beauty,Incentives
+Terrify,Ranged(25ft),Ghost,Special,At-Will,1d12,,,,
+Thief,Melee,Dark,Attack,3/day,3d8,"On hit, steals the target’s held item, if any.",,Cool,Catching Up
+Thousand Arrows,Ranged(40ft),Ground,Special,3/day,3d10,Thousand Arrows ignores any Ground-type immunities.,,,
+Thousand Waves,"Ranged(40ft, 10ft wave)",Ground,Attack,3/day,3d12,"On hit, all targets are bound to the ground for 10 mins. Thousand Waves ignores any Ground-type immunities.",,,
+Thrash,Melee,Normal,Attack,1/day,5d12,"Move to and attack the nearest possible target within 25ft. During your next action, move to and attack the nearest possible target within 25ft, then you become Confused. Thrash can and will target allies if possible.",,Tough,Reliable
+Throat Chop,Melee,Dark,Attack,3/day,3d10,"On hit, the target may not use attacks or abilities that require the use of the target’s voice.",,Tough,Catching Up
+Thunder,"Ranged(30ft, 5ft blast)",Electric,Special,1/day,5d12,"Thunder has -2 during Accuracy Check unless it’s Raining. On hit, if you got 14 or higher on Accuracy Check, the targets are Paralyzed.",Zapper,Cool,Round Starter
+Thunder Cage,Ranged(50ft burst),Electric,Special,1/day,3d8,"On hit, all targets are bound to ground for 1d4 turns. For each turn the target is bound, it takes 1d6 damage.",,,
+Thunder Fang,Melee,Electric,Attack,3/day,3d8,"On hit, if you got 18 or higher on Accuracy Check, the target is randomly either Stunned or Paralyzed.",Zapper,Clever,Appeal
+Thunder Punch,Melee,Electric,Attack,3/day,3d8,"On hit, if you got 17 or higher on Accuracy Check, the target is Paralyzed.",,Cool,Round Starter
+Thunder Shock,Ranged(20ft),Electric,Special,At-Will,1d12,"On hit, if you got 18 or higher on Accuracy Check, the target is Paralyzed.",Zapper,Cool,Appeal
+Thunder Spark,Ranged(20ft),Electric,Special,At-Will,1d12,,,,
+Thunder Wave,Ranged(20ft),Electric,Effect,1/day,,"On hit, the target is Paralyzed.",Zapper,Cool,Excitement
+Thunderbolt,Ranged(30ft),Electric,Special,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Paralyzed.",Zapper,Cool,Round Starter
+Thunderous Kick,Melee,Fighting,Attack,1/day,5d12,"On hit, the target’s Defense is -1 for 10 mins. This effect cannot be stacked.",,,
+Tireless Teleport,Self,Psychic,Effect,At-Will,,"Tireless Teleport can be used as a Reaction. If you are hit by an attack, move up to 50ft away in your line of sight. Take only 1/4 th the damage you would have taken from the attack.",,,
+Toxic,Melee,Poison,Effect,1/day,,"Toxic has -3 during Accuracy Check, unless the user is Poison type. On hit, the target is Toxifies the target.",,Clever,Excitement
+Toxic Spikes,Ranged(20ft burst),Poison,Effect,3/day,,"Place the Toxic Spikes Hazard in the area surrounding you. Toxic Spikes Hazard has the following ability: When a foe moves through Toxic Spikes Hazard during their turn and are on the ground, they are Poisoned. If the Toxic Spikes Hazard has multiple layers, it will Toxify foes instead of Poisoning them instead. This Hazard disappears after 2 mins.",,Clever,Hold That Thought
+Toxic Thread,Ranged(20ft),Poison,Effect,1/day,,"On hit, the target is Poisoned and the target’s Speed is -1 until they are no longer Poisoned.",,Clever,Excitement
+Transform,Ranged(25ft),Normal,Effect,At-Will,,"You transform into a copy of the target changing all of your stats except for HP. You copy its stats, skills, and passives. You can use any of the target’s moves. While transformed, you lose access to your regular moves, skills, passives, and biology. Except for stats, this information is not provided to you. Transform may not target Legendary Pokémon. Transform lasts for 2 hours or until Ditto chooses to change back as an action. Transform fails if used by anything but a Ditto.",,Clever,Catching Up
+Tri Attack,Ranged(20ft),Normal,Special,3/day,3d10,"On hit, if you got 17 or higher on Accuracy Check, the target is randomly either Paralyzed, Burned, or Frozen.",,Beauty,Appeal
+Trick,Melee,Psychic,Effect,1/day,,"On hit, you and the target trade any held items. If only you or the target has an item, take or give the item to exchange who has possession of it.",Telekinetic,Clever,Attention Grabber
+Trick Room,Field,Psychic,Effect,3/day,,"You create a circle of Tricky Terrain with a 60ft diameter. Within the Tricky terrain, turn orders are reversed during each round. If some are outside of Tricky terrain while others are within Tricky terrain, all actions are still made in reverse order. This terrain disappears after 2 mins.",,Cute,Scrambler
+Trick-or-Treat,Melee,Ghost,Effect,3/day,,"On hit, put a Treat Coat on the target. The Coat has the following ability: You gain the Ghost-type for 10 mins.",,Clever,Torrential Appeal
+Triple Axel,Melee,Ice,Attack,3/day,1d20,Triple Axel is a Scatter attack. Up to 3 attacks. Triple Axel’s last attack on hit deals an additional 1d12 damage.,,Beauty,Reliable
+Triple Kick,Melee,Fighting,Attack,3/day,1d20,Triple Kick is a Scatter attack. Up to 3 attacks. Triple Kick’s last attack on hit deals an additional 1d12 damage.,,Cool,Reliable
+Trop Kick,Melee,Grass,Attack,3/day,3d8,"On hit, the target’s Attack is -1 for 10 mins. This effect cannot be stacked.",,Cute,Incentives
+Twineedle,Melee,Bug,Attack,3/day,1d12,"Twineedle is a Scat-ter attack. It has two attacks. On either hit, if you got 14 or higher on Accuracy Check, the target is Poisoned.",,Cool,Reliable
+Twinkle Tackle,Melee(25ft burst),Fairy,(Variable),1/day,8d12,"Immediately move next to your target, then roll your accuracy check.",,,
+Twister,Ranged(15ft),Dragon,Special,At-Will,1d12,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Cool,Appeal
+Twisting Gust,Ranged(120ft),Dragon,Special,At-Will,1d12,,,,
+Unbreakable Armor,Self,Normal,Special,3/day,,"Your Defense is +4 for 10 mins, your Attack and Special Attack is -10 for 10 mins. This effect cannot be stacked.",,,
+Unbreakable Barrier,Self,Normal,Special,3/day,,"Your Special Defense is +4 for 10 mins, your Attack and Special Attack is -10 for 10 mins. This effect cannot be stacked.",,,
+Uproar,Ranged(20ft burst),Normal,Special,1/day,3d10,"You may move, but then must use Uproar for two more consec-utive rounds. Sleeping Pokémon within range of Uproar are awoken and Pokémon cannot go to Sleep within Uproar’s range.",,Cute,Unsettling
+V-Create,Ranged(40ft burst),Fire,Attack,1/day,8d20,"On hit, all targets are Burned.",,,
+Vacuum Wave,Ranged(15ft),Fighting,Special,At-Will,2d6,Vacuum Wave has Priority.,,Clever,Quick Set
+Venom Drench,Ranged(10ft),Poison,Effect,3/day,,"Venom Drench can only target a Poisoned or Toxified enemy. On hit, the target’s Attack, Special Attack, and Speed are -3 for 10 mins. This effect cannot be stacked.",Repulsive,Clever,Incentives
+Venoshock,Ranged(10ft),Poison,Special,3/day,2d10,"If the target is Poisoned or Toxified, Venoshock has 4d10 for damage instead.",,Clever,Incentives
+Vice Grip,Melee,Normal,Attack,At-Will,2d8,,,Tough,Appeal
+Vicious Insult,Ranged(25ft),Dark,Effect,3/day,,"Unless you’ve spent at least 10 mins with the target, Vicious Insult has -4 during accuracy check. On hit, the target is stunned. On hit, during the target’s next 3 turns it must succeed a confidence check by rolling 11 or greater on 1d20+any one of their modifiers or be stunned again.",,,
+Vine Whip,Ranged(20ft),Grass,Attack,At-Will,2d8,,Threaded,Cool,Appeal
+Vital Throw,Melee,Fighting,Attack,3/day,3d8,"You can’t miss targets with less than 15 Defense if the target already acted this round. On hit, move the target away from you 15ft.",,Cool,Slow Set
+Void Fury,Melee,Dark,Attack,1/day,5d12,"On hit, your Defense and Special Defense is -2 for 10 mins. This effect cannot be stacked.",,,
+Volcanic Devastation,Ranged(100ft burst),Water/Fire,Special,1/day,10d12,"Volcanic Devastation counts as both a Water and Fire type move for effectiveness. When you use this attack you immediately end your turn. During your next turn, you can’t act. On the round after that, when it’s your turn roll Volcanic Devastation’s Accuracy Check and damage. Set your HP to -300% HP and you must make three death savings throws.",,,
+Volt Tackle,Melee,Electric,Attack,1/day,5d12,"On hit, you lose HP equal to 1/3rd of the damage you deal and if you got 18 or higher on Accuracy Check, the target is Paralyzed.",Zapper,Cool,Seen Nothing Yet
+Wake-Up Slap,Melee,Fighting,Attack,3/day,3d8,"If Wake-Up Slap is used against a Sleeping target, Wake-Up Slap deals 5d8 for damage instead, then cures the target of Sleep. If you choose not to roll damage while using Wake-Up Slap, you do not need to roll an Accuracy Check.",,Cute,Inversed Appeal
+Water Gun,Ranged(20ft),Water,Special,At-Will,2d6,,Fountain,Cute,Appeal
+Water Pulse,Ranged(20ft burst),Water,Special,3/day,3d8,"On hit, if you got 16 or higher on Accuracy Check, the target is Confused.",Fountain,Beauty,Round Starter
+Water Shuriken,Ranged(15ft),Water,Special,At-Will,1d4,Water Shuriken has Priority and is a Scatter attack. Up to 5 attacks.,,Tough,Reliable
+Water Sport,Melee,Water,Effect,At-Will,,Put a Water Coat on the target or yourself. The Coat has the following ability: Reduce damage from Fire attacks that hit you by 10. This Coat lasts for 2 mins.,,Cute,Hold That Thought
+Water Spout,Ranged(30ft burst),Water,Special,1/day,3d10,"If you are at Max HP, Water Spout has 5d12 for damage instead.",,Beauty,Seen Nothing Yet
+Waterfall,Melee,Water,Attack,3/day,3d10,"On hit, if you got 16 or higher on Accuracy Check, the target is Stunned.",Fountain,Tough,Appeal
+Weather Ball,Ranged(25ft),Normal,Special,3/day,3d8,"If within weather, Weather Ball has 5d8 for damage instead and its type changes to match the weather.",,Clever,Incentives
+Whirling Kinesis,Ranged(10ft),Psychic,Effect,At-Will,,"On hit, the target’s Accuracy Checks are -3 during their next turn. This effect cannot be stacked.",,,
+Whirlpool,Ranged(10ft),Water,Special,3/day,1d12,"On hit, the target is bound in place for 1d4 rounds. For each round the target is bound, it takes 1d4 special damage on its turns.",Fountain,Beauty,Torrential Appeal
+Whirlwind,Ranged(20ft),Normal,Effect,3/day,,"On hit, moves the target 60ft away.",,Clever,Big Show
+Wicked Blow,Melee,Dark,Attack,3/day,3d12,"On hit, Wicked Blow always counts as a critical hit.",,,
+Wild Charge,Melee,Electric,Attack,3/day,3d10,"On hit, you lose HP equal to 1/4th of the damage you deal.",Zapper,Tough,Appeal
+Will-O-Wisp,Ranged(10ft),Fire,Effect,1/day,,"On hit, the target is Burned.",,Beauty,Round Starter
+Wing Attack,Melee,Flying,Attack,At-Will,2d8,,,Cool,Appeal
+Wish,Melee,Normal,Effect,1/day,,"Target an ally or yourself. After the target acts during the next round, they are healed HP equal to half of the target’s Max HP.",,Cute,Reflective Appeal
+Wonder Room,Field,Psychic,Effect,3/day,,You create a circle of Wonderful Terrain with a 60ft diameter. Anyone who attacks within the Wonderful terrain makes Attack Accuracy Checks against Special Defense and Special Attack Accuracy Checks against Defense. This terrain disappears after 2 mins.,,Cute,Scrambler
+Wood Hammer,Melee,Grass,Attack,1/day,5d12,"On hit, you lose HP equal to 1/3rd of the damage you deal.",,Tough,Round Ender
+Wrap,Melee,Normal,Attack,At-Will,1d4,"On hit, the target is bound to you for 1d4 rounds. For each round the target is bound, it takes 1d4 physical damage on its turns.",,Tough,Torrential Appeal
+X-Scissor,Melee,Bug,Attack,3/day,3d10,,,Beauty,Round Starter
+Yawn,Melee,Normal,Effect,3/day,,"On hit, the target falls Asleep after its next turn.",,Cute,Excitement
+Zap Cannon,Ranged(30ft),Electric,Special,1/day,5d12,Zap Cannon has -6 during Accuracy Check. On hit the target is Paralyzed.,Zapper,Cool,Incentives
+Zen Headbutt,Melee,Psychic,Attack,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Beauty,Round Ender
+Zing Zap,Melee,Electric,Attack,3/day,3d10,"On hit, if you got 18 or higher on Accuracy Check, the target is Stunned.",,Tough,Appeal
+Psionic Fury,Ranged(20ft),Psychic,Special,1/day,5d12,"On hit, your Defense and Special Defense is -2 for 10 mins. This effect cannot be stacked.",,,

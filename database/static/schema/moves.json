@@ -1,0 +1,98 @@
+{
+    "$jsonSchema": {
+      "required": [
+        "Name",
+        "Range",
+        "Type",
+        "Stat",
+        "Frequency"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "Name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Range": {
+          "bsonType": "int",
+          "minimum": 0
+        },
+        "Type": {
+          "bsonType": "int"
+        },
+        "Stat": {
+          "bsonType": "string",
+          "enum": [
+            "Attack",
+            "Special Attack",
+            "Effect",
+            "Variable"
+          ]
+        },
+        "Frequency": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "DiceRoll": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "Effect": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "GrantedSkills": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "minLength": 1
+          }
+        },
+        "ContestStat": {
+          "bsonType": "string",
+          "enum": [
+            "Beauty",
+            "Clever",
+            "Cool",
+            "Cute",
+            "Tough"
+          ]
+        },
+        "ContestKeyword": {
+          "bsonType": "string",
+          "enum": [
+            "Appeal",
+            "Attention Grabber",
+            "Big Show",
+            "Catching Up",
+            "Crowd Pleaser",
+            "End Set",
+            "Excitement",
+            "Final Appeal",
+            "Get Ready!",
+            "Good Show!",
+            "Hold That Thought",
+            "Incredible",
+            "Incentives",
+            "Interrupting Appeal",
+            "Inversed Appeal",
+            "Quick Set",
+            "Reflective Appeal",
+            "Reliable",
+            "Round Ender",
+            "Round Starter",
+            "Scrambler",
+            "Seen Nothing Yet",
+            "Slow Set",
+            "Special Attention",
+            "Start Set",
+            "Torrential Appeal",
+            "Unsettling"
+          ]
+        }
+      }
+    }
+  }

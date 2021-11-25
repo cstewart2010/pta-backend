@@ -24,6 +24,11 @@ namespace TheReplacement.PTA.Common.Models
         public int DexNo { get; set; }
 
         /// <summary>
+        /// The species name for the pokemon
+        /// </summary>
+        public string SpeciesName { get; set; }
+
+        /// <summary>
         /// The trainer's unique id
         /// </summary>
         public string TrainerId { get; set; }
@@ -31,12 +36,12 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The Pokemon's gender
         /// </summary>
-        public Gender Gender { get; set; }
+        public string Gender { get; set; }
 
         /// <summary>
         /// The Pokemon's status
         /// </summary>
-        public Status PokemonStatus { get; set; }
+        public string PokemonStatus { get; set; }
 
         /// <summary>
         /// The Pokemon's nickname. Defaults to the Species name is nothing is selected
@@ -44,39 +49,14 @@ namespace TheReplacement.PTA.Common.Models
         public string Nickname { get; set; }
 
         /// <summary>
-        /// The Pokemon's ability positioning
+        /// The Pokemon's moves
         /// </summary>
-        public int Ability { get; set; }
-
-        /// <summary>
-        /// The Pokemon's naturally learned moves
-        /// </summary>
-        public IEnumerable<string> NaturalMoves { get; set; }
-
-        /// <summary>
-        /// The Pokemon's taught moves
-        /// </summary>
-        public IEnumerable<string> TMMoves { get; set; }
+        public IEnumerable<string> Moves { get; set; }
 
         /// <summary>
         /// The Pokemon's type positioning
         /// </summary>
-        public int Type { get; set; }
-
-        /// <summary>
-        /// The Pokemon's total earn experience points
-        /// </summary>
-        public int Experience { get; set; }
-
-        /// <summary>
-        /// The Pokemon's current level
-        /// </summary>
-        public int Level { get; set; }
-
-        /// <summary>
-        /// The Pokemon's exp yield
-        /// </summary>
-        public int ExpYield { get; set; }
+        public string Type { get; set; }
 
         /// <summary>
         /// The Pokemon's catchrate
@@ -86,7 +66,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The Pokemon's nature positioning
         /// </summary>
-        public int Nature { get; set; }
+        public string Nature { get; set; }
 
         /// <summary>
         /// Whether the pokemon is shiny or not
@@ -99,46 +79,34 @@ namespace TheReplacement.PTA.Common.Models
         public bool IsOnActiveTeam { get; set; }
 
         /// <summary>
-        /// The Pokemon's HP Stat
+        /// Collection of Pokemon stats
         /// </summary>
-        public PokemonStatModel HP { get; set; }
+        public StatsModel PokemonStats { get; set; }
 
-        /// <summary>
-        /// The Pokemon's Attack Stat
-        /// </summary>
-        public PokemonStatModel Attack { get; set; }
+        public string Size { get; set; }
 
-        /// <summary>
-        /// The Pokemon's Defense Stat
-        /// </summary>
-        public PokemonStatModel Defense { get; set; }
+        public string Weight { get; set; }
 
-        /// <summary>
-        /// The Pokemon's SpecialAttack Stat
-        /// </summary>
-        public PokemonStatModel SpecialAttack { get; set; }
+        public IEnumerable<string> Skills { get; set; }
 
-        /// <summary>
-        /// The Pokemon's SpecialDefense Stat
-        /// </summary>
-        public PokemonStatModel SpecialDefense { get; set; }
+        public IEnumerable<string> Passives { get; set; }
 
-        /// <summary>
-        /// The Pokemon's Speed Stat
-        /// </summary>
-        public PokemonStatModel Speed { get; set; }
+        public IEnumerable<string> EggGroups { get; set; }
 
-        /// <summary>
-        /// Aggregates all of the pokemon's raw stats to their respective totals
-        /// </summary>
-        public void AggregateStats()
-        {
-            HP.AggregateStatValue();
-            Attack.AggregateStatValue();
-            Defense.AggregateStatValue();
-            SpecialAttack.AggregateStatValue();
-            SpecialDefense.AggregateStatValue();
-            Speed.AggregateStatValue();
-        }
+        public IEnumerable<string> Proficiencies { get; set; }
+
+        public string EggHatchRate { get; set; }
+
+        public IEnumerable<string> Habitats { get; set; }
+
+        public string Diet { get; set; }
+
+        public string Rarity { get; set; }
+
+        public string GMaxMove { get; set; }
+
+        public string EvolvedFrom { get; set; }
+
+        public LegendaryStatsModel LegendaryStats { get; set; }
     }
 }
