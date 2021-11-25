@@ -30,9 +30,10 @@ if ($proc.ExitCode -ne 0){
 }
 
 # test
-$env:Database = "test"
-mongosh $env:MongoDBConnectionString -f  .\database\scripts\update.js
 Write-Host "Updating the Test Environment"
+$env:MongoDBConnectionString = "mongodb+srv://$($env:MongoUsername):$($env:MongoPassword)@ptatestcluster.1ekcs.mongodb.net/test?retryWrites=true&w=majority"
+mongosh $env:MongoDBConnectionString -f  .\database\scripts\update.js
+$env:Database = "test"
 $proc = Start-Process -FilePath ".\src\MongoDbImportTool\bin\Debug\netcoreapp3.1\MongoDbImportTool.exe" -PassThru -Wait
 if ($proc.ExitCode -ne 0){
     return 1
@@ -40,6 +41,5 @@ if ($proc.ExitCode -ne 0){
 dotnet test .\src\PTABackEnd.sln --logger:"trx;LogFileName=C:\Users\zachagrey\.jenkins\workspace\PTA backend develop build/TestOutput.trx" --filter:Category=smoke
 
 # postbuild
-$env:MongoDBConnectionString = "mongodb+srv://$($env:MongoUsername):$($env:MongoPassword)@ptatestcluster.1ekcs.mongodb.net/test?retryWrites=true&w=majority"
 mongosh $env:MongoDBConnectionString -f .\database\scripts\catalog_logs.js
 Set-Location -Path $currentDirectory
