@@ -107,7 +107,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{pokemonId}")]
-        public ActionResult<object> DeletePokemon(string pokemonId)
+        public ActionResult<GenericMessage> DeletePokemon(string pokemonId)
         {
             Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
@@ -128,10 +128,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             Response.RefreshToken();
-            return ReturnSuccessfully(new
-            {
-                message = $"Successfully deleted {pokemonId}"
-            });
+            return ReturnSuccessfully(new GenericMessage($"Successfully deleted {pokemonId}"));
         }
 
         private bool AreTrainersOnline(

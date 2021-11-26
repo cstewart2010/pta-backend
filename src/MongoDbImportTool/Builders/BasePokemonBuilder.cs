@@ -5,7 +5,6 @@ using System.Linq;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Exceptions;
 using TheReplacement.PTA.Common.Models;
-using TheReplacement.PTA.Common.Utilities;
 
 namespace MongoDbImportTool.Builders
 {

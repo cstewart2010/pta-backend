@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
@@ -73,11 +74,21 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return null;
             }
 
+            var feats = Request.Query["feats"].ToString().Split(',')
+                .Select(feat => StaticDocumentUtility.GetStaticDocument<FeatureModel>(StaticDocumentType.Features, feat))
+                .Where(feat => feat != null)
+                .Select(feat => feat.Name);
+
+            var classes = Request.Query["classes"].ToString().Split(',')
+                .Select(@class => StaticDocumentUtility.GetStaticDocument<TrainerClassModel>(StaticDocumentType.TrainerClasses, @class))
+                .Where(@class => @class != null)
+                .Select(@class => @class.Name);
+
             return new NpcModel
             {
                 NPCId = Guid.NewGuid().ToString(),
-                Feats = Request.Query["feats"].ToString().Split(','),
-                TrainerClasses = Request.Query["classes"].ToString().Split(','),
+                Feats = feats,
+                TrainerClasses = classes,
                 TrainerName = trainerName,
                 TrainerStats = new StatsModel()
             };

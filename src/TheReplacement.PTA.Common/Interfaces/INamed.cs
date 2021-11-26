@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TheReplacement.PTA.Common.Interfaces
+﻿namespace TheReplacement.PTA.Common.Interfaces
 {
     public interface INamed
     {
