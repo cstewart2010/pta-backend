@@ -1,25 +1,36 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
+using TheReplacement.PTA.Services.Core.Messages;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
     [ApiController]
     [Route("api/v1/pokedex")]
-    public class BasePokemonController : ControllerBase
+    public class BasePokemonController : StaticControllerBase
     {
+        private static readonly IEnumerable<BasePokemonModel> BasePokemon = StaticDocumentUtility.GetStaticDocuments<BasePokemonModel>(StaticDocumentType.BasePokemon);
+
+        [HttpGet]
+        public StaticCollectionMessage FindPokemon()
+        {
+            Response.UpdateAccessControl();
+            return GetStaticCollectionResponse(BasePokemon);
+        }
+
         [HttpGet("{name}")]
         public ActionResult<BasePokemonModel> FindPokemon(string name)
         {
             Response.UpdateAccessControl();
-            var document = StaticDocumentUtility.GetStaticDocument<BasePokemonModel>(StaticDocumentType.BasePokemon, name);
-            if (document == null)
+            var document = BasePokemon.GetStaticDocument(name);
+            if (document != null)
             {
-                return NotFound(name);
+                return document;
             }
 
-            return document;
+            return NotFound(name);
         }
     }
 }
