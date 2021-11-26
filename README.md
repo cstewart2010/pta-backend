@@ -51,7 +51,7 @@ MongoPassword = **dbPassword**
 Database = **db**  
 MongoDBConnectionString = mongodb+srv://**$env:MongoUsername**:**$env:MongoPassword**@**url/to/mongo**/**$env:Database**?retryWrites=true&w=majority  
 Example: mongodb+srv://**dbAdmin**:**dbPassword**@**pokemontabletopdatabase.com**/**PTA**?retryWrites=true&w=majority  
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 
 ---
 
@@ -65,7 +65,7 @@ Running install.ps1 to install any missing tools
 All tools installed
 Running mongo update script
 ```
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 
 ---
 
@@ -74,24 +74,24 @@ Running mongo update script
 Build and test the solution before deployment
 
 ```cmd
-dotnet build .src/PTABackend.sln # builds the solutions
-dotnet test .src/PTABackend.sln # runs the entire unit test suite
-dotnet test .src/PTABackend.sln --filter Category=smoke # only runs the smoke test
+dotnet build ./src/PTABackend.sln # builds the solutions
+dotnet test ./src/PTABackend.sln # runs the entire unit test suite
+dotnet test ./src/PTABackend.sln --filter Category=smoke # only runs the smoke test
 ```
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 
 ---
 
 ## Run
 
 Not yet configured  
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 
 ---
 
 # Pokemon
 *Resource - api/v1/pokemon*  
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 - [Find Pokemon By Id](#find-pokemon-by-id)
 - [Trade Pokemon](#trade-pokemon)
 - [Evolve Pokemon](#evolve-pokemon)
@@ -153,7 +153,7 @@ Requires a ptaSessionAuth cookie
 
 # Trainer
 *Resource - api/v1/trainer*  
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 - [Find Trainer Pokemon](#find-trainer-pokemon)
 - [Verify Login](#verify-login)
 - [Verify Logout](#verify-logout)
@@ -263,7 +263,7 @@ Requires a ptaSessionAuth cookie
 
 # Game
 *Resource - api/v1/game*  
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 - [Find Game by Id](#find-game-by-id)
 - [Find Trainer In Game](#find-trainer-in-game)
 - [Create New Game](#create-new-game)
@@ -454,7 +454,7 @@ Requires a ptaSessionAuth cookie
 
 # Npc
 *Resource - api/v1/npc*  
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 - [Find Npc by Id](#find-npc-by-id)
 - [Create new Npc](#create-new-npc)
 - [Delete Npc](#delete-npc)
@@ -490,7 +490,7 @@ Response Type - Status(200)
 ---
 
 # Consumption Only
-[Back to top](#Table-Of-Contents)
+[Back to top](#table-of-contents)
 - [Pokedex](#pokedex)
 - [Berries](#berries)
 - [Features](#features)

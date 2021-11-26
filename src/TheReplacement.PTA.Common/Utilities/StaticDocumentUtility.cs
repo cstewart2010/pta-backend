@@ -100,6 +100,13 @@ namespace TheReplacement.PTA.Common.Utilities
             var basePokemon = GetStaticDocument<BasePokemonModel>(StaticDocumentType.BasePokemon, name);
             return GetPokemonFromBase(basePokemon, nature, gender, status, nickname);
         }
+
+        public static IEnumerable<TDocument> GetStaticDocuments<TDocument>(StaticDocumentType documentType) where TDocument : INamed
+        {
+            var collection = MongoCollectionHelper.Database.GetCollection<TDocument>(documentType.ToString());
+            return collection.Find(document => true).ToEnumerable();
+        }
+
         public static TDocument GetStaticDocument<TDocument>(
             StaticDocumentType documentType,
             string name) where TDocument : INamed
@@ -196,7 +203,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Rarity.Common => 50,
                 Rarity.Uncommon => 40,
                 _ => 30,
-            } - (15 * ((basePokemon.Stage) - 1));
+            } - (15 * (basePokemon.Stage - 1));
         }
 
         private static bool TryAddStaticDocument(
