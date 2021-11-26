@@ -29,6 +29,13 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             "speed"
         };
 
+        static RequestExtensions()
+        {
+            AuthKey = Environment.GetEnvironmentVariable("CookieKey");
+        }
+
+        internal static string AuthKey { get; }
+
         public static string GetJsonFromRequest(this HttpRequest request)
         {
             var jsonFile = request.Form.Files.First(file => Path.GetExtension(file.FileName).ToLower() == ".json");
@@ -41,6 +48,29 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             }
 
             return null;
+        }
+        public static bool VerifyIdentity(
+            this HttpRequest request,
+            string id)
+        {
+            var trainer = DatabaseUtility.FindTrainerById(id);
+
+            if (!(request.Query.TryGetValue("ptaActivityToken", out var accessToken)
+                && trainer.ActivityToken == accessToken
+                && EncryptionUtility.ValidateToken(accessToken)))
+            {
+                DatabaseUtility.UpdateTrainerOnlineStatus(id, false);
+                return false;
+            }
+
+            if (!(request.Query.TryGetValue("ptaSessionAuth", out var cookie) && EncryptionUtility.VerifySecret(AuthKey, cookie)))
+            {
+                DatabaseUtility.UpdateTrainerOnlineStatus(id, false);
+                return false;
+            }
+
+
+            return true;
         }
 
         public static GameModel BuildGame(this HttpRequest request)

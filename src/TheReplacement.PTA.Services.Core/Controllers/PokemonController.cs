@@ -37,7 +37,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
-            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
             }
@@ -72,6 +72,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 leftPokemon,
                 rightPokemon
             );
+
+            Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(new
             {
                 leftPokemon,
@@ -84,7 +86,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             Response.UpdateAccessControl();
             var trainerId = Request.Query["trainerId"];
-            if (!Header.VerifyCookies(Request.Cookies, trainerId))
+            if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
@@ -102,7 +104,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
-            Response.RefreshToken();
+            Response.RefreshToken(trainerId);
             return ReturnSuccessfully(pokemon);
         }
 
@@ -111,7 +113,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
-            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
             }
@@ -127,7 +129,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 NotFound(pokemonId);
             }
 
-            Response.RefreshToken();
+            Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(new GenericMessage($"Successfully deleted {pokemonId}"));
         }
 
@@ -188,8 +190,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 rightPokemon.PokemonId,
                 leftPokemon.TrainerId
             );
-
-            Response.RefreshToken();
         }
 
         private bool TradeCheck(

@@ -135,7 +135,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         public ActionResult<PokemonModel> AddPokemon(string gameMasterId)
         {
             Response.UpdateAccessControl();
-            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
             }
@@ -155,7 +155,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(writeError);
             }
 
-            Response.RefreshToken();
+            Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(pokemon);
         }
 
@@ -195,7 +195,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
-            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
             }
@@ -218,7 +218,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/addNpcs")]
         public ActionResult<UpdatedNpcListMessage> AddNPCsToGame(string gameId)
         {
-            var npcIds = GetNpcs(out var notFound);
+            var gameMasterId = Request.Query["gameMasterId"];
+            var npcIds = GetNpcs(gameMasterId, out var notFound);
             if (npcIds == null)
             {
                 return notFound;
@@ -231,6 +232,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var newNpcList = game.NPCs.Union(npcIds);
+            Response.RefreshToken(gameMasterId);
             return UpdateNpcList
             (
                 gameId,
@@ -241,7 +243,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/removeNpcs")]
         public ActionResult<UpdatedNpcListMessage> RemovesNPCsFromGame(string gameId)
         {
-            var npcIds = GetNpcs(out var notFound);
+            var gameMasterId = Request.Query["gameMasterId"];
+            var npcIds = GetNpcs(gameMasterId, out var notFound);
             if (npcIds == null)
             {
                 return notFound;
@@ -254,6 +257,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var newNpcList = game.NPCs.Except(npcIds);
+            Response.RefreshToken(gameMasterId);
             return UpdateNpcList
             (
                 gameId,
@@ -359,11 +363,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             ));
         }
 
-        private IEnumerable<string> GetNpcs(out ActionResult notFound)
+        private IEnumerable<string> GetNpcs(
+            string gameMasterId,
+            out ActionResult notFound)
         {
             Response.UpdateAccessControl();
-            var gameMasterId = Request.Query["gameMasterId"];
-            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId))
             {
                 notFound = Unauthorized();
                 return null;
@@ -394,7 +399,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return StatusCode(500);
             }
 
-            Response.RefreshToken();
             return ReturnSuccessfully(new UpdatedNpcListMessage(newNpcList));
         }
 
