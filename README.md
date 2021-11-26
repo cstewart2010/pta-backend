@@ -39,6 +39,7 @@ PTA BackEnd
   * [Find Npc by Id](#find-npc-by-id)
   * [Create new Npc](#create-new-npc)
   * [Delete Npc](#delete-npc)
+- [Consumption Only](#consumption-only)
 
 ---
 
@@ -93,9 +94,8 @@ Not yet configured
 [Back to top](#Table-Of-Contents)
 - [Find Pokemon By Id](#find-pokemon-by-id)
 - [Trade Pokemon](#trade-pokemon)
-- [Update Pokemon Stats](#update-pokemon-stats)
-- [Delete Pokemon by Id](#delete-pokemon-by-id)
 - [Evolve Pokemon](#evolve-pokemon)
+- [Delete Pokemon by Id](#delete-pokemon-by-id)
 
 ---
 
@@ -121,27 +121,6 @@ Requires a ptaSessionAuth cookie
 |leftTrainerId|string|A trainerId|required|
 |rightPokemonId|string|A pokemonId|required|
 |rightTrainerId|string|A trainerId|required|
-
----
-
-## Update Pokemon Stats
-Endpoint - update/{pokemonId}  
-Method - PUT  
-Response Type - PokemonModel  
-Requires a ptaSessionAuth cookie  
-[Back to Pokemon](#pokemon)
-
-|Parameter|Type|Expected Value|Required|
-|---------|----|--------------|--------|
-|trainerId|string|Trainer Id|required|
-|experience|int|Total experience|optional, >=0|
-|hpAdded|int|HP Added Value|optional, >=0|
-|attackAdded|int|AttackAdded Value|optional, >=0|
-|defenseAdded|int|Defense Added Value|optional, >=0|
-|specialAttackAdded|int|Special Attack Added Value|optional, >=0|
-|specialDefenseAdded|int|Special Defense Added Value|optional, >=0|
-|speedAdded|int|Speed Added Value|optional, >=0|
-|nickname|string|The pokemon's nickname|optional|
 
 ---
 
@@ -210,12 +189,8 @@ Requires a ptaSessionAuth cookie
 |gameMasterId|string|GameMaster's id|required|
 |pokemon|string|A pokemon's name|required|
 |nature|string|A pokemon's nature|required|
-|naturalMoves|list|A list of Pokemon moves|At least one, no more than four|
-|expYield|int|Experience yield|>0|
-|catchRate|int|A pokemon's catch rate|>=0|
-|experience|int|Total experience|>=0|
-|level|int|Current level|>0|
-|tmMoves|list|A list of Pokemon moves|optional, no more than four|
+|gender|string|A pokemon's gender|required|
+|status|string|A pokemon's status|required|
 |nickname|string|The pokemon's nickname|optional|
 
 ---
@@ -289,19 +264,19 @@ Requires a ptaSessionAuth cookie
 # Game
 *Resource - api/v1/game*  
 [Back to top](#Table-Of-Contents)
-* [Find Game by Id](#find-game-by-id)
-* [Find Trainer In Game](#find-trainer-in-game)
-* [Create New Game](#create-new-game)
-* [Add New Trainer to Game](#add-new-trainer-to-game)
-* [Create Wild Pokemon](#create-wild-pokemon)
-* [Import Game](#import-game)
-* [Start Game](#start-game)
-* [End Game](#end-game)
-* [Add Npcs to Game](#add-npcs-to-game)
-* [Remove Npcs from Game](#remove-npcs-from-game)
-* [Reset Trainer password](#reset-trainer-password)
-* [Delete Game](#delete-game)
-* [Export Game](#export-game)
+- [Find Game by Id](#find-game-by-id)
+- [Find Trainer In Game](#find-trainer-in-game)
+- [Create New Game](#create-new-game)
+- [Add New Trainer to Game](#add-new-trainer-to-game)
+- [Create Wild Pokemon](#create-wild-pokemon)
+- [Import Game](#import-game)
+- [Start Game](#start-game)
+- [End Game](#end-game)
+- [Add Npcs to Game](#add-npcs-to-game)
+- [Remove Npcs from Game](#remove-npcs-from-game)
+- [Reset Trainer password](#reset-trainer-password)
+- [Delete Game](#delete-game)
+- [Export Game](#export-game)
 
 ## Find Game by Id
 Endpoint - {gameId}  
@@ -346,6 +321,11 @@ Grants a ptaSessionAuth cookie
 |---------|----|--------------|--------|
 |trainerName|string|Trainer's username|required|
 |password|string|Trainer's password|required|
+|attack|int|The trainer's attack stat|required, between 1 and 10|
+|defense|int|The trainer's defense stat|required, between 1 and 10|
+|specialAttack|int|The trainer's special attack stat|required, between 1 and 10|
+|specialDefense|int|The trainer's special defense stat|required, between 1 and 10|
+|speed|int|The trainer's speed stat|required, between 1 and 10|
 
 ---
 
@@ -369,12 +349,8 @@ Requires a ptaSessionAuth cookie
 |---------|----|--------------|--------|
 |pokemon|string|A pokemon's name|required|
 |nature|string|A pokemon's nature|required|
-|naturalMoves|list|A list of Pokemon moves|At least one, no more than four|
-|expYield|int|Experience yield|>0|
-|catchRate|int|A pokemon's catch rate|>=0|
-|experience|int|Total experience|>=0|
-|level|int|Current level|>0|
-|tmMoves|list|A list of Pokemon moves|optional, no more than four|
+|gender|string|A pokemon's gender|required|
+|status|string|A pokemon's status|required|
 |nickname|string|The pokemon's nickname|optional|
 
 ---
@@ -510,3 +486,92 @@ Endpoint - {npcId}
 Method - DELETE  
 Response Type - Status(200)  
 [Back to Npc](#npc)
+
+---
+
+# Consumption Only
+[Back to top](#Table-Of-Contents)
+- [Pokedex](#pokedex)
+- [Berries](#berries)
+- [Features](#features)
+- [Items](#items)
+- [Moves](#moves)
+- [Origins](#origins)
+- [Trainer Classes](#trainer-classes)
+
+---
+
+## Pokedex
+*Resource - api/v1/pokedex*  
+Endpoints
+- {name}
+
+Response Type - BasePokemonModel  
+[Back to Consumption Only](#consumption-only)
+
+---
+
+## Berries
+*Resource - api/v1/berrydex*  
+Endpoints
+- {name}
+
+Response Type - BerryModel  
+[Back to Consumption Only](#consumption-only)
+
+---
+
+## Features
+*Resource - api/v1/featuredex*  
+Endpoints
+- general/{name}
+- legendary/{name}
+- passives/{name}
+- skills/{name}
+
+Response Type - FeatureModel  
+[Back to Consumption Only](#consumption-only)
+
+---
+
+## Items
+*Resource - api/v1/itemdex*  
+Endpoints
+- key/{name}
+- medical/{name}
+- pokeball/{name}
+- pokemon/{name}
+- trainer/{name}
+
+Response Type - BaseItemModel  
+[Back to Consumption Only](#consumption-only)
+
+---
+
+## Moves
+*Resource - api/v1/movedex*  
+Endpoints
+- {name}
+
+Response Type - MoveModel  
+[Back to Consumption Only](#consumption-only)
+
+---
+
+## Origins
+*Resource - api/v1/origindex*  
+Endpoints
+- {name}
+
+Response Type - OriginModel  
+[Back to Consumption Only](#consumption-only)
+
+---
+
+## Trainer Classes
+*Resource - api/v1/classdex*  
+Endpoints
+- {name}
+
+Response Type - TrainerClassModel  
+[Back to Consumption Only](#consumption-only)

@@ -12,11 +12,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 {
     [ApiController]
     [Route("api/v1/trainer")]
-    public class TrainerContoller : PtaControllerBase
+    public class TrainerController : PtaControllerBase
     {
         protected override MongoCollection Collection { get; }
 
-        public TrainerContoller()
+        public TrainerController()
         {
             Collection = MongoCollection.Trainers;
         }
@@ -70,7 +70,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("login")]
-        public ActionResult<object> Login()
+        public ActionResult<FoundTrainerMessage> Login()
         {
             Response.UpdateAccessControl();
             var (gameId, username, password) = Request.GetTrainerCredentials(out var credentialErrors);
@@ -109,7 +109,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{trainerId}/addItems")]
-        public ActionResult<object> AddItemsToTrainer(string trainerId)
+        public ActionResult<FoundTrainerMessage> AddItemsToTrainer(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var gameMasterId = Request.Query["gameMasterId"];
@@ -156,7 +156,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{trainerId}/removeItems")]
-        public ActionResult<object> RemoveItemsFromTrainer(string trainerId)
+        public ActionResult<FoundTrainerMessage> RemoveItemsFromTrainer(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             if (!Header.VerifyCookies(Request.Cookies, trainerId))
@@ -191,7 +191,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{trainerId}")]
-        public ActionResult<object> DeleteTrainer(string trainerId)
+        public ActionResult<GenericMessage> DeleteTrainer(string trainerId)
         {
             Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
             var gameMasterId = Request.Query["gameMasterId"];

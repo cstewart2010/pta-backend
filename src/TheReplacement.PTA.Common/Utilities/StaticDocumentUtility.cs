@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Interfaces;
 using TheReplacement.PTA.Common.Internal;
@@ -11,15 +10,34 @@ using TheReplacement.PTA.Common.Models;
 
 namespace TheReplacement.PTA.Common.Utilities
 {
+    public enum StaticDocumentType
+    {
+        BasePokemon = 1,
+        Berries = 2,
+        Features = 3,
+        KeyItems = 4,
+        LegendaryFeatures = 5,
+        Moves = 6,
+        Origins = 7,
+        Passives = 8,
+        Pokeballs = 9,
+        PokemonItems = 10,
+        Skills = 11,
+        TrainerClasses = 12,
+        TrainerEquipment = 13,
+        MedicalItems = 14
+    }
+
     public static class StaticDocumentUtility
     {
+
         public static PokemonModel GetEvolved(
             PokemonModel pokemon,
             IEnumerable<string> keptMoves,
             string evolvedName,
             IEnumerable<string> newMoves)
         {
-            var basePokemon = GetStaticDocument<BasePokemonModel>("BasePokemon", evolvedName);
+            var basePokemon = GetStaticDocument<BasePokemonModel>(StaticDocumentType.BasePokemon, evolvedName);
             if (!string.Equals(basePokemon?.EvolvesFrom, pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase))
             {
                 return null;
@@ -79,8 +97,15 @@ namespace TheReplacement.PTA.Common.Utilities
             Status status,
             string nickname)
         {
-            var basePokemon = GetBasePokemon(name);
+            var basePokemon = GetStaticDocument<BasePokemonModel>(StaticDocumentType.BasePokemon, name);
             return GetPokemonFromBase(basePokemon, nature, gender, status, nickname);
+        }
+        public static TDocument GetStaticDocument<TDocument>(
+            StaticDocumentType documentType,
+            string name) where TDocument : INamed
+        {
+            var collection = MongoCollectionHelper.Database.GetCollection<TDocument>(documentType.ToString());
+            return collection.Find(document => document.Name.ToLower() == name.ToLower()).FirstOrDefault();
         }
 
         public static void AddStaticDocuments<TDocument>(
@@ -109,11 +134,6 @@ namespace TheReplacement.PTA.Common.Utilities
                     writer.WriteLine(error.WriteErrorJsonString);
                 }
             }
-        }
-
-        private static BasePokemonModel GetBasePokemon(string name)
-        {
-            return GetStaticDocument<BasePokemonModel>("BasePokemon", name);
         }
 
         private static BasePokemonModel GetBasePokemon(int dexNo)
@@ -177,14 +197,6 @@ namespace TheReplacement.PTA.Common.Utilities
                 Rarity.Uncommon => 40,
                 _ => 30,
             } - (15 * ((basePokemon.Stage) - 1));
-        }
-
-        private static TDocument GetStaticDocument<TDocument>(
-            string collectionName,
-            string name) where TDocument : INamed
-        {
-            var collection = MongoCollectionHelper.Database.GetCollection<TDocument>(collectionName);
-            return collection.Find(document => document.Name == name).FirstOrDefault();
         }
 
         private static bool TryAddStaticDocument(

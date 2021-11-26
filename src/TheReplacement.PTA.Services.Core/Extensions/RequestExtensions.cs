@@ -12,7 +12,13 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 {
     internal static class RequestExtensions
     {
-        private static readonly IEnumerable<string> MandatoryPokemonKeys = new[] { "pokemon", "nature", "gender", "status", };
+        private static readonly IEnumerable<string> MandatoryPokemonKeys = new[]
+        {
+            "pokemon",
+            "nature",
+            "gender",
+            "status"
+        };
 
         private static readonly IEnumerable<string> MandatoryTrainerKeys = new[]
         {
@@ -64,6 +70,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 gameId,
                 "gmUsername",
                 "gmPassword",
+                true,
                 out badRequestMessage
             );
 
@@ -86,6 +93,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 gameId,
                 "username",
                 "password",
+                false,
                 out badRequestMessage
             );
 
@@ -148,7 +156,9 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return (gameId, trainerName, password);
         }
 
-        public static IEnumerable<string> GetNpcIds(this HttpRequest request, out object error)
+        public static IEnumerable<string> GetNpcIds(
+            this HttpRequest request,
+            out object error)
         {
             error = null;
             var npcIds = request.Query["npcIds"].ToString().Split(',');
@@ -171,7 +181,8 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return npcIds;
         }
 
-        private static bool ValidateMandatoryPokemonKeys(HttpRequest request,
+        private static bool ValidateMandatoryPokemonKeys(
+            HttpRequest request,
             out InvalidQueryStringMessage error)
         {
             var fails = MandatoryPokemonKeys.Where(key => string.IsNullOrWhiteSpace(request.Query[key]));
@@ -228,18 +239,23 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             string gameId,
             string userKey,
             string passKey,
+            bool isGM,
             out AbstractMessage error)
         {
-            var fails = MandatoryTrainerKeys.Where(key =>
-                !(request.Query.ContainsKey(key) && int.TryParse(request.Query[key], out var result) && result > 0 && result < 10));
-            if (fails.Any())
+            if (!isGM)
             {
-                error = new InvalidQueryStringMessage
+                var fails = MandatoryTrainerKeys.Where(key =>
+                    !(request.Query.ContainsKey(key) && int.TryParse(request.Query[key], out var result) && result > 0 && result < 10));
+                if (fails.Any())
                 {
-                    MissingParameters = fails
-                };
-                return null;
+                    error = new InvalidQueryStringMessage
+                    {
+                        MissingParameters = fails
+                    };
+                    return null;
+                }
             }
+
             var username = request.Query[userKey].ToString();
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -255,12 +271,27 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             }
 
             error = null;
-            var stats = GetStatsFromRequest(request.Query);
-            return CreateTrainer(gameId, username, password, stats);
+            var stats = GetStatsFromRequest(request.Query, isGM);
+            var trainer = CreateTrainer(gameId, username, password, stats);
+            trainer.IsGM = isGM;
+            return trainer;
         }
 
-        private static StatsModel GetStatsFromRequest(IQueryCollection query)
+        private static StatsModel GetStatsFromRequest(IQueryCollection query, bool isGM)
         {
+            if (isGM)
+            {
+                return new StatsModel
+                {
+                    HP = 20,
+                    Attack = 1,
+                    Defense = 1,
+                    SpecialAttack = 1,
+                    SpecialDefense = 1,
+                    Speed = 1
+                };
+            }
+
             return new StatsModel
             {
                 HP = 20,

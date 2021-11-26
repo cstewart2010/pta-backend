@@ -1,9 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using TheReplacement.PTA.Common.Models;
-using TheReplacement.PTA.Common.Utilities;
 
 namespace MongoDbImportTool.Builders
 {
