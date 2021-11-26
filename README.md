@@ -111,7 +111,7 @@ Response Type - PokemonModel
 Endpoint - trade  
 Method - PUT  
 Response Type - { leftPokemon: PokemonModel, rightPokemon: PokemonModel }  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token  
 [Back to Pokemon](#pokemon)
 
 |Parameter|Type|Expected Value|Required|
@@ -128,7 +128,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - evolve/{pokemonId}  
 Method - PUT  
 Response Type - PokemonModel  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Pokemon](#pokemon)
 
 |Parameter|Type|Expected Value|Required|
@@ -142,7 +142,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - {pokemonId}  
 Method - DELETE  
 Response Type - message  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Pokemon](#pokemon)
 
 |Parameter|Type|Expected Value|Required|
@@ -181,7 +181,7 @@ Response Type - PokemonModel
 Endpoint - {trainerId}  
 Method - POST  
 Response Type - PokemonModel  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Trainer](#trainer)
 
 |Parameter|Type|Expected Value|Required|
@@ -199,7 +199,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - login  
 Method - PUT  
 Response Type - TrainerModel  
-Grant a ptaSessionAuth cookie  
+Grant a ptaSessionAuth token  
 [Back to Trainer](#trainer)
 
 ---
@@ -216,7 +216,7 @@ Grant a ptaSessionAuth cookie
 Endpoint - login  
 Method - PUT  
 Response Type - Status(200)  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Trainer](#trainer)
 
 ---
@@ -225,7 +225,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - {trainerId}/addItems  
 Method - PUT  
 Response Type - PokemonModel  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Trainer](#trainer)
 
 |Parameter|Type|Expected Value|Required|
@@ -239,7 +239,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - {trainerId}/addItems  
 Method - PUT  
 Response Type - PokemonModel  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Trainer](#trainer)
 
 |Parameter|Type|Expected Value|Required|
@@ -252,7 +252,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - {trainerId}  
 Method - DELETE  
 Response Type - message  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Trainer](#trainer)
 
 |Parameter|Type|Expected Value|Required|
@@ -298,7 +298,7 @@ Response Type - GameModel
 Endpoint - new  
 Method - POST  
 Response Type - GameModel  
-Grants a ptaSessionAuth cookie  
+Grants a ptaSessionAuth token  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -314,7 +314,7 @@ Grants a ptaSessionAuth cookie
 Endpoint - {gameId}/new  
 Method - PUT  
 Response Type - TrainerModel  
-Grants a ptaSessionAuth cookie  
+Grants a ptaSessionAuth token  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -342,7 +342,7 @@ Expects a .json file matching the ExportedGame schema
 Endpoint - {gameMasterId}/wild  
 Method - POST  
 Response Type - PokemonModel  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Pokemon](#pokemon)
 
 |Parameter|Type|Expected Value|Required|
@@ -359,7 +359,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - {gameId}/start  
 Method - PUT  
 Response Type - Status(200)  
-Grants a ptaSessionAuth cookie  
+Grants a ptaSessionAuth token  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -374,7 +374,7 @@ Grants a ptaSessionAuth cookie
 Endpoint - {gameId}/end  
 Method - PUT  
 Response Type - Status(200)  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -387,7 +387,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - {gameId}/addNpcs  
 Method - PUT  
 Response Type - Status(200)  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -401,7 +401,7 @@ Requires a ptaSessionAuth cookie
 Endpoint - {gameId}/removeNpcs  
 Method - PUT  
 Response Type - Status(200)  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -428,7 +428,7 @@ Response Type - TrainerModel
 Endpoint - {gameId}  
 Method - DELETE  
 Response Type - GameModel  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
@@ -442,7 +442,7 @@ Requires a ptaSessionAuth cookie
 Endpoint -{gameId}/export  
 Method - Delete  
 Response Type - Ok  
-Requires a ptaSessionAuth cookie  
+Requires a ptaSessionAuth token in header  
 [Back to Game](#game)
 
 |Parameter|Type|Expected Value|Required|
