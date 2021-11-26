@@ -5,9 +5,11 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 {
     internal static class ResponseExtensions
     {
+        private const string AccessUrl = "*";
+
         public static void UpdateAccessControl(this HttpResponse response)
         {
-            response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            response.Headers["Access-Control-Allow-Origin"] = AccessUrl;
         }
 
         public static void AssignAuthAndToken(
@@ -21,13 +23,21 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 token
             );
 
-            response.Cookies.Append("ptaSessionAuth", Header.GetCookie());
-            response.Cookies.Append("ptaActivityToken", token);
+            response.Headers.Append("ptaSessionAuth", GetSessionAuth());
+            response.Headers.Append("ptaActivityToken", token);
         }
 
-        public static void RefreshToken(this HttpResponse response)
+        public static void RefreshToken(
+            this HttpResponse response,
+            string id)
         {
-            response.Cookies.Append("ptaActivityToken", EncryptionUtility.GenerateToken());
+            var updatedToken = EncryptionUtility.GenerateToken();
+            DatabaseUtility.UpdateTrainerActivityToken(id, updatedToken);
+            response.Headers.Append("ptaActivityToken", updatedToken);
+        }
+        private static string GetSessionAuth()
+        {
+            return EncryptionUtility.HashSecret(RequestExtensions.AuthKey);
         }
     }
 }

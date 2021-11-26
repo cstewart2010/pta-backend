@@ -26,7 +26,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             string trainerId,
             string pokemonId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var document = GetDocument(pokemonId, MongoCollection.Pokemon, out var notFound);
             if (!(document is PokemonModel pokemon))
             {
@@ -45,7 +45,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
-            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
             }
@@ -65,7 +65,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(writeError);
             }
 
-            Response.RefreshToken();
+            Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(pokemon);
         }
 
@@ -93,7 +93,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         public ActionResult Logout(string trainerId)
         {
             Response.UpdateAccessControl();
-            if (!Header.VerifyCookies(Request.Cookies, trainerId))
+            if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
@@ -111,9 +111,9 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{trainerId}/addItems")]
         public ActionResult<FoundTrainerMessage> AddItemsToTrainer(string trainerId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
-            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
             }
@@ -151,15 +151,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 throw new Exception();
             }
-            Response.RefreshToken();
+            Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
         }
 
         [HttpPut("{trainerId}/removeItems")]
         public ActionResult<FoundTrainerMessage> RemoveItemsFromTrainer(string trainerId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
-            if (!Header.VerifyCookies(Request.Cookies, trainerId))
+            Response.UpdateAccessControl();
+            if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
@@ -186,16 +186,16 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 throw new Exception();
             }
-            Response.RefreshToken();
+            Response.RefreshToken(trainerId);
             return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
         }
 
         [HttpDelete("{trainerId}")]
         public ActionResult<GenericMessage> DeleteTrainer(string trainerId)
         {
-            Response.Headers["Access-Control-Allow-Origin"] = Header.AccessUrl;
+            Response.UpdateAccessControl();
             var gameMasterId = Request.Query["gameMasterId"];
-            if (!Header.VerifyCookies(Request.Cookies, gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
             }
@@ -216,7 +216,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
-            Response.RefreshToken();
+            Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(new GenericMessage($"Successfully deleted all pokemon associated with {trainerId}"));
         }
 
