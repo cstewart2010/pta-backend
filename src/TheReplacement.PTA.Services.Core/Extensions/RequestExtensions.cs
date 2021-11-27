@@ -55,20 +55,17 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         {
             var trainer = DatabaseUtility.FindTrainerById(id);
 
-            if (!(request.Query.TryGetValue("ptaActivityToken", out var accessToken)
+            if (!(request.Headers.TryGetValue("ptaActivityToken", out var accessToken)
                 && trainer.ActivityToken == accessToken
                 && EncryptionUtility.ValidateToken(accessToken)))
             {
-                DatabaseUtility.UpdateTrainerOnlineStatus(id, false);
                 return false;
             }
 
-            if (!(request.Query.TryGetValue("ptaSessionAuth", out var cookie) && EncryptionUtility.VerifySecret(AuthKey, cookie)))
+            if (!(request.Headers.TryGetValue("ptaSessionAuth", out var cookie) && EncryptionUtility.VerifySecret(AuthKey, cookie)))
             {
-                DatabaseUtility.UpdateTrainerOnlineStatus(id, false);
                 return false;
             }
-
 
             return true;
         }
