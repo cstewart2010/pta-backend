@@ -28,7 +28,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         protected IDocument GetDocument(string id, MongoCollection collection, out ActionResult notFound)
         {
-            IDocument document = Collection switch
+            IDocument document = collection switch
             {
                 MongoCollection.Games => DatabaseUtility.FindGame(id),
                 MongoCollection.Npcs => DatabaseUtility.FindNpc(id),
@@ -40,7 +40,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             notFound = null;
             if (document == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve {collection} {id}");
+                LoggerUtility.Error(collection, $"Client {ClientIp} failed to retrieve {collection} {id}");
                 notFound = NotFound(id);
             }
 
