@@ -263,6 +263,13 @@ Requires a ptaSessionAuth token in header
 
 # Game
 *Resource - api/v1/game*  
+Method - GET  
+Response Type - IEnumerable{GameModel}  
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|nickname|string|a specific nickname to limit the query by|optional|
+
 [Back to top](#table-of-contents)
 - [Find Game by Id](#find-game-by-id)
 - [Find Trainer In Game](#find-trainer-in-game)
@@ -277,6 +284,8 @@ Requires a ptaSessionAuth token in header
 - [Reset Trainer password](#reset-trainer-password)
 - [Delete Game](#delete-game)
 - [Export Game](#export-game)
+
+---
 
 ## Find Game by Id
 Endpoint - {gameId}  

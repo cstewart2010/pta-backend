@@ -134,6 +134,31 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Returns all games in db
+        /// </summary>
+        public static IEnumerable<MinifiedGameModel> FindAllGames()
+        {
+            var games = MongoCollectionHelper.Games
+                .Find(game => true)
+                .ToEnumerable()
+                .Select(game => new MinifiedGameModel(game));
+
+            if (games.Count() > 20)
+            {
+                return games.TakeLast(20);
+            }
+
+            return games;
+        }
+
+        public static IEnumerable<GameModel> FindAllGames(string nickname)
+        {
+            return MongoCollectionHelper.Games
+                .Find(game => game.Nickname.ToLower() == nickname.ToLower())
+                .ToEnumerable();
+        }
+
+        /// <summary>
         /// Returns a game matching the game session id
         /// </summary>
         /// <param name="id">The game session id</param>

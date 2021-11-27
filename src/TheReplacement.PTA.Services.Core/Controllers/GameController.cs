@@ -6,6 +6,8 @@ using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
+using System.Collections;
+using System;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -18,6 +20,19 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         public GameController()
         {
             Collection = MongoCollection.Games;
+        }
+
+        [HttpGet]
+        public IEnumerable FindAllGames()
+        {
+            Response.UpdateAccessControl();
+            if (Request.Query.TryGetValue("nickname", out var nickname))
+            {
+                return DatabaseUtility.FindAllGames(nickname)
+                    .Select(game => new FoundGameMessage(game.GameId));
+            }
+
+            return DatabaseUtility.FindAllGames();
         }
 
         [HttpGet("{gameId}")]
