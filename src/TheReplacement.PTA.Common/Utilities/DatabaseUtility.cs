@@ -502,7 +502,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Trainer,
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
-                Builders<TrainerModel>.Update.Set("ActvityToken", token),
+                Builders<TrainerModel>.Update.Set("ActivityToken", token),
                 $"Granted trainer {trainerId} a new activity token"
             );
         }
