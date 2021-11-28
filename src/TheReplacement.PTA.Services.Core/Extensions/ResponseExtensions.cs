@@ -5,13 +5,6 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 {
     internal static class ResponseExtensions
     {
-        private const string AccessUrl = "*";
-
-        public static void UpdateAccessControl(this HttpResponse response)
-        {
-            response.Headers["Access-Control-Allow-Origin"] = AccessUrl;
-        }
-
         public static void AssignAuthAndToken(
             this HttpResponse response,
             string trainerId)
@@ -23,8 +16,8 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 token
             );
 
-            response.Headers.Append("ptaSessionAuth", GetSessionAuth());
-            response.Headers.Append("ptaActivityToken", token);
+            response.Headers.Append("pta-session-auth", GetSessionAuth());
+            response.Headers.Append("pta-activity-token", token);
         }
 
         public static void RefreshToken(
@@ -33,8 +26,9 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         {
             var updatedToken = EncryptionUtility.GenerateToken();
             DatabaseUtility.UpdateTrainerActivityToken(id, updatedToken);
-            response.Headers.Append("ptaActivityToken", updatedToken);
+            response.Headers.Append("pta-activity-token", updatedToken);
         }
+
         private static string GetSessionAuth()
         {
             return EncryptionUtility.HashSecret(RequestExtensions.AuthKey);

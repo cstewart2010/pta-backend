@@ -15,6 +15,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public object Index()
         {
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             return new
             {
                 Pokedex = $"{HostUrl}/{Version}/pokedex",

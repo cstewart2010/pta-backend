@@ -22,7 +22,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{pokemonId}")]
         public ActionResult<PokemonModel> GetPokemon(string pokemonId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = GetDocument(pokemonId, Collection, out var notFound);
             if (!(document is PokemonModel pokemon))
             {
@@ -35,7 +38,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("trade")]
         public ActionResult<object> TradePokemon()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Request.VerifyIdentity(gameMasterId))
             {
@@ -84,7 +90,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{pokemonId}/evolve")]
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var trainerId = Request.Query["trainerId"];
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -111,7 +120,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{pokemonId}")]
         public ActionResult<GenericMessage> DeletePokemon(string pokemonId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Request.VerifyIdentity(gameMasterId))
             {

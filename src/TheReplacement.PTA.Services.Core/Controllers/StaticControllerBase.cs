@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using TheReplacement.PTA.Services.Core.Messages;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
+    [EnableCors()]
     public abstract class StaticControllerBase : ControllerBase
     {
         internal  string HostUrl => $"{Request.Scheme}://{Request.Host}{Request.Path}".Trim('/');

@@ -16,14 +16,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public StaticCollectionMessage FindMoves()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(Moves);
         }
 
         [HttpGet("{name}")]
         public ActionResult<MoveModel> FindMove(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = Moves.GetStaticDocument(name);
             if (document != null)
             {
