@@ -16,20 +16,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public StaticCollectionMessage FindOrigins()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return null;
-            }
             return GetStaticCollectionResponse(Origins);
         }
 
         [HttpGet("{name}")]
         public ActionResult<OriginModel> FindOrigin(string name)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var document = Origins.GetStaticDocument(name);
             if (document != null)
             {

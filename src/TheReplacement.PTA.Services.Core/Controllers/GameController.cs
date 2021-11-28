@@ -26,10 +26,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public IEnumerable FindAllGames()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return null;
-            }
             if (Request.Query.TryGetValue("nickname", out var nickname))
             {
                 return DatabaseUtility.FindAllGames(nickname)
@@ -42,10 +38,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{gameId}")]
         public ActionResult<FoundGameMessage> FindGame(string gameId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var document = GetDocument(gameId, Collection, out var notFound);
             if (!(document is GameModel))
             {
@@ -58,10 +50,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{gameId}/find/{trainerId}")]
         public ActionResult<FoundTrainerMessage> FindTrainerInGame(string gameId, string trainerId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel))
             {
@@ -86,10 +74,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("import")]
         public ActionResult<object> ImportGame()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var json = Request.GetJsonFromRequest();
             if (string.IsNullOrEmpty(json))
             {
@@ -107,10 +91,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("new")]
         public ActionResult<CreatedGameMessage> CreateNewGame()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var game = Request.BuildGame();
             if (!DatabaseUtility.TryAddGame(game, out var error))
             {
@@ -135,10 +115,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("{gameId}/new")]
         public ActionResult<FoundTrainerMessage> AddPlayerToGame(string gameId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel))
             {
@@ -168,10 +144,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("{gameMasterId}/wild")]
         public ActionResult<PokemonModel> AddPokemon(string gameMasterId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
@@ -199,10 +171,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/start")]
         public ActionResult<FoundGameMessage> StartGame(string gameId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel game))
             {
@@ -233,10 +201,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/end")]
         public ActionResult EndGame(string gameId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Request.VerifyIdentity(gameMasterId))
             {
@@ -261,10 +225,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/addNpcs")]
         public ActionResult<UpdatedNpcListMessage> AddNPCsToGame(string gameId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var gameMasterId = Request.Query["gameMasterId"];
             var npcIds = GetNpcs(gameMasterId, out var notFound);
             if (npcIds == null)
@@ -290,10 +250,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/removeNpcs")]
         public ActionResult<UpdatedNpcListMessage> RemovesNPCsFromGame(string gameId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var gameMasterId = Request.Query["gameMasterId"];
             var npcIds = GetNpcs(gameMasterId, out var notFound);
             if (npcIds == null)
@@ -319,10 +275,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("reset")]
         public ActionResult<object> ChangeTrainerPassword()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var returnNotFound = true;
             if (returnNotFound)
             {
@@ -350,10 +302,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{gameId}")]
         public ActionResult<object> DeleteGame(string gameId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel game))
             {
@@ -384,10 +332,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{gameId}/export")]
         public ActionResult ExportGame(string gameId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
             {

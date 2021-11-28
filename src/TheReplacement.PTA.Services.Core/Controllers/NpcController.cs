@@ -23,10 +23,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{npcId}")]
         public ActionResult<NpcModel> GetNpcs(string npcId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var npc = DatabaseUtility.FindNpc(npcId);
             if (npc == null)
             {
@@ -40,10 +36,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("new")]
         public ActionResult<NpcModel> CreateNewNpc()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var npc = CreateNpc(out var badResult);
             if (npc == null)
             {
@@ -61,10 +53,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{npcId}")]
         public ActionResult DeleteNpc(string npcId)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             if (!DatabaseUtility.DeleteNpc(npcId))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");

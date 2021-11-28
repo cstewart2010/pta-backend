@@ -26,10 +26,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("key/{name}")]
         public ActionResult<BaseItemModel> FindKeyItem(string name)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var document = KeyItems.GetStaticDocument(name);
             if (document != null)
             {
@@ -42,20 +38,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("medical")]
         public StaticCollectionMessage FindMedicalItems()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return null;
-            }
             return GetStaticCollectionResponse(MedicalItems);
         }
 
         [HttpGet("medical/{name}")]
         public ActionResult<BaseItemModel> FindMedicalItem(string name)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var document = MedicalItems.GetStaticDocument(name);
             if (document != null)
             {
@@ -68,20 +56,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("pokeball")]
         public StaticCollectionMessage FindPokeballs()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return null;
-            }
             return GetStaticCollectionResponse(Pokeballs);
         }
 
         [HttpGet("pokeball/{name}")]
         public ActionResult<BaseItemModel> FindPokeball(string name)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var document = Pokeballs.GetStaticDocument(name);
             if (document != null)
             {
@@ -94,20 +74,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("pokemon")]
         public StaticCollectionMessage FindPokemonItems()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return null;
-            }
             return GetStaticCollectionResponse(PokemonItems);
         }
 
         [HttpGet("pokemon/{name}")]
         public ActionResult<BaseItemModel> FindPokemonItem(string name)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var document = PokemonItems.GetStaticDocument(name);
             if (document != null)
             {
@@ -120,20 +92,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("trainer")]
         public StaticCollectionMessage FindTrainerEquipment()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return null;
-            }
             return GetStaticCollectionResponse(TrainerEquipment);
         }
 
         [HttpGet("trainer/{name}")]
         public ActionResult<BaseItemModel> FindTrainerEquipment(string name)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var document = TrainerEquipment.GetStaticDocument(name);
             if (document != null)
             {
