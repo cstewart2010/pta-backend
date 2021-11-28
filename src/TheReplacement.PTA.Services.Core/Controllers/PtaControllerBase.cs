@@ -9,7 +9,6 @@ using TheReplacement.PTA.Services.Core.Messages;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
-    [EnableCors()]
     public abstract class PtaControllerBase : ControllerBase
     {
         protected abstract MongoCollection Collection { get; }

@@ -16,20 +16,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public StaticCollectionMessage FindPokemon()
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return null;
-            }
             return GetStaticCollectionResponse(BasePokemon);
         }
 
         [HttpGet("{name}")]
         public ActionResult<BasePokemonModel> FindPokemon(string name)
         {
-            if (Request.Method == "OPTIONS")
-            {
-                return Ok();
-            }
             var document = BasePokemon.GetStaticDocument(name);
             if (document != null)
             {

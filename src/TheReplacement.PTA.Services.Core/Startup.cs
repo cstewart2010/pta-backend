@@ -8,6 +8,8 @@ namespace TheReplacement.PTA.Services.Core
 {
     public class Startup
     {
+        private const string PolicyName = "MyPolicy";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -19,6 +21,17 @@ namespace TheReplacement.PTA.Services.Core
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: PolicyName,
+                      builder =>
+                      {
+                          builder.AllowAnyOrigin();
+                          builder.AllowAnyHeader();
+                          builder.AllowAnyMethod();
+                          builder.WithExposedHeaders("pta-activity-token", "pta-session-auth");
+                      });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -29,20 +42,11 @@ namespace TheReplacement.PTA.Services.Core
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Use((context, next) =>
-            {
-                context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-                context.Response.Headers["Access-Control-Allow-Headers"] = "*";
-                context.Response.Headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, DELETE";
-                context.Response.Headers["Access-Control-Expose-Headers"] = "pta-activity-token, pta-session-auth";
-                return next.Invoke();
-            });
-
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
-            app.UseCors();
+            app.UseCors(PolicyName);
 
             app.UseAuthorization();
 
