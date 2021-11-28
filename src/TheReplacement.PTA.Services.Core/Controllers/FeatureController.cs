@@ -19,14 +19,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("general")]
         public StaticCollectionMessage FindGeneralFeatures()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(GeneralFeatures);
         }
 
         [HttpGet("general/{name}")]
         public ActionResult<FeatureModel> FindGeneralFeature(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = GeneralFeatures.GetStaticDocument(name);
             if (document != null)
             {
@@ -39,14 +45,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("legendary")]
         public StaticCollectionMessage FindLegendaryFeatures()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(LegendaryFeatures);
         }
 
         [HttpGet("legendary/{name}")]
         public ActionResult<FeatureModel> FindLegendaryFeature(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = LegendaryFeatures.GetStaticDocument(name);
             if (document != null)
             {
@@ -59,14 +71,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("passives")]
         public StaticCollectionMessage FindPassives()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(Passives);
         }
 
         [HttpGet("passives/{name}")]
         public ActionResult<FeatureModel> FindPassive(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = Passives.GetStaticDocument(name);
             if (document != null)
             {
@@ -79,14 +97,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("skills")]
         public StaticCollectionMessage FindSkills()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(Skills);
         }
 
         [HttpGet("skills/{name}")]
         public ActionResult<FeatureModel> FindSkill(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = Skills.GetStaticDocument(name);
             if (document != null)
             {

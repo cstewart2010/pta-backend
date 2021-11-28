@@ -29,9 +29,20 @@ namespace TheReplacement.PTA.Services.Core
                 app.UseDeveloperExceptionPage();
             }
 
+            app.Use((context, next) =>
+            {
+                context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+                context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+                context.Response.Headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, DELETE";
+                context.Response.Headers["Access-Control-Expose-Headers"] = "pta-activity-token, pta-session-auth";
+                return next.Invoke();
+            });
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 

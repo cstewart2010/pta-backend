@@ -16,14 +16,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public StaticCollectionMessage FindBerries()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(Berries);
         }
 
         [HttpGet("{name}")]
         public ActionResult<BerryModel> FindBerry(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = Berries.GetStaticDocument(name);
             if (document != null)
             {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Interfaces;
@@ -8,6 +9,7 @@ using TheReplacement.PTA.Services.Core.Messages;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
+    [EnableCors()]
     public abstract class PtaControllerBase : ControllerBase
     {
         protected abstract MongoCollection Collection { get; }

@@ -20,14 +20,16 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("key")]
         public StaticCollectionMessage FindKeyItems()
         {
-            Response.UpdateAccessControl();
             return GetStaticCollectionResponse(KeyItems);
         }
 
         [HttpGet("key/{name}")]
         public ActionResult<BaseItemModel> FindKeyItem(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = KeyItems.GetStaticDocument(name);
             if (document != null)
             {
@@ -40,14 +42,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("medical")]
         public StaticCollectionMessage FindMedicalItems()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(MedicalItems);
         }
 
         [HttpGet("medical/{name}")]
         public ActionResult<BaseItemModel> FindMedicalItem(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = MedicalItems.GetStaticDocument(name);
             if (document != null)
             {
@@ -60,14 +68,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("pokeball")]
         public StaticCollectionMessage FindPokeballs()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(Pokeballs);
         }
 
         [HttpGet("pokeball/{name}")]
         public ActionResult<BaseItemModel> FindPokeball(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = Pokeballs.GetStaticDocument(name);
             if (document != null)
             {
@@ -80,14 +94,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("pokemon")]
         public StaticCollectionMessage FindPokemonItems()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(PokemonItems);
         }
 
         [HttpGet("pokemon/{name}")]
         public ActionResult<BaseItemModel> FindPokemonItem(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = PokemonItems.GetStaticDocument(name);
             if (document != null)
             {
@@ -100,14 +120,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("trainer")]
         public StaticCollectionMessage FindTrainerEquipment()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(TrainerEquipment);
         }
 
         [HttpGet("trainer/{name}")]
         public ActionResult<BaseItemModel> FindTrainerEquipment(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = TrainerEquipment.GetStaticDocument(name);
             if (document != null)
             {

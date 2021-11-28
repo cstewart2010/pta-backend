@@ -16,14 +16,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public StaticCollectionMessage FindTrainerClasses()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return null;
+            }
             return GetStaticCollectionResponse(TrainerClasses);
         }
 
         [HttpGet("{name}")]
         public ActionResult<TrainerClassModel> FindTrainerClass(string name)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = TrainerClasses.GetStaticDocument(name);
             if (document != null)
             {

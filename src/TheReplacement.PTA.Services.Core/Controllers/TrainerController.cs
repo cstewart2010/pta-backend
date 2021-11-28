@@ -26,7 +26,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             string trainerId,
             string pokemonId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var document = GetDocument(pokemonId, MongoCollection.Pokemon, out var notFound);
             if (!(document is PokemonModel pokemon))
             {
@@ -43,7 +46,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("{trainerId}")]
         public ActionResult<PokemonModel> AddPokemon(string trainerId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Request.VerifyIdentity(gameMasterId))
             {
@@ -72,7 +78,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("login")]
         public ActionResult<FoundTrainerMessage> Login()
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var (gameId, username, password) = Request.GetTrainerCredentials(out var credentialErrors);
             if (credentialErrors.Any())
             {
@@ -92,7 +101,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{trainerId}/logout")]
         public ActionResult Logout(string trainerId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
@@ -111,7 +123,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{trainerId}/addItems")]
         public ActionResult<FoundTrainerMessage> AddItemsToTrainer(string trainerId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Request.VerifyIdentity(gameMasterId))
             {
@@ -158,7 +173,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{trainerId}/removeItems")]
         public ActionResult<FoundTrainerMessage> RemoveItemsFromTrainer(string trainerId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
@@ -193,7 +211,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{trainerId}")]
         public ActionResult<GenericMessage> DeleteTrainer(string trainerId)
         {
-            Response.UpdateAccessControl();
+            if (Request.Method == "OPTIONS")
+            {
+                return Ok();
+            }
             var gameMasterId = Request.Query["gameMasterId"];
             if (!Request.VerifyIdentity(gameMasterId))
             {
