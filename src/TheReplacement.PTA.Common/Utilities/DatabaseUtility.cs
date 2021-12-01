@@ -154,7 +154,7 @@ namespace TheReplacement.PTA.Common.Utilities
         public static IEnumerable<GameModel> FindAllGames(string nickname)
         {
             return MongoCollectionHelper.Games
-                .Find(game => game.Nickname.ToLower() == nickname.ToLower())
+                .Find(game => game.Nickname.ToLower().Contains(nickname.ToLower()))
                 .ToEnumerable();
         }
 
