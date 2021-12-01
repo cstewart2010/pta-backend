@@ -22,6 +22,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{pokemonId}")]
         public ActionResult<PokemonModel> GetPokemon(string pokemonId)
         {
+            if (string.IsNullOrEmpty(pokemonId))
+            {
+                return BadRequest(nameof(pokemonId));
+            }
+
             var document = GetDocument(pokemonId, Collection, out var notFound);
             if (!(document is PokemonModel pokemon))
             {
@@ -34,7 +39,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("trade")]
         public ActionResult<object> TradePokemon()
         {
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
+
             if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
@@ -82,7 +91,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{pokemonId}/evolve")]
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
-            var trainerId = Request.Query["trainerId"];
+            if (!Request.Query.TryGetValue("trainerId", out var trainerId))
+            {
+                return BadRequest(nameof(trainerId));
+            }
             if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
@@ -108,7 +120,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{pokemonId}")]
         public ActionResult<GenericMessage> DeletePokemon(string pokemonId)
         {
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
             if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
@@ -210,14 +225,23 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         private (PokemonModel LeftPokemon, PokemonModel RightPokemon) GetTradePokemon(out ActionResult notFound)
         {
-            var leftPokemonId = Request.Query["leftPokemonId"];
+            if (!Request.Query.TryGetValue("leftPokemonId", out var leftPokemonId))
+            {
+                notFound = BadRequest(nameof(leftPokemonId));
+                return default;
+            }
             var leftDocument = GetDocument(leftPokemonId, Collection, out notFound);
             if (!(leftDocument is PokemonModel leftPokemon))
             {
                 return default;
             }
 
-            var rightPokemonId = Request.Query["rightPokemonId"];
+            if (!Request.Query.TryGetValue("rightPokemonId", out var rightPokemonId))
+            {
+                notFound = BadRequest(nameof(rightPokemonId));
+                return default;
+            }
+
             var rightDocument = GetDocument(rightPokemonId, Collection, out notFound);
             if (!(rightDocument is PokemonModel rightPokemon))
             {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Interfaces;
 
 namespace TheReplacement.PTA.Services.Core.Extensions
@@ -12,6 +11,11 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             this IEnumerable<TDocument> source,
             string name) where TDocument : INamed
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                return default;
+            }
+
             if (int.TryParse(name, out var index))
             {
                 return GetStaticDocument(source, index);

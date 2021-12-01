@@ -42,7 +42,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("{trainerId}")]
         public ActionResult<PokemonModel> AddPokemon(string trainerId)
         {
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
+
             if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
@@ -107,7 +111,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{trainerId}/addItems")]
         public ActionResult<FoundTrainerMessage> AddItemsToTrainer(string trainerId)
         {
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
             if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
@@ -187,7 +194,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{trainerId}")]
         public ActionResult<GenericMessage> DeleteTrainer(string trainerId)
         {
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
+
             if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
@@ -225,15 +236,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemName, StringComparison.CurrentCultureIgnoreCase));
-            if (item?.Amount < itemReduction)
+            if ((item?.Amount) >= itemReduction)
             {
-                return;
+                itemList = trainer.Items
+                    .Select(item => UpdateItemWithReduction(item, itemName, itemReduction))
+                    .Where(item => item.Amount > 0)
+                    .ToList();
             }
-
-            itemList = trainer.Items
-                .Select(item => UpdateItemWithReduction(item, itemName, itemReduction))
-                .Where(item => item.Amount > 0)
-                .ToList();
         }
 
         private static ItemModel UpdateItemWithReduction(
@@ -298,7 +307,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return item;
         }
 
-        private (int UpdatedAmount, object Error) GetCleanData(string itemName)
+        private (int UpdatedAmount, AbstractMessage Error) GetCleanData(string itemName)
         {
             var change = Request.Query[itemName];
             if (!int.TryParse(change, out var itemChange))
@@ -306,11 +315,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return
                 (
                     0,
-                    new
-                    {
-                        message = "No change listed",
-                        item = itemName
-                    }
+                    new GenericMessage($"No ${itemName} change listed")
                 );
             }
             if (itemChange < 1)
@@ -318,11 +323,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return
                 (
                     0,
-                    new
-                    {
-                        message = "Should not change item count less than 1",
-                        item = itemName
-                    }
+                    new GenericMessage($"Should not change ${itemName} count less than 1")
                 );
             }
             else if (itemChange > 100)

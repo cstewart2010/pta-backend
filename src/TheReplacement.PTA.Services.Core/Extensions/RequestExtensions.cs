@@ -22,6 +22,8 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
         private static readonly IEnumerable<string> MandatoryTrainerKeys = new[]
         {
+            "class",
+            "origin",
             "attack",
             "defense",
             "specialAttack",
@@ -134,6 +136,78 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return trainer;
         }
 
+        public static bool TryCompleteTrainer(
+            this HttpRequest request,
+            string trainerId,
+            out AbstractMessage error)
+        {
+            error = null;
+            var fails = MandatoryTrainerKeys.Where(key => {
+                if (!request.Query.ContainsKey(key))
+                {
+                    return false;
+                }
+
+                if (int.TryParse(request.Query[key], out var result))
+                {
+                    return result > 0 && result < 10;
+                }
+
+                return true;
+            });
+            if (fails.Any())
+            {
+                error = new InvalidQueryStringMessage
+                {
+                    MissingParameters = fails
+                };
+                return false;
+            }
+
+            var invalids = new List<string>();
+            IEnumerable<string> feats;
+            var trainerClass = StaticDocumentUtility.GetStaticDocument<TrainerClassModel>(StaticDocumentType.TrainerClasses, request.Query["class"]);
+            if (DatabaseUtility.FindIncompleteTrainerById(trainerId) == null)
+            {
+                invalids.Add("trainerId");
+            }
+            if (StaticDocumentUtility.GetStaticDocument<OriginModel>(StaticDocumentType.Origins, request.Query["origin"]) == null)
+            {
+                invalids.Add("origin");
+            }
+            if (trainerClass == null)
+            {
+                invalids.Add("class");
+            }
+
+            if (invalids.Any())
+            {
+                error = new InvalidQueryStringMessage
+                {
+                    InvalidParameters = invalids
+                };
+                return false;
+            }
+
+            feats = trainerClass.Feats.Where(feat => feat.LevelLearned == 1).Select(feat => feat.Name);
+            var stats = GetStatsFromRequest(request.Query, false);
+            var result = DatabaseUtility.CompleteTrainer
+            (
+                trainerId,
+                request.Query["origin"],
+                request.Query["class"],
+                feats,
+                stats
+            );
+
+            if (!result)
+            {
+                error = new GenericMessage($"Failed to finish trainer {trainerId}");
+            }
+
+            return result;
+        }
+
         public static PokemonModel BuildPokemon(
             this HttpRequest request,
             string trainerId,
@@ -187,27 +261,30 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
         public static IEnumerable<string> GetNpcIds(
             this HttpRequest request,
-            out object error)
+            out AbstractMessage error)
         {
             error = null;
             var npcIds = request.Query["npcIds"].ToString().Split(',');
             if (npcIds.Any())
             {
-                npcIds = DatabaseUtility.FindNpcs(npcIds).Select(npc => npc.NPCId).ToArray();
+                var foundNpcs = DatabaseUtility.FindNpcs(npcIds).Select(npc => npc.NPCId).ToArray();
                 if (!npcIds.Any())
                 {
-                    error = npcIds;
+                    error = new InvalidQueryStringMessage()
+                    {
+                        InvalidParameters = new[] { "npcIds" }
+                    };
                 }
-            }
-            else
-            {
-                error = new
-                {
-                    message = "No npc Ids provided"
-                };
+
+                return foundNpcs;
             }
 
-            return npcIds;
+            error = new InvalidQueryStringMessage()
+            {
+                MissingParameters = new[] { "npcIds" }
+            };
+
+            return Array.Empty<string>();
         }
 
         private static bool ValidateMandatoryPokemonKeys(
@@ -224,7 +301,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
         private static PokemonModel BuildDefaultPokemon(
             HttpRequest request,
-            out GenericMessage error)
+            out AbstractMessage error)
         {
             error = null;
             if (!Enum.TryParse(request.Query["gender"], true, out Gender gender))
@@ -271,20 +348,6 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             bool isGM,
             out AbstractMessage error)
         {
-            if (!isGM)
-            {
-                var fails = MandatoryTrainerKeys.Where(key =>
-                    !(request.Query.ContainsKey(key) && int.TryParse(request.Query[key], out var result) && result > 0 && result < 10));
-                if (fails.Any())
-                {
-                    error = new InvalidQueryStringMessage
-                    {
-                        MissingParameters = fails
-                    };
-                    return null;
-                }
-            }
-
             var username = request.Query[userKey].ToString();
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -300,15 +363,15 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             }
 
             error = null;
-            var stats = GetStatsFromRequest(request.Query, isGM);
+            var stats = GetStatsFromRequest(request.Query, true);
             var trainer = CreateTrainer(gameId, username, password, stats);
             trainer.IsGM = isGM;
             return trainer;
         }
 
-        private static StatsModel GetStatsFromRequest(IQueryCollection query, bool isGM)
+        private static StatsModel GetStatsFromRequest(IQueryCollection query, bool isStarting)
         {
-            if (isGM)
+            if (!isStarting)
             {
                 return new StatsModel
                 {

@@ -23,6 +23,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{npcId}")]
         public ActionResult<NpcModel> GetNpcs(string npcId)
         {
+            if (string.IsNullOrEmpty(npcId))
+            {
+                return BadRequest(nameof(npcId));
+            }
+
             var npc = DatabaseUtility.FindNpc(npcId);
             if (npc == null)
             {
@@ -53,6 +58,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{npcId}")]
         public ActionResult DeleteNpc(string npcId)
         {
+            if (string.IsNullOrEmpty(npcId))
+            {
+                return BadRequest(nameof(npcId));
+            }
+
             if (!DatabaseUtility.DeleteNpc(npcId))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
