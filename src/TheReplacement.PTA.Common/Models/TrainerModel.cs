@@ -60,6 +60,8 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         public bool IsGM { get; set; }
 
+        public bool IsComplete { get; set; }
+
         /// <summary>
         /// Trainer's achievements
         /// </summary>

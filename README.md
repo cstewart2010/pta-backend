@@ -28,6 +28,7 @@ PTA BackEnd
   * [Add New Trainer to Game](#add-new-trainer-to-game)
   * [Create Wild Pokemon](#create-wild-pokemon)
   * [Import Game](#import-game)
+  * [Add Trainer Stats](#add-trainer-stats)
   * [Start Game](#start-game)
   * [End Game](#end-game)
   * [Add Npcs to Game](#add-npcs-to-game)
@@ -277,6 +278,7 @@ Response Type - IEnumerable{GameModel}
 - [Add New Trainer to Game](#add-new-trainer-to-game)
 - [Create Wild Pokemon](#create-wild-pokemon)
 - [Import Game](#import-game)
+- [Add Trainer Stats](#add-trainer-stats)
 - [Start Game](#start-game)
 - [End Game](#end-game)
 - [Add Npcs to Game](#add-npcs-to-game)
@@ -321,7 +323,7 @@ Grants a ptaSessionAuth token
 
 ## Add New Trainer to Game
 Endpoint - {gameId}/new  
-Method - PUT  
+Method - POST  
 Response Type - TrainerModel  
 Grants a ptaSessionAuth token  
 [Back to Game](#game)
@@ -330,11 +332,8 @@ Grants a ptaSessionAuth token
 |---------|----|--------------|--------|
 |trainerName|string|Trainer's username|required|
 |password|string|Trainer's password|required|
-|attack|int|The trainer's attack stat|required, between 1 and 10|
-|defense|int|The trainer's defense stat|required, between 1 and 10|
-|specialAttack|int|The trainer's special attack stat|required, between 1 and 10|
-|specialDefense|int|The trainer's special defense stat|required, between 1 and 10|
-|speed|int|The trainer's speed stat|required, between 1 and 10|
+|gameSessionPassword|string|the password for the game session|required|
+
 
 ---
 
@@ -361,6 +360,25 @@ Requires a ptaSessionAuth token in header
 |gender|string|A pokemon's gender|required|
 |status|string|A pokemon's status|required|
 |nickname|string|The pokemon's nickname|optional|
+
+---
+
+## Add trainer Stats
+Endpoint - {trainerId}/addStats  
+Method - PUT  
+Response Type - TrainerModel  
+Requires a ptaSessionAuth token in header  
+[Back to Game](#game)
+
+|Parameter|Type|Expected Value|Required|
+|---------|----|--------------|--------|
+|class|int|The trainer's class|required|
+|origin|int|The trainer's origin|required|
+|attack|int|The trainer's attack stat|required, between 1 and 10|
+|defense|int|The trainer's defense stat|required, between 1 and 10|
+|specialAttack|int|The trainer's special attack stat|required, between 1 and 10|
+|specialDefense|int|The trainer's special defense stat|required, between 1 and 10|
+|speed|int|The trainer's speed stat|required, between 1 and 10|
 
 ---
 

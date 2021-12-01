@@ -21,6 +21,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             Origin = trainer.Origin;
             TrainerClasses = trainer.TrainerClasses;
             TrainerStats = trainer.TrainerStats;
+            IsComplete = trainer.IsComplete;
         }
 
         public string TrainerId { get; }
@@ -34,5 +35,6 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public string Origin { get; }
         public IEnumerable<string> TrainerClasses { get; }
         public StatsModel TrainerStats { get; }
+        public bool IsComplete { get; }
     }
 }

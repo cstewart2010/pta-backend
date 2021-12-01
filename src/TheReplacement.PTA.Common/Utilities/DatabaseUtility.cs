@@ -197,6 +197,27 @@ namespace TheReplacement.PTA.Common.Utilities
             return npc;
         }
 
+        public static bool CompleteTrainer(string trainerId, string origin, string trainerClass, IEnumerable<string> feats, StatsModel stats)
+        {
+            var updates = Builders<TrainerModel>.Update.Combine(new[]
+            {
+                Builders<TrainerModel>.Update.Set("Origin", origin),
+                Builders<TrainerModel>.Update.Set("TrainerClasses", new[] { trainerClass }),
+                Builders<TrainerModel>.Update.Set("Feats", feats),
+                Builders<TrainerModel>.Update.Set("TrainerStats", stats),
+                Builders<TrainerModel>.Update.Set("IsComplete", true)
+            });
+
+            return TryUpdateDocument
+            (
+                Trainer,
+                MongoCollectionHelper.Trainers,
+                trainer => trainer.TrainerId == trainerId,
+                updates,
+                $"Completed trainer {trainerId} new character creation"
+            );
+        }
+
 
         /// <summary>
         /// Returns all npcs matching the npc ids
@@ -256,6 +277,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="id">The trainer id</param>
         public static TrainerModel FindTrainerById(string id)
         {
+            return FindTrainerById(id, trainer => trainer.TrainerId == id);
             var trainer = MongoCollectionHelper
                 .Trainers
                 .Find(trainer => trainer.TrainerId == id)
@@ -269,6 +291,11 @@ namespace TheReplacement.PTA.Common.Utilities
             return trainer;
         }
 
+        public static TrainerModel FindIncompleteTrainerById(string id)
+        {
+            return FindTrainerById(id, trainer => trainer.TrainerId == id && !trainer.IsComplete);
+        }
+
         /// <summary>
         /// Returns all trainers matching the game session id
         /// </summary>
@@ -277,7 +304,7 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             var trainers = MongoCollectionHelper
                 .Trainers
-                .Find(trainer => trainer.GameId == gameId);
+                .Find(trainer => trainer.GameId == gameId && trainer.IsComplete);
 
             if (trainers.Any())
             {
@@ -573,6 +600,23 @@ namespace TheReplacement.PTA.Common.Utilities
                 GetTrainerPasswordUpdate(password),
                 $"Updated password for trainer {trainerId}"
             );
+        }
+
+        private static TrainerModel FindTrainerById(
+            string id,
+            Expression<Func<TrainerModel, bool>> searchPattern)
+        {
+            var trainer = MongoCollectionHelper
+                .Trainers
+                .Find(searchPattern)
+                .SingleOrDefault(); ;
+
+            if (trainer != null)
+            {
+                LoggerUtility.Info(Trainer, $"Retrieved trainer {id}");
+            }
+
+            return trainer;
         }
 
         private static UpdateDefinition<TrainerModel> GetTrainerPasswordUpdate(string password)

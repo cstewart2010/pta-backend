@@ -13,7 +13,8 @@
       "IsOnline",
       "Items",
       "IsGM",
-      "Origin"
+      "Origin",
+      "IsComplete"
     ],
     "additionalProperties": false,
     "properties": {
@@ -119,6 +120,9 @@
         }
       },
       "IsGM": {
+        "bsonType": "bool"
+      },
+      "IsComplete": {
         "bsonType": "bool"
       },
       "Origin": {

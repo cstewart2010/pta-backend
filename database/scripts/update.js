@@ -365,7 +365,8 @@ const updatedValidators = {
         'IsOnline',
         'Items',
         'IsGM',
-        'Origin'
+        'Origin',
+        'IsComplete'
       ],
       additionalProperties: false,
       properties: {
@@ -472,6 +473,9 @@ const updatedValidators = {
           }
         },
         IsGM: {
+          bsonType: 'bool'
+        },
+        IsComplete: {
           bsonType: 'bool'
         },
         Origin: {

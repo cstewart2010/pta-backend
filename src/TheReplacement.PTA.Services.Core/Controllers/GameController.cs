@@ -38,6 +38,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{gameId}")]
         public ActionResult<FoundGameMessage> FindGame(string gameId)
         {
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
             var document = GetDocument(gameId, Collection, out var notFound);
             if (!(document is GameModel))
             {
@@ -50,6 +55,16 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{gameId}/find/{trainerId}")]
         public ActionResult<FoundTrainerMessage> FindTrainerInGame(string gameId, string trainerId)
         {
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
+            if (string.IsNullOrEmpty(trainerId))
+            {
+                return BadRequest(nameof(trainerId));
+            }
+
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel))
             {
@@ -115,6 +130,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("{gameId}/new")]
         public ActionResult<FoundTrainerMessage> AddPlayerToGame(string gameId)
         {
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel))
             {
@@ -144,6 +164,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPost("{gameMasterId}/wild")]
         public ActionResult<PokemonModel> AddPokemon(string gameMasterId)
         {
+            if (string.IsNullOrEmpty(gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
+
             if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
@@ -168,9 +193,31 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(pokemon);
         }
 
+        [HttpPut("{trainerId}/addStats")]
+        public ActionResult<FoundTrainerMessage> AddTrainerStats(string trainerId)
+        {
+            if (!Request.VerifyIdentity(trainerId))
+            {
+                return Unauthorized();
+            }
+
+            if (!Request.TryCompleteTrainer(trainerId, out var error))
+            {
+                return BadRequest(error);
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            return ReturnSuccessfully(new FoundTrainerMessage(trainer));
+        }
+
         [HttpPut("{gameId}/start")]
         public ActionResult<FoundGameMessage> StartGame(string gameId)
         {
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel game))
             {
@@ -201,7 +248,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/end")]
         public ActionResult EndGame(string gameId)
         {
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
             if (!Request.VerifyIdentity(gameMasterId))
             {
                 return Unauthorized();
@@ -225,7 +280,16 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/addNpcs")]
         public ActionResult<UpdatedNpcListMessage> AddNPCsToGame(string gameId)
         {
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
+
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
             var npcIds = GetNpcs(gameMasterId, out var notFound);
             if (npcIds == null)
             {
@@ -250,7 +314,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/removeNpcs")]
         public ActionResult<UpdatedNpcListMessage> RemovesNPCsFromGame(string gameId)
         {
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
             var npcIds = GetNpcs(gameMasterId, out var notFound);
             if (npcIds == null)
             {
@@ -281,11 +353,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
-            var trainerId = Request.Query["trainerId"];
+            if (!Request.Query.TryGetValue("trainerId", out var trainerId))
+            {
+                return BadRequest(nameof(trainerId));
+            }
+
+            if (!Request.Query.TryGetValue("password", out var password))
+            {
+                return BadRequest(nameof(password));
+            }
+
             var wasUpdateSucessful = DatabaseUtility.UpdateTrainerPassword
             (
                 trainerId,
-                Request.Query["password"]
+                password
             );
 
             if (!wasUpdateSucessful)
@@ -302,21 +383,32 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{gameId}")]
         public ActionResult<object> DeleteGame(string gameId)
         {
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel game))
             {
                 return notFound;
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
             var trainerDocument = GetDocument(gameMasterId, MongoCollection.Trainers, out notFound);
             if (!(trainerDocument is TrainerModel trainer && trainer.IsGM))
             {
                 return notFound;
             }
 
-            var gamePassword = Request.Query["gameSessionPassword"];
-            if (!IsGameAuthenticated(gamePassword, game, out var authError))
+            if (!Request.Query.TryGetValue("gameSessionPassword", out var gameSessionPassword))
+            {
+                return BadRequest(nameof(gameSessionPassword));
+            }
+            if (!IsGameAuthenticated(gameSessionPassword, game, out var authError))
             {
                 return authError;
             }
@@ -332,6 +424,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpDelete("{gameId}/export")]
         public ActionResult ExportGame(string gameId)
         {
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
             {
@@ -339,7 +436,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(gameId);
             }
 
-            var gameMasterId = Request.Query["gameMasterId"];
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (gameMaster?.IsGM != true)
             {
@@ -347,8 +447,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(gameMasterId);
             }
 
-            var gamePassword = Request.Query["gameSessionPassword"];
-            if (!EncryptionUtility.VerifySecret(gamePassword, game.PasswordHash))
+            if (!Request.Query.TryGetValue("gameSessionPassword", out var gameSessionPassword))
+            {
+                return BadRequest(nameof(gameSessionPassword));
+            }
+            if (!EncryptionUtility.VerifySecret(gameSessionPassword, game.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new UnauthorizedMessage(gameId));
