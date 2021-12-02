@@ -332,7 +332,6 @@ Grants a ptaSessionAuth token
 |---------|----|--------------|--------|
 |trainerName|string|Trainer's username|required|
 |password|string|Trainer's password|required|
-|gameSessionPassword|string|the password for the game session|required|
 
 
 ---

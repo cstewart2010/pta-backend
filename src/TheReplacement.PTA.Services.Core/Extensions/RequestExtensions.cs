@@ -363,7 +363,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             }
 
             error = null;
-            var stats = GetStatsFromRequest(request.Query, true);
+            var stats = GetStatsFromRequest(request.Query, false);
             var trainer = CreateTrainer(gameId, username, password, stats);
             trainer.IsGM = isGM;
             return trainer;
