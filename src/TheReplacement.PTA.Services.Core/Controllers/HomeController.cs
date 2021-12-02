@@ -17,6 +17,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             return new
             {
+                Version,
                 Pokedex = $"{HostUrl}/{Version}/pokedex",
                 Berrydex = $"{HostUrl}/{Version}/berrydex",
                 Featuredex = new[]
