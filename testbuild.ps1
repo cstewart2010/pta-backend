@@ -23,7 +23,7 @@ Set-Location -Path $repository
 
 # build
 mongosh $env:MongoDBConnectionString -f database\scripts\update.js
-dotnet build src/PTABackend.sln
+dotnet build src/PTABackend.sln --configuration Release -p:Version="0.1.$env:BUILD_NUMBER.$env:BUILD_NUMBER"
 $proc = Start-Process -FilePath ".\src\MongoDbImportTool\bin\Debug\netcoreapp3.1\MongoDbImportTool.exe" -NoNewWindow -PassThru -Wait
 if ($proc.ExitCode -ne 0){
     return 1
@@ -43,3 +43,5 @@ dotnet test .\src\PTABackEnd.sln --logger:"trx;LogFileName=C:\Users\zachagrey\.j
 # postbuild
 mongosh $env:MongoDBConnectionString -f .\database\scripts\catalog_logs.js
 Set-Location -Path $currentDirectory
+Compress-Archive -Path .\database\scripts -DestinationPath .\InstallTools.zip
+Compress-Archive -Path .\src\TheReplacement.PTA.Services.Core\bin\Release -DestinationPath .\PTA_Backend.zip

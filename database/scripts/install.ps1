@@ -1,3 +1,24 @@
+# check environment
+if (!$env:MongoDBConnectionString){
+    throw "Missing MongoDBConnectionString Environment Variable"
+}
+
+if (!$env:MongoUsername){
+    throw "Missing MongoUsername Environment Variable"
+}
+
+if (!$env:MongoPassword){
+    throw "Missing MongoPassword Environment Variable"
+}
+
+if (!$env:Database){
+    throw "Missing Database Environment Variable"
+}
+
+if (!$env:CookieKey){
+    throw "Missing CookieKey Environment Variable"
+}
+
 Write-Host Running install.ps1 to install any missing tools
 $isNodejsInstall = $null -ne (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object { $_.DisplayName -ne $null -and $_.DisplayName -eq "Node.js" })
 if (!$isNodejsInstall){
@@ -18,7 +39,6 @@ if (!$isMongoShellInstall){
 }
 
 Write-Host All tools installed
-
 if ($env:MongoDBConnectionString){
     Write-Host Running mongo update script
     $CurrentDirectory = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
