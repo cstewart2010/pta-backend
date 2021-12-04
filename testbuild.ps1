@@ -43,5 +43,9 @@ dotnet test .\src\PTABackEnd.sln --logger:"trx;LogFileName=C:\Users\zachagrey\.j
 # postbuild
 mongosh $env:MongoDBConnectionString -f .\database\scripts\catalog_logs.js
 Set-Location -Path $currentDirectory
-Compress-Archive -Path .\database\scripts -DestinationPath .\InstallTools.zip
-Compress-Archive -Path .\src\TheReplacement.PTA.Services.Core\bin\Release -DestinationPath .\PTA_Backend.zip
+if ($env:BUILD_NUMBER)
+{
+    New-Item -ItemType Directory -Force -Path .\$env:BUILD_NUMBER | Out-Null
+    Compress-Archive -Path .\database\scripts\* -DestinationPath .\$env:BUILD_NUMBER\InstallTools.zip -Update
+    Compress-Archive -Path .\src\TheReplacement.PTA.Services.Core\bin\Release\**\* -DestinationPath .\$env:BUILD_NUMBER\PTA_Backend.zip -Update
+}
