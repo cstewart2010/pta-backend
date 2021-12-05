@@ -48,4 +48,5 @@ if ($env:BUILD_NUMBER)
     New-Item -ItemType Directory -Force -Path .\$env:BUILD_NUMBER | Out-Null
     Compress-Archive -Path .\database\scripts\* -DestinationPath .\$env:BUILD_NUMBER\InstallTools.zip -Update
     Compress-Archive -Path .\src\TheReplacement.PTA.Services.Core\bin\Release\**\* -DestinationPath .\$env:BUILD_NUMBER\PTA_Backend.zip -Update
+    Compress-Archive -Path .\src\MongoDbImportTool\bin\Release\**\* -DestinationPath .\$env:BUILD_NUMBER\ImportTool.zip -Update
 }
