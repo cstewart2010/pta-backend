@@ -17,3 +17,6 @@ dotnet publish -c Release -o C:\PtaApi
 # start iis
 Write-Host "Restarting IIS"
 net start W3SVC
+
+$response = Invoke-WebRequest -Uri http://localhost/api/v1/pokedex/florges -Method Get
+$response.Content | convertfrom-json | convertto-json -depth 100

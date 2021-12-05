@@ -1,14 +1,8 @@
 # check environment
 if (!$env:MongoDBConnectionString){
-    throw "Missing MongoDBConnectionString Environment Variable"
-}
-
-if (!$env:MongoUsername){
-    throw "Missing MongoUsername Environment Variable"
-}
-
-if (!$env:MongoPassword){
-    throw "Missing MongoPassword Environment Variable"
+    Write-Warning "MongoDBConnectionString has not been set."
+    Write-Host "Setting MongoDBConnectionString environment variable to mongodb://localhost:27017"
+    [System.Environment]::SetEnvironmentVariable("MongoDBConnectionString", "mongodb://localhost:27017")
 }
 
 if (!$env:Database){
@@ -38,6 +32,15 @@ if (!$isMongoShellInstall){
     Write-Host MongoDB Shell installed
 }
 
+$isMongoDBInstall = $null -ne (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object { $_.DisplayName -ne $null -and $_.DisplayName.Contains("MongoDB 5") })
+if (!$isMongoDBInstall){
+    Write-Host Installing MongoDB
+    Invoke-WebRequest -uri https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.4-signed.msi -OutFile mongodb.msi
+    Start-Process -FilePath "MsiExec.exe" -ArgumentList /i,mongodb.msi,/qb -NoNewWindow -Wait
+    Remove-Item -Path mongoshellinstall.msi
+    Write-Host MongoDB Shell installed
+}
+
 Write-Host All tools installed
 if ($env:MongoDBConnectionString){
     Write-Host Running mongo update script
@@ -52,3 +55,4 @@ else {
 }
 
 Write-Host Install script is complete
+Read-Host
