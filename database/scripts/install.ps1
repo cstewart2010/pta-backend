@@ -1,12 +1,14 @@
 # check environment
-if (!$env:MongoDBConnectionString){
-    Write-Warning "MongoDBConnectionString has not been set."
-    Write-Host "Setting MongoDBConnectionString environment variable to mongodb://localhost:27017"
-    [System.Environment]::SetEnvironmentVariable("MongoDBConnectionString", "mongodb://localhost:27017")
+if (!$env:Database){
+    Write-Warning "Database has not been set."
+    Write-Host "Setting Database environment variable to PTA"
+    [System.Environment]::SetEnvironmentVariable("Database", "PTA")
 }
 
-if (!$env:Database){
-    throw "Missing Database Environment Variable"
+if (!$env:MongoDBConnectionString){
+    Write-Warning "MongoDBConnectionString has not been set."
+    Write-Host "Setting MongoDBConnectionString environment variable to mongodb://localhost:27017/$Database"
+    [System.Environment]::SetEnvironmentVariable("MongoDBConnectionString", "mongodb://localhost:27017/$Database")
 }
 
 if (!$env:CookieKey){
