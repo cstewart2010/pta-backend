@@ -8,7 +8,7 @@ Function Invoke-MsiExecInstall {
     
     $filename = "$([System.Guid]::NewGuid()).msi"
     Invoke-WebRequest -uri $Uri -OutFile  $filename
-    Start-Process -FilePath "MsiExec.exe" -ArgumentList /i,$filename,$InstallArguments -NoNewWindow -Wait
+    Start-Process -FilePath "MsiExec.exe" -ArgumentList "/i $filename $InstallArguments" -NoNewWindow -Wait
     Remove-Item -Path $filename
 }
 
@@ -32,7 +32,7 @@ Function Update-EnvironmentVariable {
 
 Function Update-Hashkey {
     Write-Host "Updating Environment Variables"
-    if (![System.Environment]::SetEnvironmentVariable("CookieKey", "Machine")){
+    if (![System.Environment]::GetEnvironmentVariable("CookieKey", "Machine")){
         Write-Warning "Missing Hashkey Environment Variable"
         while (!$key){
             $key = Read-Host -Prompt "Enter a Hashkey"
@@ -67,7 +67,7 @@ if (!$isNodejsInstall){
 $isMongoShellInstall = $null -ne (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object { $_.DisplayName -ne $null -and $_.DisplayName -eq "MongoDB Shell" })
 if (!$isMongoShellInstall){
     Write-Host Installing MongoDB Shell
-    Invoke-MsiExecInstall -Uri https://downloads.mongodb.com/compass/mongosh-1.1.2-x64.msi -InstallArguments /qn,/norestart
+    Invoke-MsiExecInstall -Uri https://downloads.mongodb.com/compass/mongosh-1.1.2-x64.msi -InstallArguments "/qn /norestart"
     Write-Host MongoDB Shell installed
 }
 
