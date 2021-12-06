@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson;
 using System.Collections.Generic;
-using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Interfaces;
 
 namespace TheReplacement.PTA.Common.Models

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
@@ -11,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/movedex")]
     public class MovesController : StaticControllerBase
     {
-        private static readonly IEnumerable<MoveModel> Moves = StaticDocumentUtility.GetStaticDocuments<MoveModel>(StaticDocumentType.Moves);
+        private static readonly IEnumerable<MoveModel> Moves = DexUtility.GetStaticDocuments<MoveModel>(DexType.Moves);
 
         [HttpGet]
         public StaticCollectionMessage FindMoves()

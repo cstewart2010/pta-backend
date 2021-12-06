@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
@@ -11,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/berrydex")]
     public class BerryController : StaticControllerBase
     {
-        private static readonly IEnumerable<BerryModel> Berries = StaticDocumentUtility.GetStaticDocuments<BerryModel>(StaticDocumentType.Berries);
+        private static readonly IEnumerable<BerryModel> Berries = DexUtility.GetStaticDocuments<BerryModel>(DexType.Berries);
 
         [HttpGet]
         public StaticCollectionMessage FindBerries()

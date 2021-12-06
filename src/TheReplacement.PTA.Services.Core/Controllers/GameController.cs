@@ -7,8 +7,6 @@ using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 using System.Collections;
-using System;
-using Microsoft.AspNetCore.Cors;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {

@@ -166,12 +166,12 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
             var invalids = new List<string>();
             IEnumerable<string> feats;
-            var trainerClass = StaticDocumentUtility.GetStaticDocument<TrainerClassModel>(StaticDocumentType.TrainerClasses, request.Query["class"]);
+            var trainerClass = DexUtility.GetStaticDocument<TrainerClassModel>(DexType.TrainerClasses, request.Query["class"]);
             if (DatabaseUtility.FindIncompleteTrainerById(trainerId) == null)
             {
                 invalids.Add("trainerId");
             }
-            if (StaticDocumentUtility.GetStaticDocument<OriginModel>(StaticDocumentType.Origins, request.Query["origin"]) == null)
+            if (DexUtility.GetStaticDocument<OriginModel>(DexType.Origins, request.Query["origin"]) == null)
             {
                 invalids.Add("origin");
             }
@@ -322,7 +322,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 return null;
             }
 
-            var pokemon = StaticDocumentUtility.GetNewPokemon
+            var pokemon = DexUtility.GetNewPokemon
             (
                 request.Query["pokemon"],
                 nature,

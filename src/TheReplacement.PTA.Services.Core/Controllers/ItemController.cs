@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
@@ -11,11 +12,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/itemdex")]
     public class ItemController : StaticControllerBase
     {
-        private static readonly IEnumerable<BaseItemModel> KeyItems = StaticDocumentUtility.GetStaticDocuments<BaseItemModel>(StaticDocumentType.KeyItems);
-        private static readonly IEnumerable<BaseItemModel> MedicalItems = StaticDocumentUtility.GetStaticDocuments<BaseItemModel>(StaticDocumentType.MedicalItems);
-        private static readonly IEnumerable<BaseItemModel> Pokeballs = StaticDocumentUtility.GetStaticDocuments<BaseItemModel>(StaticDocumentType.Pokeballs);
-        private static readonly IEnumerable<BaseItemModel> PokemonItems = StaticDocumentUtility.GetStaticDocuments<BaseItemModel>(StaticDocumentType.PokemonItems);
-        private static readonly IEnumerable<BaseItemModel> TrainerEquipment = StaticDocumentUtility.GetStaticDocuments<BaseItemModel>(StaticDocumentType.TrainerEquipment);
+        private static readonly IEnumerable<BaseItemModel> KeyItems = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.KeyItems);
+        private static readonly IEnumerable<BaseItemModel> MedicalItems = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.MedicalItems);
+        private static readonly IEnumerable<BaseItemModel> Pokeballs = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.Pokeballs);
+        private static readonly IEnumerable<BaseItemModel> PokemonItems = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.PokemonItems);
+        private static readonly IEnumerable<BaseItemModel> TrainerEquipment = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.TrainerEquipment);
 
         [HttpGet("key")]
         public StaticCollectionMessage FindKeyItems()

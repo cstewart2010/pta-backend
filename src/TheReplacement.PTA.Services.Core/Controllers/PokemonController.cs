@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Common.Models;
-using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 
@@ -317,7 +317,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return null;
             }
 
-            var evolvedForm = StaticDocumentUtility.GetEvolved(currentForm, keptMoves, Request.Query["nextForm"], newMoves);
+            var evolvedForm = DexUtility.GetEvolved(currentForm, keptMoves, Request.Query["nextForm"], newMoves);
             if (evolvedForm == null)
             {
                 badRequest = BadRequest(new GenericMessage($"Could not evolve {currentForm.Nickname} to {evolvedFormName}"));

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
@@ -11,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/classdex")]
     public class TrainerClassController : StaticControllerBase
     {
-        private static readonly IEnumerable<TrainerClassModel> TrainerClasses = StaticDocumentUtility.GetStaticDocuments<TrainerClassModel>(StaticDocumentType.TrainerClasses);
+        private static readonly IEnumerable<TrainerClassModel> TrainerClasses = DexUtility.GetStaticDocuments<TrainerClassModel>(DexType.TrainerClasses);
 
         [HttpGet]
         public StaticCollectionMessage FindTrainerClasses()

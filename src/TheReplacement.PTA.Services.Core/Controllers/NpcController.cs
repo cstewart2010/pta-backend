@@ -4,7 +4,6 @@ using System.Linq;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
-using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
@@ -82,12 +81,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var feats = Request.Query["feats"].ToString().Split(',')
-                .Select(feat => StaticDocumentUtility.GetStaticDocument<FeatureModel>(StaticDocumentType.Features, feat))
+                .Select(feat => DexUtility.GetStaticDocument<FeatureModel>(DexType.Features, feat))
                 .Where(feat => feat != null)
                 .Select(feat => feat.Name);
 
             var classes = Request.Query["classes"].ToString().Split(',')
-                .Select(@class => StaticDocumentUtility.GetStaticDocument<TrainerClassModel>(StaticDocumentType.TrainerClasses, @class))
+                .Select(@class => DexUtility.GetStaticDocument<TrainerClassModel>(DexType.TrainerClasses, @class))
                 .Where(@class => @class != null)
                 .Select(@class => @class.Name);
 

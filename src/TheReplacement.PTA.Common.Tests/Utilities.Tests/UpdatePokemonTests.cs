@@ -1,7 +1,5 @@
 ﻿using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using TheReplacement.PTA.Common.Utilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -61,7 +59,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Logger.WriteLine($"Adding pokemon id {flabebe.PokemonId}");
 
             Logger.WriteLine($"Updating pokemon id {flabebe.PokemonId} by evolving it to Floette");
-            var floette = StaticDocumentUtility.GetEvolved(flabebe, flabebe.Moves, "Floette", Array.Empty<string>());
+            var floette = DexUtility.GetEvolved(flabebe, flabebe.Moves, "Floette", Array.Empty<string>());
             DatabaseUtility.TryAddPokemon(flabebe, out _);
             Assert.True(DatabaseUtility.UpdatePokemonWithEvolution(flabebe.PokemonId, floette));
 
