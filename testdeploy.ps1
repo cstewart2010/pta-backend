@@ -1,3 +1,8 @@
+param (
+    [Parameter(Mandatory=$true)]
+    [int]$BUILD_NUMBER
+)
+
 # validate environment
 $destination = "$env:SOURCE_LOCATION/src/TheReplacement.PTA.Services.Core"
 if (!(Test-Path $destination)){
@@ -12,7 +17,7 @@ net stop WAS /y
 # deploy release config
 Write-Host "Building Core Api"
 Set-Location $destination
-dotnet publish -c Release -o C:\PtaApi
+dotnet publish -c Release -o C:\PtaApi -p:Version="0.1.$BUILD_NUMBER.$BUILD_NUMBER"
 
 # start iis
 Write-Host "Restarting IIS"
