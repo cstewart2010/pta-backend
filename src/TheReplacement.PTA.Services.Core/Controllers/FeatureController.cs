@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
@@ -11,10 +12,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/featuredex")]
     public class FeatureController : StaticControllerBase
     {
-        private static readonly IEnumerable<FeatureModel> GeneralFeatures = StaticDocumentUtility.GetStaticDocuments<FeatureModel>(StaticDocumentType.Features);
-        private static readonly IEnumerable<FeatureModel> LegendaryFeatures = StaticDocumentUtility.GetStaticDocuments<FeatureModel>(StaticDocumentType.LegendaryFeatures);
-        private static readonly IEnumerable<FeatureModel> Passives = StaticDocumentUtility.GetStaticDocuments<FeatureModel>(StaticDocumentType.Passives);
-        private static readonly IEnumerable<FeatureModel> Skills = StaticDocumentUtility.GetStaticDocuments<FeatureModel>(StaticDocumentType.Skills);
+        private static readonly IEnumerable<FeatureModel> GeneralFeatures = DexUtility.GetStaticDocuments<FeatureModel>(DexType.Features);
+        private static readonly IEnumerable<FeatureModel> LegendaryFeatures = DexUtility.GetStaticDocuments<FeatureModel>(DexType.LegendaryFeatures);
+        private static readonly IEnumerable<FeatureModel> Passives = DexUtility.GetStaticDocuments<FeatureModel>(DexType.Passives);
+        private static readonly IEnumerable<FeatureModel> Skills = DexUtility.GetStaticDocuments<FeatureModel>(DexType.Skills);
 
         [HttpGet("general")]
         public StaticCollectionMessage FindGeneralFeatures()

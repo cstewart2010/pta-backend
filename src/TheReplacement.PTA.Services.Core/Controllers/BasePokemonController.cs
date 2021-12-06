@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
@@ -11,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/pokedex")]
     public class BasePokemonController : StaticControllerBase
     {
-        private static readonly IEnumerable<BasePokemonModel> BasePokemon = StaticDocumentUtility.GetStaticDocuments<BasePokemonModel>(StaticDocumentType.BasePokemon);
+        private static readonly IEnumerable<BasePokemonModel> BasePokemon = DexUtility.GetStaticDocuments<BasePokemonModel>(DexType.BasePokemon);
 
         [HttpGet]
         public StaticCollectionMessage FindPokemon()

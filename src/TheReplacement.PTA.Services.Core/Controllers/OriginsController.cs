@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
@@ -11,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/origindex")]
     public class OriginsController : StaticControllerBase
     {
-        private static readonly IEnumerable<OriginModel> Origins = StaticDocumentUtility.GetStaticDocuments<OriginModel>(StaticDocumentType.Origins);
+        private static readonly IEnumerable<OriginModel> Origins = DexUtility.GetStaticDocuments<OriginModel>(DexType.Origins);
 
         [HttpGet]
         public StaticCollectionMessage FindOrigins()

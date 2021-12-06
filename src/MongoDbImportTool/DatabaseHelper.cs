@@ -11,7 +11,7 @@ namespace MongoDbImportTool
             string collectionName,
             IEnumerable<TDocument> documents) where TDocument : INamed
         {
-            StaticDocumentUtility.AddStaticDocuments(collectionName, documents, Console.Out);
+            DexUtility.AddStaticDocuments(collectionName, documents, Console.Out);
         }
     }
 }

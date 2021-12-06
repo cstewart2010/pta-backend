@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -17,7 +14,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             return new
             {
-                Version,
+                Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
                 Pokedex = $"{HostUrl}/{Version}/pokedex",
                 Berrydex = $"{HostUrl}/{Version}/berrydex",
                 Featuredex = new[]

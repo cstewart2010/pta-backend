@@ -37,7 +37,7 @@ namespace TheReplacement.PTA.Common.Tests
 
         public static PokemonModel GetTestPokemon()
         {
-            var pokemon = StaticDocumentUtility.GetNewPokemon("Flabébé", Nature.Modest, Gender.Female, Status.Normal, "");
+            var pokemon = DexUtility.GetNewPokemon("Flabébé", Nature.Modest, Gender.Female, Status.Normal, "");
             pokemon.TrainerId = Guid.NewGuid().ToString();
             return pokemon;
         }

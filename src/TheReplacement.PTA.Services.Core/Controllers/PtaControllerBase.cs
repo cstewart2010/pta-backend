@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Interfaces;

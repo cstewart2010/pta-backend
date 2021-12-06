@@ -278,17 +278,6 @@ namespace TheReplacement.PTA.Common.Utilities
         public static TrainerModel FindTrainerById(string id)
         {
             return FindTrainerById(id, trainer => trainer.TrainerId == id);
-            var trainer = MongoCollectionHelper
-                .Trainers
-                .Find(trainer => trainer.TrainerId == id)
-                .SingleOrDefault(); ;
-
-            if (trainer != null)
-            {
-                LoggerUtility.Info(Trainer, $"Retrieved trainer {id}");
-            }
-
-            return trainer;
         }
 
         public static TrainerModel FindIncompleteTrainerById(string id)
