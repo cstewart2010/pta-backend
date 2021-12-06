@@ -24,7 +24,7 @@ Set-Location -Path $repository
 # build
 mongosh $env:MongoDBConnectionString -f database\scripts\update.js
 dotnet build src/PTABackend.sln --configuration Release -p:Version="0.1.$env:BUILD_NUMBER.$env:BUILD_NUMBER"
-$proc = Start-Process -FilePath ".\src\MongoDbImportTool\bin\Debug\netcoreapp3.1\MongoDbImportTool.exe" -NoNewWindow -PassThru -Wait
+$proc = Start-Process -FilePath ".\src\MongoDbImportTool\bin\Release\netcoreapp3.1\MongoDbImportTool.exe" -NoNewWindow -PassThru -Wait
 if ($proc.ExitCode -ne 0){
     return 1
 }
@@ -34,7 +34,7 @@ Write-Host "Updating the Test Environment"
 $env:MongoDBConnectionString = "mongodb+srv://$($env:MongoUsername):$($env:MongoPassword)@ptatestcluster.1ekcs.mongodb.net/test?retryWrites=true&w=majority"
 mongosh $env:MongoDBConnectionString -f  .\database\scripts\update.js
 $env:Database = "test"
-$proc = Start-Process -FilePath ".\src\MongoDbImportTool\bin\Debug\netcoreapp3.1\MongoDbImportTool.exe" -PassThru -Wait
+$proc = Start-Process -FilePath ".\src\MongoDbImportTool\bin\Release\netcoreapp3.1\MongoDbImportTool.exe" -PassThru -Wait
 if ($proc.ExitCode -ne 0){
     return 1
 }
