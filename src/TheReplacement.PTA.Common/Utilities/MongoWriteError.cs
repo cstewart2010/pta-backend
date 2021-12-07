@@ -17,7 +17,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// </summary>
         public string WriteErrorJsonString { get; }
 
-        public object ToObject()
+        internal object ToObject()
         {
             return JsonConvert.DeserializeObject(WriteErrorJsonString);
         }

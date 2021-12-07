@@ -12,11 +12,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/itemdex")]
     public class ItemController : StaticControllerBase
     {
-        private static readonly IEnumerable<BaseItemModel> KeyItems = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.KeyItems);
-        private static readonly IEnumerable<BaseItemModel> MedicalItems = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.MedicalItems);
-        private static readonly IEnumerable<BaseItemModel> Pokeballs = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.Pokeballs);
-        private static readonly IEnumerable<BaseItemModel> PokemonItems = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.PokemonItems);
-        private static readonly IEnumerable<BaseItemModel> TrainerEquipment = DexUtility.GetStaticDocuments<BaseItemModel>(DexType.TrainerEquipment);
+        private static readonly IEnumerable<BaseItemModel> KeyItems = DexUtility.GetDexEntries<BaseItemModel>(DexType.KeyItems);
+        private static readonly IEnumerable<BaseItemModel> MedicalItems = DexUtility.GetDexEntries<BaseItemModel>(DexType.MedicalItems);
+        private static readonly IEnumerable<BaseItemModel> Pokeballs = DexUtility.GetDexEntries<BaseItemModel>(DexType.Pokeballs);
+        private static readonly IEnumerable<BaseItemModel> PokemonItems = DexUtility.GetDexEntries<BaseItemModel>(DexType.PokemonItems);
+        private static readonly IEnumerable<BaseItemModel> TrainerEquipment = DexUtility.GetDexEntries<BaseItemModel>(DexType.TrainerEquipment);
 
         [HttpGet("key")]
         public StaticCollectionMessage FindKeyItems()

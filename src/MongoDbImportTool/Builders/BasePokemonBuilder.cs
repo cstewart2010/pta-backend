@@ -215,7 +215,7 @@ namespace MongoDbImportTool.Builders
             var hp = JsonHelper.GetStringFromTokenOrDefault(pokemonToken, "Legendary HP");
             if (string.IsNullOrEmpty(hp))
             {
-                return LegendaryStatsModel.GetNonLegendaryStats();
+                return GetNonLegendaryStats();
             }
 
             return new LegendaryStatsModel
@@ -237,6 +237,16 @@ namespace MongoDbImportTool.Builders
                 .Where(child => child.Name.StartsWith("Legendary Feature"))
                 .Select(child => child.Value.ToString())
                 .Where(JsonHelper.IsStringWithValue),
+            };
+        }
+        private static LegendaryStatsModel GetNonLegendaryStats()
+        {
+            return new LegendaryStatsModel
+            {
+                Moves = Array.Empty<string>(),
+                LegendaryMoves = Array.Empty<string>(),
+                Passives = Array.Empty<string>(),
+                Features = Array.Empty<string>()
             };
         }
     }

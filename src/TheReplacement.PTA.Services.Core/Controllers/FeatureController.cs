@@ -12,10 +12,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/featuredex")]
     public class FeatureController : StaticControllerBase
     {
-        private static readonly IEnumerable<FeatureModel> GeneralFeatures = DexUtility.GetStaticDocuments<FeatureModel>(DexType.Features);
-        private static readonly IEnumerable<FeatureModel> LegendaryFeatures = DexUtility.GetStaticDocuments<FeatureModel>(DexType.LegendaryFeatures);
-        private static readonly IEnumerable<FeatureModel> Passives = DexUtility.GetStaticDocuments<FeatureModel>(DexType.Passives);
-        private static readonly IEnumerable<FeatureModel> Skills = DexUtility.GetStaticDocuments<FeatureModel>(DexType.Skills);
+        private static readonly IEnumerable<FeatureModel> GeneralFeatures = DexUtility.GetDexEntries<FeatureModel>(DexType.Features);
+        private static readonly IEnumerable<FeatureModel> LegendaryFeatures = DexUtility.GetDexEntries<FeatureModel>(DexType.LegendaryFeatures);
+        private static readonly IEnumerable<FeatureModel> Passives = DexUtility.GetDexEntries<FeatureModel>(DexType.Passives);
+        private static readonly IEnumerable<FeatureModel> Skills = DexUtility.GetDexEntries<FeatureModel>(DexType.Skills);
 
         [HttpGet("general")]
         public StaticCollectionMessage FindGeneralFeatures()

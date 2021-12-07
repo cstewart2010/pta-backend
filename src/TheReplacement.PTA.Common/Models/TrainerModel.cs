@@ -60,6 +60,9 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         public bool IsGM { get; set; }
 
+        /// <summary>
+        /// Whether the trainer has completed the new user flow
+        /// </summary>
         public bool IsComplete { get; set; }
 
         /// <summary>
@@ -67,6 +70,9 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         public IEnumerable<string> Honors { get; set; }
 
+        /// <summary>
+        /// The trainer's origin
+        /// </summary>
         public string Origin { get; set; }
     }
 }

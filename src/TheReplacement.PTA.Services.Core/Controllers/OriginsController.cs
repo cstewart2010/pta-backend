@@ -12,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/origindex")]
     public class OriginsController : StaticControllerBase
     {
-        private static readonly IEnumerable<OriginModel> Origins = DexUtility.GetStaticDocuments<OriginModel>(DexType.Origins);
+        private static readonly IEnumerable<OriginModel> Origins = DexUtility.GetDexEntries<OriginModel>(DexType.Origins);
 
         [HttpGet]
         public StaticCollectionMessage FindOrigins()

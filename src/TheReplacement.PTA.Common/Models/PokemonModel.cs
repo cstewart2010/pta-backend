@@ -82,30 +82,69 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         public StatsModel PokemonStats { get; set; }
 
+        /// <summary>
+        /// The Pokemon species' <see cref="Enums.Size"/>
+        /// </summary>
         public string Size { get; set; }
 
+        /// <summary>
+        /// The Pokemon species' <see cref="Enums.Weight"/>
+        /// </summary>
         public string Weight { get; set; }
 
+        /// <summary>
+        /// The Pokemon species' Skills
+        /// </summary>
         public IEnumerable<string> Skills { get; set; }
 
+        /// <summary>
+        /// The Pokemon's Passives
+        /// </summary>
         public IEnumerable<string> Passives { get; set; }
 
+        /// <summary>
+        /// The Pokemon's <see cref="Enums.EggGroups"/>
+        /// </summary>
         public IEnumerable<string> EggGroups { get; set; }
 
+        /// <summary>
+        /// The Pokemon's Proficiencies
+        /// </summary>
         public IEnumerable<string> Proficiencies { get; set; }
 
+        /// <summary>
+        /// The Pokemon's hatch rate
+        /// </summary>
         public string EggHatchRate { get; set; }
 
+        /// <summary>
+        /// The Pokemon's habitats
+        /// </summary>
         public IEnumerable<string> Habitats { get; set; }
 
+        /// <summary>
+        /// The Pokemon's diet
+        /// </summary>
         public string Diet { get; set; }
 
+        /// <summary>
+        /// The Pokemon's <see cref="Enums.Rarity"/>
+        /// </summary>
         public string Rarity { get; set; }
 
+        /// <summary>
+        /// The Pokemon's GMax move, if any
+        /// </summary>
         public string GMaxMove { get; set; }
 
+        /// <summary>
+        /// The Pokemon's previous evolution, if any
+        /// </summary>
         public string EvolvedFrom { get; set; }
 
+        /// <summary>
+        /// The Pokemon's legendary stats, if applicable
+        /// </summary>
         public LegendaryStatsModel LegendaryStats { get; set; }
     }
 }

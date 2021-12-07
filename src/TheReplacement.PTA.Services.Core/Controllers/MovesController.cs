@@ -12,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/movedex")]
     public class MovesController : StaticControllerBase
     {
-        private static readonly IEnumerable<MoveModel> Moves = DexUtility.GetStaticDocuments<MoveModel>(DexType.Moves);
+        private static readonly IEnumerable<MoveModel> Moves = DexUtility.GetDexEntries<MoveModel>(DexType.Moves);
 
         [HttpGet]
         public StaticCollectionMessage FindMoves()

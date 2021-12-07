@@ -12,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     {
         internal  string HostUrl => $"{Request.Scheme}://{Request.Host}{Request.Path}".Trim('/');
 
-        public StaticCollectionMessage GetStaticCollectionResponse<TDocument>(IEnumerable<TDocument> documents) where TDocument : INamed
+        public StaticCollectionMessage GetStaticCollectionResponse<TDocument>(IEnumerable<TDocument> documents) where TDocument : IDexDocument
         {
             if (!int.TryParse(Request.Query["offset"], out var offset))
             {
@@ -61,7 +61,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return $"{HostUrl}?offset={nextOffset}&limit={limit}";
         }
 
-        private ResultMessage GetResultsMember<TDocument>(TDocument document) where TDocument : INamed
+        private ResultMessage GetResultsMember<TDocument>(TDocument document) where TDocument : IDexDocument
         {
             if (document == null)
             {

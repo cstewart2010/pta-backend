@@ -151,6 +151,10 @@ namespace TheReplacement.PTA.Common.Utilities
             return games;
         }
 
+        /// <summary>
+        /// Returns all games that contains the supplied nickname as a substring
+        /// </summary>
+        /// <param name="nickname">The nickname to search with</param>
         public static IEnumerable<GameModel> FindAllGames(string nickname)
         {
             return MongoCollectionHelper.Games
@@ -197,7 +201,21 @@ namespace TheReplacement.PTA.Common.Utilities
             return npc;
         }
 
-        public static bool CompleteTrainer(string trainerId, string origin, string trainerClass, IEnumerable<string> feats, StatsModel stats)
+        /// <summary>
+        /// Attempts to update the trainer with their appropriate starting stats
+        /// </summary>
+        /// <param name="trainerId">The id of the trainer being updated</param>
+        /// <param name="origin">The trianer's origin</param>
+        /// <param name="trainerClass">The trainer's stats class</param>
+        /// <param name="feats">The trainer's starting feats</param>
+        /// <param name="stats">The trainer's starting stats</param>
+        /// <returns>True if successful</returns>
+        public static bool CompleteTrainer(
+            string trainerId,
+            string origin,
+            string trainerClass,
+            IEnumerable<string> feats,
+            StatsModel stats)
         {
             var updates = Builders<TrainerModel>.Update.Combine(new[]
             {
@@ -280,6 +298,10 @@ namespace TheReplacement.PTA.Common.Utilities
             return FindTrainerById(id, trainer => trainer.TrainerId == id);
         }
 
+        /// <summary>
+        /// Search for the trainer and returns them if the trainer has not completed the new user flow
+        /// </summary>
+        /// <param name="id">The id of the trainer to search for</param>
         public static TrainerModel FindIncompleteTrainerById(string id)
         {
             return FindTrainerById(id, trainer => trainer.TrainerId == id && !trainer.IsComplete);

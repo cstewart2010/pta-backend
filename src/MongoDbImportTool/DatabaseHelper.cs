@@ -9,9 +9,9 @@ namespace MongoDbImportTool
     {
         public static void AddDocuments<TDocument>(
             string collectionName,
-            IEnumerable<TDocument> documents) where TDocument : INamed
+            IEnumerable<TDocument> documents) where TDocument : IDexDocument
         {
-            DexUtility.AddStaticDocuments(collectionName, documents, Console.Out);
+            DexUtility.AddDexEntries(collectionName, documents, Console.Out);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/berrydex")]
     public class BerryController : StaticControllerBase
     {
-        private static readonly IEnumerable<BerryModel> Berries = DexUtility.GetStaticDocuments<BerryModel>(DexType.Berries);
+        private static readonly IEnumerable<BerryModel> Berries = DexUtility.GetDexEntries<BerryModel>(DexType.Berries);
 
         [HttpGet]
         public StaticCollectionMessage FindBerries()
