@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Models;
 
 namespace MongoDbImportTool.Builders
@@ -13,11 +14,22 @@ namespace MongoDbImportTool.Builders
 
         public static void AddItems()
         {
-            DatabaseHelper.AddDocuments("KeyItems", GetItems(KeyItemsJson));
-            DatabaseHelper.AddDocuments("MedicalItems", GetItems(MedicalItemsJson));
-            DatabaseHelper.AddDocuments("Pokeballs", GetItems(PokeballsJson));
-            DatabaseHelper.AddDocuments("PokemonItems", GetItems(PokemonItemsJson));
-            DatabaseHelper.AddDocuments("TrainerEquipment", GetItems(TrainerEquipmentJson));
+            var factory = new TaskFactory();
+            var tasks = new List<Task>
+            {
+                factory.StartNew(() => DatabaseHelper.AddDocuments("KeyItems", GetItems(KeyItemsJson))),
+                factory.StartNew(() => DatabaseHelper.AddDocuments("MedicalItems", GetItems(PokeballsJson))),
+                factory.StartNew(() => DatabaseHelper.AddDocuments("Pokeballs", GetItems(PokeballsJson))),
+                factory.StartNew(() => DatabaseHelper.AddDocuments("PokemonItems", GetItems(PokemonItemsJson))),
+                factory.StartNew(() => DatabaseHelper.AddDocuments("TrainerEquipment", GetItems(TrainerEquipmentJson))),
+            };
+            foreach (var task in tasks)
+            {
+                if (!(task.IsCompleted || task.IsFaulted))
+                {
+                    task.Wait();
+                }
+            }
         }
 
         private static IEnumerable<BaseItemModel> GetItems(string path)
