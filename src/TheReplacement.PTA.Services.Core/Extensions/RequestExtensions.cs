@@ -166,12 +166,12 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
             var invalids = new List<string>();
             IEnumerable<string> feats;
-            var trainerClass = DexUtility.GetStaticDocument<TrainerClassModel>(DexType.TrainerClasses, request.Query["class"]);
+            var trainerClass = DexUtility.GetDexEntry<TrainerClassModel>(DexType.TrainerClasses, request.Query["class"]);
             if (DatabaseUtility.FindIncompleteTrainerById(trainerId) == null)
             {
                 invalids.Add("trainerId");
             }
-            if (DexUtility.GetStaticDocument<OriginModel>(DexType.Origins, request.Query["origin"]) == null)
+            if (DexUtility.GetDexEntry<OriginModel>(DexType.Origins, request.Query["origin"]) == null)
             {
                 invalids.Add("origin");
             }

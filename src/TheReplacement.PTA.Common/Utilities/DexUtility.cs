@@ -10,15 +10,25 @@ using TheReplacement.PTA.Common.Models;
 
 namespace TheReplacement.PTA.Common.Utilities
 {
+    /// <summary>
+    /// Provides a collection of methods for performing CRUD interactions on Dex Collections
+    /// </summary>
     public static class DexUtility
     {
+        /// <summary>
+        /// Attempts to evolve a pokemon to its next stage
+        /// </summary>
+        /// <param name="pokemon">The current form</param>
+        /// <param name="keptMoves">The moves you wish to keep</param>
+        /// <param name="evolvedName">The name of the evolved form</param>
+        /// <param name="newMoves">The moves you wish to add</param>
         public static PokemonModel GetEvolved(
             PokemonModel pokemon,
             IEnumerable<string> keptMoves,
             string evolvedName,
             IEnumerable<string> newMoves)
         {
-            var basePokemon = GetStaticDocument<BasePokemonModel>(DexType.BasePokemon, evolvedName);
+            var basePokemon = GetDexEntry<BasePokemonModel>(DexType.BasePokemon, evolvedName);
             if (!string.Equals(basePokemon?.EvolvesFrom, pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase))
             {
                 return null;
@@ -60,6 +70,14 @@ namespace TheReplacement.PTA.Common.Utilities
             };
         }
 
+        /// <summary>
+        /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
+        /// </summary>
+        /// <param name="dexNo">The pokemon's dex number</param>
+        /// <param name="nature">The nature to give the pokemon</param>
+        /// <param name="gender">The pokemon's gender</param>
+        /// <param name="status">The pokemon's status</param>
+        /// <param name="nickname">The pokemon's nickname, if applicable</param>
         public static PokemonModel GetNewPokemon(
             int dexNo,
             Nature nature,
@@ -71,6 +89,14 @@ namespace TheReplacement.PTA.Common.Utilities
             return GetPokemonFromBase(basePokemon, nature, gender, status, nickname);
         }
 
+        /// <summary>
+        /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
+        /// </summary>
+        /// <param name="name">The pokemon's species name</param>
+        /// <param name="nature">The nature to give the pokemon</param>
+        /// <param name="gender">The pokemon's gender</param>
+        /// <param name="status">The pokemon's status</param>
+        /// <param name="nickname">The pokemon's nickname, if applicable</param>
         public static PokemonModel GetNewPokemon(
             string name,
             Nature nature,
@@ -78,39 +104,54 @@ namespace TheReplacement.PTA.Common.Utilities
             Status status,
             string nickname)
         {
-            var basePokemon = GetStaticDocument<BasePokemonModel>(DexType.BasePokemon, name);
+            var basePokemon = GetDexEntry<BasePokemonModel>(DexType.BasePokemon, name);
             return GetPokemonFromBase(basePokemon, nature, gender, status, nickname);
         }
 
-        public static IEnumerable<TDocument> GetStaticDocuments<TDocument>(DexType documentType) where TDocument : INamed
+        /// <summary>
+        /// Returns all Dex extries for a specific Dex collection
+        /// </summary>
+        /// <param name="documentType">The dex collection you wish to return data from</param>
+        public static IEnumerable<TDocument> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
         {
             var collection = MongoCollectionHelper.Database.GetCollection<TDocument>(documentType.ToString());
             return collection.Find(document => true).ToEnumerable();
         }
 
-        public static TDocument GetStaticDocument<TDocument>(
+        /// <summary>
+        /// Returns a specific Dex entry from a specific Dex collection
+        /// </summary>
+        /// <param name="documentType">The dex collection you wish to return data from</param>
+        /// <param name="name">The name of the dex entry</param>
+        public static TDocument GetDexEntry<TDocument>(
             DexType documentType,
-            string name) where TDocument : INamed
+            string name) where TDocument : IDexDocument
         {
             var collection = MongoCollectionHelper.Database.GetCollection<TDocument>(documentType.ToString());
             return collection.Find(document => document.Name.ToLower() == name.ToLower()).FirstOrDefault();
         }
 
-        public static void AddStaticDocuments<TDocument>(
+        /// <summary>
+        /// Adds a collection of dex entry to a specific dex collection
+        /// </summary>
+        /// <param name="collectionName">The name of the collection to add document</param>
+        /// <param name="documents">The documents to add to collection</param>
+        /// <param name="writer">The writer to write logs to</param>
+        public static void AddDexEntries<TDocument>(
             string collectionName,
             IEnumerable<TDocument> documents,
-            TextWriter writer) where TDocument : INamed
+            TextWriter writer) where TDocument : IDexDocument
         {
             var collection = MongoCollectionHelper.Database.GetCollection<TDocument>(collectionName);
             foreach (var document in documents)
             {
-                if (collection.Find(currentDocument => document.Name == (currentDocument as INamed).Name).Any())
+                if (collection.Find(currentDocument => document.Name == currentDocument.Name).Any())
                 {
                     continue;
                 }
 
                 writer.WriteLine($"Adding {document.Name} to {collectionName}");
-                var isSuccessful = TryAddStaticDocument
+                var isSuccessful = TryAddDexEntry
                 (
                     () => collection.InsertOne(document),
                     out var error
@@ -187,7 +228,7 @@ namespace TheReplacement.PTA.Common.Utilities
             } - (15 * (basePokemon.Stage - 1));
         }
 
-        private static bool TryAddStaticDocument(
+        private static bool TryAddDexEntry(
             Action action,
             out MongoWriteError error)
         {

@@ -9,7 +9,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
     {
         public static TDocument GetStaticDocument<TDocument>(
             this IEnumerable<TDocument> source,
-            string name) where TDocument : INamed
+            string name) where TDocument : IDexDocument
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -27,7 +27,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         public static IEnumerable<TDocument> GetSubset<TDocument>(
             this IEnumerable<TDocument> source,
             int offset,
-            int limit) where TDocument : INamed
+            int limit) where TDocument : IDexDocument
         {
             if (offset < 0 || offset >= source.Count() || limit < 0)
             {
@@ -49,7 +49,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
         private static TDocument GetStaticDocument<TDocument>(
             IEnumerable<TDocument> source,
-            int index) where TDocument : INamed
+            int index) where TDocument : IDexDocument
         {
             if (index > 0 && index <= source.Count())
             {

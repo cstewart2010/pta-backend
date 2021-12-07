@@ -12,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/pokedex")]
     public class BasePokemonController : StaticControllerBase
     {
-        private static readonly IEnumerable<BasePokemonModel> BasePokemon = DexUtility.GetStaticDocuments<BasePokemonModel>(DexType.BasePokemon);
+        private static readonly IEnumerable<BasePokemonModel> BasePokemon = DexUtility.GetDexEntries<BasePokemonModel>(DexType.BasePokemon);
 
         [HttpGet]
         public StaticCollectionMessage FindPokemon()

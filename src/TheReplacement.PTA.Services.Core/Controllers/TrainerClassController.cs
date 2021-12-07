@@ -12,7 +12,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/classdex")]
     public class TrainerClassController : StaticControllerBase
     {
-        private static readonly IEnumerable<TrainerClassModel> TrainerClasses = DexUtility.GetStaticDocuments<TrainerClassModel>(DexType.TrainerClasses);
+        private static readonly IEnumerable<TrainerClassModel> TrainerClasses = DexUtility.GetDexEntries<TrainerClassModel>(DexType.TrainerClasses);
 
         [HttpGet]
         public StaticCollectionMessage FindTrainerClasses()

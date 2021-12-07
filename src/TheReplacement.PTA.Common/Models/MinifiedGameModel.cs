@@ -1,12 +1,13 @@
 ﻿using MongoDB.Driver;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using TheReplacement.PTA.Common.Internal;
 
 namespace TheReplacement.PTA.Common.Models
 {
+    /// <summary>
+    /// Represents a Game Session for external use
+    /// </summary>
     public class MinifiedGameModel
     {
         internal MinifiedGameModel(GameModel game)

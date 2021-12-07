@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Models;
 
 namespace MongoDbImportTool.Builders
@@ -13,21 +12,13 @@ namespace MongoDbImportTool.Builders
 
         public static void AddFeatures()
         {
-            var factory = new TaskFactory();
-            var tasks = new List<Task>
-            {
-                factory.StartNew(() => DatabaseHelper.AddDocuments("Features", GetFeatures(FeaturesJson))),
-                factory.StartNew(() => DatabaseHelper.AddDocuments("LegendaryFeatures", GetFeatures(LegendaryFeaturesJson))),
-                factory.StartNew(() => DatabaseHelper.AddDocuments("Skills", GetFeatures(SkillsJson))),
-                factory.StartNew(() => DatabaseHelper.AddDocuments("Passives", GetFeatures(PassivesJson))),
-            };
-            foreach (var task in tasks)
-            {
-                if (!(task.IsCompleted || task.IsFaulted))
-                {
-                    task.Wait();
-                }
-            }
+            TaskHelper.RunAsyncTasks
+            (
+                () => DatabaseHelper.AddDocuments("Features", GetFeatures(FeaturesJson)),
+                () => DatabaseHelper.AddDocuments("LegendaryFeatures", GetFeatures(LegendaryFeaturesJson)),
+                () => DatabaseHelper.AddDocuments("Skills", GetFeatures(SkillsJson)),
+                () => DatabaseHelper.AddDocuments("Passives", GetFeatures(PassivesJson))
+            );
         }
 
         private static IEnumerable<FeatureModel> GetFeatures(string path)

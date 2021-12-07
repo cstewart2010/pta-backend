@@ -81,12 +81,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var feats = Request.Query["feats"].ToString().Split(',')
-                .Select(feat => DexUtility.GetStaticDocument<FeatureModel>(DexType.Features, feat))
+                .Select(feat => DexUtility.GetDexEntry<FeatureModel>(DexType.Features, feat))
                 .Where(feat => feat != null)
                 .Select(feat => feat.Name);
 
             var classes = Request.Query["classes"].ToString().Split(',')
-                .Select(@class => DexUtility.GetStaticDocument<TrainerClassModel>(DexType.TrainerClasses, @class))
+                .Select(@class => DexUtility.GetDexEntry<TrainerClassModel>(DexType.TrainerClasses, @class))
                 .Where(@class => @class != null)
                 .Select(@class => @class.Name);
 
