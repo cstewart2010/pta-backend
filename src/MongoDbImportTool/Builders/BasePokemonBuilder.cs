@@ -156,6 +156,15 @@ namespace MongoDbImportTool.Builders
             return pokemonToken.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("EggGroup"))
                 .Select(child => child.Value.ToString())
+                .Select(eggGroup =>
+                {
+                    if (!Enum.TryParse(eggGroup, true, out EggGroups group))
+                    {
+                        return null;
+                    }
+
+                    return group.ToString();
+                })
                 .Where(JsonHelper.IsStringWithValue);
         }
 

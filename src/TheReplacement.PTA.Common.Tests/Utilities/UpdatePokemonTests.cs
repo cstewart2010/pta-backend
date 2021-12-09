@@ -55,12 +55,11 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
         public void UpdatePokemonWithEvolution_SmokeTest_True()
         {
             var flabebe = GetTestPokemon();
-            flabebe.DexNo = 669;
             Logger.WriteLine($"Adding pokemon id {flabebe.PokemonId}");
+            DatabaseUtility.TryAddPokemon(flabebe, out _);
 
             Logger.WriteLine($"Updating pokemon id {flabebe.PokemonId} by evolving it to Floette");
             var floette = DexUtility.GetEvolved(flabebe, flabebe.Moves, "Floette", Array.Empty<string>());
-            DatabaseUtility.TryAddPokemon(flabebe, out _);
             Assert.True(DatabaseUtility.UpdatePokemonWithEvolution(flabebe.PokemonId, floette));
 
             Logger.WriteLine($"Verify pokemon id {flabebe.PokemonId} evolved to floette");

@@ -174,7 +174,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
         public void FindTrainerByGameId_ValidIds_TrainerCount(int trainerCount)
         {
             var game = GetTestGame();
-            DatabaseUtility.TryAddGame(game, out _);
+            Assert.True(DatabaseUtility.TryAddGame(game, out _));
 
             Logger.WriteLine($"Adding {trainerCount} trainers to game id {game.GameId}");
             var trainerIds = new List<string>();
@@ -182,12 +182,13 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             {
                 var trainer = GetTestTrainer();
                 trainer.GameId = game.GameId;
-                DatabaseUtility.TryAddTrainer(trainer, out _);
+                trainer.IsComplete = true;
+                Assert.True(DatabaseUtility.TryAddTrainer(trainer, out _));
                 trainerIds.Add(trainer.TrainerId);
             }
 
             Logger.WriteLine($"Retrieving list of trainerIds with game id {game.GameId}");
-            var retrievedTrainerIds = DatabaseUtility.FindTrainersByGameId(game.GameId).Select(trainer => trainer.TrainerId).ToList();
+            var retrievedTrainerIds = DatabaseUtility.FindTrainersByGameId(game.GameId).Select(trainer => trainer.TrainerId);
             DatabaseUtility.DeleteGame(game.GameId);
             foreach (var trainerId in retrievedTrainerIds)
             {
@@ -196,7 +197,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
 
             Logger.WriteLine($"Verifying that the retrieved list matches the original set");
             Assert.True(retrievedTrainerIds.All(trainerId => trainerIds.Contains(trainerId)));
-            Assert.Equal(trainerCount, retrievedTrainerIds.Count);
+            Assert.Equal(trainerCount, retrievedTrainerIds.Count());
         }
 
         [Fact]
