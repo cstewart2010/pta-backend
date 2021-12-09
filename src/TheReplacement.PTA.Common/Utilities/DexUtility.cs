@@ -28,14 +28,19 @@ namespace TheReplacement.PTA.Common.Utilities
             string evolvedName,
             IEnumerable<string> newMoves)
         {
+            if (pokemon == null) throw ExceptionHandler.ArgumentNull(nameof(pokemon));
+            if (keptMoves == null) throw ExceptionHandler.ArgumentNull(nameof(keptMoves));
+            if (string.IsNullOrEmpty(evolvedName)) throw ExceptionHandler.IsNullOrEmpty(nameof(evolvedName));
+            if (evolvedName == null) throw ExceptionHandler.ArgumentNull(nameof(evolvedName));
+
             var basePokemon = GetDexEntry<BasePokemonModel>(DexType.BasePokemon, evolvedName);
             if (!string.Equals(basePokemon?.EvolvesFrom, pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase))
             {
                 return null;
             }
 
-            var moveComparer = basePokemon.Moves.Select(move => move.ToLower());
-            if (!newMoves.All(move => basePokemon.Moves.Contains(move.ToLower())))
+            var evolvedMoves = basePokemon.Moves.Select(move => move.ToLower());
+            if (!newMoves.All(move => evolvedMoves.Contains(move.ToLower())))
             {
                 return null;
             }
@@ -68,25 +73,6 @@ namespace TheReplacement.PTA.Common.Utilities
                 EvolvedFrom = basePokemon.EvolvesFrom,
                 LegendaryStats = basePokemon.LegendaryStats
             };
-        }
-
-        /// <summary>
-        /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
-        /// </summary>
-        /// <param name="dexNo">The pokemon's dex number</param>
-        /// <param name="nature">The nature to give the pokemon</param>
-        /// <param name="gender">The pokemon's gender</param>
-        /// <param name="status">The pokemon's status</param>
-        /// <param name="nickname">The pokemon's nickname, if applicable</param>
-        public static PokemonModel GetNewPokemon(
-            int dexNo,
-            Nature nature,
-            Gender gender,
-            Status status,
-            string nickname)
-        {
-            var basePokemon = GetBasePokemon(dexNo);
-            return GetPokemonFromBase(basePokemon, nature, gender, status, nickname);
         }
 
         /// <summary>
@@ -163,12 +149,6 @@ namespace TheReplacement.PTA.Common.Utilities
                     writer.WriteLine(error.WriteErrorJsonString);
                 }
             }
-        }
-
-        private static BasePokemonModel GetBasePokemon(int dexNo)
-        {
-            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModel>("BasePokemon");
-            return collection.Find(document => document.DexNo == dexNo).FirstOrDefault();
         }
 
         private static PokemonModel GetPokemonFromBase(

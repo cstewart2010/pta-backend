@@ -52,19 +52,21 @@ namespace MongoDbImportTool
 
         internal static string BuildType(JToken token)
         {
-            return token.Children<JProperty>()
+            var types = token.Children<JProperty>()
                 .Where(child => child.Name.StartsWith("Type"))
                 .Select(child => child.Value.ToString())
-                .Aggregate(PokemonTypes.None, (prev, curr) =>
+                .Select(type =>
                 {
-                    if (!Enum.TryParse(curr.Replace('/', '_'), out PokemonTypes type))
+                    if (!Enum.TryParse(type, true, out PokemonTypes pokemonType))
                     {
-                        return prev;
+                        return null;
                     }
 
-                    return prev | type;
+                    return pokemonType.ToString();
                 })
-                .ToString().Replace('_', '/');
+                .Where(IsStringWithValue);
+
+            return string.Join('/', types);
         }
 
         internal static IEnumerable<string> BuildSkills(JToken pokemonToken)

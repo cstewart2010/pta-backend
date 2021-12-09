@@ -30,7 +30,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                     .Select(game => new FoundGameMessage(game.GameId));
             }
 
-            return DatabaseUtility.FindAllGames();
+            return DatabaseUtility.FindMostRecent20Games();
         }
 
         [HttpGet("{gameId}")]

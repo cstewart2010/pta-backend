@@ -136,7 +136,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Returns all games in db
         /// </summary>
-        public static IEnumerable<MinifiedGameModel> FindAllGames()
+        public static IEnumerable<MinifiedGameModel> FindMostRecent20Games()
         {
             var games = MongoCollectionHelper.Games
                 .Find(game => true)
