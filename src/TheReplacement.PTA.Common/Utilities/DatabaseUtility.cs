@@ -315,7 +315,7 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             var trainers = MongoCollectionHelper
                 .Trainers
-                .Find(trainer => trainer.GameId == gameId && trainer.IsComplete);
+                .Find(trainer => trainer.GameId == gameId);
 
             if (trainers.Any())
             {

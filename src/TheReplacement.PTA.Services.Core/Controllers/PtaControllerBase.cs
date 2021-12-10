@@ -54,12 +54,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         {
             var message = string.Empty;
             var validationPassed = true;
-            if (game.IsOnline)
-            {
-                message = "This game is already online";
-                validationPassed = false;
-            }
-            else if (!EncryptionUtility.VerifySecret(gamePassword, game.PasswordHash))
+            if (!EncryptionUtility.VerifySecret(gamePassword, game.PasswordHash))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 message = "Could not login in to game with provided password";
@@ -97,7 +92,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 message = "Invalid password";
                 validationPassed = false;
             }
-            else if (isGM && trainer.IsGM)
+            else if (isGM && !trainer.IsGM)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 message = $"This user is not the GM for {gameId}";
