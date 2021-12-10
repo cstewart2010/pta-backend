@@ -91,7 +91,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{trainerId}/logout")]
-        public ActionResult Logout(string trainerId)
+        public ActionResult<AbstractMessage> Logout(string trainerId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -105,7 +105,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
-            return ReturnSuccessfully(Ok());
+            return ReturnSuccessfully(new GenericMessage(""));
         }
 
         [HttpPut("{trainerId}/addItems")]
