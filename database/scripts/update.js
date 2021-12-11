@@ -493,6 +493,34 @@ const updatedValidators = {
       }
     }
   },
+  PokeDex:{
+    $jsonSchema: {
+      required: [
+        'TrainerId',
+        'DexNo',
+        'IsSeen',
+        'IsCaught'
+      ],
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
+        },
+        TrainerId: {
+          bsonType: 'string'
+        },
+        DexNo: {
+          bsonType: 'int'
+        },
+        IsSeen: {
+          bsonType: 'bool'
+        },
+        IsCaught: {
+          bsonType: 'bool'
+        }
+      }
+    }
+  },
   BasePokemon: {
     $jsonSchema: {
       required: [

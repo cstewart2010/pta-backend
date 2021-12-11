@@ -21,7 +21,8 @@ namespace TheReplacement.PTA.Services.Core.Objects
             TrainerClasses = trainer.TrainerClasses;
             TrainerStats = trainer.TrainerStats;
             IsComplete = trainer.IsComplete;
-            Pokemon = DatabaseUtility.FindPokemonByTrainerId(trainer.TrainerId);
+            Pokemon = DatabaseUtility.FindPokemonByTrainerId(TrainerId);
+            PokeDex = DatabaseUtility.GetTrainerPokeDex(TrainerId);
         }
 
         public string TrainerId { get; }
@@ -38,5 +39,6 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public StatsModel TrainerStats { get; }
         public bool IsComplete { get; }
         public IEnumerable<PokemonModel> Pokemon { get; }
+        public IEnumerable<PokeDexItemModel> PokeDex { get; }
     }
 }

@@ -279,7 +279,7 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             var pokemon = MongoCollectionHelper
                 .Pokemon
-                .Find(Pokemon => Pokemon.TrainerId == trainerId);
+                .Find(pokemon => pokemon.TrainerId == trainerId);
 
             if (pokemon.Any())
             {
@@ -355,6 +355,20 @@ namespace TheReplacement.PTA.Common.Utilities
         public static string GetGameNickname(string gameId)
         {
             return FindGame(gameId)?.Nickname;
+        }
+
+        public static IEnumerable<PokeDexItemModel> GetTrainerPokeDex(string trainerId)
+        {
+            return MongoCollectionHelper.PokeDex
+                .Find(dexItem => dexItem.TrainerId == trainerId)
+                .ToEnumerable();
+        }
+
+        public static PokeDexItemModel GetPokedexItem(string trainerId, int dexNo)
+        {
+            return MongoCollectionHelper.PokeDex
+                .Find(dexItem => dexItem.TrainerId == trainerId && dexItem.DexNo == dexNo)
+                .SingleOrDefault();
         }
 
         /// <summary>
@@ -447,6 +461,56 @@ namespace TheReplacement.PTA.Common.Utilities
                 trainer.TrainerId,
                 () => MongoCollectionHelper.Trainers.InsertOne(trainer),
                 out error
+            );
+        }
+
+        /// <summary>
+        /// Attempts to add a dexItem using the provided document
+        /// </summary>
+        /// <param name="dexItem">The document to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryAddDeXItem(
+            PokeDexItemModel dexItem,
+            out MongoWriteError error)
+        {
+            return TryAddDocument
+            (
+                MongoCollection.PokeDex,
+                $"{dexItem.TrainerId}_{dexItem.DexNo}",
+                () => MongoCollectionHelper.PokeDex.InsertOne(dexItem),
+                out error
+            );
+        }
+
+        public static bool UpdateDexItemIsSeen(string trainerId, int dexNo)
+        {
+            return TryUpdateDocument
+            (
+                MongoCollection.PokeDex,
+                MongoCollectionHelper.PokeDex,
+                dexItem => dexItem.TrainerId == trainerId && dexItem.DexNo == dexNo,
+                Builders<PokeDexItemModel>.Update.Set("IsSeen", true),
+                $"Updated seen value for trainer {trainerId}"
+            );
+        }
+
+        public static bool UpdateDexItemIsCaught(string trainerId, int dexNo)
+        {
+            var updates = Builders<PokeDexItemModel>
+                .Update
+                .Combine(new[]
+                {
+                    Builders<PokeDexItemModel>.Update.Set("IsSeen", true),
+                    Builders<PokeDexItemModel>.Update.Set("IsCaught", true)
+                });
+
+            return TryUpdateDocument
+            (
+                MongoCollection.PokeDex,
+                MongoCollectionHelper.PokeDex,
+                dexItem => dexItem.TrainerId == trainerId && dexItem.DexNo == dexNo,
+                updates,
+                $"Updated caught value for trainer {trainerId}"
             );
         }
 

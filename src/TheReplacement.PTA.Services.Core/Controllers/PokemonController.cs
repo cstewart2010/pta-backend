@@ -44,7 +44,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(nameof(gameMasterId));
             }
 
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
@@ -95,7 +95,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return BadRequest(nameof(trainerId));
             }
-            if (!Request.VerifyIdentity(trainerId))
+            if (!Request.VerifyIdentity(trainerId, false))
             {
                 return Unauthorized();
             }
@@ -117,6 +117,60 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(pokemon);
         }
 
+        [HttpPut("{trainerId}/saw")]
+        public ActionResult<AbstractMessage> UpdateDexItemIsSeen(string trainerId)
+        {
+            var dexNo = GetDexNoForPokedexUpdate(trainerId, out var actionResult);
+            if (dexNo < 1 || dexNo >= DexUtility.GetDexEntries<BasePokemonModel>(DexType.BasePokemon).Count())
+            {
+                return actionResult;
+            }
+
+            var dexItem = DatabaseUtility.GetPokedexItem(trainerId, dexNo);
+            if (dexItem != null)
+            {
+                if (dexItem.IsSeen)
+                {
+                    return ReturnSuccessfully(new GenericMessage("Pokemon was already seen"));
+                }
+                if (!DatabaseUtility.UpdateDexItemIsSeen(trainerId, dexNo))
+                {
+                    return BadRequest(new GenericMessage("Failed to update Dex Item"));
+                }
+
+                return ReturnSuccessfully(new GenericMessage("Pokedex updated successfully"));
+            }
+
+            return AddDexItem(trainerId, dexNo, isSeen: true);
+        }
+
+        [HttpPut("{trainerId}/caught")]
+        public ActionResult<AbstractMessage> UpdateDexItemIsCaught(string trainerId)
+        {
+            var dexNo = GetDexNoForPokedexUpdate(trainerId, out var actionResult);
+            if (dexNo < 1 || dexNo >= DexUtility.GetDexEntries<BasePokemonModel>(DexType.BasePokemon).Count())
+            {
+                return actionResult;
+            }
+
+            var dexItem = DatabaseUtility.GetPokedexItem(trainerId, dexNo);
+            if (dexItem != null)
+            {
+                if (dexItem.IsCaught)
+                {
+                    return ReturnSuccessfully(new GenericMessage("Pokemon was already caught"));
+                }
+                if (!DatabaseUtility.UpdateDexItemIsCaught(trainerId, dexNo))
+                {
+                    return BadRequest(new GenericMessage("Failed to update Dex Item"));
+                }
+
+                return ReturnSuccessfully(new GenericMessage("Pokedex updated successfully"));
+            }
+
+            return AddDexItem(trainerId, dexNo, isCaught: true);
+        }
+
         [HttpDelete("{pokemonId}")]
         public ActionResult<GenericMessage> DeletePokemon(string pokemonId)
         {
@@ -124,7 +178,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return BadRequest(nameof(gameMasterId));
             }
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
@@ -144,6 +198,28 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(new GenericMessage($"Successfully deleted {pokemonId}"));
         }
 
+        private ActionResult<AbstractMessage> AddDexItem(string trainerId, int dexNo, bool isSeen = false, bool isCaught = false)
+        {
+            if (isCaught)
+            {
+                isSeen = true;
+            }
+
+            var result = DatabaseUtility.TryAddDeXItem(new PokeDexItemModel
+            {
+                TrainerId = trainerId,
+                DexNo = dexNo,
+                IsSeen = isSeen,
+                IsCaught = isCaught
+            }, out var error);
+            if (!result)
+            {
+                return BadRequest(error);
+            }
+
+            return ReturnSuccessfully(new GenericMessage("Pokedex item added successfully"));
+        }
+
         private bool AreTrainersOnline(
             string gameId,
             string leftTrainerId,
@@ -160,6 +236,33 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return true;
+        }
+        private int GetDexNoForPokedexUpdate(string trainerId, out ActionResult actionResult)
+        {
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                actionResult = BadRequest(nameof(gameMasterId));
+                return -1;
+            }
+            if (!Request.VerifyIdentity(gameMasterId, true))
+            {
+                actionResult = Unauthorized();
+                return -1;
+            }
+
+            if (!(Request.Query.TryGetValue("dexNo", out var dexNoQueryValue) && int.TryParse(dexNoQueryValue, out var dexNo)))
+            {
+                actionResult = BadRequest(nameof(dexNo));
+                return -1;
+            }
+
+            var document = GetDocument(trainerId, MongoCollection.Trainers, out actionResult);
+            if (!(document is TrainerModel))
+            {
+                return -1;
+            }
+            
+            return dexNo;
         }
 
         private bool IsTrainerOnline(

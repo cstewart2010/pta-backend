@@ -53,12 +53,21 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         }
         public static bool VerifyIdentity(
             this HttpRequest request,
-            string id)
+            string id,
+            bool isGM)
         {
             var trainer = DatabaseUtility.FindTrainerById(id);
             if (trainer == null)
             {
                 return false;
+            }
+
+            if (isGM)
+            {
+                if (!trainer.IsGM)
+                {
+                    return false;
+                }
             }
 
             if (!(request.Headers.TryGetValue("pta-activity-token", out var accessToken)
