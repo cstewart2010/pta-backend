@@ -7,6 +7,7 @@ using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
+using TheReplacement.PTA.Services.Core.Objects;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -19,6 +20,57 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         public TrainerController()
         {
             Collection = MongoCollection.Trainers;
+        }
+
+        [HttpGet("refreshGM")]
+        public ActionResult<IEnumerable<StrippedTrainer>> RefreshGM()
+        {
+            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            {
+                return BadRequest(nameof(gameMasterId));
+            }
+
+            if (!Request.VerifyIdentity(gameMasterId))
+            {
+                return Unauthorized();
+            }
+
+            return FindTrainers(gameMasterId);
+        }
+
+        [HttpGet("refreshTrainer")]
+        public ActionResult<FoundTrainerMessage> RefreshTrainer()
+        {
+            if (!Request.Query.TryGetValue("trainerId", out var trainerId))
+            {
+                return BadRequest(nameof(trainerId));
+            }
+
+            if (!Request.VerifyIdentity(trainerId))
+            {
+                return Unauthorized();
+            }
+
+            Response.RefreshToken(trainerId);
+            return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
+        }
+
+        [HttpGet("trainers")]
+        public ActionResult<IEnumerable<StrippedTrainer>> FindTrainers()
+        {
+            return FindTrainers(null);
+        }
+
+        [HttpGet("trainers/{trainerName}")]
+        public ActionResult<FoundTrainerMessage> FindTrainer(string trainerName)
+        {
+            if (!Request.Query.TryGetValue("gameId", out var gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
+            var trainer = DatabaseUtility.FindTrainerByUsername(trainerName, gameId);
+            return ReturnSuccessfully(new FoundTrainerMessage(trainer));
         }
 
         [HttpGet("{trainerId}/{pokemonId}")]
@@ -224,6 +276,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(new GenericMessage($"Successfully deleted all pokemon associated with {trainerId}"));
         }
 
+        private ActionResult<IEnumerable<StrippedTrainer>> FindTrainers(string gameMasterId)
+        {
+            if (!Request.Query.TryGetValue("gameId", out var gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
+            if (!string.IsNullOrEmpty(gameMasterId))
+            {
+                Response.RefreshToken(gameMasterId);
+            }
+            return ReturnSuccessfully(GetTrainers(gameId));
+        }
+
         private void UpdateAllItemsWithReduction(
             List<ItemModel> itemList,
             string itemName,
@@ -243,23 +309,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                     .Where(item => item.Amount > 0)
                     .ToList();
             }
-        }
-
-        private static ItemModel UpdateItemWithReduction(
-            ItemModel item,
-            string itemName,
-            int itemReduction)
-        {
-            if (item.Name == itemName)
-            {
-                return new ItemModel
-                {
-                    Name = itemName,
-                    Amount = item.Amount - itemReduction
-                };
-            }
-
-            return item;
         }
 
         private void UpdateAllItemsWithAddition(
@@ -288,25 +337,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
         }
 
-        private static ItemModel UpdateItemWithAddition(
-            ItemModel item,
-            string itemName,
-            int itemIncrease)
-        {
-            if (item.Name == itemName)
-            {
-                return new ItemModel
-                {
-                    Name = itemName,
-                    Amount = item.Amount + itemIncrease > 100
-                        ? 100
-                        : item.Amount + itemIncrease
-                };
-            }
-
-            return item;
-        }
-
         private (int UpdatedAmount, AbstractMessage Error) GetCleanData(string itemName)
         {
             var change = Request.Query[itemName];
@@ -332,6 +362,48 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return (itemChange, null);
+        }
+
+        private static List<StrippedTrainer> GetTrainers(string gameId)
+        {
+            return DatabaseUtility.FindTrainersByGameId(gameId)
+                .Select(trainer => new StrippedTrainer(trainer)).ToList();
+        }
+
+        private static ItemModel UpdateItemWithReduction(
+            ItemModel item,
+            string itemName,
+            int itemReduction)
+        {
+            if (item.Name == itemName)
+            {
+                return new ItemModel
+                {
+                    Name = itemName,
+                    Amount = item.Amount - itemReduction
+                };
+            }
+
+            return item;
+        }
+
+        private static ItemModel UpdateItemWithAddition(
+            ItemModel item,
+            string itemName,
+            int itemIncrease)
+        {
+            if (item.Name == itemName)
+            {
+                return new ItemModel
+                {
+                    Name = itemName,
+                    Amount = item.Amount + itemIncrease > 100
+                        ? 100
+                        : item.Amount + itemIncrease
+                };
+            }
+
+            return item;
         }
     }
 }

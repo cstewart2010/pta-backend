@@ -349,6 +349,15 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Returns a game's nickname using the game id
+        /// </summary>
+        /// <param name="gameId">The game session id</param>
+        public static string GetGameNickname(string gameId)
+        {
+            return FindGame(gameId)?.Nickname;
+        }
+
+        /// <summary>
         /// Returns whether there is a game master for the provide game session
         /// </summary>
         /// <param name="gameId">The game session id</param>
