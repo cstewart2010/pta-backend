@@ -56,6 +56,10 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             string id)
         {
             var trainer = DatabaseUtility.FindTrainerById(id);
+            if (trainer == null)
+            {
+                return false;
+            }
 
             if (!(request.Headers.TryGetValue("pta-activity-token", out var accessToken)
                 && trainer.ActivityToken == accessToken
