@@ -23,6 +23,11 @@
         /// <summary>
         /// Represents the Trainers collection
         /// </summary>
-        Trainers = 4
+        Trainers = 4,
+
+        /// <summary>
+        /// Represents the PokeDex collection
+        /// </summary>
+        PokeDex = 5
     }
 }

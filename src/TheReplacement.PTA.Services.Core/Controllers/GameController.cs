@@ -167,7 +167,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(nameof(gameMasterId));
             }
 
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
@@ -194,7 +194,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{trainerId}/addStats")]
         public ActionResult<FoundTrainerMessage> AddTrainerStats(string trainerId)
         {
-            if (!Request.VerifyIdentity(trainerId))
+            if (!Request.VerifyIdentity(trainerId, false))
             {
                 return Unauthorized();
             }
@@ -255,7 +255,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return BadRequest(nameof(gameMasterId));
             }
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
@@ -471,7 +471,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             string gameMasterId,
             out ActionResult notFound)
         {
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 notFound = Unauthorized();
                 return null;

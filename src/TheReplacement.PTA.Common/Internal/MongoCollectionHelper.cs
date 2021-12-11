@@ -17,24 +17,13 @@ namespace TheReplacement.PTA.Common.Internal
             Trainers = Database.GetCollection<TrainerModel>("Trainers");
             Npcs = Database.GetCollection<NpcModel>("NPCs");
             Logs = Database.GetCollection<LoggerModel>("Logs");
-            BasePokemon = Database.GetCollection<BasePokemonModel>("BasePokemon");
-            Berries = Database.GetCollection<BerryModel>("Berries");
+            PokeDex = Database.GetCollection<PokeDexItemModel>("BasePokemon");
         }
 
         /// <summary>
         /// Represents the BasePokemon Collection
         /// </summary>
         public static IMongoDatabase Database { get; }
-
-        /// <summary>
-        /// Represents the BasePokemon Collection
-        /// </summary>
-        public static IMongoCollection<BasePokemonModel> BasePokemon { get; }
-
-        /// <summary>
-        /// Represents the BasePokemon Collection
-        /// </summary>
-        public static IMongoCollection<BerryModel> Berries { get; }
 
         /// <summary>
         /// Represents the Game Collection
@@ -55,6 +44,11 @@ namespace TheReplacement.PTA.Common.Internal
         /// Represents the Npc Collection
         /// </summary>
         public static IMongoCollection<NpcModel> Npcs { get; }
+
+        /// <summary>
+        /// Represents the Npc Collection
+        /// </summary>
+        public static IMongoCollection<PokeDexItemModel> PokeDex { get; }
 
         /// <summary>
         /// Represents the Logs Collection

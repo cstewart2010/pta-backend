@@ -23,19 +23,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("refreshGM")]
-        public ActionResult<IEnumerable<StrippedTrainer>> RefreshGM()
+        public ActionResult<GameMasterMessage> RefreshGM()
         {
             if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
             {
                 return BadRequest(nameof(gameMasterId));
             }
 
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
 
-            return FindTrainers(gameMasterId);
+            Response.RefreshToken(gameMasterId);
+            return ReturnSuccessfully(new GameMasterMessage(gameMasterId));
         }
 
         [HttpGet("refreshTrainer")]
@@ -46,7 +47,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(nameof(trainerId));
             }
 
-            if (!Request.VerifyIdentity(trainerId))
+            if (!Request.VerifyIdentity(trainerId, false))
             {
                 return Unauthorized();
             }
@@ -99,7 +100,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(nameof(gameMasterId));
             }
 
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
@@ -145,7 +146,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{trainerId}/logout")]
         public ActionResult<AbstractMessage> Logout(string trainerId)
         {
-            if (!Request.VerifyIdentity(trainerId))
+            if (!Request.VerifyIdentity(trainerId, false))
             {
                 return Unauthorized();
             }
@@ -167,7 +168,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return BadRequest(nameof(gameMasterId));
             }
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
@@ -212,7 +213,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{trainerId}/removeItems")]
         public ActionResult<FoundTrainerMessage> RemoveItemsFromTrainer(string trainerId)
         {
-            if (!Request.VerifyIdentity(trainerId))
+            if (!Request.VerifyIdentity(trainerId, false))
             {
                 return Unauthorized();
             }
@@ -251,7 +252,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(nameof(gameMasterId));
             }
 
-            if (!Request.VerifyIdentity(gameMasterId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
