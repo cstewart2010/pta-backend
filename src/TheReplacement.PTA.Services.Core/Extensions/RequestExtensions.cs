@@ -141,9 +141,9 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 out badRequestMessage
             );
 
-            if (!(trainer == null || DatabaseUtility.FindTrainerByUsername(trainer.TrainerName, gameId) == null))
+            if (badRequestMessage != null)
             {
-                badRequestMessage = new GenericMessage($"Duplicate trainerName found in {gameId}");
+                return null;
             }
 
             return trainer;
@@ -365,6 +365,12 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             if (string.IsNullOrWhiteSpace(username))
             {
                 error = new GenericMessage($"Missing {userKey} for {gameId}");
+                return null;
+            }
+
+            if (DatabaseUtility.FindTrainerByUsername(username, gameId) != null)
+            {
+                error = new GenericMessage($"Duplicate username {username}");
                 return null;
             }
 

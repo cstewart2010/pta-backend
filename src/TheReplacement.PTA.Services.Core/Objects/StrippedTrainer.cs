@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 
@@ -23,6 +24,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             IsComplete = trainer.IsComplete;
             Pokemon = DatabaseUtility.FindPokemonByTrainerId(TrainerId);
             PokeDex = DatabaseUtility.GetTrainerPokeDex(TrainerId);
+            DexTotal = PokeDex.Count();
         }
 
         public string TrainerId { get; }
@@ -40,5 +42,6 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public bool IsComplete { get; }
         public IEnumerable<PokemonModel> Pokemon { get; }
         public IEnumerable<PokeDexItemModel> PokeDex { get; }
+        public int DexTotal { get; }
     }
 }
