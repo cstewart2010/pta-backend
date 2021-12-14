@@ -57,7 +57,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("trainers")]
-        public ActionResult<IEnumerable<StrippedTrainer>> FindTrainers()
+        public ActionResult<IEnumerable<PublicTrainer>> FindTrainers()
         {
             return FindTrainers(null);
         }
@@ -277,7 +277,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(new GenericMessage($"Successfully deleted all pokemon associated with {trainerId}"));
         }
 
-        private ActionResult<IEnumerable<StrippedTrainer>> FindTrainers(string gameMasterId)
+        private ActionResult<IEnumerable<PublicTrainer>> FindTrainers(string gameMasterId)
         {
             if (!Request.Query.TryGetValue("gameId", out var gameId))
             {
@@ -365,10 +365,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return (itemChange, null);
         }
 
-        private static List<StrippedTrainer> GetTrainers(string gameId)
+        private static List<PublicTrainer> GetTrainers(string gameId)
         {
             return DatabaseUtility.FindTrainersByGameId(gameId)
-                .Select(trainer => new StrippedTrainer(trainer)).ToList();
+                .Select(trainer => new PublicTrainer(trainer)).ToList();
         }
 
         private static ItemModel UpdateItemWithReduction(

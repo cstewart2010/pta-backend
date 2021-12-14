@@ -3,6 +3,9 @@ using TheReplacement.PTA.Common.Interfaces;
 
 namespace TheReplacement.PTA.Common.Models
 {
+    /// <summary>
+    /// Represents a container for all pokedex entries
+    /// </summary>
     public class PokeDexItemModel : IDocument
     {
         /// <inheritdoc/>

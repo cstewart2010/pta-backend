@@ -9,11 +9,11 @@ namespace TheReplacement.PTA.Services.Core.Messages
         {
             Message = "Game was created";
             GameId = trainer.GameId;
-            GameMaster = new StrippedTrainer(trainer);
+            GameMaster = new PublicTrainer(trainer);
         }
 
         public override string Message { get; }
         public string GameId { get; }
-        public StrippedTrainer GameMaster { get; }
+        public PublicTrainer GameMaster { get; }
     }
 }

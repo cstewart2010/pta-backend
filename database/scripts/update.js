@@ -366,7 +366,7 @@ const updatedValidators = {
         'Items',
         'IsGM',
         'Origin',
-        'IsComplete'
+        'TrainerSkills'
       ],
       additionalProperties: false,
       properties: {
@@ -475,10 +475,83 @@ const updatedValidators = {
         IsGM: {
           bsonType: 'bool'
         },
+        Origin: {
+          bsonType: 'string'
+        },
         IsComplete: {
           bsonType: 'bool'
         },
-        Origin: {
+        TrainerSkills: {
+          bsonType: 'array',
+          items: {
+            required: [
+              'Name',
+              'Talent1',
+              'Talent2',
+              'ModifierStat'
+            ],
+            additionalProperties: false,
+            properties: {
+              Name: {
+                bsonType: 'string',
+                'enum': [
+                  'Acrobatics',
+                  'Athletics',
+                  'Bluff/Deception',
+                  'Concentration',
+                  'Constitution',
+                  'Diplomacy/Persuasion',
+                  'Engineering/Operation',
+                  'History',
+                  'Insight',
+                  'Investigation',
+                  'Medicine',
+                  'Nature',
+                  'Perception',
+                  'Performance',
+                  'Pokémon Handling',
+                  'Programming',
+                  'Sleight of Hand',
+                  'Stealth'
+                ]
+              },
+              Talent1: {
+                bsonType: 'bool'
+              },
+              Talent2: {
+                bsonType: 'bool'
+              },
+              ModifierStat: {
+                bsonType: 'string'
+              }
+            }
+          }
+        },
+        Age: {
+          bsonType: 'int'
+        },
+        Gender: {
+          bsonType: 'string'
+        },
+        Height: {
+          bsonType: 'int'
+        },
+        Weight: {
+          bsonType: 'int'
+        },
+        Description: {
+          bsonType: 'string'
+        },
+        Personality: {
+          bsonType: 'string'
+        },
+        Background: {
+          bsonType: 'string'
+        },
+        Goals: {
+          bsonType: 'string'
+        },
+        Species: {
           bsonType: 'string'
         }
       }

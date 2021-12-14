@@ -9,12 +9,12 @@ namespace TheReplacement.PTA.Services.Core.Messages
         internal FoundTrainerMessage(TrainerModel trainer)
         {
             Message = "Trainer was found";
-            Trainer = new StrippedTrainer(trainer);
+            Trainer = new PublicTrainer(trainer);
             GameNickname = DatabaseUtility.GetGameNickname(trainer.GameId);
         }
 
         public override string Message { get; }
-        public StrippedTrainer Trainer { get; }
+        public PublicTrainer Trainer { get; }
         public string GameNickname { get; set; }
     }
 }
