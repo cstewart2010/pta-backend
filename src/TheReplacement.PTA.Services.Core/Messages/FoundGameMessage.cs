@@ -11,11 +11,11 @@ namespace TheReplacement.PTA.Services.Core.Messages
         {
             Message = "Game was found";
             GameId = gameId;
-            Trainers = DatabaseUtility.FindTrainersByGameId(gameId).Select(trainer => new StrippedTrainer(trainer));
+            Trainers = DatabaseUtility.FindTrainersByGameId(gameId).Select(trainer => new PublicTrainer(trainer));
         }
 
         public override string Message { get; }
         public string GameId { get; }
-        public IEnumerable<StrippedTrainer> Trainers { get; }
+        public IEnumerable<PublicTrainer> Trainers { get; }
     }
 }

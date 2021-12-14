@@ -71,7 +71,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new ResultMessage
             {
                 Name = document.Name,
-                Url = $"{HostUrl}/{document.Name}"
+                Url = $"{HostUrl}/{document.Name.Replace("/", "_")}"
             };
         }
     }

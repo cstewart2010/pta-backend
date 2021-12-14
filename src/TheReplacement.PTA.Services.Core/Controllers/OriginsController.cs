@@ -23,7 +23,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{name}")]
         public ActionResult<OriginModel> FindOrigin(string name)
         {
-            var document = Origins.GetStaticDocument(name);
+            var document = Origins.GetStaticDocument(name.Replace("_","/"));
             if (document != null)
             {
                 return document;

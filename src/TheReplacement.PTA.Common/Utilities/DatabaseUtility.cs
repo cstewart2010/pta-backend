@@ -357,6 +357,10 @@ namespace TheReplacement.PTA.Common.Utilities
             return FindGame(gameId)?.Nickname;
         }
 
+        /// <summary>
+        /// Compiles all pokedex entries for a specific trainer into one collection
+        /// </summary>
+        /// <param name="trainerId">The trainer's id to search with</param>
         public static IEnumerable<PokeDexItemModel> GetTrainerPokeDex(string trainerId)
         {
             return MongoCollectionHelper.PokeDex
@@ -364,6 +368,11 @@ namespace TheReplacement.PTA.Common.Utilities
                 .ToEnumerable();
         }
 
+        /// <summary>
+        /// Searches the database for a pokedex entry
+        /// </summary>
+        /// <param name="trainerId">The trainer's id to search with</param>
+        /// <param name="dexNo">The dex number for the pokemon</param>
         public static PokeDexItemModel GetPokedexItem(string trainerId, int dexNo)
         {
             return MongoCollectionHelper.PokeDex
@@ -482,6 +491,11 @@ namespace TheReplacement.PTA.Common.Utilities
             );
         }
 
+        /// <summary>
+        /// Updates the pokedex entry for a seen pokemon
+        /// </summary>
+        /// <param name="trainerId">The trainer's id to search with</param>
+        /// <param name="dexNo">The dex number for the pokemon</param>
         public static bool UpdateDexItemIsSeen(string trainerId, int dexNo)
         {
             return TryUpdateDocument
@@ -494,6 +508,11 @@ namespace TheReplacement.PTA.Common.Utilities
             );
         }
 
+        /// <summary>
+        /// Updates the pokedex entry for a caught pokemon
+        /// </summary>
+        /// <param name="trainerId">The trainer's id to search with</param>
+        /// <param name="dexNo">The dex number for the pokemon</param>
         public static bool UpdateDexItemIsCaught(string trainerId, int dexNo)
         {
             var updates = Builders<PokeDexItemModel>
@@ -769,6 +788,8 @@ namespace TheReplacement.PTA.Common.Utilities
                 {
                     return false;
                 }
+
+                //collection.Re
 
                 LoggerUtility.Info(dbCollection, successMessage);
                 return true;

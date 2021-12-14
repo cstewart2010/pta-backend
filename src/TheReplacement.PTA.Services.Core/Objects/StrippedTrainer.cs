@@ -5,9 +5,9 @@ using TheReplacement.PTA.Common.Utilities;
 
 namespace TheReplacement.PTA.Services.Core.Objects
 {
-    public class StrippedTrainer
+    public class PublicTrainer
     {
-        internal StrippedTrainer(TrainerModel trainer)
+        internal PublicTrainer(TrainerModel trainer)
         {
             TrainerId = trainer.TrainerId;
             TrainerName = trainer.TrainerName;
@@ -24,7 +24,19 @@ namespace TheReplacement.PTA.Services.Core.Objects
             IsComplete = trainer.IsComplete;
             Pokemon = DatabaseUtility.FindPokemonByTrainerId(TrainerId);
             PokeDex = DatabaseUtility.GetTrainerPokeDex(TrainerId);
-            DexTotal = PokeDex.Count();
+            SeenTotal = PokeDex.Count(dexItem => dexItem.IsSeen);
+            CaughtTotal = PokeDex.Count(dexItem => dexItem.IsCaught);
+            Level = Honors.Count() + CaughtTotal / 30 + 1;
+            TrainerSkills = trainer.TrainerSkills;
+            Age = trainer.Age;
+            Gender = trainer.Gender;
+            Height = trainer.Height;
+            Weight = trainer.Weight;
+            Description = trainer.Description;
+            Personality = trainer.Personality;
+            Background = trainer.Background;
+            Goals = trainer.Goals;
+            Species = trainer.Species;
         }
 
         public string TrainerId { get; }
@@ -42,6 +54,27 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public bool IsComplete { get; }
         public IEnumerable<PokemonModel> Pokemon { get; }
         public IEnumerable<PokeDexItemModel> PokeDex { get; }
-        public int DexTotal { get; }
+        public int SeenTotal { get; }
+        public int CaughtTotal { get; }
+        public int Level { get; }
+        public IEnumerable<TrainerSkill> TrainerSkills { get; }
+
+        public int Age { get; set; }
+
+        public string Gender { get; set; }
+
+        public int Height { get; set; }
+
+        public int Weight { get; set; }
+
+        public string Description { get; set; }
+
+        public string Personality { get; set; }
+
+        public string Background { get; set; }
+
+        public string Goals { get; set; }
+
+        public string Species { get; set; }
     }
 }
