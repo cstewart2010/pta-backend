@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
@@ -7,13 +9,20 @@ namespace TheReplacement.PTA.Services.Core.Objects
 {
     public class PublicTrainer
     {
+        internal static PublicTrainer FromJsonString(string json)
+        {
+            var jtrainer = JToken.Parse(json);
+            return jtrainer.ToObject<PublicTrainer>();
+        }
+
+        internal PublicTrainer() { }
+
         internal PublicTrainer(TrainerModel trainer)
         {
             TrainerId = trainer.TrainerId;
             TrainerName = trainer.TrainerName;
             IsGM = trainer.IsGM;
             IsOnline = trainer.IsOnline;
-            Items = trainer.Items;
             Feats = trainer.Feats;
             GameId = trainer.GameId;
             Honors = trainer.Honors;
@@ -22,8 +31,13 @@ namespace TheReplacement.PTA.Services.Core.Objects
             TrainerClasses = trainer.TrainerClasses;
             TrainerStats = trainer.TrainerStats;
             IsComplete = trainer.IsComplete;
-            Pokemon = DatabaseUtility.FindPokemonByTrainerId(TrainerId);
-            PokeDex = DatabaseUtility.GetTrainerPokeDex(TrainerId);
+            var trainerPokemon = DatabaseUtility.FindPokemonByTrainerId(trainer.TrainerId);
+            PokemonTeam = trainerPokemon
+                .Where(pokemon => pokemon.IsOnActiveTeam);
+            PokemonHome = trainerPokemon
+                .Where(pokemon => !pokemon.IsOnActiveTeam);
+
+            PokeDex = DatabaseUtility.GetTrainerPokeDex(TrainerId).OrderBy(item => item.DexNo);
             SeenTotal = PokeDex.Count(dexItem => dexItem.IsSeen);
             CaughtTotal = PokeDex.Count(dexItem => dexItem.IsCaught);
             Level = Honors.Count() + CaughtTotal / 30 + 1;
@@ -37,27 +51,52 @@ namespace TheReplacement.PTA.Services.Core.Objects
             Background = trainer.Background;
             Goals = trainer.Goals;
             Species = trainer.Species;
+            NewPokemon = Array.Empty<NewPokemon>();
         }
 
-        public string TrainerId { get; }
-        public string TrainerName { get; }
-        public bool IsGM { get; }
-        public bool IsOnline { get; }
-        public IEnumerable<ItemModel> Items { get; }
-        public IEnumerable<string> Feats { get; }
-        public string GameId { get; }
-        public IEnumerable<string> Honors { get; }
-        public int Money { get; }
-        public string Origin { get; }
-        public IEnumerable<string> TrainerClasses { get; }
-        public StatsModel TrainerStats { get; }
-        public bool IsComplete { get; }
-        public IEnumerable<PokemonModel> Pokemon { get; }
-        public IEnumerable<PokeDexItemModel> PokeDex { get; }
-        public int SeenTotal { get; }
-        public int CaughtTotal { get; }
-        public int Level { get; }
-        public IEnumerable<TrainerSkill> TrainerSkills { get; }
+        internal TrainerModel ParseBackToModel()
+        {
+            var trainer = DatabaseUtility.FindTrainerById(TrainerId);
+            trainer.TrainerName = TrainerName;
+            trainer.IsGM = IsGM;
+            trainer.Feats = Feats;
+            trainer.Money = Money;
+            trainer.Origin = Origin;
+            trainer.TrainerClasses = TrainerClasses;
+            trainer.TrainerStats = TrainerStats;
+            trainer.TrainerSkills = TrainerSkills;
+            trainer.Age = Age;
+            trainer.Gender = Gender;
+            trainer.Height = Height;
+            trainer.Weight = Weight;
+            trainer.Description = Description;
+            trainer.Personality = Personality;
+            trainer.Background = Background;
+            trainer.Goals = Goals;
+            trainer.Species = Species;
+            return trainer;
+        }
+
+        public string TrainerId { get; set; }
+        public string TrainerName { get; set; }
+        public bool IsGM { get; set; }
+        public bool IsOnline { get; set; }
+        public IEnumerable<string> Feats { get; set; }
+        public string GameId { get; set; }
+        public IEnumerable<string> Honors { get; set; }
+        public int Money { get; set; }
+        public string Origin { get; set; }
+        public IEnumerable<string> TrainerClasses { get; set; }
+        public IEnumerable<PokemonModel> PokemonTeam { get; set; }
+        public IEnumerable<PokemonModel> PokemonHome { get; set; }
+        public IEnumerable<PokeDexItemModel> PokeDex { get; set; }
+        public IEnumerable<NewPokemon> NewPokemon { get; set; }
+        public StatsModel TrainerStats { get; set; }
+        public bool IsComplete { get; set; }
+        public int SeenTotal { get; set; }
+        public int CaughtTotal { get; set; }
+        public int Level { get; set; }
+        public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
 
         public int Age { get; set; }
 

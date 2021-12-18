@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using System;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 
 namespace TheReplacement.PTA.Common.Internal
@@ -12,12 +13,12 @@ namespace TheReplacement.PTA.Common.Internal
             var client = new MongoClient(settings);
             var databaseName = Environment.GetEnvironmentVariable("Database", EnvironmentVariableTarget.Process);
             Database = client.GetDatabase(databaseName);
-            Games = Database.GetCollection<GameModel>("Games");
-            Pokemon = Database.GetCollection<PokemonModel>("Pokemon");
-            Trainers = Database.GetCollection<TrainerModel>("Trainers");
+            Games = Database.GetCollection<GameModel>(MongoCollection.Games.ToString());
+            Pokemon = Database.GetCollection<PokemonModel>(MongoCollection.Pokemon.ToString());
+            Trainers = Database.GetCollection<TrainerModel>(MongoCollection.Trainers.ToString());
             Npcs = Database.GetCollection<NpcModel>("NPCs");
             Logs = Database.GetCollection<LoggerModel>("Logs");
-            PokeDex = Database.GetCollection<PokeDexItemModel>("BasePokemon");
+            PokeDex = Database.GetCollection<PokeDexItemModel>(MongoCollection.PokeDex.ToString());
         }
 
         /// <summary>

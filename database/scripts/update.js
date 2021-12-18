@@ -94,6 +94,7 @@ const updatedValidators = {
         'PokemonId',
         'DexNo',
         'SpeciesName',
+        'OriginalTrainerId',
         'TrainerId',
         'Nickname',
         'Gender',
@@ -133,6 +134,11 @@ const updatedValidators = {
         SpeciesName: {
           bsonType: 'string',
           minLength: 1
+        },
+        OriginalTrainerId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
         },
         TrainerId: {
           bsonType: 'string',

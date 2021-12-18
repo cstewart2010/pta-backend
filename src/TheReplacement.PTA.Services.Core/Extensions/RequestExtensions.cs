@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Messages;
+using TheReplacement.PTA.Services.Core.Objects;
 
 namespace TheReplacement.PTA.Services.Core.Extensions
 {
@@ -18,17 +20,6 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             "nature",
             "gender",
             "status"
-        };
-
-        private static readonly IEnumerable<string> MandatoryTrainerKeys = new[]
-        {
-            "class",
-            "origin",
-            "attack",
-            "defense",
-            "specialAttack",
-            "specialDefense",
-            "speed"
         };
 
         static RequestExtensions()
@@ -149,76 +140,35 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return trainer;
         }
 
-        public static bool TryCompleteTrainer(
-            this HttpRequest request,
-            string trainerId,
-            out AbstractMessage error)
+        public static async Task<bool> TryCompleteTrainer(this HttpRequest request)
         {
-            error = null;
-            var fails = MandatoryTrainerKeys.Where(key => {
-                if (!request.Query.ContainsKey(key))
+            using var reader = new StreamReader(request.Body);
+            var json = await reader.ReadToEndAsync();
+            File.WriteAllText("trainer.txt", json);
+            var publicTrainer = PublicTrainer.FromJsonString(json);
+            var trainer = publicTrainer.ParseBackToModel();
+            AddTrainerPokemon(publicTrainer.NewPokemon, trainer.TrainerId);
+            return DatabaseUtility.UpdateTrainer(trainer);
+        }
+
+        private static void AddTrainerPokemon(IEnumerable<NewPokemon> pokemon, string trainerId)
+        {
+            foreach (var data in pokemon.Where(data => data != null))
+            {
+                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, data.Nickname);
+                pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
+                pokemonModel.OriginalTrainerId = trainerId;
+                pokemonModel.TrainerId = trainerId;
+                DatabaseUtility.TryAddPokemon(pokemonModel, out _);
+                if (DatabaseUtility.GetPokedexItem(trainerId, pokemonModel.DexNo) == null)
                 {
-                    return false;
+                    DatabaseUtility.TryAddDexItem(trainerId, pokemonModel.DexNo, true, true, out _);
                 }
-
-                if (int.TryParse(request.Query[key], out var result))
+                else
                 {
-                    return result > 0 && result < 10;
+                    DatabaseUtility.UpdateDexItemIsCaught(trainerId, pokemonModel.DexNo);
                 }
-
-                return true;
-            });
-            if (fails.Any())
-            {
-                error = new InvalidQueryStringMessage
-                {
-                    MissingParameters = fails
-                };
-                return false;
             }
-
-            var invalids = new List<string>();
-            IEnumerable<string> feats;
-            var trainerClass = DexUtility.GetDexEntry<TrainerClassModel>(DexType.TrainerClasses, request.Query["class"]);
-            if (DatabaseUtility.FindIncompleteTrainerById(trainerId) == null)
-            {
-                invalids.Add("trainerId");
-            }
-            if (DexUtility.GetDexEntry<OriginModel>(DexType.Origins, request.Query["origin"]) == null)
-            {
-                invalids.Add("origin");
-            }
-            if (trainerClass == null)
-            {
-                invalids.Add("class");
-            }
-
-            if (invalids.Any())
-            {
-                error = new InvalidQueryStringMessage
-                {
-                    InvalidParameters = invalids
-                };
-                return false;
-            }
-
-            feats = trainerClass.Feats.Where(feat => feat.LevelLearned == 1).Select(feat => feat.Name);
-            var stats = GetStatsFromRequest(request.Query, false);
-            var result = DatabaseUtility.CompleteTrainer
-            (
-                trainerId,
-                request.Query["origin"],
-                request.Query["class"],
-                feats,
-                stats
-            );
-
-            if (!result)
-            {
-                error = new GenericMessage($"Failed to finish trainer {trainerId}");
-            }
-
-            return result;
         }
 
         public static PokemonModel BuildPokemon(

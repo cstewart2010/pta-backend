@@ -178,6 +178,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return BadRequest(nameof(gameMasterId));
             }
+
             if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
@@ -205,13 +206,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 isSeen = true;
             }
 
-            var result = DatabaseUtility.TryAddDeXItem(new PokeDexItemModel
-            {
-                TrainerId = trainerId,
-                DexNo = dexNo,
-                IsSeen = isSeen,
-                IsCaught = isCaught
-            }, out var error);
+            var result = DatabaseUtility.TryAddDexItem(
+                trainerId,
+                dexNo,
+                isSeen,
+                isCaught,
+                out var error
+            );
             if (!result)
             {
                 return BadRequest(error);

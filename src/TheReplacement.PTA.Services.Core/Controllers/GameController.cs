@@ -7,6 +7,7 @@ using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 using System.Collections;
+using System.Threading.Tasks;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -192,16 +193,17 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{trainerId}/addStats")]
-        public ActionResult<FoundTrainerMessage> AddTrainerStats(string trainerId)
+        public async Task<ActionResult<FoundTrainerMessage>> AddTrainerStats(string trainerId)
         {
             if (!Request.VerifyIdentity(trainerId, false))
             {
                 return Unauthorized();
             }
 
-            if (!Request.TryCompleteTrainer(trainerId, out var error))
+            var result = await Request.TryCompleteTrainer();
+            if (!result)
             {
-                return BadRequest(error);
+                return BadRequest(new GenericMessage("Failed to update trainer"));
             }
 
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
