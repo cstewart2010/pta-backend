@@ -1,12 +1,18 @@
 param (
-    [Parameter(Mandatory=$true)]
-    [int]$BUILD_NUMBER
+  [Parameter(Mandatory=$true)]
+  [string]$WWW_ROOT,
+  [Parameter(Mandatory=$true)]
+  [string]$CORE_API
 )
 
 # validate environment
-$destination = "$env:SOURCE_LOCATION/src/TheReplacement.PTA.Services.Core"
-if (!(Test-Path $destination)){
-  Write-Host "Invalid location for pta backend source: $env:SOURCE_LOCATION"
+if (!(Test-Path $CORE_API)){
+  Write-Host "Invalid location for pta backend source: $CORE_API"
+  return
+}
+
+if (!(Test-Path $WWW_ROOT)){
+  Write-Host "Invalid location for wwwroot: $WWW_ROOT"
   return
 }
 
@@ -16,8 +22,8 @@ net stop WAS /y
 
 # deploy release config
 Write-Host "Building Core Api"
-Set-Location $destination
-dotnet publish -c Release -o C:\PtaApi -p:Version="0.1.$BUILD_NUMBER.$BUILD_NUMBER"
+Set-Location $CORE_API
+dotnet publish -c Release -o $WWW_ROOT
 
 # start iis
 Write-Host "Restarting IIS"
