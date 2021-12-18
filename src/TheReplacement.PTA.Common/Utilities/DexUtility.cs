@@ -79,6 +79,20 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
         /// </summary>
         /// <param name="name">The pokemon's species name</param>
+        /// <param name="nickname">The pokemon's nickname, if applicable</param>
+        public static PokemonModel GetNewPokemon(string name, string nickname)
+        {
+            var random = new Random();
+            var nature = (Nature)random.Next(1, 21);
+            var gender = (Gender)random.Next(3);
+            var status = Status.Normal;
+            return GetNewPokemon(name, nature, gender, status, nickname);
+        }
+
+        /// <summary>
+        /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
+        /// </summary>
+        /// <param name="name">The pokemon's species name</param>
         /// <param name="nature">The nature to give the pokemon</param>
         /// <param name="gender">The pokemon's gender</param>
         /// <param name="status">The pokemon's status</param>
@@ -167,6 +181,17 @@ namespace TheReplacement.PTA.Common.Utilities
                 ? basePokemon.Name
                 : nickname;
 
+            var modifier = nature.GetNatureModifier();
+            var stats = new StatsModel
+            {
+                HP = basePokemon.PokemonStats.HP,
+                Attack = basePokemon.PokemonStats.Attack + modifier.AttackModifier,
+                Defense = basePokemon.PokemonStats.Defense + modifier.DefenseModifier,
+                SpecialAttack = basePokemon.PokemonStats.SpecialAttack + modifier.SpecialAttackModifier,
+                SpecialDefense = basePokemon.PokemonStats.SpecialDefense + modifier.SpecialDefenseModifier,
+                Speed = basePokemon.PokemonStats.Speed + modifier.SpeedModifier,
+            };
+
             return new PokemonModel
             {
                 PokemonId = Guid.NewGuid().ToString(),
@@ -180,7 +205,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 CatchRate = GetCatchRate(basePokemon),
                 Nature = nature.ToString(),
                 IsShiny = new Random().Next(420) == 69,
-                PokemonStats = basePokemon.PokemonStats,
+                PokemonStats = stats,
                 Size = basePokemon.Size,
                 Weight = basePokemon.Weight,
                 Skills = basePokemon.Skills,

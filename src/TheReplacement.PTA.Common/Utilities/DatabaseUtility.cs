@@ -402,6 +402,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to replace the previous trainer with the new data
+        /// </summary>
+        /// <param name="updatedTrainer">The updated trainer data</param>
+        public static bool UpdateTrainer(TrainerModel updatedTrainer)
+        {
+            var result = MongoCollectionHelper.Trainers.ReplaceOne
+            (
+                trainer => trainer.TrainerId == updatedTrainer.TrainerId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatedTrainer
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
         /// Attempts to add a game using the provided document
         /// </summary>
         /// <param name="game">The document to add</param>
@@ -476,12 +492,26 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Attempts to add a dexItem using the provided document
         /// </summary>
-        /// <param name="dexItem">The document to add</param>
+        /// <param name="trainerId">The pokedex's trainer id</param>
+        /// <param name="dexNo">The dex number</param>
+        /// <param name="isSeen">Whether the pokemon was seen</param>
+        /// <param name="isCaught">Whether the pokemon was caught</param>
         /// <param name="error">Any error found</param>
-        public static bool TryAddDeXItem(
-            PokeDexItemModel dexItem,
+        public static bool TryAddDexItem(
+            string trainerId,
+            int dexNo,
+            bool isSeen,
+            bool isCaught,
             out MongoWriteError error)
         {
+            var dexItem = new PokeDexItemModel
+            {
+                TrainerId = trainerId,
+                DexNo = dexNo,
+                IsSeen = isSeen,
+                IsCaught = isCaught
+            };
+
             return TryAddDocument
             (
                 MongoCollection.PokeDex,

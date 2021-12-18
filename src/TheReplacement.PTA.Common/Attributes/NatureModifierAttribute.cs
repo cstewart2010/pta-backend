@@ -3,9 +3,12 @@ using TheReplacement.PTA.Common.Enums;
 
 namespace TheReplacement.PTA.Common.Attributes
 {
-    internal class NatureModifierAttribute : Attribute
+    /// <summary>
+    /// Represents the container for all modifiers associated with a nature
+    /// </summary>
+    public class NatureModifierAttribute : Attribute
     {
-        public NatureModifierAttribute(
+        internal NatureModifierAttribute(
             Flavors likedFlavor,
             Flavors dislikedFlavor,
             int attackModifier = 0,
@@ -23,8 +26,14 @@ namespace TheReplacement.PTA.Common.Attributes
             SpeedModifier = speedModifier;
         }
 
+        /// <summary>
+        /// Returns the Liked Flavor
+        /// </summary>
         public Flavors LikedFlavor { get; }
 
+        /// <summary>
+        /// Returns the Disliked Flavor
+        /// </summary>
         public Flavors DislikedFlavor { get; }
 
         /// <summary>

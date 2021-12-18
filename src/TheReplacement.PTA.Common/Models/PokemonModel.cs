@@ -33,6 +33,11 @@ namespace TheReplacement.PTA.Common.Models
         public string TrainerId { get; set; }
 
         /// <summary>
+        /// The pokemon's original trainer id
+        /// </summary>
+        public string OriginalTrainerId { get; set; }
+
+        /// <summary>
         /// The Pokemon's gender
         /// </summary>
         public string Gender { get; set; }
