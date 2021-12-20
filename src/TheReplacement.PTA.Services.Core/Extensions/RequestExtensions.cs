@@ -144,7 +144,6 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         {
             using var reader = new StreamReader(request.Body);
             var json = await reader.ReadToEndAsync();
-            File.WriteAllText("trainer.txt", json);
             var publicTrainer = PublicTrainer.FromJsonString(json);
             var trainer = publicTrainer.ParseBackToModel();
             AddTrainerPokemon(publicTrainer.NewPokemon, trainer.TrainerId);

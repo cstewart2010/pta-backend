@@ -28,7 +28,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             if (Request.Query.TryGetValue("nickname", out var nickname))
             {
                 return DatabaseUtility.FindAllGames(nickname)
-                    .Select(game => new FoundGameMessage(game.GameId));
+                    .Select(game => new FoundGameMessage(game.GameId, game.Nickname));
             }
 
             return DatabaseUtility.FindMostRecent20Games();
