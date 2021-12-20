@@ -13,7 +13,15 @@ namespace TheReplacement.PTA.Services.Core.Messages
             GameId = gameId;
             Trainers = DatabaseUtility.FindTrainersByGameId(gameId).Select(trainer => new PublicTrainer(trainer));
         }
+        internal FoundGameMessage(string gameId, string nickname)
+        {
+            Message = "Game was found";
+            GameId = gameId;
+            Nickname = nickname;
+            Trainers = DatabaseUtility.FindTrainersByGameId(gameId).Select(trainer => new PublicTrainer(trainer));
+        }
 
+        public string Nickname { get; }
         public override string Message { get; }
         public string GameId { get; }
         public IEnumerable<PublicTrainer> Trainers { get; }

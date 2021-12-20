@@ -86,6 +86,7 @@ namespace TheReplacement.PTA.Common.Utilities
             if (deleteResult.IsAcknowledged)
             {
                 LoggerUtility.Info(Pokemon, $"Deleted {deleteResult.DeletedCount} pokemon associated with trainer {trainerId}");
+                MongoCollectionHelper.PokeDex.DeleteMany(pokeDex => pokeDex.TrainerId == trainerId);
                 return deleteResult.DeletedCount;
             }
             else
@@ -334,7 +335,7 @@ namespace TheReplacement.PTA.Common.Utilities
             string username,
             string gameId)
         {
-            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerName == username && trainer.GameId == gameId;
+            Expression<Func<TrainerModel, bool>> filter = trainer => trainer.TrainerName.ToLower() == username.ToLower() && trainer.GameId == gameId;
             var trainer = MongoCollectionHelper
                 .Trainers
                 .Find(filter)
