@@ -8,6 +8,7 @@ using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 using TheReplacement.PTA.Services.Core.Objects;
+using System.Threading.Tasks;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -93,7 +94,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{trainerId}")]
-        public ActionResult<PokemonModel> AddPokemon(string trainerId)
+        public async Task<ActionResult<PokemonModel>> AddPokemon(string trainerId)
         {
             if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
             {
@@ -110,7 +111,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(gameMasterId);
             }
 
-            var pokemon = Request.BuildPokemon(trainerId, out var error);
+            var (pokemon, error) = await Request.BuildPokemon(trainerId);
             if (pokemon == null)
             {
                 return BadRequest(error);
@@ -125,9 +126,9 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("login")]
-        public ActionResult<FoundTrainerMessage> Login()
+        public async Task<ActionResult<FoundTrainerMessage>> Login()
         {
-            var (gameId, username, password) = Request.GetTrainerCredentials(out var credentialErrors);
+            var (gameId, username, password, credentialErrors) = await Request.GetTrainerCredentials();
             if (credentialErrors.Any())
             {
                 return BadRequest(credentialErrors);

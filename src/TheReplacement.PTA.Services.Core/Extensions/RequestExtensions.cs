@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -94,57 +95,52 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             };
         }
 
-        public static TrainerModel BuildGM(
+        public static async Task<(TrainerModel GameMaster, AbstractMessage Message)> BuildGM(
             this HttpRequest request,
-            string gameId,
-            out AbstractMessage badRequestMessage)
+            string gameId)
         {
-            var trainer =  BuildTrainer
+            var (gm, badRequestMessage) = await BuildTrainer
             (
                 request,
                 gameId,
                 "gmUsername",
                 "gmPassword",
-                true,
-                out badRequestMessage
+                true
             );
 
-            if (trainer != null)
+            if (gm != null)
             {
-                trainer.IsGM = true;
+                gm.IsGM = true;
             }
 
-            return trainer;
+            return (gm, badRequestMessage);
         }
 
-        public static TrainerModel BuildTrainer(
+        public static async Task<(TrainerModel Trainer, AbstractMessage Message)> BuildTrainer(
             this HttpRequest request,
-            string gameId,
-            out AbstractMessage badRequestMessage)
+            string gameId)
         {
-            var trainer =  BuildTrainer
+            var (trainer, badRequestMessage) = await BuildTrainer
             (
                 request,
                 gameId,
                 "username",
                 "password",
-                false,
-                out badRequestMessage
+                false
             );
 
             if (badRequestMessage != null)
             {
-                return null;
+                return (null, badRequestMessage);
             }
 
-            return trainer;
+            return (trainer, null);
         }
 
         public static async Task<bool> TryCompleteTrainer(this HttpRequest request)
         {
-            using var reader = new StreamReader(request.Body);
-            var json = await reader.ReadToEndAsync();
-            var publicTrainer = PublicTrainer.FromJsonString(json);
+            var json = await request.GetRequestBody();
+            var publicTrainer = PublicTrainer.FromJson(json);
             var trainer = publicTrainer.ParseBackToModel();
             AddTrainerPokemon(publicTrainer.NewPokemon, trainer.TrainerId);
             return DatabaseUtility.UpdateTrainer(trainer);
@@ -170,55 +166,60 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             }
         }
 
-        public static PokemonModel BuildPokemon(
+        public static async Task<(PokemonModel Pokemon, AbstractMessage Message)> BuildPokemon(
             this HttpRequest request,
-            string trainerId,
-            out AbstractMessage badRequestMessage)
+            string trainerId)
         {
-            if (ValidateMandatoryPokemonKeys(request, out var invalid))
+            var (isValid, message) = await ValidateMandatoryPokemonKeys(request);
+            if (isValid)
             {
-                badRequestMessage = invalid;
-                return null;
+                return (null, message);
             }
 
-            var pokemon = BuildDefaultPokemon(request, out var error);
+            var (pokemon, error) = await BuildDefaultPokemon(request);
             if (pokemon == null)
             {
-                badRequestMessage = error;
-                return null;
+                return (null, error);
             }
 
-            badRequestMessage = null;
             pokemon.TrainerId = trainerId;
-            return pokemon;
+            pokemon.OriginalTrainerId = trainerId;
+            return (pokemon, null);
         }
 
-        public static (string GamePassword, string GameMasterUsername, string GamemasterPassword) GetStartGameCredentials(
-            this HttpRequest request,
-            out IEnumerable<string> errors)
+        public static async Task<(string GamePassword, string GameMasterUsername, string GamemasterPassword, IEnumerable<string> Errors)> GetStartGameCredentials(
+            this HttpRequest request)
         {
-            errors = new[] { "gameSessionPassword", "gmUsername", "gmPassword" }
-                .Select(key => request.Query.ContainsKey(key) ? null : $"Missing {key}")
+            var body = await request.GetRequestBody();
+            var errors = new[] { "gameSessionPassword", "gmUsername", "gmPassword" }
+                .Select(key => body[key] != null ? null : $"Missing {key}")
                 .Where(error => error != null);
-            var gamePassword = request.Query["gameSessionPassword"];
-            var username = request.Query["gmUsername"];
-            var password = request.Query["gmPassword"];
+            var gamePassword = (string)body["gameSessionPassword"];
+            var username = (string)body["gmUsername"];
+            var password = (string)body["gmPassword"];
 
-            return (gamePassword, username, password);
+            return (gamePassword, username, password, errors);
         }
 
-        public static (string GameId, string Username, string Password) GetTrainerCredentials(
-            this HttpRequest request,
-            out IEnumerable<string> errors)
+        public static async Task<(string GameId, string Username, string Password, IEnumerable<string> Errors)> GetTrainerCredentials(
+            this HttpRequest request)
         {
-            errors = new[] { "gameId", "trainerName", "password" }
-                .Select(key => request.Query.ContainsKey(key) ? null : $"Missing {key}")
+            var body = await request.GetRequestBody();
+            var errors = new[] { "trainerName", "password" }
+                .Select(key => body[key] != null ? null : $"Missing {key}")
                 .Where(error => error != null);
             var gameId = request.Query["gameId"];
-            var trainerName = request.Query["trainerName"];
-            var password = request.Query["password"];
+            var trainerName = (string)body["trainerName"];
+            var password = (string)body["password"];
 
-            return (gameId, trainerName, password);
+            return (gameId, trainerName, password, errors);
+        }
+
+        public static async Task<JToken> GetRequestBody(this HttpRequest request)
+        {
+            using var reader = new StreamReader(request.Body);
+            var json = await reader.ReadToEndAsync();
+            return JToken.Parse(json);
         }
 
         public static IEnumerable<string> GetNpcIds(
@@ -249,125 +250,87 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return Array.Empty<string>();
         }
 
-        private static bool ValidateMandatoryPokemonKeys(
-            HttpRequest request,
-            out InvalidQueryStringMessage error)
+        private static async Task<(bool IsValid, InvalidQueryStringMessage Message)>  ValidateMandatoryPokemonKeys(
+            HttpRequest request)
         {
-            var fails = MandatoryPokemonKeys.Where(key => string.IsNullOrWhiteSpace(request.Query[key]));
-            error = new InvalidQueryStringMessage
+            var body = await request.GetRequestBody();
+            var fails = MandatoryPokemonKeys.Where(key => string.IsNullOrWhiteSpace((string)body[key]));
+            var error = new InvalidQueryStringMessage
             {
                 MissingParameters = fails
             };
-            return fails.Any();
+            return (fails.Any(), error);
         }
 
-        private static PokemonModel BuildDefaultPokemon(
-            HttpRequest request,
-            out AbstractMessage error)
+        private static async Task<(PokemonModel Pokemon, AbstractMessage Message)> BuildDefaultPokemon(HttpRequest request)
         {
-            error = null;
-            if (!Enum.TryParse(request.Query["gender"], true, out Gender gender))
+            var body = await request.GetRequestBody();
+            if (!Enum.TryParse((string)body["gender"], true, out Gender gender))
             {
-                error = new GenericMessage($"Invalid gender in request");
-                return null;
+                return (null, new GenericMessage($"Invalid gender in request"));
             }
 
-            if (!Enum.TryParse(request.Query["nature"], true, out Nature nature))
+            if (!Enum.TryParse((string)body["nature"], true, out Nature nature))
             {
-                error = new GenericMessage($"Invalid nature in request");
-                return null;
+                return (null, new GenericMessage($"Invalid nature in request"));
             }
 
-            if (!Enum.TryParse(request.Query["status"], true, out Status status))
+            if (!Enum.TryParse((string)body["status"], true, out Status status))
             {
-                error = new GenericMessage($"Invalid status in request");
-                return null;
+                return (null, new GenericMessage($"Invalid status in request"));
             }
 
             var pokemon = DexUtility.GetNewPokemon
             (
-                request.Query["pokemon"],
+                (string)body["pokemon"],
                 nature,
                 gender,
                 status,
-                request.Query["nickname"]
+                (string)body["nickname"]
             );
 
             if (pokemon == null)
             {
-                error = new GenericMessage("Failed to build pokemon");
-                return null;
+                return (null, new GenericMessage("Failed to build pokemon"));
             }
 
-            return pokemon;
+            return (pokemon, null);
         }
 
-        private static TrainerModel BuildTrainer(
+        private static async Task<(TrainerModel Trainer, AbstractMessage Error)> BuildTrainer(
             HttpRequest request,
             string gameId,
             string userKey,
             string passKey,
-            bool isGM,
-            out AbstractMessage error)
+            bool isGM)
         {
-            var username = request.Query[userKey].ToString();
+            var body = await request.GetRequestBody();
+            var username = body[userKey].ToString();
             if (string.IsNullOrWhiteSpace(username))
             {
-                error = new GenericMessage($"Missing {userKey} for {gameId}");
-                return null;
+                return (null, new GenericMessage($"Missing {userKey} for {gameId}"));
             }
 
             if (DatabaseUtility.FindTrainerByUsername(username, gameId) != null)
             {
-                error = new GenericMessage($"Duplicate username {username}");
-                return null;
+                return (null, new GenericMessage($"Duplicate username {username}"));
             }
 
-            var password = request.Query[passKey].ToString();
+            var password = body[passKey].ToString();
             if (string.IsNullOrWhiteSpace(password))
             {
-                error = new GenericMessage($"Missing {passKey} for {gameId}");
-                return null;
+                return (null, new GenericMessage($"Missing {passKey} for {gameId}"));
             }
 
-            error = null;
-            var stats = GetStatsFromRequest(request.Query, false);
-            var trainer = CreateTrainer(gameId, username, password, stats);
+            var trainer = CreateTrainer(gameId, username, password);
             trainer.IsGM = isGM;
-            return trainer;
-        }
-
-        private static StatsModel GetStatsFromRequest(IQueryCollection query, bool isStarting)
-        {
-            if (!isStarting)
-            {
-                return new StatsModel
-                {
-                    HP = 20,
-                    Attack = 1,
-                    Defense = 1,
-                    SpecialAttack = 1,
-                    SpecialDefense = 1,
-                    Speed = 1
-                };
-            }
-
-            return new StatsModel
-            {
-                HP = 20,
-                Attack = int.Parse(query["attack"]),
-                Defense = int.Parse(query["defense"]),
-                SpecialAttack = int.Parse(query["specialAttack"]),
-                SpecialDefense = int.Parse(query["specialDefense"]),
-                Speed = int.Parse(query["speed"])
-            };
+            return (trainer, null);
         }
 
         private static TrainerModel CreateTrainer(
             string gameId,
             string username,
-            string password,
-            StatsModel stats)
+            string password)
         {
             return new TrainerModel
             {
@@ -380,9 +343,22 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 Feats = Array.Empty<string>(),
                 IsOnline = true,
                 Items = new List<ItemModel>(),
-                TrainerStats = stats,
+                TrainerStats = GetStats(),
                 ActivityToken = EncryptionUtility.GenerateToken(),
                 Origin = string.Empty
+            };
+        }
+
+        private static StatsModel GetStats()
+        {
+            return new StatsModel
+            {
+                HP = 20,
+                Attack = 1,
+                Defense = 1,
+                SpecialAttack = 1,
+                SpecialDefense = 1,
+                Speed = 1
             };
         }
     }
