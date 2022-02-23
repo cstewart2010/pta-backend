@@ -9,10 +9,9 @@ namespace TheReplacement.PTA.Services.Core.Objects
 {
     public class PublicTrainer
     {
-        internal static PublicTrainer FromJsonString(string json)
+        internal static PublicTrainer FromJson(JToken json)
         {
-            var jtrainer = JToken.Parse(json);
-            return jtrainer.ToObject<PublicTrainer>();
+            return json.ToObject<PublicTrainer>();
         }
 
         internal PublicTrainer() { }

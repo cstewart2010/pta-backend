@@ -27,7 +27,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("key/{name}")]
         public ActionResult<BaseItemModel> FindKeyItem(string name)
         {
-            var document = KeyItems.GetStaticDocument(name);
+            var document = KeyItems.GetStaticDocument(name.Replace("_", "/"));
             if (document != null)
             {
                 return document;
@@ -45,7 +45,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("medical/{name}")]
         public ActionResult<BaseItemModel> FindMedicalItem(string name)
         {
-            var document = MedicalItems.GetStaticDocument(name);
+            var document = MedicalItems.GetStaticDocument(name.Replace("_", "/"));
             if (document != null)
             {
                 return document;
@@ -63,7 +63,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("pokeball/{name}")]
         public ActionResult<BaseItemModel> FindPokeball(string name)
         {
-            var document = Pokeballs.GetStaticDocument(name);
+            var document = Pokeballs.GetStaticDocument(name.Replace("_", "/"));
             if (document != null)
             {
                 return document;
@@ -81,7 +81,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("pokemon/{name}")]
         public ActionResult<BaseItemModel> FindPokemonItem(string name)
         {
-            var document = PokemonItems.GetStaticDocument(name);
+            var document = PokemonItems.GetStaticDocument(name.Replace("_", "/"));
             if (document != null)
             {
                 return document;
@@ -99,7 +99,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("trainer/{name}")]
         public ActionResult<BaseItemModel> FindTrainerEquipment(string name)
         {
-            var document = TrainerEquipment.GetStaticDocument(name);
+            var document = TrainerEquipment.GetStaticDocument(name.Replace("_", "/"));
             if (document != null)
             {
                 return document;

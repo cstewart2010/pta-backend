@@ -103,7 +103,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("new")]
-        public ActionResult<CreatedGameMessage> CreateNewGame()
+        public async Task<ActionResult<CreatedGameMessage>> CreateNewGame()
         {
             var game = Request.BuildGame();
             if (!DatabaseUtility.TryAddGame(game, out var error))
@@ -111,7 +111,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
-            var trainer = Request.BuildGM(game.GameId, out var badRequest);
+            var (trainer, badRequest) = await Request.BuildGM(game.GameId);
             if (trainer == null)
             {
                 return BadRequest(badRequest);
@@ -127,7 +127,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/new")]
-        public ActionResult<FoundTrainerMessage> AddPlayerToGame(string gameId)
+        public async Task<ActionResult<FoundTrainerMessage>> AddPlayerToGame(string gameId)
         {
             if (string.IsNullOrEmpty(gameId))
             {
@@ -145,7 +145,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(noGMError);
             }
 
-            var trainer = Request.BuildTrainer(gameId, out var badRequest);
+            var (trainer, badRequest) = await Request.BuildTrainer(gameId);
             if (trainer == null)
             {
                 return BadRequest(badRequest);
@@ -161,7 +161,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameMasterId}/wild")]
-        public ActionResult<PokemonModel> AddPokemon(string gameMasterId)
+        public async Task<ActionResult<PokemonModel>> AddPokemon(string gameMasterId)
         {
             if (string.IsNullOrEmpty(gameMasterId))
             {
@@ -178,7 +178,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(gameMasterId);
             }
 
-            var pokemon = Request.BuildPokemon(gameMasterId, out var error);
+            var (pokemon, error) = await Request.BuildPokemon(gameMasterId);
             if (pokemon == null)
             {
                 return BadRequest(error);
@@ -211,7 +211,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/start")]
-        public ActionResult<FoundGameMessage> StartGame(string gameId)
+        public async Task<ActionResult<FoundGameMessage>> StartGame(string gameId)
         {
             if (string.IsNullOrEmpty(gameId))
             {
@@ -224,7 +224,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return notFound;
             }
 
-            var (gamePassword, username, password) = Request.GetStartGameCredentials(out var credentialErrors);
+            var (gamePassword, username, password, credentialErrors) = await Request.GetStartGameCredentials();
             if (credentialErrors.Any())
             {
                 return BadRequest(credentialErrors);
