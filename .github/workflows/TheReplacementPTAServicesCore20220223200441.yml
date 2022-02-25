@@ -9,7 +9,7 @@ env:
   AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.THEREPLACEMENTPTASERVICESCORE20220223200441_FFFF }}
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 5.0.x
-  WORKING_DIRECTORY: TheReplacement.PTA.Services.Core
+  WORKING_DIRECTORY: src/TheReplacement.PTA.Services.Core
 jobs:
   build:
     runs-on: windows-latest
