@@ -91,7 +91,8 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                     : nickname,
                 IsOnline = true,
                 PasswordHash = EncryptionUtility.HashSecret(request.Query["gameSessionPassword"]),
-                NPCs = Array.Empty<string>()
+                NPCs = Array.Empty<string>(),
+                Logs = Array.Empty<LogModel>()
             };
         }
 
@@ -143,7 +144,19 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             var publicTrainer = PublicTrainer.FromJson(json);
             var trainer = publicTrainer.ParseBackToModel();
             AddTrainerPokemon(publicTrainer.NewPokemon, trainer.TrainerId);
-            return DatabaseUtility.UpdateTrainer(trainer);
+            var result = DatabaseUtility.UpdateTrainer(trainer);
+            if (result)
+            {
+                var game = DatabaseUtility.FindGame(trainer.GameId);
+                var statsAddedLog = new LogModel
+                {
+                    User = trainer.TrainerName,
+                    Action = $"updated their stats at {DateTime.UtcNow}"
+                };
+                DatabaseUtility.UpdateGameLogs(game, statsAddedLog);
+            }
+
+            return result;
         }
 
         private static void AddTrainerPokemon(IEnumerable<NewPokemon> pokemon, string trainerId)
@@ -155,6 +168,14 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 pokemonModel.OriginalTrainerId = trainerId;
                 pokemonModel.TrainerId = trainerId;
                 DatabaseUtility.TryAddPokemon(pokemonModel, out _);
+                var trainer = DatabaseUtility.FindTrainerById(trainerId);
+                var game = DatabaseUtility.FindGame(trainer.GameId);
+                var caughtPokemonLog = new LogModel
+                {
+                    User = trainer.TrainerName,
+                    Action = $"caught a {pokemonModel.SpeciesName} named {pokemonModel.Nickname} at {DateTime.UtcNow}"
+                };
+                DatabaseUtility.UpdateGameLogs(game, caughtPokemonLog);
                 if (DatabaseUtility.GetPokedexItem(trainerId, pokemonModel.DexNo) == null)
                 {
                     DatabaseUtility.TryAddDexItem(trainerId, pokemonModel.DexNo, true, true, out _);

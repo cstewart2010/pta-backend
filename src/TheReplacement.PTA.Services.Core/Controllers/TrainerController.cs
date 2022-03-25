@@ -179,7 +179,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var itemList = trainer.Items;
-            var items = await Request.GetRequestBody();
+            var items = (await Request.GetRequestBody()).Select(token => token.ToObject<ItemModel>());
             foreach (var item in items)
             {
                 itemList = UpdateAllItemsWithAddition
@@ -204,7 +204,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var addedItemsLogs = items.Select(item => new LogModel
             {
                 User = trainer.TrainerName,
-                Action = $"added ({item["amount"]}) {item["name"]} at {DateTime.UtcNow}"
+                Action = $"added ({item.Amount}) {item.Name} at {DateTime.UtcNow}"
             });
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), addedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
@@ -227,7 +227,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var itemList = trainer.Items;
-            var items = await Request.GetRequestBody();
+            var items = (await Request.GetRequestBody()).Select(token => token.ToObject<ItemModel>());
             foreach (var item in items)
             {
                 itemList = UpdateAllItemsWithReduction
@@ -251,7 +251,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var removedItemsLogs = items.Select(item => new LogModel
             {
                 User = trainer.TrainerName,
-                Action = $"removed ({item["amount"]}) {item["name"]} at {DateTime.UtcNow}"
+                Action = $"removed ({item.Amount}) {item.Name} at {DateTime.UtcNow}"
             });
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), removedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
@@ -290,7 +290,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var deleteTrainerLog = new LogModel
             {
                 User = gameMaster.TrainerName,
-                Action = $"removed ${trainer.TrainerName} and all of their pokemon from the game at {DateTime.UtcNow}"
+                Action = $"removed {trainer.TrainerName} and all of their pokemon from the game at {DateTime.UtcNow}"
             };
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), deleteTrainerLog);
             Response.RefreshToken(gameMasterId);
@@ -313,21 +313,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         private static List<ItemModel> UpdateAllItemsWithReduction(
             List<ItemModel> itemList,
-            JToken itemToken,
+            ItemModel itemToken,
             TrainerModel trainer)
         {
-            var newItem = itemToken.ToObject<ItemModel>();
-            //var (itemReduction, badDataObject) = GetCleanData(itemName);
-            //if (badDataObject != null)
-            //{
-            //    return;
-            //}
-
-            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(newItem.Name, StringComparison.CurrentCultureIgnoreCase));
-            if ((item?.Amount ?? 0) >= newItem.Amount)
+            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemToken.Name, StringComparison.CurrentCultureIgnoreCase));
+            if ((item?.Amount ?? 0) >= itemToken.Amount)
             {
                 itemList = trainer.Items
-                    .Select(item => UpdateItemWithReduction(item, newItem))
+                    .Select(item => UpdateItemWithReduction(item, itemToken))
                     .Where(item => item.Amount > 0)
                     .ToList();
             }
@@ -337,55 +330,21 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         private static List<ItemModel> UpdateAllItemsWithAddition(
             List<ItemModel> itemList,
-            JToken itemToken,
+            ItemModel itemToken,
             TrainerModel trainer)
         {
-            var newItem = itemToken.ToObject<ItemModel>();
-            //var (itemIncrease, badDataObject) = GetCleanData(itemToken);
-            //if (badDataObject != null)
-            //{
-            //    return;
-            //}
-
-            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(newItem.Name, StringComparison.CurrentCultureIgnoreCase));
+            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemToken.Name, StringComparison.CurrentCultureIgnoreCase));
             if (item == null)
             {
-                itemList.Add(newItem);
+                itemList.Add(itemToken);
             }
             else
             {
-                itemList = trainer.Items.Select(item => UpdateItemWithAddition(item, newItem)).ToList();
+                itemList = trainer.Items.Select(item => UpdateItemWithAddition(item, itemToken)).ToList();
             }
 
             return itemList;
         }
-
-        //private (int UpdatedAmount, AbstractMessage Error) GetCleanData(JToken itemToken)
-        //{
-        //    var change = Request.Query[itemToken];
-        //    if (!int.TryParse(change, out var itemChange))
-        //    {
-        //        return
-        //        (
-        //            0,
-        //            new GenericMessage($"No ${itemToken} change listed")
-        //        );
-        //    }
-        //    if (itemChange < 1)
-        //    {
-        //        return
-        //        (
-        //            0,
-        //            new GenericMessage($"Should not change ${itemToken} count less than 1")
-        //        );
-        //    }
-        //    else if (itemChange > 100)
-        //    {
-        //        itemChange = 100;
-        //    }
-
-        //    return (itemChange, null);
-        //}
 
         private static List<PublicTrainer> GetTrainers(string gameId)
         {
