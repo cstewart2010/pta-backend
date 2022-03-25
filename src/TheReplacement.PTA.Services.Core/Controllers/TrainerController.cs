@@ -82,7 +82,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             string pokemonId)
         {
             var document = GetDocument(pokemonId, MongoCollection.Pokemon, out var notFound);
-            if (!(document is PokemonModel pokemon))
+            if (document is not PokemonModel pokemon)
             {
                 return notFound;
             }
@@ -154,7 +154,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var trainerDocument = GetDocument(trainerId, Collection, out var notFound);
-            if (!(trainerDocument is TrainerModel trainer))
+            if (trainerDocument is not TrainerModel trainer)
             {
                 return notFound;
             }
@@ -200,6 +200,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 throw new Exception();
             }
+
+            var addedItemsLogs = items.Select(item => new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"added ({item["amount"]}) {item["name"]} at {DateTime.UtcNow}"
+            });
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), addedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
             return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
         }
@@ -240,6 +247,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 throw new Exception();
             }
+
+            var removedItemsLogs = items.Select(item => new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"removed ({item["amount"]}) {item["name"]} at {DateTime.UtcNow}"
+            });
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), removedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
             return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
         }
@@ -261,7 +275,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return error;
             }
-
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
             foreach (var pokemon in DatabaseUtility.FindPokemonByTrainerId(trainerId))
             {
                 DatabaseUtility.DeletePokemon(pokemon.PokemonId);
@@ -273,6 +287,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
+            var deleteTrainerLog = new LogModel
+            {
+                User = gameMaster.TrainerName,
+                Action = $"removed ${trainer.TrainerName} and all of their pokemon from the game at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), deleteTrainerLog);
             Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(new GenericMessage($"Successfully deleted all pokemon associated with {trainerId}"));
         }

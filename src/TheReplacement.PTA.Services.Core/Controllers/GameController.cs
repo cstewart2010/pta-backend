@@ -8,6 +8,7 @@ using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 using System.Collections;
 using System.Threading.Tasks;
+using System;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -71,7 +72,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var trainerDocument = GetDocument(trainerId, MongoCollection.Trainers, out notFound);
-            if (!(trainerDocument is TrainerModel trainer))
+            if (trainerDocument is not TrainerModel trainer)
             {
                 return notFound;
             }
@@ -83,6 +84,45 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return ReturnSuccessfully(new FoundTrainerMessage(trainer));
+        }
+
+        [HttpGet("{gameId}/all_logs")]
+        public ActionResult<AllLogsMessage> GetAllLogs(string gameId)
+        {
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
+            var gameDocument = GetDocument(gameId, Collection, out var notFound);
+            if (gameDocument is not GameModel game)
+            {
+                return notFound;
+            }
+
+            return ReturnSuccessfully(new AllLogsMessage(game));
+        }
+
+        [HttpGet("{gameId}/logs")]
+        public ActionResult<IEnumerable<LogModel>> GetLogs(string gameId)
+        {
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return BadRequest(nameof(gameId));
+            }
+
+            var gameDocument = GetDocument(gameId, Collection, out var notFound);
+            if (gameDocument is not GameModel game)
+            {
+                return notFound;
+            }
+
+            if (game.Logs == null)
+            {
+                return Array.Empty<LogModel>();
+            }
+
+            return ReturnSuccessfully(game.Logs.Reverse().Take(100).ToList());
         }
 
         [HttpPost("import")]
@@ -122,6 +162,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
+            var gameCreationLog = new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"created a new game and joined as game master at ${DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(game, gameCreationLog);
             Response.AssignAuthAndToken(trainer.TrainerId);
             return ReturnSuccessfully(new CreatedGameMessage(trainer));
         }
@@ -135,7 +181,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
-            if (!(gameDocument is GameModel))
+            if (gameDocument is not GameModel game)
             {
                 return notFound;
             }
@@ -156,6 +202,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
+            var trainerCreationLog = new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"joined at ${DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(game, trainerCreationLog);
             Response.AssignAuthAndToken(trainer.TrainerId);
             return ReturnSuccessfully(new FoundTrainerMessage(trainer));
         }
@@ -188,6 +240,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(writeError);
             }
 
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            var game = DatabaseUtility.FindGame(gameMaster.GameId);
+            var pokemonCreationLog = new LogModel
+            {
+                User = pokemon.SpeciesName,
+                Action = $"spawned at ${DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(game, pokemonCreationLog);
             Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(pokemon);
         }
@@ -207,6 +267,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            var game = DatabaseUtility.FindGame(trainer.GameId);
+            var statsAddedLog = new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"updated their stats at ${DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(game, statsAddedLog);
             return ReturnSuccessfully(new FoundTrainerMessage(trainer));
         }
 
@@ -219,7 +286,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
-            if (!(gameDocument is GameModel game))
+            if (gameDocument is not GameModel game)
             {
                 return notFound;
             }
@@ -297,7 +364,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameDocument = GetDocument(gameId, Collection, out notFound);
-            if (!(gameDocument is GameModel game))
+            if (gameDocument is not GameModel game)
             {
                 return notFound;
             }
@@ -330,7 +397,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameDocument = GetDocument(gameId, Collection, out notFound);
-            if (!(gameDocument is GameModel game))
+            if (gameDocument is not GameModel game)
             {
                 return notFound;
             }
@@ -389,7 +456,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
-            if (!(gameDocument is GameModel game))
+            if (gameDocument is not GameModel game)
             {
                 return notFound;
             }
@@ -457,7 +524,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized(new UnauthorizedMessage(gameId));
             }
 
+            var exportLog = new LogModel
+            {
+                User = gameMaster.TrainerName,
+                Action = $"exported game session at {DateTime.UtcNow}"
+            };
             DatabaseUtility.UpdateGameOnlineStatus(gameId, false);
+            DatabaseUtility.UpdateGameLogs(game, exportLog);
             var exportStream = ExportUtility.GetExportStream(game);
 
             DeleteGame(gameId);

@@ -5,6 +5,7 @@ using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
+using System;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -28,7 +29,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var document = GetDocument(pokemonId, Collection, out var notFound);
-            if (!(document is PokemonModel pokemon))
+            if (document is not PokemonModel pokemon)
             {
                 return notFound;
             }
@@ -80,6 +81,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 rightPokemon
             );
 
+            var leftTrainer = DatabaseUtility.FindTrainerById(rightPokemon.TrainerId);
+            var rightTrainer = DatabaseUtility.FindTrainerById(leftPokemon.TrainerId);
+            var tradeLog = new LogModel
+            {
+                User = gameMaster.TrainerName,
+                Action = $"authorized a trade between {leftTrainer.TrainerName} and {rightTrainer.TrainerName} at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), tradeLog);
             Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(new
             {
@@ -113,6 +122,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             DatabaseUtility.UpdatePokemonWithEvolution(pokemonId, evolvedForm);
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            var evolutionLog = new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"evolved their {pokemon.Nickname} to an {evolvedForm.SpeciesName} at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), evolutionLog);
             Response.RefreshToken(trainerId);
             return ReturnSuccessfully(pokemon);
         }
@@ -189,12 +205,21 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(gameMasterId);
             }
 
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (!DatabaseUtility.DeletePokemon(pokemonId))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
-                NotFound(pokemonId);
+                return NotFound(pokemonId);
             }
 
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            var deletionLog = new LogModel
+            {
+                User = gameMaster.TrainerName,
+                Action = $"removed {pokemon.Nickname} ({pokemonId}) at {DateTime.UtcNow}"
+            };
+
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), deletionLog);
             Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(new GenericMessage($"Successfully deleted {pokemonId}"));
         }
@@ -271,7 +296,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             string trainerId,
             out ActionResult badResult)
         {
-            if (!(GetDocument(trainerId, MongoCollection.Trainers, out badResult) is TrainerModel trainer))
+            if (GetDocument(trainerId, MongoCollection.Trainers, out badResult) is not TrainerModel trainer)
             {
                 return false;
             }
@@ -289,7 +314,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return true;
         }
 
-        private void UpdatePokemonTrainerIds(
+        private static void UpdatePokemonTrainerIds(
             PokemonModel leftPokemon,
             PokemonModel rightPokemon)
         {
@@ -335,7 +360,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return default;
             }
             var leftDocument = GetDocument(leftPokemonId, Collection, out notFound);
-            if (!(leftDocument is PokemonModel leftPokemon))
+            if (leftDocument is not PokemonModel leftPokemon)
             {
                 return default;
             }
@@ -347,7 +372,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var rightDocument = GetDocument(rightPokemonId, Collection, out notFound);
-            if (!(rightDocument is PokemonModel rightPokemon))
+            if (rightDocument is not PokemonModel rightPokemon)
             {
                 return default;
             }
@@ -367,13 +392,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             out ActionResult error)
         {
             var trainerDocument = GetDocument(trainerId, MongoCollection.Trainers, out error);
-            if (!(trainerDocument is TrainerModel trainer))
+            if (trainerDocument is not TrainerModel trainer)
             {
                 return null;
             }
 
             var pokemonDocument = GetDocument(pokemonId, MongoCollection.Pokemon, out error);
-            if (!(pokemonDocument is PokemonModel pokemon))
+            if (pokemonDocument is not PokemonModel pokemon)
             {
                 return null;
             }
