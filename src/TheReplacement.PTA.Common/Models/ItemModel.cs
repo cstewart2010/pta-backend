@@ -19,5 +19,10 @@
         /// The Amount of that item that the user is holding, greater than 0
         /// </summary>
         public int Amount { get; set; }
+
+        /// <summary>
+        /// The type of item it is
+        /// </summary>
+        public string Type { get; set; }
     }
 }
