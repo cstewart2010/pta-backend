@@ -165,7 +165,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var gameCreationLog = new LogModel
             {
                 User = trainer.TrainerName,
-                Action = $"created a new game and joined as game master at ${DateTime.UtcNow}"
+                Action = $"created a new game and joined as game master at {DateTime.UtcNow}"
             };
             DatabaseUtility.UpdateGameLogs(game, gameCreationLog);
             Response.AssignAuthAndToken(trainer.TrainerId);
@@ -205,7 +205,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var trainerCreationLog = new LogModel
             {
                 User = trainer.TrainerName,
-                Action = $"joined at ${DateTime.UtcNow}"
+                Action = $"joined at {DateTime.UtcNow}"
             };
             DatabaseUtility.UpdateGameLogs(game, trainerCreationLog);
             Response.AssignAuthAndToken(trainer.TrainerId);
@@ -245,7 +245,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var pokemonCreationLog = new LogModel
             {
                 User = pokemon.SpeciesName,
-                Action = $"spawned at ${DateTime.UtcNow}"
+                Action = $"spawned at {DateTime.UtcNow}"
             };
             DatabaseUtility.UpdateGameLogs(game, pokemonCreationLog);
             Response.RefreshToken(gameMasterId);
@@ -265,15 +265,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return BadRequest(new GenericMessage("Failed to update trainer"));
             }
-
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            var game = DatabaseUtility.FindGame(trainer.GameId);
-            var statsAddedLog = new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"updated their stats at ${DateTime.UtcNow}"
-            };
-            DatabaseUtility.UpdateGameLogs(game, statsAddedLog);
             return ReturnSuccessfully(new FoundTrainerMessage(trainer));
         }
 

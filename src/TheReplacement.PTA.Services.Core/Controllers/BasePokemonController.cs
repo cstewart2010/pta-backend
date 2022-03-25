@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
@@ -17,7 +18,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public StaticCollectionMessage FindPokemon()
         {
-            return GetStaticCollectionResponse(BasePokemon);
+            return GetStaticCollectionResponse(BasePokemon.OrderBy(pokemon => pokemon.DexNo));
         }
 
         [HttpGet("{name}")]
