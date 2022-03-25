@@ -583,6 +583,24 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Searches for a game, then updates the logs
+        /// </summary>
+        /// <param name="theGame">The game session</param>
+        /// <param name="logs">The new logs to add</param>
+        /// <exception cref="MongoCommandException" />
+        public static bool UpdateGameLogs(GameModel theGame, params LogModel[] logs)
+        {
+            return TryUpdateDocument
+            (
+                Game,
+                MongoCollectionHelper.Games,
+                game => game.GameId == theGame.GameId,
+                Builders<GameModel>.Update.Set("Logs", theGame.Logs?.Union(logs) ?? logs),
+                $"Updated logs for game {theGame.GameId}"
+            );
+        }
+
+        /// <summary>
         /// Searches for a game, then updates its online status
         /// </summary>
         /// <param name="gameId">The game session id</param>

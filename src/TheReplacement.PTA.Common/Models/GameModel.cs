@@ -32,5 +32,10 @@ namespace TheReplacement.PTA.Common.Models
         /// Collection of NPC ids that used in this game session
         /// </summary>
         public IEnumerable<string> NPCs { get; set; }
+
+        /// <summary>
+        /// Collection of logs related to the game
+        /// </summary>
+        public IEnumerable<LogModel> Logs { get; set; }
     }
 }

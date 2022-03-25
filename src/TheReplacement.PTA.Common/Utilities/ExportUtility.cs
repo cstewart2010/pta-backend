@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -101,6 +102,15 @@ namespace TheReplacement.PTA.Common.Utilities
                 return false;
             }
 
+            if (game.Logs == null)
+            {
+                game.Logs = Array.Empty<LogModel>();
+            }
+            game.Logs = game.Logs.Append(new LogModel
+            {
+                User = "Import Tool",
+                Action = $"Recreated game {game.GameId} at {DateTime.Now}"
+            });
             if (!DatabaseUtility.TryAddGame(game, out var error))
             {
                 errors.Add(error.WriteErrorJsonString);
