@@ -50,6 +50,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             Background = trainer.Background;
             Goals = trainer.Goals;
             Species = trainer.Species;
+            Items = trainer.Items;
             NewPokemon = Array.Empty<NewPokemon>();
         }
 
@@ -72,6 +73,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             trainer.Personality = Personality;
             trainer.Background = Background;
             trainer.Goals = Goals;
+            trainer.Items = Items.ToList();
             trainer.Species = Species;
             return trainer;
         }
@@ -95,6 +97,9 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public int SeenTotal { get; set; }
         public int CaughtTotal { get; set; }
         public int Level { get; set; }
+
+        public IEnumerable<ItemModel> Items { get; set; }
+
         public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
 
         public int Age { get; set; }

@@ -9,6 +9,7 @@ using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 using TheReplacement.PTA.Services.Core.Objects;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -163,20 +164,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{trainerId}/addItems")]
-        public ActionResult<FoundTrainerMessage> AddItemsToTrainer(string trainerId)
+        public async Task<ActionResult<FoundTrainerMessage>> AddItemsToTrainerAsync(string trainerId)
         {
-            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
-            {
-                return BadRequest(nameof(gameMasterId));
-            }
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.VerifyIdentity(trainerId, false))
             {
                 return Unauthorized();
-            }
-
-            if (!IsGMOnline(gameMasterId))
-            {
-                return Unauthorized(gameMasterId);
             }
 
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
@@ -187,12 +179,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var itemList = trainer.Items;
-            foreach (var itemName in Request.Query.Keys)
+            var items = await Request.GetRequestBody();
+            foreach (var item in items)
             {
-                UpdateAllItemsWithAddition
+                itemList = UpdateAllItemsWithAddition
                 (
                     itemList,
-                    itemName,
+                    item,
                     trainer
                 );
             }
@@ -207,12 +200,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 throw new Exception();
             }
-            Response.RefreshToken(gameMasterId);
+            Response.RefreshToken(trainerId);
             return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
         }
 
         [HttpPut("{trainerId}/removeItems")]
-        public ActionResult<FoundTrainerMessage> RemoveItemsFromTrainer(string trainerId)
+        public async Task<ActionResult<FoundTrainerMessage>> RemoveItemsFromTrainerAsync(string trainerId)
         {
             if (!Request.VerifyIdentity(trainerId, false))
             {
@@ -220,16 +213,22 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            if (trainer?.IsOnline == true)
+            if (trainer?.IsOnline != true)
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
                 return NotFound(trainerId);
             }
 
             var itemList = trainer.Items;
-            foreach (var itemName in Request.Query.Keys)
+            var items = await Request.GetRequestBody();
+            foreach (var item in items)
             {
-                UpdateAllItemsWithReduction(itemList, itemName, trainer);
+                itemList = UpdateAllItemsWithReduction
+                (
+                    itemList,
+                    item,
+                    trainer
+                );
             }
 
             var result = DatabaseUtility.UpdateTrainerItemList
@@ -292,79 +291,81 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(GetTrainers(gameId));
         }
 
-        private void UpdateAllItemsWithReduction(
+        private static List<ItemModel> UpdateAllItemsWithReduction(
             List<ItemModel> itemList,
-            string itemName,
+            JToken itemToken,
             TrainerModel trainer)
         {
-            var (itemReduction, badDataObject) = GetCleanData(itemName);
-            if (badDataObject != null)
-            {
-                return;
-            }
+            var newItem = itemToken.ToObject<ItemModel>();
+            //var (itemReduction, badDataObject) = GetCleanData(itemName);
+            //if (badDataObject != null)
+            //{
+            //    return;
+            //}
 
-            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemName, StringComparison.CurrentCultureIgnoreCase));
-            if ((item?.Amount) >= itemReduction)
+            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(newItem.Name, StringComparison.CurrentCultureIgnoreCase));
+            if ((item?.Amount ?? 0) >= newItem.Amount)
             {
                 itemList = trainer.Items
-                    .Select(item => UpdateItemWithReduction(item, itemName, itemReduction))
+                    .Select(item => UpdateItemWithReduction(item, newItem))
                     .Where(item => item.Amount > 0)
                     .ToList();
             }
+
+            return itemList;
         }
 
-        private void UpdateAllItemsWithAddition(
+        private static List<ItemModel> UpdateAllItemsWithAddition(
             List<ItemModel> itemList,
-            string itemName,
+            JToken itemToken,
             TrainerModel trainer)
         {
-            var (itemIncrease, badDataObject) = GetCleanData(itemName);
-            if (badDataObject != null)
-            {
-                return;
-            }
+            var newItem = itemToken.ToObject<ItemModel>();
+            //var (itemIncrease, badDataObject) = GetCleanData(itemToken);
+            //if (badDataObject != null)
+            //{
+            //    return;
+            //}
 
-            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemName, StringComparison.CurrentCultureIgnoreCase));
+            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(newItem.Name, StringComparison.CurrentCultureIgnoreCase));
             if (item == null)
             {
-                itemList.Add(new ItemModel
-                {
-                    Name = itemName,
-                    Amount = itemIncrease
-                });
+                itemList.Add(newItem);
             }
             else
             {
-                itemList = trainer.Items.Select(item => UpdateItemWithAddition(item, itemName, itemIncrease)).ToList();
-            }
-        }
-
-        private (int UpdatedAmount, AbstractMessage Error) GetCleanData(string itemName)
-        {
-            var change = Request.Query[itemName];
-            if (!int.TryParse(change, out var itemChange))
-            {
-                return
-                (
-                    0,
-                    new GenericMessage($"No ${itemName} change listed")
-                );
-            }
-            if (itemChange < 1)
-            {
-                return
-                (
-                    0,
-                    new GenericMessage($"Should not change ${itemName} count less than 1")
-                );
-            }
-            else if (itemChange > 100)
-            {
-                itemChange = 100;
+                itemList = trainer.Items.Select(item => UpdateItemWithAddition(item, newItem)).ToList();
             }
 
-            return (itemChange, null);
+            return itemList;
         }
+
+        //private (int UpdatedAmount, AbstractMessage Error) GetCleanData(JToken itemToken)
+        //{
+        //    var change = Request.Query[itemToken];
+        //    if (!int.TryParse(change, out var itemChange))
+        //    {
+        //        return
+        //        (
+        //            0,
+        //            new GenericMessage($"No ${itemToken} change listed")
+        //        );
+        //    }
+        //    if (itemChange < 1)
+        //    {
+        //        return
+        //        (
+        //            0,
+        //            new GenericMessage($"Should not change ${itemToken} count less than 1")
+        //        );
+        //    }
+        //    else if (itemChange > 100)
+        //    {
+        //        itemChange = 100;
+        //    }
+
+        //    return (itemChange, null);
+        //}
 
         private static List<PublicTrainer> GetTrainers(string gameId)
         {
@@ -374,16 +375,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         private static ItemModel UpdateItemWithReduction(
             ItemModel item,
-            string itemName,
-            int itemReduction)
+            ItemModel newItem)
         {
-            if (item.Name == itemName)
+            if (item.Name == newItem.Name)
             {
-                return new ItemModel
-                {
-                    Name = itemName,
-                    Amount = item.Amount - itemReduction
-                };
+                item.Amount -= newItem.Amount;
             }
 
             return item;
@@ -391,18 +387,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         private static ItemModel UpdateItemWithAddition(
             ItemModel item,
-            string itemName,
-            int itemIncrease)
+            ItemModel newItem)
         {
-            if (item.Name == itemName)
+            if (item.Name == newItem.Name)
             {
-                return new ItemModel
-                {
-                    Name = itemName,
-                    Amount = item.Amount + itemIncrease > 100
+                item.Amount = item.Amount + newItem.Amount > 100
                         ? 100
-                        : item.Amount + itemIncrease
-                };
+                        : item.Amount + newItem.Amount;
             }
 
             return item;

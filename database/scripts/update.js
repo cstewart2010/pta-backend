@@ -474,6 +474,17 @@ const updatedValidators = {
               Amount: {
                 bsonType: 'int',
                 minimum: 1
+              },
+              Type: {
+                bsonType: 'string',
+                enum: [
+                  'Berry',
+                  'Key',
+                  'Medical',
+                  'Pokeball',
+                  'Pokemon',
+                  'Trainer'
+                ]
               }
             }
           }
