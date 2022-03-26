@@ -252,6 +252,27 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(pokemon);
         }
 
+        [HttpPost("{gameId}/log/{trainerId}")]
+        public async Task<ActionResult<LogModel>> PostLogAsync(string gameId, string trainerId)
+        {
+            var body = await Request.GetRequestBody();
+            if (string.IsNullOrEmpty(trainerId))
+            {
+                return BadRequest(nameof(trainerId));
+            }
+
+            if (!Request.VerifyIdentity(trainerId, false))
+            {
+                return Unauthorized();
+            }
+
+            var log = body.ToObject<LogModel>();
+            log.Action += $" at {DateTime.UtcNow}";
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), log);
+            Response.RefreshToken(trainerId);
+            return ReturnSuccessfully(log);
+        }
+
         [HttpPut("{trainerId}/addStats")]
         public async Task<ActionResult<FoundTrainerMessage>> AddTrainerStats(string trainerId)
         {
