@@ -122,7 +122,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Array.Empty<LogModel>();
             }
 
-            return ReturnSuccessfully(game.Logs.Reverse().Take(100).ToList());
+            return ReturnSuccessfully(game.Logs.Reverse().Take(50).ToList());
         }
 
         [HttpPost("import")]
