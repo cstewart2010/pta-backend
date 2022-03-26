@@ -163,7 +163,8 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         {
             foreach (var data in pokemon.Where(data => data != null))
             {
-                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, data.Nickname);
+                var nickname = data.Nickname.Length > 18 ? data.Nickname.Substring(0, 18) : data.Nickname;
+                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, nickname);
                 pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
                 pokemonModel.OriginalTrainerId = trainerId;
                 pokemonModel.TrainerId = trainerId;
