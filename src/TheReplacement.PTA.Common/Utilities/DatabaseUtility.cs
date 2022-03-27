@@ -642,6 +642,27 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Searches for a pokemon, then updates its location
+        /// </summary>
+        /// <param name="pokemonId">The pokemon id</param>
+        /// <param name="isOnActiveTeam">Where the pokemon is on the active team</param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
+        public static bool UpdatePokemonLocation(
+            string pokemonId,
+            bool isOnActiveTeam)
+        {
+            return TryUpdateDocument
+            (
+                Pokemon,
+                MongoCollectionHelper.Pokemon,
+                pokemon => pokemon.PokemonId == pokemonId,
+                Builders<PokemonModel>.Update.Set("IsOnActiveTeam", isOnActiveTeam),
+                $"Updated IsOnActiveTeam for pokemon {pokemonId}"
+            );
+        }
+
+        /// <summary>
         /// Searches for a pokemon, then evolves it to its next stage
         /// </summary>
         /// <param name="pokemonId">The pokemon id</param>
