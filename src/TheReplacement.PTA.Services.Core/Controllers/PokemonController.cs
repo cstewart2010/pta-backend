@@ -313,10 +313,22 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 rightPokemon.TrainerId
             );
 
+            DatabaseUtility.UpdatePokemonLocation
+            (
+                leftPokemon.PokemonId,
+                rightPokemon.IsOnActiveTeam
+            );
+
             DatabaseUtility.UpdatePokemonTrainerId
             (
                 rightPokemon.PokemonId,
                 leftPokemon.TrainerId
+            );
+
+            DatabaseUtility.UpdatePokemonLocation
+            (
+                rightPokemon.PokemonId,
+                leftPokemon.IsOnActiveTeam
             );
         }
 
