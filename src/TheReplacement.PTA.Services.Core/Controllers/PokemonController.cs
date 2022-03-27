@@ -63,18 +63,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return badRequest;
             }
 
-            var areTrainersOnline = AreTrainersOnline
-            (
-                gameMaster.GameId,
-                leftPokemon.TrainerId,
-                rightPokemon.TrainerId,
-                out badRequest
-            );
-            if (!areTrainersOnline)
-            {
-                return badRequest;
-            }
-
             UpdatePokemonTrainerIds
             (
                 leftPokemon,
