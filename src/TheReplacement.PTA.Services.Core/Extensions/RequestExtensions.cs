@@ -164,7 +164,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             foreach (var data in pokemon.Where(data => data != null))
             {
                 var nickname = data.Nickname.Length > 18 ? data.Nickname.Substring(0, 18) : data.Nickname;
-                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, nickname);
+                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, nickname, data.Form);
                 pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
                 pokemonModel.OriginalTrainerId = trainerId;
                 pokemonModel.TrainerId = trainerId;
@@ -302,13 +302,20 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 return (null, new GenericMessage($"Invalid status in request"));
             }
 
+            var form = (string)body["form"];
+            if (!string.IsNullOrWhiteSpace(form))
+            {
+                return (null, new GenericMessage($"Mission form in request"));
+            }
+
             var pokemon = DexUtility.GetNewPokemon
             (
                 (string)body["pokemon"],
                 nature,
                 gender,
                 status,
-                (string)body["nickname"]
+                (string)body["nickname"],
+                form
             );
 
             if (pokemon == null)

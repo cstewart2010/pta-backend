@@ -234,23 +234,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(new GenericMessage("Pokedex item added successfully"));
         }
 
-        private bool AreTrainersOnline(
-            string gameId,
-            string leftTrainerId,
-            string rightTrainerId,
-            out ActionResult badResult)
-        {
-            if (!IsTrainerOnline(gameId, leftTrainerId, out badResult))
-            {
-                return false;
-            }
-            if (!IsTrainerOnline(gameId, rightTrainerId, out badResult))
-            {
-                return false;
-            }
-
-            return true;
-        }
         private int GetDexNoForPokedexUpdate(string trainerId, out ActionResult actionResult)
         {
             if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
@@ -277,29 +260,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
             
             return dexNo;
-        }
-
-        private bool IsTrainerOnline(
-            string gameId,
-            string trainerId,
-            out ActionResult badResult)
-        {
-            if (GetDocument(trainerId, MongoCollection.Trainers, out badResult) is not TrainerModel trainer)
-            {
-                return false;
-            }
-            if (!TradeCheck(gameId, trainer.GameId, out badResult))
-            {
-                return false;
-            }
-            if (!trainer.IsOnline)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
-                badResult = NotFound(trainerId);
-                return false;
-            }
-
-            return true;
         }
 
         private static void UpdatePokemonTrainerIds(
@@ -330,26 +290,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 rightPokemon.PokemonId,
                 leftPokemon.IsOnActiveTeam
             );
-        }
-
-        private bool TradeCheck(
-            string gameMasterGameId, 
-            string trainerGameId,
-            out ActionResult authError)
-        {
-            authError = null;
-            var result = gameMasterGameId == trainerGameId;
-            if (!result)
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade for an unknown player");
-                authError = Unauthorized(new
-                {
-                    gameMasterGameId,
-                    trainerGameId
-                });
-            }
-
-            return result;
         }
 
         private (PokemonModel LeftPokemon, PokemonModel RightPokemon) GetTradePokemon(out ActionResult notFound)

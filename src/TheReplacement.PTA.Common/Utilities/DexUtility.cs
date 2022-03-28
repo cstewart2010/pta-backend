@@ -80,13 +80,14 @@ namespace TheReplacement.PTA.Common.Utilities
         /// </summary>
         /// <param name="name">The pokemon's species name</param>
         /// <param name="nickname">The pokemon's nickname, if applicable</param>
-        public static PokemonModel GetNewPokemon(string name, string nickname)
+        /// <param name="form">The pokemon's form</param>
+        public static PokemonModel GetNewPokemon(string name, string nickname, string form)
         {
             var random = new Random();
             var nature = (Nature)random.Next(1, 21);
             var gender = (Gender)random.Next(3);
             var status = Status.Normal;
-            return GetNewPokemon(name, nature, gender, status, nickname);
+            return GetNewPokemon(name, nature, gender, status, nickname, form);
         }
 
         /// <summary>
@@ -97,15 +98,17 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="gender">The pokemon's gender</param>
         /// <param name="status">The pokemon's status</param>
         /// <param name="nickname">The pokemon's nickname, if applicable</param>
+        /// <param name="form">The pokemon's form</param>
         public static PokemonModel GetNewPokemon(
             string name,
             Nature nature,
             Gender gender,
             Status status,
-            string nickname)
+            string nickname,
+            string form)
         {
-            var basePokemon = GetDexEntry<BasePokemonModel>(DexType.BasePokemon, name);
-            return GetPokemonFromBase(basePokemon, nature, gender, status, nickname);
+            var (basePokemon, altForms) = GetPokedexEntry(name, form);
+            return GetPokemonFromBase(basePokemon, nature, gender, status, nickname, altForms);
         }
 
         /// <summary>
@@ -121,6 +124,23 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Returns a specific Dex entry from a specific Dex collection
         /// </summary>
+        /// <param name="name">The name of the dex entry</param>
+        /// <param name="form">The pokemon form to select</param>
+        public static (BasePokemonModel Model, IEnumerable<string> AlternateForms) GetPokedexEntry(
+            string name,
+            string form)
+        {
+            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModel>(DexType.BasePokemon.ToString());
+            var allForms = collection.Find(document => document.Name.ToLower() == name.ToLower()).ToEnumerable();
+            var model = allForms.First(document => document.Form.Equals(form, StringComparison.CurrentCultureIgnoreCase));
+            var alternateForms = allForms.Where(document => !document.Form.Equals(form, StringComparison.CurrentCultureIgnoreCase))
+                .Select(document => document.Form);
+            return (model, alternateForms);
+        }
+
+        /// <summary>
+        /// Returns a specific Dex entry from a specific Dex collection
+        /// </summary>
         /// <param name="documentType">The dex collection you wish to return data from</param>
         /// <param name="name">The name of the dex entry</param>
         public static TDocument GetDexEntry<TDocument>(
@@ -129,6 +149,35 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             var collection = MongoCollectionHelper.Database.GetCollection<TDocument>(documentType.ToString());
             return collection.Find(document => document.Name.ToLower() == name.ToLower()).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Adds a collection of dex entry to a specific dex collection
+        /// </summary>
+        /// <param name="documents">The documents to add to collection</param>
+        public static void AddPokedexEntries(IEnumerable<BasePokemonModel> documents)
+        {
+            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModel>(DexType.BasePokemon.ToString());
+            foreach (var document in documents)
+            {
+                if (collection.Find(currentDocument => document.Name == currentDocument.Name && document.Form == currentDocument.Form).Any())
+                {
+                    continue;
+                }
+
+                Console.WriteLine($"Adding {document.Name} to {DexType.BasePokemon}");
+                var isSuccessful = TryAddDexEntry
+                (
+                    () => collection.InsertOne(document),
+                    out var error
+                );
+
+                if (!isSuccessful)
+                {
+                    Console.WriteLine($"Failed to add {document.Name} to {DexType.BasePokemon}");
+                    Console.WriteLine(error.WriteErrorJsonString);
+                }
+            }
         }
 
         /// <summary>
@@ -170,7 +219,8 @@ namespace TheReplacement.PTA.Common.Utilities
             Nature nature,
             Gender gender,
             Status status,
-            string nickname)
+            string nickname,
+            IEnumerable<string> altForms)
         {
             if (basePokemon == null)
             {
@@ -218,7 +268,11 @@ namespace TheReplacement.PTA.Common.Utilities
                 Rarity = basePokemon.Rarity,
                 GMaxMove = basePokemon.GMaxMove,
                 EvolvedFrom = basePokemon.EvolvesFrom,
-                LegendaryStats = basePokemon.LegendaryStats
+                LegendaryStats = basePokemon.LegendaryStats,
+                Form = basePokemon.Form,
+                AlternateForms = altForms,
+                NormalPortrait = basePokemon.NormalPortrait,
+                ShinyPortrait = basePokemon.ShinyPortrait
             };
         }
 
