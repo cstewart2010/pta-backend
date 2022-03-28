@@ -85,6 +85,51 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             });
         }
 
+        [HttpPut("{pokemonId}/form/{form}")]
+        public ActionResult<PokemonModel> SwitchForm(string pokemonId, string form)
+        {
+            if (!Request.Query.TryGetValue("trainerId", out var trainerId))
+            {
+                return BadRequest(nameof(trainerId));
+            }
+            if (!Request.VerifyIdentity(trainerId, false))
+            {
+                return Unauthorized();
+            }
+
+            var pokemon = GetPokemonFromTrainer(trainerId, pokemonId, out var error);
+            if (pokemon == null)
+            {
+                return error;
+            }
+
+            form = form.Replace('_', '/');
+            if (!pokemon.AlternateForms.Contains(form))
+            {
+                return BadRequest(nameof(form));
+            }
+
+            var result = GetDifferentForm(pokemon, form);
+            result.PokemonId = pokemon.PokemonId;
+            result.OriginalTrainerId = pokemon.OriginalTrainerId;
+            result.TrainerId = pokemon.TrainerId;
+            result.IsOnActiveTeam = pokemon.IsOnActiveTeam;
+            result.IsShiny = pokemon.IsShiny;
+            if (!DatabaseUtility.TryChangePokemonForm(result, out var writeError))
+            {
+                return BadRequest(writeError);
+            }
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            var changedFormLog = new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"changed their {pokemon.Nickname} to its {form} form at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), changedFormLog);
+            Response.RefreshToken(trainerId);
+            return result;
+        }
+
         [HttpPut("{pokemonId}/evolve")]
         public ActionResult<PokemonModel> EvolvePokemon(string pokemonId)
         {
@@ -210,6 +255,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), deletionLog);
             Response.RefreshToken(gameMasterId);
             return ReturnSuccessfully(new GenericMessage($"Successfully deleted {pokemonId}"));
+        }
+
+        private static PokemonModel GetDifferentForm(PokemonModel pokemon, string form)
+        {
+            return DexUtility.GetNewPokemon(pokemon.SpeciesName, Enum.Parse<Nature>(pokemon.Nature), Enum.Parse<Gender>(pokemon.Gender), Enum.Parse<Status>(pokemon.PokemonStatus), pokemon.Nickname, form);
         }
 
         private ActionResult<AbstractMessage> AddDexItem(string trainerId, int dexNo, bool isSeen = false, bool isCaught = false)
