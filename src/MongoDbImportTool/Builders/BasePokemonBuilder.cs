@@ -5,6 +5,7 @@ using System.Linq;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Exceptions;
 using TheReplacement.PTA.Common.Models;
+using TheReplacement.PTA.Common.Utilities;
 
 namespace MongoDbImportTool.Builders
 {
@@ -24,18 +25,16 @@ namespace MongoDbImportTool.Builders
         };
 
         private static readonly string BasePokemonJson = $"{JsonHelper.CurrentDirectory}/json/base_pokemon.min.json";
-        private static int _incrementor = 0;
 
         public static void AddBasePokemon()
         {
-            DatabaseHelper.AddDocuments("BasePokemon", GetPokemon(BasePokemonJson));
+            DexUtility.AddPokedexEntries(GetPokemon(BasePokemonJson));
         }
 
         private static IEnumerable<BasePokemonModel> GetPokemon(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {
-                _incrementor++;
                 yield return Build(child);
             }
         }
@@ -60,7 +59,10 @@ namespace MongoDbImportTool.Builders
                 EvolvesFrom = BuildEvolvesFrom(pokemonToken),
                 Stage = BuildStage(pokemonToken),
                 LegendaryStats = BuildLegendaryStats(pokemonToken),
-                DexNo = _incrementor
+                DexNo = JsonHelper.GetIntFromToken(pokemonToken, "DexNo"),
+                NormalPortrait = JsonHelper.GetStringFromToken(pokemonToken, "NormalPortrait"),
+                ShinyPortrait = JsonHelper.GetStringFromToken(pokemonToken, "ShinyPortrait"),
+                Form = JsonHelper.GetStringFromToken(pokemonToken, "Form")
             };
 
             (pokemon.Size, pokemon.Weight) = GetSizeAndWeight(pokemonToken);

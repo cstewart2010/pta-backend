@@ -21,6 +21,21 @@ namespace TheReplacement.PTA.Common.Models
         public int DexNo { get; set; }
 
         /// <summary>
+        /// The Pokemon species' form name
+        /// </summary>
+        public string Form { get; set; }
+
+        /// <summary>
+        /// The Pokemon species' normal form
+        /// </summary>
+        public string NormalPortrait { get; set; }
+
+        /// <summary>
+        /// The Pokemon species' shiny form
+        /// </summary>
+        public string ShinyPortrait { get; set; }
+
+        /// <summary>
         /// Collection of Pokemon stats
         /// </summary>
         public StatsModel PokemonStats { get; set; }

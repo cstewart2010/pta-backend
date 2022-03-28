@@ -32,5 +32,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             return NotFound(name);
         }
+
+        [HttpGet("form/{form}")]
+        public IEnumerable<object> FindPokemonByForm(string form)
+        {
+            return BasePokemon.Where(pokemon => pokemon.Form.Contains(form)).Select(pokemon => new
+            {
+                pokemon.Name,
+                pokemon.Form
+            });
+        }
     }
 }
