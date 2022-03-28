@@ -455,6 +455,23 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to update a pokemon's form
+        /// </summary>
+        /// <param name="pokemon">The document to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryChangePokemonForm(
+            PokemonModel pokemon,
+            out MongoWriteError error)
+        {
+            if (DeletePokemon(pokemon.PokemonId))
+            {
+                return TryAddPokemon(pokemon, out error);
+            }
+
+            throw new Exception();
+        }
+
+        /// <summary>
         /// Attempts to add a Pokemon using the provided document
         /// </summary>
         /// <param name="pokemon">The document to add</param>
