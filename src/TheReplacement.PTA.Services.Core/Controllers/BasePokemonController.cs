@@ -18,7 +18,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet]
         public StaticCollectionMessage FindPokemon()
         {
-            return GetStaticCollectionResponse(BasePokemon.OrderBy(pokemon => pokemon.DexNo));
+            return GetStaticCollectionResponse(BasePokemon.GroupBy(pokemon => pokemon.DexNo).Select(group => group.First()));
         }
 
         [HttpGet("{name}")]
