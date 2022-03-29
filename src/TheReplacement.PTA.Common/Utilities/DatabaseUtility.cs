@@ -706,6 +706,25 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Searches for a trainer, then updates their honors
+        /// </summary>
+        /// <param name="trainerId">The trainer id</param>
+        /// <param name="honors">The trainer's honors</param>
+        public static bool UpdateTrainerHonors(
+            string trainerId,
+            IEnumerable<string> honors)
+        {
+            return TryUpdateDocument
+            (
+                Trainer,
+                MongoCollectionHelper.Trainers,
+                trainer => trainer.TrainerId == trainerId,
+                Builders<TrainerModel>.Update.Set("Honors", honors),
+                $"Updated trainer {trainerId} honors"
+            );
+        }
+
+        /// <summary>
         /// Searches for a trainer, then updates their activity token
         /// </summary>
         /// <param name="trainerId">The trainer id</param>

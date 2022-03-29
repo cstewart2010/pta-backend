@@ -145,6 +145,75 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return ReturnSuccessfully(new FoundTrainerMessage(trainer));
         }
 
+        [HttpPut("{gameMasterId}/groupHonor")]
+        public async Task<ActionResult<GenericMessage>> AddGroupHonor(string gameMasterId)
+        {
+            if (!Request.VerifyIdentity(gameMasterId, true))
+            {
+                return Unauthorized();
+            }
+
+            var body = await Request.GetRequestBody();
+            var honor = body["honor"].ToString();
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            var trainers = DatabaseUtility.FindTrainersByGameId(gameMaster.GameId);
+            if (string.IsNullOrEmpty(honor))
+            {
+                return BadRequest(nameof(honor));
+            }
+            foreach (var trainer in trainers)
+            {
+                DatabaseUtility.UpdateTrainerHonors(trainer.TrainerId, trainer.Honors.Append(honor));
+            }
+
+            var updatedHonorsLog = new LogModel
+            {
+                User = gameMaster.TrainerName,
+                Action = $"has granted the party a new honor"
+            };
+
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), updatedHonorsLog);
+            Response.RefreshToken(gameMasterId);
+            return new GenericMessage($"Granted the party honor: {honor}");
+        }
+
+        [HttpPut("{gameMasterId}/honor")]
+        public async Task<ActionResult<GenericMessage>> AddSingleHonor(string gameMasterId)
+        {
+            if (!Request.VerifyIdentity(gameMasterId, true))
+            {
+                return Unauthorized();
+            }
+
+            var body = await Request.GetRequestBody();
+            var honor = body["honor"].ToString();
+            var trainerId = body["trainerId"].ToString();
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (gameMaster.GameId != trainer.GameId)
+            {
+                return Unauthorized("Mismatched games");
+            }
+            if (string.IsNullOrEmpty(honor))
+            {
+                return BadRequest(nameof(honor));
+            }
+            if (!DatabaseUtility.UpdateTrainerHonors(trainerId, trainer.Honors.Append(honor)))
+            {
+                throw new Exception();
+            }
+
+            var updatedHonorsLog = new LogModel
+            {
+                User = gameMaster.TrainerName,
+                Action = $"has granted {trainer.TrainerName} a new honor"
+            };
+
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), updatedHonorsLog);
+            Response.RefreshToken(gameMasterId);
+            return new GenericMessage($"Granted {trainerId} honor: {honor}");
+        }
+
         [HttpPut("{trainerId}/logout")]
         public ActionResult<AbstractMessage> Logout(string trainerId)
         {
