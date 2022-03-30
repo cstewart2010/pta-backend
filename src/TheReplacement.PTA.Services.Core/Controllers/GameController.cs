@@ -49,7 +49,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return notFound;
             }
 
-            return ReturnSuccessfully(new FoundGameMessage(gameId));
+            return new FoundGameMessage(gameId);
         }
 
         [HttpGet("{gameId}/find/{trainerId}")]
@@ -83,7 +83,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(new InvalidGameIdMessage(trainer));
             }
 
-            return ReturnSuccessfully(new FoundTrainerMessage(trainer));
+            return new FoundTrainerMessage(trainer);
         }
 
         [HttpGet("{gameId}/all_logs")]
@@ -100,7 +100,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return notFound;
             }
 
-            return ReturnSuccessfully(new AllLogsMessage(game));
+            return new AllLogsMessage(game);
         }
 
         [HttpGet("{gameId}/logs")]
@@ -122,7 +122,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Array.Empty<LogModel>();
             }
 
-            return ReturnSuccessfully(game.Logs.Reverse().Take(50).ToList());
+            return game.Logs.Reverse().Take(50).ToArray();
         }
 
         [HttpPost("import")]
@@ -139,7 +139,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(errors);
             }
 
-            return ReturnSuccessfully(Ok(errors));
+            return Ok(errors);
         }
 
         [HttpPost("new")]
@@ -169,7 +169,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
             DatabaseUtility.UpdateGameLogs(game, gameCreationLog);
             Response.AssignAuthAndToken(trainer.TrainerId);
-            return ReturnSuccessfully(new CreatedGameMessage(trainer));
+            return new CreatedGameMessage(trainer);
         }
 
         [HttpPost("{gameId}/new")]
@@ -209,7 +209,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
             DatabaseUtility.UpdateGameLogs(game, trainerCreationLog);
             Response.AssignAuthAndToken(trainer.TrainerId);
-            return ReturnSuccessfully(new FoundTrainerMessage(trainer));
+            return new FoundTrainerMessage(trainer);
         }
 
         [HttpPost("{gameMasterId}/wild")]
@@ -249,7 +249,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
             DatabaseUtility.UpdateGameLogs(game, pokemonCreationLog);
             Response.RefreshToken(gameMasterId);
-            return ReturnSuccessfully(pokemon);
+            return pokemon;
         }
 
         [HttpPost("{gameId}/log/{trainerId}")]
@@ -270,7 +270,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             log.Action += $" at {DateTime.UtcNow}";
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), log);
             Response.RefreshToken(trainerId);
-            return ReturnSuccessfully(log);
+            return log;
         }
 
         [HttpPut("{trainerId}/addStats")]
@@ -287,7 +287,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(new GenericMessage("Failed to update trainer"));
             }
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            return ReturnSuccessfully(new FoundTrainerMessage(trainer));
+            return new FoundTrainerMessage(trainer);
         }
 
         [HttpPut("{gameId}/start")]
@@ -322,7 +322,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var trainer = DatabaseUtility.FindTrainerByUsername(username, gameId);
             Response.AssignAuthAndToken(trainer.TrainerId);
-            return ReturnSuccessfully(new FoundGameMessage(gameId));
+            return new FoundGameMessage(gameId);
         }
 
         [HttpPut("{gameId}/end")]
@@ -354,7 +354,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             SetEndGameStatuses(gameId);
-            return ReturnSuccessfully(Ok());
+            return Ok();
         }
 
         [HttpPut("{gameId}/addNpcs")]
@@ -457,7 +457,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             Response.AssignAuthAndToken(trainer.TrainerId);
-            return ReturnSuccessfully(new FoundTrainerMessage(trainer));
+            return new FoundTrainerMessage(trainer);
         }
 
         [HttpDelete("{gameId}")]
@@ -493,12 +493,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return authError;
             }
 
-            return ReturnSuccessfully(new
+            return new
             {
                 pokemonDeletionResult = GetMassPokemonDeletion(gameId),
                 trainerDeletionResult = GetMassTrainerDeletion(gameId),
                 gameDeletionResult = GetGameDeletion(gameId)
-            });;
+            };
         }
 
         [HttpDelete("{gameId}/export")]
@@ -547,12 +547,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var exportStream = ExportUtility.GetExportStream(game);
 
             DeleteGame(gameId);
-            return ReturnSuccessfully(File
+            return File
             (
                 exportStream,
                 "application/octet-stream",
                 $"{game.Nickname}.json"
-            ));
+            );
         }
 
         private IEnumerable<string> GetNpcs(
@@ -590,7 +590,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return StatusCode(500);
             }
 
-            return ReturnSuccessfully(new UpdatedNpcListMessage(newNpcList));
+            return new UpdatedNpcListMessage(newNpcList);
         }
 
         private static void SetEndGameStatuses(string gameId)

@@ -126,11 +126,5 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             return new GenericMessage(message);
         }
-
-        protected T ReturnSuccessfully<T>(T reward)
-        {
-            LoggerUtility.Info(Collection, $"Client {ClientIp} successfully hit {Request.Path.Value} {Request.Method} endpoint");
-            return reward;
-        }
     }
 }

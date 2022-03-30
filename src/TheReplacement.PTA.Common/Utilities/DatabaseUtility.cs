@@ -232,8 +232,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Trainer,
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
-                updates,
-                $"Completed trainer {trainerId} new character creation"
+                updates
             );
         }
 
@@ -296,7 +295,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="id">The trainer id</param>
         public static TrainerModel FindTrainerById(string id)
         {
-            return FindTrainerById(id, trainer => trainer.TrainerId == id);
+            return FindTrainerById(trainer => trainer.TrainerId == id);
         }
 
         /// <summary>
@@ -305,7 +304,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="id">The id of the trainer to search for</param>
         public static TrainerModel FindIncompleteTrainerById(string id)
         {
-            return FindTrainerById(id, trainer => trainer.TrainerId == id && !trainer.IsComplete);
+            return FindTrainerById(trainer => trainer.TrainerId == id && !trainer.IsComplete);
         }
 
         /// <summary>
@@ -430,7 +429,6 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryAddDocument
             (
                 Game,
-                game.GameId,
                 () => MongoCollectionHelper.Games.InsertOne(game),
                 out error
             );
@@ -448,7 +446,6 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryAddDocument
             (
                 Npc,
-                npc.NPCId,
                 () => MongoCollectionHelper.Npcs.InsertOne(npc),
                 out error
             );
@@ -483,7 +480,6 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryAddDocument
             (
                 Pokemon,
-                pokemon.PokemonId,
                 () => MongoCollectionHelper.Pokemon.InsertOne(pokemon),
                 out error
             );
@@ -501,7 +497,6 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryAddDocument
             (
                 Trainer,
-                trainer.TrainerId,
                 () => MongoCollectionHelper.Trainers.InsertOne(trainer),
                 out error
             );
@@ -533,7 +528,6 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryAddDocument
             (
                 MongoCollection.PokeDex,
-                $"{dexItem.TrainerId}_{dexItem.DexNo}",
                 () => MongoCollectionHelper.PokeDex.InsertOne(dexItem),
                 out error
             );
@@ -551,8 +545,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 MongoCollection.PokeDex,
                 MongoCollectionHelper.PokeDex,
                 dexItem => dexItem.TrainerId == trainerId && dexItem.DexNo == dexNo,
-                Builders<PokeDexItemModel>.Update.Set("IsSeen", true),
-                $"Updated seen value for trainer {trainerId}"
+                Builders<PokeDexItemModel>.Update.Set("IsSeen", true)
             );
         }
 
@@ -576,8 +569,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 MongoCollection.PokeDex,
                 MongoCollectionHelper.PokeDex,
                 dexItem => dexItem.TrainerId == trainerId && dexItem.DexNo == dexNo,
-                updates,
-                $"Updated caught value for trainer {trainerId}"
+                updates
             );
         }
 
@@ -594,8 +586,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Game,
                 MongoCollectionHelper.Games,
                 game => game.GameId == gameId,
-                Builders<GameModel>.Update.Set("NPCs", npcIds),
-                $"Updated npc list for game {gameId}"
+                Builders<GameModel>.Update.Set("NPCs", npcIds)
             );
         }
 
@@ -612,8 +603,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Game,
                 MongoCollectionHelper.Games,
                 game => game.GameId == theGame.GameId,
-                Builders<GameModel>.Update.Set("Logs", theGame.Logs?.Union(logs) ?? logs),
-                $"Updated logs for game {theGame.GameId}"
+                Builders<GameModel>.Update.Set("Logs", theGame.Logs?.Union(logs) ?? logs)
             );
         }
 
@@ -632,8 +622,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Game,
                 MongoCollectionHelper.Games,
                 game => game.GameId == gameId,
-                Builders<GameModel>.Update.Set("IsOnline", isOnline),
-                $"Updated online status for game {gameId}"
+                Builders<GameModel>.Update.Set("IsOnline", isOnline)
             );
         }
 
@@ -653,8 +642,26 @@ namespace TheReplacement.PTA.Common.Utilities
                 Pokemon,
                 MongoCollectionHelper.Pokemon,
                 pokemon => pokemon.PokemonId == pokemonId,
-                Builders<PokemonModel>.Update.Set("TrainerId", trainerId),
-                $"Updated trainerId for pokemon {pokemonId}"
+                Builders<PokemonModel>.Update.Set("TrainerId", trainerId)
+            );
+        }
+        /// <summary>
+        /// Searches for a pokemon, then updates its evolvability
+        /// </summary>
+        /// <param name="pokemonId">The pokemon id</param>
+        /// <param name="isEvolvable">Whether the pokemon is evolvable</param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
+        public static bool UpdatePokemonEvolvability(
+            string pokemonId,
+            bool isEvolvable)
+        {
+            return TryUpdateDocument
+            (
+                Pokemon,
+                MongoCollectionHelper.Pokemon,
+                pokemon => pokemon.PokemonId == pokemonId,
+                Builders<PokemonModel>.Update.Set("CanEvolve", isEvolvable)
             );
         }
 
@@ -662,7 +669,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Searches for a pokemon, then updates its location
         /// </summary>
         /// <param name="pokemonId">The pokemon id</param>
-        /// <param name="isOnActiveTeam">Where the pokemon is on the active team</param>
+        /// <param name="isOnActiveTeam">Whether the pokemon is on the active team</param>
         /// <exception cref="ArgumentNullException" />
         /// <exception cref="MongoCommandException" />
         public static bool UpdatePokemonLocation(
@@ -674,8 +681,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Pokemon,
                 MongoCollectionHelper.Pokemon,
                 pokemon => pokemon.PokemonId == pokemonId,
-                Builders<PokemonModel>.Update.Set("IsOnActiveTeam", isOnActiveTeam),
-                $"Updated IsOnActiveTeam for pokemon {pokemonId}"
+                Builders<PokemonModel>.Update.Set("IsOnActiveTeam", isOnActiveTeam)
             );
         }
 
@@ -695,14 +701,12 @@ namespace TheReplacement.PTA.Common.Utilities
                 throw new ArgumentNullException(nameof(evolvedForm));
             }
 
-            return TryUpdateDocument
-            (
-                Pokemon,
-                MongoCollectionHelper.Pokemon,
-                pokemon => pokemon.PokemonId == pokemonId,
-                GetEvolvedUpdates(evolvedForm),
-                $"Evolved pokemon {pokemonId}"
-            );
+            if (DeletePokemon(pokemonId))
+            {
+                return TryAddPokemon(evolvedForm, out _);
+            }
+
+            throw new Exception();
         }
 
         /// <summary>
@@ -719,8 +723,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Trainer,
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
-                Builders<TrainerModel>.Update.Set("Honors", honors),
-                $"Updated trainer {trainerId} honors"
+                Builders<TrainerModel>.Update.Set("Honors", honors)
             );
         }
 
@@ -738,8 +741,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Trainer,
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
-                Builders<TrainerModel>.Update.Set("ActivityToken", token),
-                $"Granted trainer {trainerId} a new activity token"
+                Builders<TrainerModel>.Update.Set("ActivityToken", token)
             );
         }
 
@@ -764,8 +766,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Trainer,
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
-                Builders<TrainerModel>.Update.Set("Items", itemList),
-                $"Updated item list for trainer {trainerId}"
+                Builders<TrainerModel>.Update.Set("Items", itemList)
             );
         }
 
@@ -785,8 +786,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Trainer,
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
-                TrainerStatusUpdate(isOnline),
-                $"Updated online status for trainer {trainerId}"
+                TrainerStatusUpdate(isOnline)
             );
         }
 
@@ -806,24 +806,17 @@ namespace TheReplacement.PTA.Common.Utilities
                 Trainer,
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
-                GetTrainerPasswordUpdate(password),
-                $"Updated password for trainer {trainerId}"
+                GetTrainerPasswordUpdate(password)
             );
         }
 
         private static TrainerModel FindTrainerById(
-            string id,
             Expression<Func<TrainerModel, bool>> searchPattern)
         {
             var trainer = MongoCollectionHelper
                 .Trainers
                 .Find(searchPattern)
-                .SingleOrDefault(); ;
-
-            if (trainer != null)
-            {
-                LoggerUtility.Info(Trainer, $"Retrieved trainer {id}");
-            }
+                .SingleOrDefault();
 
             return trainer;
         }
@@ -839,30 +832,8 @@ namespace TheReplacement.PTA.Common.Utilities
                 });
         }
 
-        private static UpdateDefinition<PokemonModel> GetEvolvedUpdates(PokemonModel evolvedForm)
-        {
-            return Builders<PokemonModel>.Update.Combine(new[]
-            {
-                Builders<PokemonModel>.Update.Set("Nickname", evolvedForm.Nickname),
-                Builders<PokemonModel>.Update.Set("DexNo", evolvedForm.DexNo),
-                Builders<PokemonModel>.Update.Set("PokemonStats", evolvedForm.PokemonStats),
-                Builders<PokemonModel>.Update.Set("Size", evolvedForm.Size),
-                Builders<PokemonModel>.Update.Set("Weight", evolvedForm.Weight),
-                Builders<PokemonModel>.Update.Set("Skills", evolvedForm.Skills),
-                Builders<PokemonModel>.Update.Set("Passives", evolvedForm.Passives),
-                Builders<PokemonModel>.Update.Set("Proficiencies", evolvedForm.Proficiencies),
-                Builders<PokemonModel>.Update.Set("Habitats", evolvedForm.Habitats),
-                Builders<PokemonModel>.Update.Set("Diet", evolvedForm.Diet),
-                Builders<PokemonModel>.Update.Set("Rarity", evolvedForm.Rarity),
-                Builders<PokemonModel>.Update.Set("GMaxMove", evolvedForm.GMaxMove),
-                Builders<PokemonModel>.Update.Set("EvolvedFrom", evolvedForm.EvolvedFrom),
-                Builders<PokemonModel>.Update.Set("LegendaryStats", evolvedForm.LegendaryStats)
-            });
-        }
-
         private static bool TryAddDocument(
             MongoCollection dbCollection,
-            string id,
             Action action,
             out MongoWriteError error)
         {
@@ -870,7 +841,6 @@ namespace TheReplacement.PTA.Common.Utilities
             {
                 action();
                 error = null;
-                LoggerUtility.Info(dbCollection, $"Added {dbCollection} {id}");
                 return true;
             }
             catch (MongoWriteException exception)
@@ -885,8 +855,7 @@ namespace TheReplacement.PTA.Common.Utilities
             MongoCollection dbCollection,
             IMongoCollection<TMongoCollection> collection,
             Expression<Func<TMongoCollection, bool>> filter,
-            UpdateDefinition<TMongoCollection> update,
-            string successMessage)
+            UpdateDefinition<TMongoCollection> update)
         {
             try
             {
@@ -895,9 +864,6 @@ namespace TheReplacement.PTA.Common.Utilities
                     return false;
                 }
 
-                //collection.Re
-
-                LoggerUtility.Info(dbCollection, successMessage);
                 return true;
             }
             catch (MongoCommandException ex)
