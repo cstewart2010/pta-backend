@@ -86,6 +86,7 @@ const updatedValidators = {
         ActiveParticipants: {
           bsonType: 'array',
           items: {
+            bsonType: 'object',
             required: [
               'Id',
               'Type',
