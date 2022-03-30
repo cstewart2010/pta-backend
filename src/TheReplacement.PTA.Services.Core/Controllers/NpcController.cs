@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
+using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
@@ -20,7 +22,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{npcId}")]
-        public ActionResult<NpcModel> GetNpcs(string npcId)
+        public ActionResult<NpcModel> GetNpc(string npcId)
         {
             if (string.IsNullOrEmpty(npcId))
             {
@@ -38,12 +40,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("new")]
-        public ActionResult<NpcModel> CreateNewNpc()
+        public async Task<ActionResult<NpcModel>> CreateNewNpcAsync()
         {
-            var npc = CreateNpc(out var badResult);
+            var npc = await CreateNpcAsync();
             if (npc == null)
             {
-                return badResult;
+                throw new Exception();
             }
 
             if (!DatabaseUtility.TryAddNpc(npc, out var error))
@@ -71,22 +73,16 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        private NpcModel CreateNpc(out ActionResult badRequest)
+        private async Task<NpcModel> CreateNpcAsync()
         {
-            badRequest = null;
-            if (!Request.Query.TryGetValue("trainerName", out var trainerName))
-            {
-                badRequest = BadRequest(new GenericMessage("Missing trainerName for npc"));
-                return null;
-            }
+            var json = await Request.GetRequestBody();
+            var trainerName = json["trainerName"].ToString();
 
-            var feats = Request.Query["feats"].ToString().Split(',')
-                .Select(feat => DexUtility.GetDexEntry<FeatureModel>(DexType.Features, feat))
+            var feats = json["feats"].Select(feat => DexUtility.GetDexEntry<FeatureModel>(DexType.Features, feat.ToString()))
                 .Where(feat => feat != null)
                 .Select(feat => feat.Name);
 
-            var classes = Request.Query["classes"].ToString().Split(',')
-                .Select(@class => DexUtility.GetDexEntry<TrainerClassModel>(DexType.TrainerClasses, @class))
+            var classes = json["classes"].Select(@class => DexUtility.GetDexEntry<TrainerClassModel>(DexType.TrainerClasses, @class.ToString()))
                 .Where(@class => @class != null)
                 .Select(@class => @class.Name);
 
