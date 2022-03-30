@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
+using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
@@ -19,77 +21,95 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             Collection = MongoCollection.Npcs;
         }
 
-        [HttpGet("{npcId}")]
-        public ActionResult<NpcModel> GetNpcs(string npcId)
+        [HttpGet("{gameMasterId}/{npcId}")]
+        public ActionResult<NpcModel> GetNpc(string gameMasterId, string npcId)
         {
-            if (string.IsNullOrEmpty(npcId))
+            if(!Request.VerifyIdentity(gameMasterId, true))
             {
-                return BadRequest(nameof(npcId));
+                return Unauthorized();
             }
 
             var npc = DatabaseUtility.FindNpc(npcId);
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (npc == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
                 return NotFound(npcId);
             }
+
+            // add check for npc and gameMaster's GameIds
 
             return npc;
         }
 
-        [HttpPost("new")]
-        public ActionResult<NpcModel> CreateNewNpc()
+        [HttpPost("{gameMasterId}/new")]
+        public async Task<ActionResult<NpcModel>> CreateNewNpcAsync(string gameMasterId)
         {
-            var npc = CreateNpc(out var badResult);
-            if (npc == null)
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
-                return badResult;
+                return Unauthorized();
             }
 
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            var npc = await CreateNpcAsync(gameMaster);
             if (!DatabaseUtility.TryAddNpc(npc, out var error))
             {
                 return BadRequest(error);
             }
 
+            var newNpcLog = new LogModel
+            {
+                User = npc.TrainerName,
+                Action = $"has entered the chat at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), newNpcLog);
+            Response.RefreshToken(gameMasterId);
             return npc;
         }
 
-        [HttpDelete("{npcId}")]
-        public ActionResult DeleteNpc(string npcId)
+        [HttpDelete("{gameMasterId}/{npcId}")]
+        public ActionResult DeleteNpc(string gameMasterId, string npcId)
         {
-            if (string.IsNullOrEmpty(npcId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
-                return BadRequest(nameof(npcId));
+                return Unauthorized();
             }
 
-            if (!DatabaseUtility.DeleteNpc(npcId))
+            var npc = DatabaseUtility.FindNpc(npcId);
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (npc == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
                 return NotFound(npcId);
             }
 
-            return Ok();
-        }
+            // add check for npc and gameMaster's GameIds
 
-        private NpcModel CreateNpc(out ActionResult badRequest)
-        {
-            badRequest = null;
-            if (!Request.Query.TryGetValue("trainerName", out var trainerName))
+            if (!DatabaseUtility.DeleteNpc(npcId))
             {
-                badRequest = BadRequest(new GenericMessage("Missing trainerName for npc"));
-                return null;
+                return BadRequest(npcId);
             }
 
-            var feats = Request.Query["feats"].ToString().Split(',')
-                .Select(feat => DexUtility.GetDexEntry<FeatureModel>(DexType.Features, feat))
+            var retiredNpcLog = new LogModel
+            {
+                User = npc.TrainerName,
+                Action = $"has left the chat at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), retiredNpcLog);
+            return Ok();
+        }
+        private async Task<NpcModel> CreateNpcAsync(TrainerModel gameMaster)
+        {
+            var json = await Request.GetRequestBody();
+            var trainerName = json["trainerName"].ToString();
+
+            var feats = json["feats"].Select(feat => DexUtility.GetDexEntry<FeatureModel>(DexType.Features, feat.ToString()))
                 .Where(feat => feat != null)
                 .Select(feat => feat.Name);
 
-            var classes = Request.Query["classes"].ToString().Split(',')
-                .Select(@class => DexUtility.GetDexEntry<TrainerClassModel>(DexType.TrainerClasses, @class))
+            var classes = json["classes"].Select(@class => DexUtility.GetDexEntry<TrainerClassModel>(DexType.TrainerClasses, @class.ToString()))
                 .Where(@class => @class != null)
                 .Select(@class => @class.Name);
 
+            // add gameMaster's GameId to npc
             return new NpcModel
             {
                 NPCId = Guid.NewGuid().ToString(),
