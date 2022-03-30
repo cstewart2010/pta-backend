@@ -38,7 +38,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             Response.RefreshToken(gameMasterId);
-            return ReturnSuccessfully(new GameMasterMessage(gameMasterId));
+            return new GameMasterMessage(gameMasterId);
         }
 
         [HttpGet("refreshTrainer")]
@@ -55,7 +55,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             Response.RefreshToken(trainerId);
-            return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
+            return new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId));
         }
 
         [HttpGet("trainers")]
@@ -73,7 +73,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var trainer = DatabaseUtility.FindTrainerByUsername(trainerName, gameId);
-            return ReturnSuccessfully(new FoundTrainerMessage(trainer));
+            return new FoundTrainerMessage(trainer);
         }
 
         [HttpGet("{trainerId}/{pokemonId}")]
@@ -91,7 +91,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(new PokemonTrainerMismatchMessage(pokemon.TrainerId, trainerId));
             }
 
-            return ReturnSuccessfully(pokemon);
+            return pokemon;
         }
 
         [HttpPost("{trainerId}")]
@@ -123,7 +123,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             Response.RefreshToken(gameMasterId);
-            return ReturnSuccessfully(pokemon);
+            return pokemon;
         }
 
         [HttpPut("login")]
@@ -142,7 +142,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var trainer = DatabaseUtility.FindTrainerByUsername(username, gameId);
             Response.AssignAuthAndToken(trainer.TrainerId);
-            return ReturnSuccessfully(new FoundTrainerMessage(trainer));
+            return new FoundTrainerMessage(trainer);
         }
 
         [HttpPut("{gameMasterId}/groupHonor")]
@@ -215,7 +215,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{trainerId}/logout")]
-        public ActionResult<AbstractMessage> Logout(string trainerId)
+        public ActionResult Logout(string trainerId)
         {
             if (!Request.VerifyIdentity(trainerId, false))
             {
@@ -229,7 +229,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
-            return ReturnSuccessfully(new GenericMessage(""));
+            return Ok();
         }
 
         [HttpPut("{trainerId}/addItems")]
@@ -277,7 +277,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             });
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), addedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
-            return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
+            return new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId));
         }
 
         [HttpPut("{trainerId}/removeItems")]
@@ -324,7 +324,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             });
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), removedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
-            return ReturnSuccessfully(new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId)));
+            return new FoundTrainerMessage(DatabaseUtility.FindTrainerById(trainerId));
         }
 
         [HttpDelete("{trainerId}")]
@@ -363,7 +363,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), deleteTrainerLog);
             Response.RefreshToken(gameMasterId);
-            return ReturnSuccessfully(new GenericMessage($"Successfully deleted all pokemon associated with {trainerId}"));
+            return new GenericMessage($"Successfully deleted all pokemon associated with {trainerId}");
         }
 
         private ActionResult<IEnumerable<PublicTrainer>> FindTrainers(string gameMasterId)
@@ -377,7 +377,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 Response.RefreshToken(gameMasterId);
             }
-            return ReturnSuccessfully(GetTrainers(gameId));
+            return GetTrainers(gameId);
         }
 
         private static List<ItemModel> UpdateAllItemsWithReduction(

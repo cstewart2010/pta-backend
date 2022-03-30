@@ -103,6 +103,11 @@ namespace TheReplacement.PTA.Common.Models
         public bool IsOnActiveTeam { get; set; }
 
         /// <summary>
+        /// Whether the pokemon is ready to evolve
+        /// </summary>
+        public bool CanEvolve { get; set; }
+
+        /// <summary>
         /// Collection of Pokemon stats
         /// </summary>
         public StatsModel PokemonStats { get; set; }

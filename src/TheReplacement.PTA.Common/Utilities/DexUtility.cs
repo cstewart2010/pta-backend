@@ -31,9 +31,8 @@ namespace TheReplacement.PTA.Common.Utilities
             if (pokemon == null) throw ExceptionHandler.ArgumentNull(nameof(pokemon));
             if (keptMoves == null) throw ExceptionHandler.ArgumentNull(nameof(keptMoves));
             if (string.IsNullOrEmpty(evolvedName)) throw ExceptionHandler.IsNullOrEmpty(nameof(evolvedName));
-            if (evolvedName == null) throw ExceptionHandler.ArgumentNull(nameof(evolvedName));
 
-            var basePokemon = GetDexEntry<BasePokemonModel>(DexType.BasePokemon, evolvedName);
+            var (basePokemon, altForms) = GetPokedexEntry(evolvedName, pokemon.Form);
             if (!string.Equals(basePokemon?.EvolvesFrom, pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase))
             {
                 return null;
@@ -71,8 +70,22 @@ namespace TheReplacement.PTA.Common.Utilities
                 Rarity = basePokemon.Rarity,
                 GMaxMove = basePokemon.GMaxMove,
                 EvolvedFrom = basePokemon.EvolvesFrom,
-                LegendaryStats = basePokemon.LegendaryStats
+                LegendaryStats = basePokemon.LegendaryStats,
+                IsOnActiveTeam = pokemon.IsOnActiveTeam,
+                AlternateForms = altForms,
+                NormalPortrait = basePokemon.NormalPortrait,
+                ShinyPortrait = basePokemon.ShinyPortrait,
+                TrainerId = pokemon.TrainerId,
+                OriginalTrainerId = pokemon.OriginalTrainerId,
+                Form = pokemon.Form
             };
+        }
+
+        public static IEnumerable<BasePokemonModel> GetPossibleEvolutions(PokemonModel pokemon)
+        {
+            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModel>(DexType.BasePokemon.ToString());
+            var allEvolutions = collection.Find(document => document.EvolvesFrom.ToLower() == pokemon.SpeciesName.ToLower()).ToEnumerable();
+            return allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase));
         }
 
         /// <summary>

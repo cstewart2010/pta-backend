@@ -34,7 +34,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(npcId);
             }
 
-            return ReturnSuccessfully(npc);
+            return npc;
         }
 
         [HttpPost("new")]
@@ -51,7 +51,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
-            return ReturnSuccessfully(npc);
+            return npc;
         }
 
         [HttpDelete("{npcId}")]
@@ -68,7 +68,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(npcId);
             }
 
-            return ReturnSuccessfully(Ok());
+            return Ok();
         }
 
         private NpcModel CreateNpc(out ActionResult badRequest)
