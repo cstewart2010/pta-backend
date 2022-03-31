@@ -28,6 +28,11 @@
         /// <summary>
         /// Represents the PokeDex collection
         /// </summary>
-        PokeDex = 5
+        PokeDex = 5,
+
+        /// <summary>
+        /// Represents the Encounter collection
+        /// </summary>
+        Encounter = 6
     }
 }

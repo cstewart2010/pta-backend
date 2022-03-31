@@ -225,11 +225,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            if (!IsGMOnline(gameMasterId))
-            {
-                return NotFound(gameMasterId);
-            }
-
             var (pokemon, error) = await Request.BuildPokemon(gameMasterId);
             if (pokemon == null)
             {
