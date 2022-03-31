@@ -122,6 +122,7 @@ const updatedValidators = {
         'NPCId',
         'TrainerName',
         'TrainerClasses',
+        'CurrentHP',
         'TrainerStats',
         'Feats'
       ],
@@ -149,6 +150,9 @@ const updatedValidators = {
         },
         TrainerStats: {
           bsonType: 'object'
+        },
+        CurrentHP: {
+          bsonType: 'int'
         },
         Feats: {
           bsonType: 'array',
@@ -182,6 +186,7 @@ const updatedValidators = {
         'IsOnActiveTeam',
         'CanEvolve',
         'PokemonStats',
+        'CurrentHP',
         'Size',
         'Weight',
         'Rarity',
@@ -246,6 +251,9 @@ const updatedValidators = {
         },
         PokemonStatus: {
           bsonType: 'string'
+        },
+        CurrentHP: {
+          bsonType: 'int'
         },
         Nickname: {
           bsonType: 'string',
@@ -460,6 +468,7 @@ const updatedValidators = {
         'PasswordHash',
         'TrainerClasses',
         'TrainerStats',
+        'CurrentHP',
         'Feats',
         'Money',
         'IsOnline',
@@ -540,6 +549,9 @@ const updatedValidators = {
               minimum: 1
             }
           }
+        },
+        CurrentHP: {
+          bsonType: 'int'
         },
         Feats: {
           bsonType: 'array',

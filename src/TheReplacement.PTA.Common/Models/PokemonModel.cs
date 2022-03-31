@@ -113,6 +113,11 @@ namespace TheReplacement.PTA.Common.Models
         public StatsModel PokemonStats { get; set; }
 
         /// <summary>
+        /// The pokemon'ss current hp
+        /// </summary>
+        public int CurrentHP { get; set; }
+
+        /// <summary>
         /// The Pokemon species' <see cref="Enums.Size"/>
         /// </summary>
         public string Size { get; set; }

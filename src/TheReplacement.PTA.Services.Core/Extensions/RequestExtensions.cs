@@ -373,6 +373,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 IsOnline = true,
                 Items = new List<ItemModel>(),
                 TrainerStats = GetStats(),
+                CurrentHP = 20,
                 ActivityToken = EncryptionUtility.GenerateToken(),
                 Origin = string.Empty
             };

@@ -116,7 +116,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 Feats = feats,
                 TrainerClasses = classes,
                 TrainerName = trainerName,
-                TrainerStats = new StatsModel()
+                TrainerStats = new StatsModel(),
+                CurrentHP = 0
             };
         }
     }
