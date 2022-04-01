@@ -28,5 +28,41 @@ namespace TheReplacement.PTA.Common.Models
 
         /// <inheritdoc />
         public IEnumerable<string> Feats { get; set; }
+
+        /// <inheritdoc />
+        public string GameId { get; set; }
+
+        /// <inheritdoc />
+        public int Level { get; set; }
+
+        /// <inheritdoc />
+        public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
+
+        /// <inheritdoc />
+        public int Age { get; set; }
+
+        /// <inheritdoc />
+        public string Gender { get; set; }
+
+        /// <inheritdoc />
+        public int Height { get; set; }
+
+        /// <inheritdoc />
+        public int Weight { get; set; }
+
+        /// <inheritdoc />
+        public string Description { get; set; }
+
+        /// <inheritdoc />
+        public string Personality { get; set; }
+
+        /// <inheritdoc />
+        public string Background { get; set; }
+
+        /// <inheritdoc />
+        public string Goals { get; set; }
+
+        /// <inheritdoc />
+        public string Species { get; set; }
     }
 }
