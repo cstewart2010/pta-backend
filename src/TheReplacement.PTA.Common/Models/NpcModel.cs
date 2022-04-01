@@ -70,6 +70,11 @@ namespace TheReplacement.PTA.Common.Models
         public StatsModel TrainerStats { get; set; }
 
         /// <summary>
+        /// The npc's current hp
+        /// </summary>
+        public int CurrentHP { get; set; }
+
+        /// <summary>
         /// The trainer's Feats
         /// </summary>
         public IEnumerable<string> Feats { get; set; }

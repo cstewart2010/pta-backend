@@ -51,6 +51,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             Goals = trainer.Goals;
             Species = trainer.Species;
             Items = trainer.Items;
+            CurrentHP = trainer.CurrentHP;
             NewPokemon = Array.Empty<NewPokemon>();
         }
 
@@ -75,6 +76,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             trainer.Goals = Goals;
             trainer.Items = Items.ToList();
             trainer.Species = Species;
+            trainer.CurrentHP = CurrentHP;
             return trainer;
         }
 
@@ -119,5 +121,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public string Goals { get; set; }
 
         public string Species { get; set; }
+
+        public int CurrentHP { get; set; }
     }
 }

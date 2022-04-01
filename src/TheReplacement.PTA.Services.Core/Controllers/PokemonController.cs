@@ -87,6 +87,33 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
         }
 
+        [HttpPut("{pokemonId}/hp/{hp}")]
+        public ActionResult UpdateHP(string pokemonId, int hp)
+        {
+            if (!Request.Query.TryGetValue("trainerId", out var trainerId))
+            {
+                return BadRequest(nameof(trainerId));
+            }
+            if (!Request.VerifyIdentity(trainerId, false))
+            {
+                return Unauthorized();
+            }
+
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            if (pokemon?.TrainerId != trainerId)
+            {
+                return Unauthorized();
+            }
+
+            if (hp > pokemon.PokemonStats.HP || hp < -pokemon.PokemonStats.HP)
+            {
+                return BadRequest(nameof(hp));
+            }
+
+            DatabaseUtility.UpdatePokemonHP(pokemonId, hp);
+            return Ok();
+        }
+
         [HttpPut("{pokemonId}/form/{form}")]
         public ActionResult<PokemonModel> SwitchForm(string pokemonId, string form)
         {

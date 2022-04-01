@@ -45,12 +45,84 @@ const updatedValidators = {
       }
     }
   },
+  Encounters: {
+    $jsonSchema: {
+      required: [
+        'EncounterId',
+        'GameId',
+        'Name',
+        'IsActive',
+        'Type',
+        'ActiveParticipants'
+      ],
+      additionalProperties: false,
+      properties: {
+        EncounterId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
+        GameId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
+        Name: {
+          bsonType: 'string',
+          minLength: 1,
+          maxLength: 36
+        },
+        IsActive: {
+          bsonType: 'bool'
+        },
+        Type: {
+          bsonType: 'string',
+          'enum': [
+            'Wild',
+            'Trainer',
+            'Hybrid'
+          ]
+        },
+        ActiveParticipants: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'object',
+            required: [
+              'Id',
+              'Type',
+              'HP'
+            ],
+            additionalProperties: false,
+            properties: {
+              Id: {
+                bsonType: 'string',
+                minLength: 36,
+                maxLength: 36
+              },
+              Type: {
+                bsonType: 'string',
+                'enum': [
+                  'Trainer',
+                  'Pokemon',
+                  'Npc'
+                ]
+              },
+              HP: {
+                bsonType: 'int'
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   NPCs: {
     $jsonSchema: {
       required: [
         'NPCId',
         'TrainerName',
         'TrainerClasses',
+        'CurrentHP',
         'TrainerStats',
         'Feats'
       ],
@@ -79,6 +151,9 @@ const updatedValidators = {
         TrainerStats: {
           bsonType: 'object'
         },
+        CurrentHP: {
+          bsonType: 'int'
+        },
         Feats: {
           bsonType: 'array',
           items: {
@@ -93,6 +168,10 @@ const updatedValidators = {
       required: [
         'PokemonId',
         'DexNo',
+        'Form',
+        'AlternateForms',
+        'NormalPortrait',
+        'ShinyPortrait',
         'SpeciesName',
         'OriginalTrainerId',
         'TrainerId',
@@ -105,7 +184,9 @@ const updatedValidators = {
         'Nature',
         'IsShiny',
         'IsOnActiveTeam',
+        'CanEvolve',
         'PokemonStats',
+        'CurrentHP',
         'Size',
         'Weight',
         'Rarity',
@@ -130,6 +211,21 @@ const updatedValidators = {
         DexNo: {
           bsonType: 'int',
           minimum: 1
+        },
+        Form: {
+          bsonType: 'string'
+        },
+        AlternateForms: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'string'
+          }
+        },
+        NormalPortrait: {
+          bsonType: 'string'
+        },
+        ShinyPortrait: {
+          bsonType: 'string'
         },
         SpeciesName: {
           bsonType: 'string',
@@ -156,6 +252,9 @@ const updatedValidators = {
         PokemonStatus: {
           bsonType: 'string'
         },
+        CurrentHP: {
+          bsonType: 'int'
+        },
         Nickname: {
           bsonType: 'string',
           minLength: 1,
@@ -181,6 +280,9 @@ const updatedValidators = {
           bsonType: 'bool'
         },
         IsShiny: {
+          bsonType: 'bool'
+        },
+        CanEvolve: {
           bsonType: 'bool'
         },
         Nature: {
@@ -366,6 +468,7 @@ const updatedValidators = {
         'PasswordHash',
         'TrainerClasses',
         'TrainerStats',
+        'CurrentHP',
         'Feats',
         'Money',
         'IsOnline',
@@ -446,6 +549,9 @@ const updatedValidators = {
               minimum: 1
             }
           }
+        },
+        CurrentHP: {
+          bsonType: 'int'
         },
         Feats: {
           bsonType: 'array',
@@ -615,6 +721,9 @@ const updatedValidators = {
     $jsonSchema: {
       required: [
         'DexNo',
+        'Form',
+        'NormalPortrait',
+        'ShinyPortrait',
         'Name',
         'PokemonStats',
         'Type',
@@ -638,6 +747,15 @@ const updatedValidators = {
         },
         DexNo: {
           bsonType: 'int'
+        },
+        Form: {
+          bsonType: 'string'
+        },
+        NormalPortrait: {
+          bsonType: 'string'
+        },
+        ShinyPortrait: {
+          bsonType: 'string'
         },
         Name: {
           bsonType: 'string',

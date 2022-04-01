@@ -76,6 +76,11 @@ namespace TheReplacement.PTA.Common.Models
         /// <inheritdoc />
         public StatsModel TrainerStats { get; set; }
 
+        /// <summary>
+        /// The trainer's current hp
+        /// </summary>
+        public int CurrentHP { get; set; }
+
         /// <inheritdoc />
         public IEnumerable<string> Feats { get; set; }
 

@@ -21,59 +21,82 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             Collection = MongoCollection.Npcs;
         }
 
-        [HttpGet("{npcId}")]
-        public ActionResult<NpcModel> GetNpc(string npcId)
+        [HttpGet("{gameMasterId}/{npcId}")]
+        public ActionResult<NpcModel> GetNpc(string gameMasterId, string npcId)
         {
-            if (string.IsNullOrEmpty(npcId))
+            if(!Request.VerifyIdentity(gameMasterId, true))
             {
-                return BadRequest(nameof(npcId));
+                return Unauthorized();
             }
 
             var npc = DatabaseUtility.FindNpc(npcId);
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (npc == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
                 return NotFound(npcId);
             }
+
+            // add check for npc and gameMaster's GameIds
 
             return npc;
         }
 
-        [HttpPost("new")]
-        public async Task<ActionResult<NpcModel>> CreateNewNpcAsync()
+        [HttpPost("{gameMasterId}/new")]
+        public async Task<ActionResult<NpcModel>> CreateNewNpcAsync(string gameMasterId)
         {
-            var npc = await CreateNpcAsync();
-            if (npc == null)
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
-                throw new Exception();
+                return Unauthorized();
             }
 
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            var npc = await CreateNpcAsync(gameMaster);
             if (!DatabaseUtility.TryAddNpc(npc, out var error))
             {
                 return BadRequest(error);
             }
 
+            var newNpcLog = new LogModel
+            {
+                User = npc.TrainerName,
+                Action = $"has entered the chat at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), newNpcLog);
+            Response.RefreshToken(gameMasterId);
             return npc;
         }
 
-        [HttpDelete("{npcId}")]
-        public ActionResult DeleteNpc(string npcId)
+        [HttpDelete("{gameMasterId}/{npcId}")]
+        public ActionResult DeleteNpc(string gameMasterId, string npcId)
         {
-            if (string.IsNullOrEmpty(npcId))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
-                return BadRequest(nameof(npcId));
+                return Unauthorized();
             }
 
-            if (!DatabaseUtility.DeleteNpc(npcId))
+            var npc = DatabaseUtility.FindNpc(npcId);
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            if (npc == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve npc {npcId}");
                 return NotFound(npcId);
             }
 
+            // add check for npc and gameMaster's GameIds
+
+            if (!DatabaseUtility.DeleteNpc(npcId))
+            {
+                return BadRequest(npcId);
+            }
+
+            var retiredNpcLog = new LogModel
+            {
+                User = npc.TrainerName,
+                Action = $"has left the chat at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), retiredNpcLog);
             return Ok();
         }
-
-        private async Task<NpcModel> CreateNpcAsync()
+        private async Task<NpcModel> CreateNpcAsync(TrainerModel gameMaster)
         {
             var json = await Request.GetRequestBody();
             var trainerName = json["trainerName"].ToString();
@@ -86,13 +109,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 .Where(@class => @class != null)
                 .Select(@class => @class.Name);
 
+            // add gameMaster's GameId to npc
             return new NpcModel
             {
                 NPCId = Guid.NewGuid().ToString(),
                 Feats = feats,
                 TrainerClasses = classes,
                 TrainerName = trainerName,
-                TrainerStats = new StatsModel()
+                TrainerStats = new StatsModel(),
+                CurrentHP = 0
             };
         }
     }

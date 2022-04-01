@@ -34,7 +34,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 MongoCollection.Npcs => DatabaseUtility.FindNpc(id),
                 MongoCollection.Pokemon => DatabaseUtility.FindPokemonById(id),
                 MongoCollection.Trainers => DatabaseUtility.FindTrainerById(id),
-                _ => throw new ArgumentOutOfRangeException(),
+                _ => throw new ArgumentOutOfRangeException(nameof(collection)),
             };
 
             notFound = null;

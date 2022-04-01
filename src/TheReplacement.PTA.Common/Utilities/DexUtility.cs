@@ -81,6 +81,10 @@ namespace TheReplacement.PTA.Common.Utilities
             };
         }
 
+        /// <summary>
+        /// Returns a collection of possible evolutions
+        /// </summary>
+        /// <param name="pokemon"></param>
         public static IEnumerable<BasePokemonModel> GetPossibleEvolutions(PokemonModel pokemon)
         {
             var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModel>(DexType.BasePokemon.ToString());
@@ -269,6 +273,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Nature = nature.ToString(),
                 IsShiny = new Random().Next(420) == 69,
                 PokemonStats = stats,
+                CurrentHP = stats.HP,
                 Size = basePokemon.Size,
                 Weight = basePokemon.Weight,
                 Skills = basePokemon.Skills,

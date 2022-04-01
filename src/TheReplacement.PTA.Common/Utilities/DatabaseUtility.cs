@@ -666,6 +666,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to update a pokemon's hp
+        /// </summary>
+        /// <param name="pokemonId">The pokemon's id</param>
+        /// <param name="hp">The pokemon's new hp</param>
+        public static bool UpdatePokemonHP(string pokemonId, int hp)
+        {
+            return TryUpdateDocument
+            (
+                Pokemon,
+                MongoCollectionHelper.Pokemon,
+                pokemon => pokemon.PokemonId == pokemonId,
+                Builders<PokemonModel>.Update.Set("CurrentHP", hp)
+            );
+        }
+
+        /// <summary>
         /// Searches for a pokemon, then updates its location
         /// </summary>
         /// <param name="pokemonId">The pokemon id</param>
