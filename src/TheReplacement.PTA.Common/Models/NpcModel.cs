@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using System.Collections.Generic;
+using System.Linq;
 using TheReplacement.PTA.Common.Interfaces;
 
 namespace TheReplacement.PTA.Common.Models
@@ -9,6 +10,42 @@ namespace TheReplacement.PTA.Common.Models
     /// </summary>
     public class NpcModel : IPerson, IDocument
     {
+
+        private static readonly IReadOnlyDictionary<string, string> TrainerSkillNames = new Dictionary<string, string>
+        {
+            {"Acrobatics", "speed"},
+            {"Athletics", "attack"},
+            {"Bluff/Deception", "specialDefense"},
+            {"Concentration", "defense"},
+            {"Constitution", "defense"},
+            {"Diplomacy/Persuasion", "specialDefense"},
+            {"Engineering/Operation", "specialAttack"},
+            {"History", "specialAttack"},
+            {"Insight", "specialDefense"},
+            {"Investigation", "specialAttack"},
+            {"Medicine", "specialAttack"},
+            {"Nature", "specialAttack"},
+            {"Perception", "specialDefense"},
+            {"Performance", "specialDefense"},
+            {"Pokémon Handling", "specialDefense"},
+            {"Programming", "specialAttack"},
+            {"Sleight of Hand", "speed"},
+            {"Stealth", "speed"}
+        };
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="NpcModel"/> with default values
+        /// </summary>
+        public NpcModel()
+        {
+            TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkill { Name = skill.Key, ModifierStat = skill.Value });
+            Gender = "Agender";
+            Description = string.Empty;
+            Personality = string.Empty;
+            Background = string.Empty;
+            Goals = string.Empty;
+            Species = string.Empty;
+        }
         /// <inheritdoc />
         public ObjectId _id { get; set; }
 
