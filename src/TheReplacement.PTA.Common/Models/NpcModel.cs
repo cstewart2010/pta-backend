@@ -17,52 +17,84 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         public string NPCId { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's name
+        /// </summary>
         public string TrainerName { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's classes
+        /// </summary>
         public IEnumerable<string> TrainerClasses { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's stats
+        /// </summary>
         public StatsModel TrainerStats { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's Feats
+        /// </summary>
         public IEnumerable<string> Feats { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The PTA game session id
+        /// </summary>
         public string GameId { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's level
+        /// </summary>
         public int Level { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's skills
+        /// </summary>
         public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's age
+        /// </summary>
         public int Age { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's gender
+        /// </summary>
         public string Gender { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's height
+        /// </summary>
         public int Height { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's weight
+        /// </summary>
         public int Weight { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// A summary of the trainer's description
+        /// </summary>
         public string Description { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// A summary of the trainer's personality
+        /// </summary>
         public string Personality { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// A summary of the trainer's background
+        /// </summary>
         public string Background { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// A summary of the trainer's goals
+        /// </summary>
         public string Goals { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The trainer's species (human or a pokemon)
+        /// </summary>
         public string Species { get; set; }
     }
 }
