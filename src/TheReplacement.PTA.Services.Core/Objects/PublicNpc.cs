@@ -37,7 +37,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             Goals = npc.Goals;
         }
 
-        internal NpcModel parseBackToModel()
+        internal NpcModel ParseBackToModel()
         {
             var npc = DatabaseUtility.FindNpc(NpcId);
             npc.TrainerName = TrainerName;
