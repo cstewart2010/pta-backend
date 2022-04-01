@@ -138,7 +138,7 @@ namespace TheReplacement.PTA.Common.Models
         public int Height { get; set; }
 
         /// <summary>
-        /// The trainer's wight
+        /// The trainer's weight
         /// </summary>
         public int Weight { get; set; }
 
