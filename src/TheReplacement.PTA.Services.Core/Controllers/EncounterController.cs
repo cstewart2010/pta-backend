@@ -126,6 +126,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest();
             }
 
+            var newEncounterLog = new LogModel
+            {
+                User = gameMaster.TrainerName,
+                Action = $"activated a new encounter ({encounter.Name}) at {DateTime.Now}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), newEncounterLog);
             return Ok();
         }
 
