@@ -1,4 +1,6 @@
-﻿namespace TheReplacement.PTA.Common.Models
+﻿using TheReplacement.PTA.Common.Utilities;
+
+namespace TheReplacement.PTA.Common.Models
 {
     /// <summary>
     /// Represents a participant to an encounter during a PTA session
@@ -28,9 +30,10 @@
         /// <summary>
         /// Returns the trainer as a participant
         /// </summary>
-        /// <param name="trainer"></param>
-        public static EncounterParticipantModel FromTrainer(TrainerModel trainer)
+        /// <param name="trainerId"></param>
+        public static EncounterParticipantModel FromTrainer(string trainerId)
         {
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
             return new EncounterParticipantModel
             {
                 Id = trainer.TrainerId,
@@ -43,9 +46,10 @@
         /// <summary>
         /// Returns the pokemon as a participant
         /// </summary>
-        /// <param name="pokemon"></param>
-        public static EncounterParticipantModel FromPokemon(PokemonModel pokemon)
+        /// <param name="pokemonId"></param>
+        public static EncounterParticipantModel FromPokemon(string pokemonId)
         {
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             return new EncounterParticipantModel
             {
                 Id = pokemon.PokemonId,
@@ -58,9 +62,10 @@
         /// <summary>
         /// Returns the npc as a participant
         /// </summary>
-        /// <param name="npc"></param>
-        public static EncounterParticipantModel FromNpc(NpcModel npc)
+        /// <param name="npcId"></param>
+        public static EncounterParticipantModel FromNpc(string npcId)
         {
+            var npc = DatabaseUtility.FindNpc(npcId);
             return new EncounterParticipantModel
             {
                 Id = npc.NPCId,

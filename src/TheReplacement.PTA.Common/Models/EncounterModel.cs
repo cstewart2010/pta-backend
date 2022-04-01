@@ -40,5 +40,10 @@ namespace TheReplacement.PTA.Common.Models
         /// The type of Encounter (Wild, Trainer, Hybrid)
         /// </summary>
         public string Type { get; set; }
+
+        /// <summary>
+        /// The encounters participants
+        /// </summary>
+        public IEnumerable<EncounterParticipantModel> ActiveParticipants { get; set; }
     }
 }

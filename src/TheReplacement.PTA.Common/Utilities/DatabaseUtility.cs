@@ -18,6 +18,43 @@ namespace TheReplacement.PTA.Common.Utilities
         private const MongoCollection Npc = MongoCollection.Npcs;
         private const MongoCollection Pokemon = MongoCollection.Pokemon;
         private const MongoCollection Trainer = MongoCollection.Trainers;
+        private const MongoCollection Encounter = MongoCollection.Encounter;
+
+        /// <summary>
+        /// Searches for a encounter using its id, then deletes it
+        /// </summary>
+        /// <param name="id">The encounter id</param>
+        public static bool DeleteEncounter(string id)
+        {
+            var result = MongoCollectionHelper
+                .Encounter
+                .FindOneAndDelete(encounter => encounter.EncounterId == id) != null;
+
+            if (result)
+            {
+                LoggerUtility.Info(Encounter, $"Deleted encounter session {id}");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Searches for encounter using their game id, then deletes them
+        /// </summary>
+        /// <param name="gameId">The game session id</param>
+        public static bool DeleteEncountersByGameId(string gameId)
+        {
+            var result = MongoCollectionHelper
+                .Encounter
+                .DeleteMany(encounter => encounter.EncounterId == gameId)?.IsAcknowledged == true;
+
+            if (result)
+            {
+                LoggerUtility.Info(Encounter, $"Deleted all encounters associated with game session {gameId}");
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Searches for a game using its id, then deletes it
@@ -132,6 +169,39 @@ namespace TheReplacement.PTA.Common.Utilities
             {
                 return -1;
             }
+        }
+
+        /// <summary>
+        /// Returns an active encounter (if any) matching the game session id
+        /// </summary>
+        /// <param name="gameId">The game id</param>
+        public static EncounterModel FindActiveEncounter(string gameId)
+        {
+            return MongoCollectionHelper.Encounter
+                .Find(encounter => encounter.GameId == gameId && encounter.IsActive)
+                .SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Returns an encounter matching the id
+        /// </summary>
+        /// <param name="encounterId">The encounter id</param>
+        public static EncounterModel FindEncounter(string encounterId)
+        {
+            return MongoCollectionHelper.Encounter
+                .Find(encounter => encounter.EncounterId == encounterId)
+                .SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Returns all encounters associated with the game session
+        /// </summary>
+        /// <param name="gameId">The game id</param>
+        public static IEnumerable<EncounterModel> FindAllEncounters(string gameId)
+        {
+            return MongoCollectionHelper.Encounter
+                .Find(encounter => encounter.GameId == gameId)
+                .ToEnumerable();
         }
 
         /// <summary>
@@ -402,6 +472,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to replace the previous encounter with the new data
+        /// </summary>
+        /// <param name="updatedEncounter">The updated encounter data</param>
+        public static bool UpdateEncounter(EncounterModel updatedEncounter)
+        {
+            var result = MongoCollectionHelper.Encounter.ReplaceOne
+            (
+                encounter => encounter.GameId == updatedEncounter.GameId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatedEncounter
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
         /// Attempts to replace the previous trainer with the new data
         /// </summary>
         /// <param name="updatedTrainer">The updated trainer data</param>
@@ -415,6 +501,20 @@ namespace TheReplacement.PTA.Common.Utilities
             );
 
             return result.IsAcknowledged;
+        }
+
+        /// <summary>
+        /// Attempts to add a encounter using the provided document
+        /// </summary>
+        /// <param name="encounter">The document to add</param>
+        public static (bool Result, MongoWriteError Error) TryAddEncounter(EncounterModel encounter)
+        {
+            return (TryAddDocument
+            (
+                Encounter,
+                () => MongoCollectionHelper.Encounter.InsertOne(encounter),
+                out var error
+            ), error);
         }
 
         /// <summary>
