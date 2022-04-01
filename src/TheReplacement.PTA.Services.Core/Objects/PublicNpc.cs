@@ -18,7 +18,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
         internal PublicNpc(NpcModel npc)
         {
             NpcId = npc.NPCId;
-            //GameId = npc.GameId;  
+            GameId = npc.GameId;  
             TrainerName = npc.TrainerName;
             Feats = npc.Feats;
             TrainerClasses = npc.TrainerClasses;
@@ -26,27 +26,27 @@ namespace TheReplacement.PTA.Services.Core.Objects
             var NpcPokemon = DatabaseUtility.FindPokemonByTrainerId(npc.NPCId);
             PokemonTeam = NpcPokemon
                 .Where(Pokemon => Pokemon.IsOnActiveTeam);
-            //Level = npc.Level;
-            //TrainerSkills = npc.TrainerSkills;
-           // Gender = npc.Gender;
-            //Height = npc.Height;
-           // Weight = npc.Weight;
-           // Description = npc.Description;
-           // Personality = npc.Personality;
-            //Background = npc.Background;
-            //Goals = npc.Goals;
+            Level = npc.Level;
+            TrainerSkills = npc.TrainerSkills;
+            Gender = npc.Gender;
+            Height = npc.Height;
+            Weight = npc.Weight;
+            Description = npc.Description;
+            Personality = npc.Personality;
+            Background = npc.Background;
+            Goals = npc.Goals;
         }
 
-       /* internal NpcModel parseBackToModel()
+        internal NpcModel parseBackToModel()
         {
-            var npc = DatabaseUtility.FindTrainerById(NpcId);
+            var npc = DatabaseUtility.FindNpc(NpcId);
             npc.TrainerName = TrainerName;
             npc.Feats = Feats;
             npc.TrainerClasses = TrainerClasses;
             npc.TrainerStats = TrainerStats;   
             npc.Level = Level;
             npc.TrainerSkills = TrainerSkills;
-            npc.Gender = Gender
+            npc.Gender = Gender;
             npc.Height = Height;
             npc.Weight = Weight; 
             npc.Description = Description;
@@ -54,7 +54,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             npc.Background = Background;
             npc.Goals = Goals;
             return npc;
-        }*/
+        }
 
         public string NpcId { get; set; }
 
