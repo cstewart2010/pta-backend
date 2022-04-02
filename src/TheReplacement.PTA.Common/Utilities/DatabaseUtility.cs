@@ -102,14 +102,9 @@ namespace TheReplacement.PTA.Common.Utilities
                 .Npcs
                 .DeleteMany(npc => npc.GameId == gameId);
 
-            if (deleteResult.IsAcknowledged)
-            {
-                return deleteResult.DeletedCount;
-            }
-            else
-            {
+           
                 return deleteResult.IsAcknowledged;
-            }
+            
         }
 
         /// <summary>
