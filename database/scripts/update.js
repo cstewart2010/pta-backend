@@ -122,9 +122,12 @@ const updatedValidators = {
         'NPCId',
         'TrainerName',
         'TrainerClasses',
-        'CurrentHP',
         'TrainerStats',
-        'Feats'
+        'CurrentHP',
+        'Feats',
+        'GameId',
+        'Level',
+        'TrainerSkills'
       ],
       additionalProperties: false,
       properties: {
@@ -159,6 +162,88 @@ const updatedValidators = {
           items: {
             bsonType: 'string'
           }
+        },
+        GameId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
+        Level: {
+          bsonType: 'int',
+          minimum: 1
+        },
+        TrainerSkills: {
+          bsonType: 'array',
+          items: {
+            required: [
+              'Name',
+              'Talent1',
+              'Talent2',
+              'ModifierStat'
+            ],
+            additionalProperties: false,
+            properties: {
+              Name: {
+                bsonType: 'string',
+                'enum': [
+                  'Acrobatics',
+                  'Athletics',
+                  'Bluff/Deception',
+                  'Concentration',
+                  'Constitution',
+                  'Diplomacy/Persuasion',
+                  'Engineering/Operation',
+                  'History',
+                  'Insight',
+                  'Investigation',
+                  'Medicine',
+                  'Nature',
+                  'Perception',
+                  'Performance',
+                  'Pokémon Handling',
+                  'Programming',
+                  'Sleight of Hand',
+                  'Stealth'
+                ]
+              },
+              Talent1: {
+                bsonType: 'bool'
+              },
+              Talent2: {
+                bsonType: 'bool'
+              },
+              ModifierStat: {
+                bsonType: 'string'
+              }
+            }
+          }
+        },
+        Age: {
+          bsonType: 'int'
+        },
+        Gender: {
+          bsonType: 'string'
+        },
+        Height: {
+          bsonType: 'int'
+        },
+        Weight: {
+          bsonType: 'int'
+        },
+        Description: {
+          bsonType: 'string'
+        },
+        Personality: {
+          bsonType: 'string'
+        },
+        Background: {
+          bsonType: 'string'
+        },
+        Goals: {
+          bsonType: 'string'
+        },
+        Species: {
+          bsonType: 'string'
         }
       }
     }
@@ -178,6 +263,7 @@ const updatedValidators = {
         'Nickname',
         'Gender',
         'PokemonStatus',
+        'CurrentHP',
         'Moves',
         'Type',
         'CatchRate',
@@ -186,7 +272,6 @@ const updatedValidators = {
         'IsOnActiveTeam',
         'CanEvolve',
         'PokemonStats',
-        'CurrentHP',
         'Size',
         'Weight',
         'Rarity',
