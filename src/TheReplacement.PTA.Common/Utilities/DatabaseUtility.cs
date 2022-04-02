@@ -96,7 +96,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Searches for all Npcs using their game id, then deletes it
         /// </summary>
         /// <param name="gameId">The game id</param>
-        public static long DeleteNpcByGameId(string gameId)
+        public static bool DeleteNpcByGameId(string gameId)
         {
             var deleteResult = MongoCollectionHelper
                 .Npcs
@@ -108,7 +108,7 @@ namespace TheReplacement.PTA.Common.Utilities
             }
             else
             {
-                return -1;
+                return deleteResult.IsAcknowledged;
             }
         }
 

@@ -161,7 +161,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            var npcs = DatabaseUtility.DeleteNpcByGameId(gameId);
+            if (!DatabaseUtility.DeleteNpcByGameId(gameId))
+            {
+                return BadRequest();
+            }
 
             return Ok();
         }
