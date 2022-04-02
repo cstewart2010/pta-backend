@@ -137,7 +137,15 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
             return (trainer, null);
         }
-
+        public static async Task<bool> TryCompleteNpc(this HttpRequest request)
+        {
+            var json = await request.GetRequestBody();
+            var publicNpc = PublicNpc.FromJson(json);
+            var npc = publicNpc.ParseBackToModel();
+           
+            var result = DatabaseUtility.UpdateNpc(npc);
+            return result;
+        }
         public static async Task<bool> TryCompleteTrainer(this HttpRequest request)
         {
             var json = await request.GetRequestBody();
