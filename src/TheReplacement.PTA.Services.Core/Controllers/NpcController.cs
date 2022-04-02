@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Enums;
@@ -7,6 +8,7 @@ using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
+using TheReplacement.PTA.Services.Core.Objects;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -24,7 +26,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{gameMasterId}/{npcId}")]
         public ActionResult<NpcModel> GetNpc(string gameMasterId, string npcId)
         {
-            if(!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
@@ -36,9 +38,42 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(npcId);
             }
 
-            // add check for npc and gameMaster's GameIds
+            if (gameMaster.GameId != npc.GameId)
+            {
+                return Conflict();
+            }
 
             return npc;
+        }
+
+        [HttpGet("{npcId}/pokemon/{pokemonId}")]
+        public ActionResult<PokemonModel> GetNpcMon([FromQuery] string gameMasterId, string npcId, string pokemonId)
+        {
+            if (!Request.VerifyIdentity(gameMasterId, true))
+            {
+                return Unauthorized();
+            }
+
+            var pokemon = DatabaseUtility.FindPokemonByTrainerId(npcId).SingleOrDefault(pokemon => pokemon.PokemonId == pokemonId);
+            if (pokemon == null)
+            {
+                return NotFound(pokemonId);
+            }
+
+            return pokemon;
+
+        }
+
+        [HttpGet("{gameMasterId}/all/{gameId}")]
+        public ActionResult<IEnumerable<PublicNpc>> GetNpcsInGame(string gameMasterId, string gameId)
+        {
+            if (!Request.VerifyIdentity(gameMasterId, true))
+            {
+                return Unauthorized();
+            }
+
+            var npcs = DatabaseUtility.FindNpcsByGameId(gameId);
+            return npcs.Select(npc => new PublicNpc(npc)).ToList();
         }
 
         [HttpPost("{gameMasterId}/new")]
@@ -66,6 +101,24 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return npc;
         }
 
+        [HttpPut("{gameMasterId}/{npcId}/addStats")]
+        public async Task<ActionResult<PublicNpc>> AddNpcStats(string gameMasterId, string npcId)
+        {
+            if (!Request.VerifyIdentity(gameMasterId, true)) 
+            { 
+                return Unauthorized(); 
+            }
+
+            var result = await Request.TryCompleteNpc();
+            if (!result)
+            {
+                return BadRequest(new GenericMessage("Failed to update Npc"));
+            }
+
+            var npc = DatabaseUtility.FindNpc(npcId);
+            return new PublicNpc(npc);
+        }
+
         [HttpDelete("{gameMasterId}/{npcId}")]
         public ActionResult DeleteNpc(string gameMasterId, string npcId)
         {
@@ -80,8 +133,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return NotFound(npcId);
             }
-
-            // add check for npc and gameMaster's GameIds
+           
+            if (gameMaster.GameId != npc.GameId)
+            {
+                return Conflict();
+            }
 
             if (!DatabaseUtility.DeleteNpc(npcId))
             {
@@ -96,6 +152,23 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), retiredNpcLog);
             return Ok();
         }
+
+        [HttpDelete("{gameMasterId}/all/{gameId}")]
+        public ActionResult DeleteNpcsInGame(string gameMasterId, string gameId) 
+        {
+            if (!Request.VerifyIdentity(gameMasterId, true))
+            {
+                return Unauthorized();
+            }
+
+            if (!DatabaseUtility.DeleteNpcByGameId(gameId))
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
         private async Task<NpcModel> CreateNpcAsync(TrainerModel gameMaster)
         {
             var json = await Request.GetRequestBody();

@@ -93,6 +93,21 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Searches for all Npcs using their game id, then deletes it
+        /// </summary>
+        /// <param name="gameId">The game id</param>
+        public static bool DeleteNpcByGameId(string gameId)
+        {
+            var deleteResult = MongoCollectionHelper
+                .Npcs
+                .DeleteMany(npc => npc.GameId == gameId);
+
+           
+                return deleteResult.IsAcknowledged;
+            
+        }
+
+        /// <summary>
         /// Searches for a Pokemon using its id, then deletes it
         /// </summary>
         /// <param name="id">The Pokemon id</param>
@@ -323,6 +338,15 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Returns all npcs matching the game id
+        /// </summary>
+        /// <param name="gameId">The npc ids</param>
+        public static IEnumerable<NpcModel> FindNpcsByGameId(string gameId)
+        {
+            return MongoCollectionHelper.Npcs.Find(npc => npc.GameId == gameId).ToEnumerable();
+        }
+
+        /// <summary>
         /// Returns a Pokemon matching the Pokemon id
         /// </summary>
         /// <param name="id">The Pokemon id</param>
@@ -479,9 +503,25 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             var result = MongoCollectionHelper.Encounter.ReplaceOne
             (
-                encounter => encounter.GameId == updatedEncounter.GameId,
+                encounter => encounter.EncounterId == updatedEncounter.EncounterId,
                 options: new ReplaceOptions { IsUpsert = true },
                 replacement: updatedEncounter
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
+        /// Attempts to replace the previous Npc with the new data
+        /// </summary>
+        /// <param name="updatedNpc">The updated npc data</param>
+        public static bool UpdateNpc(NpcModel updatedNpc)
+        {
+            var result = MongoCollectionHelper.Npcs.ReplaceOne
+            (
+                npc => npc.NPCId == updatedNpc.NPCId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatedNpc
             );
 
             return result.IsAcknowledged;
