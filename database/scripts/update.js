@@ -90,7 +90,9 @@ const updatedValidators = {
             required: [
               'Id',
               'Type',
-              'HP'
+              'Name',
+              'HP',
+              'Position'
             ],
             additionalProperties: false,
             properties: {
@@ -98,6 +100,9 @@ const updatedValidators = {
                 bsonType: 'string',
                 minLength: 36,
                 maxLength: 36
+              },
+              Name: {
+                bsonType: 'string'
               },
               Type: {
                 bsonType: 'string',
@@ -109,6 +114,26 @@ const updatedValidators = {
               },
               HP: {
                 bsonType: 'int'
+              },
+              Position: {
+                bsonType: 'object',
+                required: [
+                  'X',
+                  'Y'
+                ],
+                additionalProperties: false,
+                properties: {
+                  X: {
+                    bsonType: 'int',
+                    minimum: 0,
+                    maximum: 20
+                  },
+                  Y: {
+                    bsonType: 'int',
+                    minimum: 0,
+                    maximum: 20
+                  }
+                }
               }
             }
           }
