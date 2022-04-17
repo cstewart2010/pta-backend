@@ -28,6 +28,11 @@ namespace TheReplacement.PTA.Common.Models
         public int HP { get; set; }
 
         /// <summary>
+        /// The participants's position on the map
+        /// </summary>
+        public MapPositionModel Position { get; set; }
+
+        /// <summary>
         /// Returns the trainer as a participant
         /// </summary>
         /// <param name="trainerId"></param>

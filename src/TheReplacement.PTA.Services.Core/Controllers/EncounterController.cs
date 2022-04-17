@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -92,6 +91,114 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var json = await Request.GetRequestBody();
             var participant = json.ToObject<EncounterParticipantModel>();
             encounter.ActiveParticipants = encounter.ActiveParticipants.Append(participant);
+            if (DatabaseUtility.UpdateEncounter(encounter))
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
+        [HttpPut("{gameMasterId}/position/{participantId}")]
+        public async Task<ActionResult> UpdatePositionAsync(string gameMasterId, string participantId)
+        {
+            if (!Request.VerifyIdentity(gameMasterId, false))
+            {
+                return Unauthorized();
+            }
+
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            var encounter = DatabaseUtility.FindActiveEncounter(gameMaster.GameId);
+            if (encounter == null)
+            {
+                return NotFound();
+            }
+
+            var json = await Request.GetRequestBody();
+            encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
+            {
+                if (participant.Id == participantId)
+                {
+                    participant.Position = json.ToObject<MapPositionModel>();
+                }
+
+                return participant;
+            });
+
+            if (DatabaseUtility.UpdateEncounter(encounter))
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
+        [HttpPut("{trainerId}/trainer_position")]
+        public async Task<ActionResult> UpdateTrainerPositionAsync(string trainerId)
+        {
+            if (!Request.VerifyIdentity(trainerId, false))
+            {
+                return Unauthorized();
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            var encounter = DatabaseUtility.FindActiveEncounter(trainer.GameId);
+            if (encounter == null)
+            {
+                return NotFound();
+            }
+
+            var json = await Request.GetRequestBody();
+            encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
+            {
+                if (participant.Id == trainerId)
+                {
+                    participant.Position = json.ToObject<MapPositionModel>();
+                }
+
+                return participant;
+            });
+
+            if (DatabaseUtility.UpdateEncounter(encounter))
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
+        [HttpPut("{trainerId}/pokemon_position/{pokemonId}")]
+        public async Task<ActionResult> UpdateTrainerPokemonPositionAsync(string trainerId, string pokemonId)
+        {
+            if (!Request.VerifyIdentity(trainerId, false))
+            {
+                return Unauthorized();
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            var encounter = DatabaseUtility.FindActiveEncounter(trainer.GameId);
+            if (encounter == null)
+            {
+                return NotFound();
+            }
+
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            if (pokemon.TrainerId != trainerId)
+            {
+                return Conflict();
+            }
+
+            var json = await Request.GetRequestBody();
+            encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
+            {
+                if (participant.Id == pokemonId)
+                {
+                    participant.Position = json.ToObject<MapPositionModel>();
+                }
+
+                return participant;
+            });
+
             if (DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
