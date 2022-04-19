@@ -8,9 +8,24 @@ namespace TheReplacement.PTA.Common.Models
     public class EncounterParticipantModel
     {
         /// <summary>
+        /// Default constructor
+        /// </summary>
+        public EncounterParticipantModel() { }
+
+        /// <summary>
+        /// Initiziles a new instance of <see cref="EncounterParticipantModel"/>
+        /// </summary>
+        /// <param name="currentHp">The participant's current hp</param>
+        /// <param name="totalHp">The participant's total hp</param>
+        public EncounterParticipantModel(double currentHp, double totalHp)
+        {
+            Health = GetHealth(currentHp, totalHp);
+        }
+
+        /// <summary>
         /// The paticipant's id
         /// </summary>
-        public string Id { get; set; }
+        public string ParticipantId { get; set; }
 
         /// <summary>
         /// The paticipant's name
@@ -18,14 +33,19 @@ namespace TheReplacement.PTA.Common.Models
         public string Name { get; set; }
 
         /// <summary>
-        /// The paticipant's type (Trainer/Pokemon/Npc)
+        /// The pariticipant's type (Trainer/Pokemon/Npc)
         /// </summary>
         public string Type { get; set; }
 
         /// <summary>
-        /// The paticipant's hp
+        /// A description of the participant's health
         /// </summary>
-        public int HP { get; set; }
+        public string Health { get; set; }
+
+        /// <summary>
+        /// The pariticipant's speed
+        /// </summary>
+        public double Speed { get; set; }
 
         /// <summary>
         /// The participants's position on the map
@@ -36,15 +56,17 @@ namespace TheReplacement.PTA.Common.Models
         /// Returns the trainer as a participant
         /// </summary>
         /// <param name="trainerId"></param>
-        public static EncounterParticipantModel FromTrainer(string trainerId)
+        /// <param name="position"></param>
+        public static EncounterParticipantModel FromTrainer(string trainerId, MapPositionModel position)
         {
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            return new EncounterParticipantModel
+            return new EncounterParticipantModel(trainer.CurrentHP, trainer.TrainerStats.HP)
             {
-                Id = trainer.TrainerId,
+                ParticipantId = trainer.TrainerId,
                 Name = trainer.TrainerName,
                 Type = "Trainer",
-                HP = trainer.CurrentHP
+                Speed = trainer.TrainerStats.Speed,
+                Position = position
             };
         }
 
@@ -52,15 +74,17 @@ namespace TheReplacement.PTA.Common.Models
         /// Returns the pokemon as a participant
         /// </summary>
         /// <param name="pokemonId"></param>
-        public static EncounterParticipantModel FromPokemon(string pokemonId)
+        /// <param name="position"></param>
+        public static EncounterParticipantModel FromPokemon(string pokemonId, MapPositionModel position)
         {
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
-            return new EncounterParticipantModel
+            return new EncounterParticipantModel(pokemon.CurrentHP, pokemon.PokemonStats.HP)
             {
-                Id = pokemon.PokemonId,
+                ParticipantId = pokemon.PokemonId,
                 Name = pokemon.Nickname,
                 Type = "Pokemon",
-                HP = pokemon.CurrentHP
+                Speed = pokemon.PokemonStats.Speed,
+                Position = position
             };
         }
 
@@ -68,16 +92,45 @@ namespace TheReplacement.PTA.Common.Models
         /// Returns the npc as a participant
         /// </summary>
         /// <param name="npcId"></param>
-        public static EncounterParticipantModel FromNpc(string npcId)
+        /// <param name="position"></param>
+        public static EncounterParticipantModel FromNpc(string npcId, MapPositionModel position)
         {
             var npc = DatabaseUtility.FindNpc(npcId);
-            return new EncounterParticipantModel
+            return new EncounterParticipantModel(npc.CurrentHP, npc.TrainerStats.HP)
             {
-                Id = npc.NPCId,
+                ParticipantId = npc.NPCId,
                 Name = npc.TrainerName,
                 Type = "Trainer",
-                HP = npc.CurrentHP
+                Speed = npc.TrainerStats.Speed,
+                Position = position
             };
+        }
+
+        private static string GetHealth(double currentHp, double totalHp)
+        {
+            var quotient = currentHp / totalHp;
+            if (quotient >= 1)
+            {
+                return "Feeling fresh!";
+            }
+            else if (quotient > .6)
+            {
+                return "Going strong!";
+            }
+            else if (quotient > .3)
+            {
+                return "Might need some help. . .";
+            }
+            else if (quotient > 0)
+            {
+                return "Help!!!";
+            }
+            else if (quotient > -1)
+            {
+                return "Incapacitated";
+            }
+
+            return "";
         }
     }
 }

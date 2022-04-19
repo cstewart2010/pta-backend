@@ -53,6 +53,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             Items = trainer.Items;
             CurrentHP = trainer.CurrentHP;
             NewPokemon = Array.Empty<NewPokemon>();
+            Sprite = trainer.Sprite;
         }
 
         internal TrainerModel ParseBackToModel()
@@ -77,6 +78,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             trainer.Items = Items.ToList();
             trainer.Species = Species;
             trainer.CurrentHP = CurrentHP;
+            trainer.Sprite = Sprite;
             return trainer;
         }
 
@@ -105,6 +107,8 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
 
         public int Age { get; set; }
+
+        public string Sprite { get; set; }
 
         public string Gender { get; set; }
 

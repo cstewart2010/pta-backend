@@ -33,6 +33,6 @@
         /// <summary>
         /// Represents the Encounter collection
         /// </summary>
-        Encounter = 6
+        Encounters = 6
     }
 }

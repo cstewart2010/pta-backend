@@ -57,6 +57,9 @@ const updatedValidators = {
       ],
       additionalProperties: false,
       properties: {
+        _id: {
+          bsonType: 'objectId'
+        },
         EncounterId: {
           bsonType: 'string',
           minLength: 36,
@@ -88,15 +91,16 @@ const updatedValidators = {
           items: {
             bsonType: 'object',
             required: [
-              'Id',
+              'ParticipantId',
               'Type',
               'Name',
-              'HP',
+              'Health',
+              'Speed',
               'Position'
             ],
             additionalProperties: false,
             properties: {
-              Id: {
+              ParticipantId: {
                 bsonType: 'string',
                 minLength: 36,
                 maxLength: 36
@@ -112,8 +116,11 @@ const updatedValidators = {
                   'Npc'
                 ]
               },
-              HP: {
-                bsonType: 'int'
+              Health: {
+                bsonType: 'string'
+              },
+              Speed: {
+                bsonType: 'double'
               },
               Position: {
                 bsonType: 'object',

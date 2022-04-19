@@ -19,7 +19,7 @@ namespace TheReplacement.PTA.Common.Internal
             Npcs = Database.GetCollection<NpcModel>("NPCs");
             Logs = Database.GetCollection<LoggerModel>("Logs");
             PokeDex = Database.GetCollection<PokeDexItemModel>(MongoCollection.PokeDex.ToString());
-            Encounter = Database.GetCollection<EncounterModel>(MongoCollection.Encounter.ToString());
+            Encounter = Database.GetCollection<EncounterModel>(MongoCollection.Encounters.ToString());
         }
 
         /// <summary>
