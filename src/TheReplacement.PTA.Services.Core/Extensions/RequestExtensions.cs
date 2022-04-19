@@ -135,6 +135,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 return (null, badRequestMessage);
             }
 
+            trainer.Sprite = "acetrainer";
             return (trainer, null);
         }
         public static async Task<bool> TryCompleteNpc(this HttpRequest request)

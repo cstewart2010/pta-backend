@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a participant's position on the Enocunter Map
     /// </summary>
-    public struct MapPositionModel
+    public class MapPositionModel
     {
         /// <summary>
         /// The x position on the Encounter map

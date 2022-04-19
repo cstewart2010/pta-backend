@@ -128,6 +128,11 @@ namespace TheReplacement.PTA.Common.Models
         public int Age { get; set; }
 
         /// <summary>
+        /// The trainer's sprite
+        /// </summary>
+        public string Sprite { get; set; }
+
+        /// <summary>
         /// The trainer's gender
         /// </summary>
         public string Gender { get; set; }

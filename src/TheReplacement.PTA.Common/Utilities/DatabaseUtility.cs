@@ -18,7 +18,7 @@ namespace TheReplacement.PTA.Common.Utilities
         private const MongoCollection Npc = MongoCollection.Npcs;
         private const MongoCollection Pokemon = MongoCollection.Pokemon;
         private const MongoCollection Trainer = MongoCollection.Trainers;
-        private const MongoCollection Encounter = MongoCollection.Encounter;
+        private const MongoCollection Encounter = MongoCollection.Encounters;
 
         /// <summary>
         /// Searches for a encounter using its id, then deletes it

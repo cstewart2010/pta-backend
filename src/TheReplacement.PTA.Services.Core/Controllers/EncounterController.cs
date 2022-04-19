@@ -19,13 +19,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         public EncounterController()
         {
-            Collection = MongoCollection.Encounter;
+            Collection = MongoCollection.Encounters;
         }
 
         [HttpGet("{gameId}")]
         public ActionResult<EncounterModel> GetActiveEncounter(string gameId)
         {
-            return DatabaseUtility.FindActiveEncounter(gameId);
+            return DatabaseUtility.FindActiveEncounter(gameId) ?? new EncounterModel();
         }
 
         [HttpGet("{gameMasterId}/all")]
@@ -90,8 +90,27 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var json = await Request.GetRequestBody();
             var participant = json.ToObject<EncounterParticipantModel>();
+            if (encounter.ActiveParticipants.Any(activeParticipant => activeParticipant.ParticipantId == participant.ParticipantId))
+            {
+                return Conflict();
+            }
+            if (encounter.ActiveParticipants.Any(activeParticipant => 
+            {
+                if (activeParticipant.Position.X == participant.Position.X)
+                {
+                    if (activeParticipant.Position.Y == participant.Position.Y)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }))
+            {
+                return Conflict();
+            }
             encounter.ActiveParticipants = encounter.ActiveParticipants.Append(participant);
-            if (DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
             }
@@ -115,21 +134,39 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var json = await Request.GetRequestBody();
+            var position = (await Request.GetRequestBody()).ToObject<MapPositionModel>();
+            if (encounter.ActiveParticipants.Any(activeParticipant =>
+            {
+                if (activeParticipant.Position.X == position.X)
+                {
+                    if (activeParticipant.Position.Y == position.Y)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }))
+            {
+                return Conflict();
+            }
+            var participant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == participantId);
             encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
             {
-                if (participant.Id == participantId)
+                if (participant.ParticipantId == participantId)
                 {
-                    participant.Position = json.ToObject<MapPositionModel>();
+                    participant.Position = position;
                 }
 
                 return participant;
             });
 
-            if (DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
             }
 
+            SendRepositionLog(gameMaster.GameId, participant.Name, position);
             return Ok();
         }
 
@@ -148,22 +185,43 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
-            var json = await Request.GetRequestBody();
+            var position = (await Request.GetRequestBody()).ToObject<MapPositionModel>();
+            var participant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == trainerId);
+            if (GetDistance(position, participant.Position) > participant.Speed)
+            {
+                return StatusCode(411);
+            }
+            if (encounter.ActiveParticipants.Any(activeParticipant =>
+            {
+                if (activeParticipant.Position.X == position.X)
+                {
+                    if (activeParticipant.Position.Y == position.Y)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }))
+            {
+                return Conflict();
+            }
             encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
             {
-                if (participant.Id == trainerId)
+                if (participant.ParticipantId == trainerId)
                 {
-                    participant.Position = json.ToObject<MapPositionModel>();
+                    participant.Position = position;
                 }
 
                 return participant;
             });
 
-            if (DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
             }
 
+            SendRepositionLog(trainer.GameId, participant.Name, position);
             return Ok();
         }
 
@@ -188,22 +246,43 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Conflict();
             }
 
-            var json = await Request.GetRequestBody();
+            var position = (await Request.GetRequestBody()).ToObject<MapPositionModel>();
+            var participant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == pokemonId);
+            if (GetDistance(position, participant.Position) > participant.Speed)
+            {
+                return StatusCode(411);
+            }
+            if (encounter.ActiveParticipants.Any(activeParticipant =>
+            {
+                if (activeParticipant.Position.X == position.X)
+                {
+                    if (activeParticipant.Position.Y == position.Y)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }))
+            {
+                return Conflict();
+            }
             encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
             {
-                if (participant.Id == pokemonId)
+                if (participant.ParticipantId == pokemonId)
                 {
-                    participant.Position = json.ToObject<MapPositionModel>();
+                    participant.Position = position;
                 }
 
                 return participant;
             });
 
-            if (DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
             }
 
+            SendRepositionLog(trainer.GameId, participant.Name, position);
             return Ok();
         }
 
@@ -228,7 +307,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             encounter.IsActive = true;
-            if (DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
             }
@@ -257,7 +336,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             encounter.IsActive = false;
-            if (DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
             }
@@ -280,7 +359,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             encounter.ActiveParticipants = encounter.ActiveParticipants.Select(GetWithUpdatedHP);
-            if (DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
             }
@@ -321,17 +400,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant)
-        {
-            return Enum.Parse<EncounterParticipantType>(participant.Type, true) switch
-            {
-                EncounterParticipantType.Trainer => EncounterParticipantModel.FromTrainer(participant.Id),
-                EncounterParticipantType.Pokemon => EncounterParticipantModel.FromPokemon(participant.Id),
-                EncounterParticipantType.Npc => EncounterParticipantModel.FromNpc(participant.Id),
-                _ => throw new ArgumentOutOfRangeException(nameof(participant.Type)),
-            };
-        }
-
         private async Task<(string Name, string Type, AbstractMessage Message)> GetCreationParametersAsync()
         {
             var json = await Request.GetRequestBody();
@@ -355,6 +423,32 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return (name, type, null);
+        }
+
+        private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant)
+        {
+            return Enum.Parse<EncounterParticipantType>(participant.Type, true) switch
+            {
+                EncounterParticipantType.Trainer => EncounterParticipantModel.FromTrainer(participant.ParticipantId, participant.Position),
+                EncounterParticipantType.Pokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position),
+                EncounterParticipantType.Npc => EncounterParticipantModel.FromNpc(participant.ParticipantId, participant.Position),
+                _ => throw new ArgumentOutOfRangeException(nameof(participant.Type)),
+            };
+        }
+
+        private static void SendRepositionLog(string gameId, string participantName, MapPositionModel position)
+        {
+            var repositionLog = new LogModel
+            {
+                User = participantName,
+                Action = $"moved to point ({position.X}, {position.Y}) at {DateTime.Now}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), repositionLog);
+        }
+
+        private static double GetDistance(MapPositionModel start, MapPositionModel end)
+        {
+            return Math.Sqrt(Math.Pow(start.X - end.X, 2) + Math.Pow(start.Y - end.Y, 2));
         }
     }
 }
