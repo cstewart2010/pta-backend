@@ -86,6 +86,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             var npc = await CreateNpcAsync(gameMaster);
+            npc.GameId = gameMaster.GameId;
             if (!DatabaseUtility.TryAddNpc(npc, out var error))
             {
                 return BadRequest(error);
