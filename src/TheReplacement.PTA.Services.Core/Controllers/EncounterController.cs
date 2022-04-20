@@ -118,10 +118,37 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
+        [HttpPut("{gameMasterId}/remove/{participantId}")]
+        public ActionResult RemoveFromActiveEncounter(string gameMasterId, string participantId)
+        {
+            if (!Request.VerifyIdentity(gameMasterId, true))
+            {
+                return Unauthorized();
+            }
+
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            var encounter = DatabaseUtility.FindActiveEncounter(gameMaster.GameId);
+            var removedParticipant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == participantId);
+            encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != participantId);
+
+            if (!DatabaseUtility.UpdateEncounter(encounter))
+            {
+                return BadRequest();
+            }
+
+            var removalLog = new LogModel
+            {
+                User = removedParticipant.Name,
+                Action = $"has been removed from {encounter.Name} at {DateTime.Now}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), removalLog);
+            return Ok();
+        }
+
         [HttpPut("{gameMasterId}/position/{participantId}")]
         public async Task<ActionResult> UpdatePositionAsync(string gameMasterId, string participantId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, false))
+            if (!Request.VerifyIdentity(gameMasterId, true))
             {
                 return Unauthorized();
             }
@@ -133,7 +160,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
-            var json = await Request.GetRequestBody();
             var position = (await Request.GetRequestBody()).ToObject<MapPositionModel>();
             if (encounter.ActiveParticipants.Any(activeParticipant =>
             {
