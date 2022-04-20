@@ -88,19 +88,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{pokemonId}/hp/{hp}")]
-        public ActionResult UpdateHP(string pokemonId, int hp)
+        public ActionResult UpdateHP(string pokemonId, int hp, [FromQuery] string trainerId)
         {
-            if (!Request.Query.TryGetValue("trainerId", out var trainerId))
-            {
-                return BadRequest(nameof(trainerId));
-            }
             if (!Request.VerifyIdentity(trainerId, false))
             {
                 return Unauthorized();
             }
 
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
-            if (pokemon?.TrainerId != trainerId)
+            if (!(pokemon?.TrainerId == trainerId || DatabaseUtility.FindTrainerById(trainerId)?.IsGM == true))
             {
                 return Unauthorized();
             }
@@ -498,10 +494,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return null;
             }
 
-            if (trainer.TrainerId != pokemon.TrainerId)
+            if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
-                error = Unauthorized(pokemonId);
+                error = Unauthorized(trainer.TrainerId);
                 return null;
             }
 
