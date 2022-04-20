@@ -35,6 +35,8 @@ namespace TheReplacement.PTA.Services.Core.Objects
             Personality = npc.Personality;
             Background = npc.Background;
             Goals = npc.Goals;
+            Species = npc.Species;
+            Sprite = npc.Sprite;
         }
 
         internal NpcModel ParseBackToModel()
@@ -53,6 +55,8 @@ namespace TheReplacement.PTA.Services.Core.Objects
             npc.Personality = Personality;
             npc.Background = Background;
             npc.Goals = Goals;
+            npc.Species = Species;
+            npc.Sprite = Sprite;
             return npc;
         }
 
@@ -71,6 +75,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public IEnumerable<PokemonModel> PokemonTeam { get; set; }
 
         public int Level { get; set; }
+
         public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
 
         public string Gender { get; set; }
@@ -88,5 +93,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public string Goals { get; set; }
 
         public string Species { get; set; }
+
+        public string Sprite { get; set; }
     }
 }

@@ -138,5 +138,10 @@ namespace TheReplacement.PTA.Common.Models
         /// The trainer's species (human or a pokemon)
         /// </summary>
         public string Species { get; set; }
+
+        /// <summary>
+        /// The npc's sprite
+        /// </summary>
+        public string Sprite { get; set; }
     }
 }
