@@ -770,6 +770,9 @@ const updatedValidators = {
         Age: {
           bsonType: 'int'
         },
+        Sprite: {
+          bsonType: 'string'
+        },
         Gender: {
           bsonType: 'string'
         },
