@@ -35,6 +35,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return DatabaseUtility.FindMostRecent20Games();
         }
 
+        [HttpGet("sprites/all")]
+        public IEnumerable<SpriteModel> GetAllSprites()
+        {
+            return DatabaseUtility.GetAllSprites();
+        }
+
         [HttpGet("{gameId}")]
         public ActionResult<FoundGameMessage> FindGame(string gameId)
         {

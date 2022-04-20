@@ -443,6 +443,14 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Returns all sprites
+        /// </summary>
+        public static IEnumerable<SpriteModel> GetAllSprites()
+        {
+            return MongoCollectionHelper.Sprite.Find(sprite => true).ToEnumerable();
+        }
+
+        /// <summary>
         /// Returns a game's nickname using the game id
         /// </summary>
         /// <param name="gameId">The game session id</param>
