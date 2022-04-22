@@ -102,6 +102,25 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return npc;
         }
 
+        [HttpPost("{gameMasterId}/{npcId}/new")]
+        public async Task<ActionResult> CreateNewNpcMonAsync(string gameMasterId, string npcId)
+        {
+            if (!Request.VerifyIdentity(gameMasterId, true))
+            {
+                return Unauthorized();
+            }
+
+            var npc = DatabaseUtility.FindNpc(npcId);
+            if (npc == null)
+            {
+                return BadRequest(npcId);
+            }
+
+            var newPokemon = (await Request.GetRequestBody()).ToObject<IEnumerable<NewPokemon>>();
+            Request.AddNpcPokemon(newPokemon, npcId);
+            return Ok();
+        }
+
         [HttpPut("{gameMasterId}/{npcId}/addStats")]
         public async Task<ActionResult<PublicNpc>> AddNpcStats(string gameMasterId, string npcId)
         {
@@ -191,7 +210,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 TrainerClasses = classes,
                 TrainerName = trainerName,
                 TrainerStats = new StatsModel(),
-                CurrentHP = 0
+                CurrentHP = 0,
+                Sprite = "acetrainer"
             };
         }
     }

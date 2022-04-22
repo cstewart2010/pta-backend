@@ -168,8 +168,22 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return result;
         }
 
+        public static void AddNpcPokemon(this HttpRequest request, IEnumerable<NewPokemon> pokemon, string npcId)
+        {
+            foreach (var data in pokemon.Where(data => data != null))
+            {
+                var nickname = data.Nickname.Length > 18 ? data.Nickname.Substring(0, 18) : data.Nickname;
+                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, nickname, data.Form);
+                pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
+                pokemonModel.OriginalTrainerId = npcId;
+                pokemonModel.TrainerId = npcId;
+                DatabaseUtility.TryAddPokemon(pokemonModel, out _);
+            }
+        }
+
         private static void AddTrainerPokemon(IEnumerable<NewPokemon> pokemon, string trainerId)
         {
+            var trainer = DatabaseUtility.FindTrainerById(trainerId);
             foreach (var data in pokemon.Where(data => data != null))
             {
                 var nickname = data.Nickname.Length > 18 ? data.Nickname.Substring(0, 18) : data.Nickname;
@@ -178,7 +192,6 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 pokemonModel.OriginalTrainerId = trainerId;
                 pokemonModel.TrainerId = trainerId;
                 DatabaseUtility.TryAddPokemon(pokemonModel, out _);
-                var trainer = DatabaseUtility.FindTrainerById(trainerId);
                 var game = DatabaseUtility.FindGame(trainer.GameId);
                 var caughtPokemonLog = new LogModel
                 {
