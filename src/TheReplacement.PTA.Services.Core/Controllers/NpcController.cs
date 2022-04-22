@@ -24,7 +24,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameMasterId}/{npcId}")]
-        public ActionResult<NpcModel> GetNpc(string gameMasterId, string npcId)
+        public ActionResult<PublicNpc> GetNpc(string gameMasterId, string npcId)
         {
             if (!Request.VerifyIdentity(gameMasterId, true))
             {
@@ -43,7 +43,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Conflict();
             }
 
-            return npc;
+            return new PublicNpc(npc);
         }
 
         [HttpGet("{npcId}/pokemon/{pokemonId}")]
