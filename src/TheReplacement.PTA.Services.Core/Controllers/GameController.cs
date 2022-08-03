@@ -85,7 +85,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             if (trainer.GameId != gameId)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} Game {gameId} retrieved trainer {trainerId} who had game {trainer.GameId}");
                 return BadRequest(new InvalidGameIdMessage(trainer));
             }
 
@@ -452,7 +451,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             if (!wasUpdateSucessful)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
                 return NotFound();
             }
 
@@ -513,7 +511,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game {gameId}");
                 return NotFound(gameId);
             }
 
@@ -524,7 +521,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (gameMaster?.IsGM != true)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve game master with {gameMasterId}");
                 return NotFound(gameMasterId);
             }
 
@@ -534,7 +530,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
             if (!EncryptionUtility.VerifySecret(gameSessionPassword, game.PasswordHash))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 return Unauthorized(new UnauthorizedMessage(gameId));
             }
 
@@ -626,12 +621,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             if (DatabaseUtility.DeleteTrainersByGameId(gameId) > -1)
             {
                 message = $"Successfully deleted all trainers associate with {gameId}";
-                LoggerUtility.Info(MongoCollection.Trainers, message);
             }
             else
             {
                 message = $"Failed to delete trainers";
-                LoggerUtility.Error(MongoCollection.Trainers, message);
             }
 
             return new GenericMessage(message);

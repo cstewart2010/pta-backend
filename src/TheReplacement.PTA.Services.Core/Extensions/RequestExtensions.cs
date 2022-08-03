@@ -66,13 +66,11 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 && trainer.ActivityToken == accessToken
                 && EncryptionUtility.ValidateToken(accessToken)))
             {
-                LoggerUtility.Error(MongoCollection.Games, "Attempt 1");
                 return false;
             }
 
             if (!(request.Headers.TryGetValue("pta-session-auth", out var cookie) && EncryptionUtility.VerifySecret(AuthKey, cookie)))
             {
-                LoggerUtility.Error(MongoCollection.Games, "Attempt 2");
                 return false;
             }
 
@@ -112,6 +110,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             if (gm != null)
             {
                 gm.IsGM = true;
+                gm.Sprite = "acetrainer";
             }
 
             return (gm, badRequestMessage);

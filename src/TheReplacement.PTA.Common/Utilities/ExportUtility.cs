@@ -40,13 +40,7 @@ namespace TheReplacement.PTA.Common.Utilities
             out List<string> errors)
         {
             var import = GetParsedImportFromExport(json, out errors);
-            if (errors.Any() || !CleanyAddGame(import, out errors))
-            {
-                return false;
-            }
-
-            LoggerUtility.Info(MongoCollection.Trainers, $"Successfully imported game {import.GameSession.GameId}");
-            return true;
+            return !errors.Any() && CleanyAddGame(import, out errors);
         }
 
         private static ExportedGame GetParsedImportFromExport(
@@ -133,7 +127,6 @@ namespace TheReplacement.PTA.Common.Utilities
                 return;
             }
 
-            LoggerUtility.Info(MongoCollection.Trainers, $"Successfully imported trainer {trainer.TrainerId}");
             errors = import.Pokemon
                 .Select(pokemon => AddPokemon(pokemon, trainer.TrainerId))
                 .Where(error => !string.IsNullOrEmpty(error))

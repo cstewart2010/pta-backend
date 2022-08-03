@@ -14,7 +14,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// </summary>
         /// <param name="affectedCollection">The collection where the action occured</param>
         /// <param name="record">A record of the action</param>
-        public static void Info(
+        private static void Info(
             MongoCollection affectedCollection,
             object record)
         {
@@ -31,7 +31,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// </summary>
         /// <param name="affectedCollection">The collection where the error was thrown</param>
         /// <param name="record">A record of the error</param>
-        public static void Error(
+        private static void Error(
             MongoCollection affectedCollection,
             object record)
         {
