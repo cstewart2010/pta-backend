@@ -112,6 +112,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             if (gm != null)
             {
                 gm.IsGM = true;
+                gm.Sprite = "acetrainer";
             }
 
             return (gm, badRequestMessage);
