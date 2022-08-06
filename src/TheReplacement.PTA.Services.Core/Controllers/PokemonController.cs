@@ -339,21 +339,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(gameMasterId);
             }
 
-            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (!DatabaseUtility.DeletePokemon(pokemonId))
             {
                 LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
                 return NotFound(pokemonId);
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            var deletionLog = new LogModel
-            {
-                User = gameMaster.TrainerName,
-                Action = $"removed {pokemon.Nickname} ({pokemonId}) at {DateTime.UtcNow}"
-            };
-
-            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), deletionLog);
             Response.RefreshToken(gameMasterId);
             return new GenericMessage($"Successfully deleted {pokemonId}");
         }
