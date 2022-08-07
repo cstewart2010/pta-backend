@@ -243,7 +243,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainer.TrainerId}");
                 return NotFound(trainerId);
             }
 
@@ -291,7 +290,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var trainer = DatabaseUtility.FindTrainerById(trainerId);
             if (trainer?.IsOnline != true)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve trainer {trainerId}");
                 return NotFound(trainerId);
             }
 
@@ -352,7 +350,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             if (!(DatabaseUtility.DeleteTrainer(trainerId) && DatabaseUtility.FindTrainerById(trainerId) == null))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to delete trainer {trainerId}");
                 return NotFound();
             }
 

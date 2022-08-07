@@ -26,7 +26,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("{gameMasterId}/{npcId}")]
         public ActionResult<PublicNpc> GetNpc(string gameMasterId, string npcId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.VerifyIdentity(gameMasterId, false))
             {
                 return Unauthorized();
             }

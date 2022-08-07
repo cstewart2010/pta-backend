@@ -55,7 +55,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             if (gameMaster?.IsOnline != true)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempt to authorize a trade while not being an online gm");
                 return Unauthorized(gameMasterId);
             }
 
@@ -342,7 +341,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             if (!DatabaseUtility.DeletePokemon(pokemonId))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve pokemon {pokemonId}");
                 return NotFound(pokemonId);
             }
 
@@ -496,7 +494,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} attempted to update pokemon with unknown pokemon {pokemonId}");
                 error = Unauthorized(trainer.TrainerId);
                 return null;
             }
