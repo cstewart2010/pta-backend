@@ -634,6 +634,28 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to add a sprite using the provided document
+        /// </summary>
+        /// <param name="sprite">The document to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryAddSprite(
+            SpriteModel sprite,
+            out MongoWriteError error)
+        {
+            try
+            {
+                MongoCollectionHelper.Sprite.InsertOne(sprite);
+                error = null;
+                return true;
+            }
+            catch (MongoWriteException exception)
+            {
+                error = new MongoWriteError(exception.WriteError.Details.GetValue("details").AsBsonDocument.ToString());
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Attempts to add a trainer using the provided document
         /// </summary>
         /// <param name="trainer">The document to add</param>
