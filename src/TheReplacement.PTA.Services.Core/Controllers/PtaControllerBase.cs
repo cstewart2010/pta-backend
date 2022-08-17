@@ -17,13 +17,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         protected bool IsGMOnline(string gameMasterId)
         {
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            if (!(gameMaster?.IsGM == true && gameMaster.IsOnline))
-            {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to retrieve the online game master with {gameMasterId}");
-                return false;
-            }
-
-            return true;
+            return gameMaster?.IsGM == true && gameMaster.IsOnline;
         }
 
         protected IDocument GetDocument(string id, MongoCollection collection, out ActionResult notFound)
@@ -40,7 +34,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             notFound = null;
             if (document == null)
             {
-                LoggerUtility.Error(collection, $"Client {ClientIp} failed to retrieve {collection} {id}");
                 notFound = NotFound(id);
             }
 
@@ -56,7 +49,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var validationPassed = true;
             if (!EncryptionUtility.VerifySecret(gamePassword, game.PasswordHash))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 message = "Could not login in to game with provided password";
                 validationPassed = false;
             }
@@ -82,19 +74,16 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var trainer = DatabaseUtility.FindTrainerByUsername(username, gameId);
             if (trainer == null)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 message = "No username found with provided";
                 validationPassed = false;
             }
             else if (!EncryptionUtility.VerifySecret(password, trainer.PasswordHash))
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 message = "Invalid password";
                 validationPassed = false;
             }
             else if (isGM && !trainer.IsGM)
             {
-                LoggerUtility.Error(Collection, $"Client {ClientIp} failed to log in to PTA");
                 message = $"This user is not the GM for {gameId}";
                 validationPassed = false;
             }
