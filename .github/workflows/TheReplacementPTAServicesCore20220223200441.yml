@@ -2,7 +2,7 @@ name: Build and deploy .NET Core application to Web App TheReplacementPTAService
 on:
   push:
     branches:
-    - v1.0
+    - develop
 env:
   AZURE_WEBAPP_NAME: TheReplacementPTAServicesCore20220223200441
   AZURE_WEBAPP_PACKAGE_PATH: TheReplacement.PTA.Services.Core\published

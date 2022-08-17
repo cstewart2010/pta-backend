@@ -14,7 +14,8 @@ namespace MongoDbImportTool
                 FeatureBuilder.AddFeatures,
                 MoveBuilder.AddMoves,
                 OriginBuilder.AddOrigins,
-                TrainerClassBuilder.AddClasses
+                TrainerClassBuilder.AddClasses,
+                SpriteBuilder.AddSprites
             );
         }
     }

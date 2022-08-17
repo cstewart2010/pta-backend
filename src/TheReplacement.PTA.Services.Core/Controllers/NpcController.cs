@@ -92,12 +92,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
-            var newNpcLog = new LogModel
-            {
-                User = npc.TrainerName,
-                Action = $"has entered the chat at {DateTime.UtcNow}"
-            };
-            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), newNpcLog);
             Response.RefreshToken(gameMasterId);
             return npc;
         }

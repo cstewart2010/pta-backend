@@ -38,7 +38,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("sprites/all")]
         public IEnumerable<SpriteModel> GetAllSprites()
         {
-            return DatabaseUtility.GetAllSprites();
+            return DatabaseUtility.GetAllSprites().OrderBy(sprite => sprite.FriendlyText);
         }
 
         [HttpGet("{gameId}")]
