@@ -1616,6 +1616,7 @@ const updatedValidators = {
     }
   }
 }
+
 // update schema validation
 for (const collection in updatedValidators) {
   if (!currentCollections.includes(collection)){

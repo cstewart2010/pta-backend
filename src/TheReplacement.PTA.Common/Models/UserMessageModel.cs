@@ -16,7 +16,7 @@
         public string Message { get; set; }
 
         /// <summary>
-        /// Game the message is associated with
+        /// Game with which the message is associated
         /// </summary>
         public string Game { get; set; }
 

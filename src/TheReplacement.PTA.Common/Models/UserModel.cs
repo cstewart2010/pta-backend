@@ -39,7 +39,7 @@ namespace TheReplacement.PTA.Common.Models
         public string SiteRole{ get; set; }
 
         /// <summary>
-        /// Games that the PTA user is a member of
+        /// Games of which the PTA user is a member
         /// </summary>
         public IEnumerable<string> Games { get; set; }
 
