@@ -36,7 +36,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Site role for PTA user
         /// </summary>
-        public string SiteRole{ get; set; }
+        public string SiteRole { get; set; }
 
         /// <summary>
         /// Games of which the PTA user is a member

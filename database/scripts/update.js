@@ -593,7 +593,6 @@ const updatedValidators = {
         'IsGM',
         'Origin',
         'TrainerSkills'
-        
       ],
       additionalProperties: false,
       properties: {
