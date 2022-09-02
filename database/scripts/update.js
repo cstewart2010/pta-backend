@@ -1516,6 +1516,103 @@ const updatedValidators = {
         }
       }
     }
+  },
+  User: {
+    $jsonSchema:{
+      required:[
+        'UserId',
+        'Username',
+        'PasswordHash',
+        'DateCreated',
+        'SiteRole',
+        'Games',
+        'Messages'
+      ],
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
+        },
+        UserId:{
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
+        Username:{
+          bsonType: 'string',
+          minLength: 6,
+          maxLength: 18
+        },
+        IsOnline:{
+          bsonType: 'bool'
+        },
+        PasswordHash: {
+          bsonType: 'string',
+        },
+        DateCreated:{
+          bsonType: 'string',
+        },
+        SiteRole:{
+          bsonType:'string',
+          enum:['IpBanned','Deactivated','Active','SiteAdmin']
+        },
+        Games:{
+          bsonType: 'array',
+          items:{
+            bsonType:'string',
+            minLength: 36,
+            maxLength: 36
+          }
+        },
+        Messages:{
+          bsonType: 'array',
+          items:{
+            bsonType:'string',
+            minLength: 36,
+            maxLength: 36
+          }
+        }
+      }
+    }
+  },
+  UserMessageThreadModel: {
+    $jsonSchema: {
+      required: [
+        'MessageId',
+        'Messages'
+      ],
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
+        },
+        MessageId:{
+          bsonType: 'string',
+            minLength: 36,
+            maxLength: 36
+        },
+        Messages:{
+          bsonType: 'array',
+          items:{
+            properties:{
+              Message:{
+                bsonType: 'string',
+              },
+              User:{
+                bsonType: 'string',
+              },
+              Game:{
+                bsonType: 'string',
+              },
+              Timestamp:{
+                bsonType: 'string',
+              }
+            },
+            additionalProperties: false
+          }
+        }
+      }
+    }
   }
 }
 
