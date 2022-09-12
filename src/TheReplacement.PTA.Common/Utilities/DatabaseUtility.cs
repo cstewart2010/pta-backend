@@ -121,6 +121,12 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="gameId">The game id</param>
         public static long DeleteTrainersByGameId(string gameId)
         {
+            foreach (var trainer in FindTrainersByGameId(gameId))
+            {
+                var user = FindUserById(trainer.TrainerId);
+                user.Games.Remove(gameId);
+                UpdateUser(user);
+            }
             var deleteResult =  MongoCollectionHelper
                 .Trainers
                 .DeleteMany(trainer => trainer.GameId == gameId);
@@ -171,10 +177,10 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Returns all games in db
         /// </summary>
-        public static IEnumerable<MinifiedGameModel> FindMostRecent20Games()
+        public static IEnumerable<MinifiedGameModel> FindMostRecent20Games(UserModel user)
         {
             var games = MongoCollectionHelper.Games
-                .Find(game => true)
+                .Find(game => !user.Games.Contains(game.GameId))
                 .ToEnumerable()
                 .Select(game => new MinifiedGameModel(game));
 
@@ -194,6 +200,13 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             return MongoCollectionHelper.Games
                 .Find(game => game.Nickname.ToLower().Contains(nickname.ToLower()))
+                .ToEnumerable();
+        }
+
+        public static IEnumerable<GameModel> FindAllGamesWithUser(UserModel user)
+        {
+            return MongoCollectionHelper.Games
+                .Find(game => user.Games.Contains(game.GameId))
                 .ToEnumerable();
         }
 
@@ -255,6 +268,17 @@ namespace TheReplacement.PTA.Common.Utilities
             );
         }
 
+        /// <summary>
+        /// Returns a message thread matching the id
+        /// </summary>
+        /// <param name="id">The message id</param>
+        public static UserMessageThreadModel FindMessageById(string id)
+        {
+            return MongoCollectionHelper
+                .UserMessageThreads
+                .Find(message => message.MessageId == id)
+                .SingleOrDefault();
+        }
 
         /// <summary>
         /// Returns all npcs matching the npc ids
@@ -308,9 +332,24 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Returns a trainer matching the trainer id
         /// </summary>
         /// <param name="id">The trainer id</param>
-        public static TrainerModel FindTrainerById(string id)
+        /// <param name="gameId">The game session id</param>
+        public static TrainerModel FindTrainerById(string id, string gameId)
         {
-            return FindTrainerById(trainer => trainer.TrainerId == id);
+            return FindTrainerById(trainer => trainer.TrainerId == id && trainer.GameId == gameId);
+        }
+
+        /// <summary>
+        /// Returns a user matching the trainer id
+        /// </summary>
+        /// <param name="id">The user id</param>
+        public static UserModel FindUserById(string id)
+        {
+            var user = MongoCollectionHelper
+                .Users
+                .Find(user => user.UserId == id)
+                .SingleOrDefault();
+
+            return user;
         }
 
         /// <summary>
@@ -349,6 +388,20 @@ namespace TheReplacement.PTA.Common.Utilities
                 .Trainers
                 .Find(filter)
                 .SingleOrDefault(); ;
+        }
+
+        /// <summary>
+        /// Returns a trainer matching the trainer name and game session id
+        /// </summary>
+        /// <param name="username">The trainer name</param>
+        public static UserModel FindUserByUsername(string username)
+        {
+            Expression<Func<UserModel, bool>> filter = user => user.Username.ToLower() == username.ToLower();
+
+            return MongoCollectionHelper
+                .Users
+                .Find(filter)
+                .SingleOrDefault();
         }
 
         /// <summary>
@@ -445,6 +498,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to replace the previous thread with the new data
+        /// </summary>
+        /// <param name="updatedThread">The updated thread data</param>
+        public static bool UpdateThread(UserMessageThreadModel updatedThread)
+        {
+            var result = MongoCollectionHelper.UserMessageThreads.ReplaceOne
+            (
+                thread => thread.MessageId == updatedThread.MessageId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatedThread
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
         /// Attempts to replace the previous trainer with the new data
         /// </summary>
         /// <param name="updatedTrainer">The updated trainer data</param>
@@ -455,6 +524,22 @@ namespace TheReplacement.PTA.Common.Utilities
                 trainer => trainer.TrainerId == updatedTrainer.TrainerId,
                 options: new ReplaceOptions { IsUpsert = true },
                 replacement: updatedTrainer
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
+        /// Attempts to replace the previous user with the new data
+        /// </summary>
+        /// <param name="updatedUser">The updated user data</param>
+        public static bool UpdateUser(UserModel updatedUser)
+        {
+            var result = MongoCollectionHelper.Users.ReplaceOne
+            (
+                user => user.UserId == updatedUser.UserId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatedUser
             );
 
             return result.IsAcknowledged;
@@ -561,6 +646,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to add a message thread using the provided document
+        /// </summary>
+        /// <param name="thread">The thread to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryAddThread(
+            UserMessageThreadModel thread,
+            out MongoWriteError error)
+        {
+            return TryAddDocument
+            (
+                () => MongoCollectionHelper.UserMessageThreads.InsertOne(thread),
+                out error
+            );
+        }
+
+        /// <summary>
         /// Attempts to add a trainer using the provided document
         /// </summary>
         /// <param name="trainer">The document to add</param>
@@ -572,6 +673,22 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryAddDocument
             (
                 () => MongoCollectionHelper.Trainers.InsertOne(trainer),
+                out error
+            );
+        }
+
+        /// <summary>
+        /// Attempts to add a user using the provided document
+        /// </summary>
+        /// <param name="user">The document to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryAddUser(
+            UserModel user,
+            out MongoWriteError error)
+        {
+            return TryAddDocument
+            (
+                () => MongoCollectionHelper.Users.InsertOne(user),
                 out error
             );
         }
@@ -809,17 +926,17 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Searches for a trainer, then updates their activity token
         /// </summary>
-        /// <param name="trainerId">The trainer id</param>
+        /// <param name="userId">The user id</param>
         /// <param name="token">The new activity token</param>
-        public static bool UpdateTrainerActivityToken(
-            string trainerId,
+        public static bool UpdateUserActivityToken(
+            string userId,
             string token)
         {
             return TryUpdateDocument
             (
-                MongoCollectionHelper.Trainers,
-                trainer => trainer.TrainerId == trainerId,
-                Builders<TrainerModel>.Update.Set("ActivityToken", token)
+                MongoCollectionHelper.Users,
+                user => user.UserId == userId,
+                Builders<UserModel>.Update.Set("ActivityToken", token)
             );
         }
 
@@ -863,6 +980,25 @@ namespace TheReplacement.PTA.Common.Utilities
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
                 TrainerStatusUpdate(isOnline)
+            );
+        }
+
+        /// <summary>
+        /// Searches for a trainer, then updates their online status
+        /// </summary>
+        /// <param name="userId">The user id</param>
+        /// <param name="isOnline">The updated online status</param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
+        public static bool UpdateUserOnlineStatus(
+            string userId,
+            bool isOnline)
+        {
+            return TryUpdateDocument
+            (
+                MongoCollectionHelper.Users,
+                user => user.UserId == userId,
+                UserStatusUpdate(isOnline)
             );
         }
 
@@ -948,6 +1084,20 @@ namespace TheReplacement.PTA.Common.Utilities
             (
                 Builders<TrainerModel>.Update.Set("IsOnline", isOnline),
                 Builders<TrainerModel>.Update.Set("ActivityToken", string.Empty)
+            );
+        }
+
+        private static UpdateDefinition<UserModel> UserStatusUpdate(bool isOnline)
+        {
+            if (isOnline)
+            {
+                return Builders<UserModel>.Update.Set("IsOnline", isOnline);
+            }
+
+            return Builders<UserModel>.Update.Combine
+            (
+                Builders<UserModel>.Update.Set("IsOnline", isOnline),
+                Builders<UserModel>.Update.Set("ActivityToken", string.Empty)
             );
         }
     }

@@ -7,11 +7,13 @@ namespace TheReplacement.PTA.Services.Core.Messages
 {
     public class GameMasterMessage : AbstractMessage
     {
-        internal GameMasterMessage(string gameMasterId)
+        internal GameMasterMessage(string userId, string gameId)
         {
+            var user = DatabaseUtility.FindUserById(userId);
+            User = new PublicUser(user);
             Message = "Game was found";
-            GameMasterId = gameMasterId;
-            GameId = DatabaseUtility.FindTrainerById(gameMasterId).GameId;
+            GameMasterId = userId;
+            GameId = gameId;
             Trainers = DatabaseUtility.FindTrainersByGameId(GameId).Select(trainer => new PublicTrainer(trainer));
         }
 
@@ -19,5 +21,6 @@ namespace TheReplacement.PTA.Services.Core.Messages
         public string GameId { get; }
         public string GameMasterId { get; }
         public IEnumerable<PublicTrainer> Trainers { get; }
+        public PublicUser User { get; }
     }
 }

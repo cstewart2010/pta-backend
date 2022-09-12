@@ -56,10 +56,11 @@ namespace TheReplacement.PTA.Common.Models
         /// Returns the trainer as a participant
         /// </summary>
         /// <param name="trainerId"></param>
+        /// <param name="gameId"></param>
         /// <param name="position"></param>
-        public static EncounterParticipantModel FromTrainer(string trainerId, MapPositionModel position)
+        public static EncounterParticipantModel FromTrainer(string trainerId, string gameId, MapPositionModel position)
         {
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
+            var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
             return new EncounterParticipantModel(trainer.CurrentHP, trainer.TrainerStats.HP)
             {
                 ParticipantId = trainer.TrainerId,

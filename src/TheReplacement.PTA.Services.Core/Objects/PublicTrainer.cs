@@ -52,15 +52,15 @@ namespace TheReplacement.PTA.Services.Core.Objects
             Species = trainer.Species;
             Items = trainer.Items;
             CurrentHP = trainer.CurrentHP;
+            IsAllowed = trainer.IsAllowed;
             NewPokemon = Array.Empty<NewPokemon>();
             Sprite = trainer.Sprite;
         }
 
         internal TrainerModel ParseBackToModel()
         {
-            var trainer = DatabaseUtility.FindTrainerById(TrainerId);
+            var trainer = DatabaseUtility.FindTrainerById(TrainerId, GameId);
             trainer.TrainerName = TrainerName;
-            trainer.IsGM = IsGM;
             trainer.Feats = Feats;
             trainer.Money = Money;
             trainer.Origin = Origin;
@@ -98,6 +98,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
         public IEnumerable<NewPokemon> NewPokemon { get; set; }
         public StatsModel TrainerStats { get; set; }
         public bool IsComplete { get; set; }
+        public bool IsAllowed { get; set; }
         public int SeenTotal { get; set; }
         public int CaughtTotal { get; set; }
         public int Level { get; set; }

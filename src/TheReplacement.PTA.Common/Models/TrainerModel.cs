@@ -8,7 +8,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a Trainer in Pokemon Tabletop Adventures
     /// </summary>
-    public class TrainerModel : IAuthenticated, IPerson, IDocument
+    public class TrainerModel : IPerson, IDocument
     {
         private static readonly IReadOnlyDictionary<string, string> TrainerSkillNames = new Dictionary<string,string>
         {
@@ -63,14 +63,6 @@ namespace TheReplacement.PTA.Common.Models
         public string TrainerName { get; set; }
 
         /// <inheritdoc />
-        public string PasswordHash { get; set; }
-
-        /// <summary>
-        /// The 30 minute activity token for trainers
-        /// </summary>
-        public string ActivityToken { get; set; }
-
-        /// <inheritdoc />
         public IEnumerable<string> TrainerClasses { get; set; }
 
         /// <inheritdoc />
@@ -101,6 +93,11 @@ namespace TheReplacement.PTA.Common.Models
         /// Whether the trainer is the Game Master of the session
         /// </summary>
         public bool IsGM { get; set; }
+
+        /// <summary>
+        /// Whether the trainer is allow to participate
+        /// </summary>
+        public bool IsAllowed { get; set; }
 
         /// <summary>
         /// Whether the trainer has completed the new user flow
