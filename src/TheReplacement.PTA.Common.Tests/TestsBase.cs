@@ -143,7 +143,7 @@ namespace TheReplacement.PTA.Common.Tests
             logger.WriteLine($"Verify that error object is null");
             Assert.Null(error);
             logger.WriteLine($"Removing trainer with trainer id {trainer.TrainerId}");
-            DatabaseUtility.DeleteTrainer(trainer.TrainerId);
+            DatabaseUtility.DeleteTrainer(trainer.GameId, trainer.TrainerId);
         }
     }
 }

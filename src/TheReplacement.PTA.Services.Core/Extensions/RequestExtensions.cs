@@ -108,20 +108,6 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return result;
         }
 
-        public static void AddNpcPokemon(this HttpRequest request, IEnumerable<NewPokemon> pokemon, string npcId, string gameId)
-        {
-            foreach (var data in pokemon.Where(data => data != null))
-            {
-                var nickname = data.Nickname.Length > 18 ? data.Nickname.Substring(0, 18) : data.Nickname;
-                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, nickname, data.Form);
-                pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
-                pokemonModel.OriginalTrainerId = npcId;
-                pokemonModel.TrainerId = npcId;
-                pokemonModel.GameId = gameId;
-                DatabaseUtility.TryAddPokemon(pokemonModel, out _);
-            }
-        }
-
         private static void AddTrainerPokemon(IEnumerable<NewPokemon> pokemon, TrainerModel trainer)
         {
             foreach (var data in pokemon.Where(data => data != null))
@@ -142,7 +128,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 DatabaseUtility.UpdateGameLogs(game, caughtPokemonLog);
                 if (DatabaseUtility.GetPokedexItem(trainer.TrainerId, pokemonModel.DexNo) == null)
                 {
-                    DatabaseUtility.TryAddDexItem(trainer.TrainerId, pokemonModel.DexNo, true, true, out _);
+                    DatabaseUtility.TryAddDexItem(trainer.TrainerId, trainer.GameId, pokemonModel.DexNo, true, true, out _);
                 }
                 else
                 {

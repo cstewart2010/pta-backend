@@ -263,7 +263,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 DatabaseUtility.DeletePokemon(pokemon.PokemonId);
             }
 
-            if (!(DatabaseUtility.DeleteTrainer(trainerId) && DatabaseUtility.FindTrainerById(trainerId, gameId) == null))
+            if (!(DatabaseUtility.DeleteTrainer(gameId, trainerId) && DatabaseUtility.FindTrainerById(trainerId, gameId) == null))
             {
                 return NotFound();
             }

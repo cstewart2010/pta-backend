@@ -111,7 +111,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var newPokemon = (await Request.GetRequestBody()).ToObject<IEnumerable<NewPokemon>>();
-            Request.AddNpcPokemon(newPokemon, npcId, gameId);
+            AddNpcPokemon(newPokemon, npcId, gameId);
             return Ok();
         }
 
@@ -200,6 +200,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 CurrentHP = 0,
                 Sprite = "acetrainer"
             };
+        }
+
+        private static void AddNpcPokemon(IEnumerable<NewPokemon> pokemon, string npcId, string gameId)
+        {
+            foreach (var data in pokemon.Where(data => data != null))
+            {
+                var nickname = data.Nickname.Length > 18 ? data.Nickname.Substring(0, 18) : data.Nickname;
+                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, nickname, data.Form);
+                pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
+                pokemonModel.OriginalTrainerId = npcId;
+                pokemonModel.TrainerId = npcId;
+                pokemonModel.GameId = gameId;
+                DatabaseUtility.TryAddPokemon(pokemonModel, out _);
+            }
         }
     }
 }

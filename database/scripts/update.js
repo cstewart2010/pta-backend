@@ -833,7 +833,8 @@ const updatedValidators = {
         'TrainerId',
         'DexNo',
         'IsSeen',
-        'IsCaught'
+        'IsCaught',
+        'GameId'
       ],
       additionalProperties: false,
       properties: {
@@ -841,6 +842,9 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         TrainerId: {
+          bsonType: 'string'
+        },
+        GameId: {
           bsonType: 'string'
         },
         DexNo: {

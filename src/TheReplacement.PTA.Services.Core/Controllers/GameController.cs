@@ -705,7 +705,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         private static IEnumerable<GenericMessage> GetMassPokemonDeletion(string gameId)
         {
             return DatabaseUtility.FindTrainersByGameId(gameId)
-                .Select(trainer => GetPokemonDeletion(trainer.TrainerId))
+                .Select(trainer => GetPokemonDeletion(trainer.TrainerId, trainer.GameId))
                 .Where(response => response != null);
         }
     }

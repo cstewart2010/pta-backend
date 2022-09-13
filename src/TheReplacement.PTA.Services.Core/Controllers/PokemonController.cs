@@ -269,7 +269,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return new GenericMessage("Pokedex updated successfully");
             }
 
-            return AddDexItem(trainerId, dexNo, isSeen: true);
+            return AddDexItem(trainerId, gameId, dexNo, isSeen: true);
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{trainerId}/caught")]
@@ -296,7 +296,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return new GenericMessage("Pokedex updated successfully");
             }
 
-            return AddDexItem(trainerId, dexNo, isCaught: true);
+            return AddDexItem(trainerId, gameId, dexNo, isCaught: true);
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/{pokemonId}")]
@@ -329,7 +329,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             );
         }
 
-        private ActionResult<AbstractMessage> AddDexItem(string trainerId, int dexNo, bool isSeen = false, bool isCaught = false)
+        private ActionResult<AbstractMessage> AddDexItem(string trainerId, string gameId, int dexNo, bool isSeen = false, bool isCaught = false)
         {
             if (isCaught)
             {
@@ -338,6 +338,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var result = DatabaseUtility.TryAddDexItem(
                 trainerId,
+                gameId,
                 dexNo,
                 isSeen,
                 isCaught,

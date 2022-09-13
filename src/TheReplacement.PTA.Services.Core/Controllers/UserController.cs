@@ -7,6 +7,7 @@ using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Extensions;
 using TheReplacement.PTA.Services.Core.Messages;
+using TheReplacement.PTA.Services.Core.Objects;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -15,6 +16,53 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     public class UserController : PtaControllerBase
     {
         protected override MongoCollection Collection => throw new NotImplementedException();
+
+        [HttpGet("{userId}")]
+        public ActionResult<string> GetUsername(string userId)
+        {
+            var user = DatabaseUtility.FindUserById(userId);
+            if (user == null)
+            {
+                return NotFound(userId);
+            }
+
+            return user.Username;
+        }
+
+        [HttpGet("{adminId}/admin/allUsers")]
+        public ActionResult GetUsers(string adminId, [FromQuery] int offset, [FromQuery] int limit)
+        {
+            if (offset < 0 || limit <= 0)
+            {
+                return BadRequest();
+            }
+
+            if (!IsUserAdmin(adminId))
+            {
+                return Unauthorized();
+            }
+
+            var users = DatabaseUtility.FindUsers();
+            var result = new
+            {
+                previous = GetPrevious(offset, limit),
+                next = GetNext(offset, limit, users.Count()),
+                users = users.GetSubset(offset, limit).Select(user => new PublicUser(user))
+            };
+
+            return Ok(result);
+        }
+
+        [HttpGet("{adminId}/{messageId}/admin/message")]
+        public ActionResult<UserMessageThreadModel> ForceGetMessage(string adminId, string messageId)
+        {
+            if (!IsUserAdmin(adminId))
+            {
+                return Unauthorized();
+            }
+
+            return DatabaseUtility.FindMessageById(messageId);
+        }
 
         [HttpGet("{userId}/{messageId}")]
         public ActionResult<UserMessageThreadModel> GetMessage(string userId, string messageId)
@@ -85,6 +133,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
+            Response.RefreshToken(userId);
             return Ok();
         }
 
@@ -111,6 +160,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             AddNewReplyToThread(user, thread, messageContent);
+            Response.RefreshToken(userId);
             return Ok();
         }
 
@@ -154,6 +204,49 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             DatabaseUtility.UpdateUserOnlineStatus(userId, false);
             return Ok();
+        }
+
+        [HttpDelete("{userId}")]
+        public ActionResult DeleteUser(string userId)
+        {
+            if (!Request.VerifyIdentity(userId))
+            {
+                return Unauthorized();
+            }
+
+            if (IsUserAdmin(userId))
+            {
+                return BadRequest();
+            }
+
+            if (DatabaseUtility.DeleteUser(userId))
+            {
+                return Ok();
+            }
+
+            return BadRequest();
+        }
+
+        [HttpDelete("{adminId}/{userId}/admin")]
+        public ActionResult ForceDeleteUser(string adminId, string userId)
+        {
+            if (!IsUserAdmin(adminId))
+            {
+                return Unauthorized();
+            }
+
+            if (adminId == userId)
+            {
+                return BadRequest();
+            }
+
+            if (DatabaseUtility.DeleteUser(userId))
+            {
+                return Ok();
+            }
+
+            Response.RefreshToken(adminId);
+            return BadRequest();
         }
 
         private ActionResult GetUpdatedTrainer(string userId, string gameId)
@@ -203,6 +296,52 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var message = new UserMessageModel(sender.UserId, messageContent);
             thread.Messages = thread.Messages.Append(message);
             DatabaseUtility.UpdateThread(thread);
+        }
+
+        public static bool IsUserAdmin(string userId)
+        {
+            var siteAdmin = DatabaseUtility.FindUserById(userId);
+            return Enum.TryParse<UserRoleOnSite>(siteAdmin.SiteRole, out var role) && role == UserRoleOnSite.SiteAdmin;
+        }
+
+        private static object GetPrevious(int offset, int limit)
+        {
+            int previousOffset = Math.Max(0, offset - limit);
+            int previousLimit = offset - limit < 0 ? offset : limit;
+            if (previousOffset == offset)
+            {
+                return new
+                {
+                    offset,
+                    limit
+                };
+            }
+
+            return new
+            {
+                offset = previousOffset,
+                limit = previousLimit
+            };
+        }
+
+        private static object GetNext(int offset, int limit, int count)
+        {
+            int nextOffset = Math.Min(offset + limit, count - limit);
+            if (nextOffset <= offset)
+            {
+                return new
+                {
+                    offset,
+                    limit
+                };
+            }
+
+
+            return new
+            {
+                offset = nextOffset,
+                limit
+            };
         }
     }
 }

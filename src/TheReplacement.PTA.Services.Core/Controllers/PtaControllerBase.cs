@@ -88,9 +88,9 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return validationPassed;
         }
 
-        internal static GenericMessage GetPokemonDeletion(string trainerId)
+        internal static GenericMessage GetPokemonDeletion(string trainerId, string gameId)
         {
-            string message = DatabaseUtility.DeletePokemonByTrainerId(trainerId) > -1
+            string message = DatabaseUtility.DeletePokemonByTrainerId(gameId, trainerId) > -1
                 ? $"Successfully deleted all pokemon associated with {trainerId}"
                 : $"No pokemon found for trainer {trainerId}";
 

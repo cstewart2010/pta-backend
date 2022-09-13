@@ -41,9 +41,30 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="id">The game session id</param>
         public static bool DeleteGame(string id)
         {
-            return MongoCollectionHelper
+            var gameDeletionResult = MongoCollectionHelper
                 .Games
                 .FindOneAndDelete(game => game.GameId == id) != null;
+
+            var trainers = MongoCollectionHelper
+                .Trainers
+                .Find(trainer => trainer.GameId == id)
+                .ToEnumerable()
+                .Select(trainer => trainer.TrainerId);
+
+            var trainerDeletionResult = MongoCollectionHelper
+                .Trainers
+                .DeleteMany(trainer => trainers.Contains(trainer.TrainerId)).IsAcknowledged;
+
+            var pokedexDeletionResult = MongoCollectionHelper
+                .PokeDex
+                .DeleteMany(pokedex => trainers.Contains(pokedex.TrainerId)).IsAcknowledged;
+
+            var pokemonDeletionResult = MongoCollectionHelper
+                .Pokemon
+                .DeleteMany(pokemon => pokemon.GameId == id).IsAcknowledged;
+
+            var npcDeletionResult = DeleteNpcByGameId(id);
+            return gameDeletionResult && trainerDeletionResult && pokedexDeletionResult && pokemonDeletionResult && npcDeletionResult;
         }
 
         /// <summary>
@@ -67,9 +88,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 .Npcs
                 .DeleteMany(npc => npc.GameId == gameId);
 
-           
-                return deleteResult.IsAcknowledged;
-            
+            return deleteResult.IsAcknowledged;
         }
 
         /// <summary>
@@ -86,16 +105,17 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Searches for all Pokemon using their trainer id, then deletes it
         /// </summary>
+        /// <param name="gameId">The game id</param>
         /// <param name="trainerId">The trainer id</param>
-        public static long DeletePokemonByTrainerId(string trainerId)
+        public static long DeletePokemonByTrainerId(string gameId, string trainerId)
         {
             var deleteResult = MongoCollectionHelper
                 .Pokemon
-                .DeleteMany(pokemon => pokemon.TrainerId == trainerId);
+                .DeleteMany(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
             
             if (deleteResult.IsAcknowledged)
             {
-                MongoCollectionHelper.PokeDex.DeleteMany(pokeDex => pokeDex.TrainerId == trainerId);
+                MongoCollectionHelper.PokeDex.DeleteMany(pokeDex => pokeDex.TrainerId == trainerId && pokeDex.GameId == gameId);
                 return deleteResult.DeletedCount;
             }
             else
@@ -107,13 +127,53 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Searches for a trainer using their id, then deletes it
         /// </summary>
-        /// <param name="id">The trainer id</param>
-        public static bool DeleteTrainer(string id)
+        /// <param name="gameId">The game id</param>
+        /// <param name="trainerId">The trainer id</param>
+        public static bool DeleteTrainer(string gameId, string trainerId)
         {
-            return MongoCollectionHelper
+            var trainer = MongoCollectionHelper
                 .Trainers
-                .FindOneAndDelete(trainer => trainer.TrainerId == id) != null;
+                .FindOneAndDelete(trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId);
+
+            if (trainer.IsGM)
+            {
+                return DeleteGame(trainer.GameId);
+            }
+            else
+            {
+                var pokemonDeletionResult = MongoCollectionHelper
+                    .Pokemon
+                    .DeleteMany(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId).IsAcknowledged;
+
+                var pokedexDeletionResult = MongoCollectionHelper
+                    .PokeDex
+                    .DeleteMany(pokedex => pokedex.TrainerId == trainerId && pokedex.GameId == gameId).IsAcknowledged;
+
+                return pokedexDeletionResult && pokemonDeletionResult;
+            }
         }
+
+        public static bool DeleteUser(string userId)
+        {
+            var userDeletionResult = MongoCollectionHelper
+                .Users
+                .FindOneAndDelete(user => user.UserId == userId) != null;
+
+            var trainers = MongoCollectionHelper
+                .Trainers
+                .Find(trainer => trainer.TrainerId == userId)
+                .ToEnumerable();
+
+            var trainerDeletionResult = true;
+            foreach (var trainer in trainers)
+            {
+                trainerDeletionResult = trainerDeletionResult && DeleteTrainer(trainer.GameId, trainer.TrainerId);
+            }
+
+            return userDeletionResult && trainerDeletionResult;
+        }
+
+
 
         /// <summary>
         /// Searches for all trainers using their game id, then deletes it
@@ -350,6 +410,14 @@ namespace TheReplacement.PTA.Common.Utilities
                 .SingleOrDefault();
 
             return user;
+        }
+
+        public static IEnumerable<UserModel> FindUsers()
+        {
+            return MongoCollectionHelper
+                .Users
+                .Find(user => true)
+                .ToEnumerable();
         }
 
         /// <summary>
@@ -697,12 +765,14 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Attempts to add a dexItem using the provided document
         /// </summary>
         /// <param name="trainerId">The pokedex's trainer id</param>
+        /// <param name="gameId">The pokedex's game id</param>
         /// <param name="dexNo">The dex number</param>
         /// <param name="isSeen">Whether the pokemon was seen</param>
         /// <param name="isCaught">Whether the pokemon was caught</param>
         /// <param name="error">Any error found</param>
         public static bool TryAddDexItem(
             string trainerId,
+            string gameId,
             int dexNo,
             bool isSeen,
             bool isCaught,
@@ -713,7 +783,8 @@ namespace TheReplacement.PTA.Common.Utilities
                 TrainerId = trainerId,
                 DexNo = dexNo,
                 IsSeen = isSeen,
-                IsCaught = isCaught
+                IsCaught = isCaught,
+                GameId = gameId,
             };
 
             return TryAddDocument

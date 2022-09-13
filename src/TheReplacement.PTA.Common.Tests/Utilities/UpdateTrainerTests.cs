@@ -52,7 +52,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
 
             Logger.WriteLine($"Updating trainer id {trainer.TrainerId} with null items");
             Assert.Throws<ArgumentNullException>(() => DatabaseUtility.UpdateTrainerItemList(trainer.TrainerId, null));
-            DatabaseUtility.DeleteTrainer(trainer.TrainerId);
+            DatabaseUtility.DeleteTrainer(trainer.GameId, trainer.TrainerId);
         }
 
         [Theory, Trait("Category", "smoke")]
@@ -87,7 +87,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Assert.False(DatabaseUtility.UpdateTrainerOnlineStatus(trainerId, true));
 
             Logger.WriteLine($"Verifying trainer id {trainer.TrainerId} online status has not been changed to true");
-            DatabaseUtility.DeleteTrainer(trainer.TrainerId);
+            DatabaseUtility.DeleteTrainer(trainer.GameId, trainer.TrainerId);
             //trainer = DatabaseUtility.FindTrainerById(trainerId);
             //Assert.Null(trainer);
         }
