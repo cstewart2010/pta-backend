@@ -104,16 +104,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             PerformTryAddTrainerFailTest(trainer, Logger);
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData(null)]
-        public void TryAddTrainer_PasswordInvalid_False(string password)
-        {
-            var trainer = GetTestTrainer();
-            trainer.PasswordHash = password;
-            PerformTryAddTrainerFailTest(trainer, Logger);
-        }
-
         [Fact]
         public void TryAddTrainer_ItemValid_True()
         {

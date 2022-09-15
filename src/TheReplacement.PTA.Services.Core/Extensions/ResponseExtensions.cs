@@ -10,7 +10,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             string trainerId)
         {
             var token = EncryptionUtility.GenerateToken();
-            DatabaseUtility.UpdateTrainerActivityToken
+            DatabaseUtility.UpdateUserActivityToken
             (
                 trainerId,
                 token
@@ -25,7 +25,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             string id)
         {
             var updatedToken = EncryptionUtility.GenerateToken();
-            DatabaseUtility.UpdateTrainerActivityToken(id, updatedToken);
+            DatabaseUtility.UpdateUserActivityToken(id, updatedToken);
             response.Headers.Append("pta-activity-token", updatedToken);
         }
 

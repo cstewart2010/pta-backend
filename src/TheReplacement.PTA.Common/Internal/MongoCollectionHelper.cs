@@ -16,6 +16,8 @@ namespace TheReplacement.PTA.Common.Internal
             Games = Database.GetCollection<GameModel>(MongoCollection.Games.ToString());
             Pokemon = Database.GetCollection<PokemonModel>(MongoCollection.Pokemon.ToString());
             Trainers = Database.GetCollection<TrainerModel>(MongoCollection.Trainers.ToString());
+            Users = Database.GetCollection<UserModel>(MongoCollection.Users.ToString());
+            UserMessageThreads = Database.GetCollection<UserMessageThreadModel>(MongoCollection.UserMessageThreads.ToString());
             Npcs = Database.GetCollection<NpcModel>("NPCs");
             Logs = Database.GetCollection<LoggerModel>("Logs");
             PokeDex = Database.GetCollection<PokeDexItemModel>(MongoCollection.PokeDex.ToString());
@@ -42,6 +44,16 @@ namespace TheReplacement.PTA.Common.Internal
         /// Represents the Trainer Collection
         /// </summary>
         public static IMongoCollection<TrainerModel> Trainers { get; }
+
+        /// <summary>
+        /// Represents the User Collection
+        /// </summary>
+        public static IMongoCollection<UserModel> Users { get; }
+
+        /// <summary>
+        /// Represents the User Collection
+        /// </summary>
+        public static IMongoCollection<UserMessageThreadModel> UserMessageThreads { get; }
 
         /// <summary>
         /// Represents the Npc Collection

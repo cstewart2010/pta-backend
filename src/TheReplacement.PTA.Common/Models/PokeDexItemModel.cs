@@ -16,6 +16,8 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         public string TrainerId { get; set; }
 
+        public string GameId { get; set; }
+
         /// <summary>
         /// The Pokemon species' dex number
         /// </summary>

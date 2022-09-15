@@ -28,22 +28,21 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return DatabaseUtility.FindActiveEncounter(gameId) ?? new EncounterModel();
         }
 
-        [HttpGet("{gameMasterId}/all")]
-        public ActionResult<IEnumerable<EncounterModel>> GetAllEncounters(string gameMasterId)
+        [HttpGet("{gameId}/{gameMasterId}/all")]
+        public ActionResult<IEnumerable<EncounterModel>> GetAllEncounters(string gameId, string gameMasterId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            return DatabaseUtility.FindAllEncounters(gameMaster.GameId).ToList();
+            return DatabaseUtility.FindAllEncounters(gameId).ToList();
         }
 
-        [HttpPost("{gameMasterId}")]
-        public async Task<ActionResult> CreateEncounterAsync(string gameMasterId)
+        [HttpPost("{gameId}/{gameMasterId}")]
+        public async Task<ActionResult> CreateEncounterAsync(string gameId, string gameMasterId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
@@ -54,11 +53,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(message);
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
             var encounter = new EncounterModel
             {
                 EncounterId = Guid.NewGuid().ToString(),
-                GameId = gameMaster.GameId,
+                GameId = gameId,
                 Name = name,
                 Type = type,
                 ActiveParticipants = Array.Empty<EncounterParticipantModel>()
@@ -73,16 +71,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        [HttpPut("{trainerId}")]
-        public async Task<ActionResult> AddToActiveEncounterAsync(string trainerId)
+        [HttpPut("{gameId}/{trainerId}")]
+        public async Task<ActionResult> AddToActiveEncounterAsync(string gameId, string trainerId)
         {
-            if (!Request.VerifyIdentity(trainerId, false))
+            if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
 
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            var encounter = DatabaseUtility.FindActiveEncounter(trainer.GameId);
+            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
             if (encounter == null)
             {
                 return NotFound();
@@ -118,16 +115,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        [HttpPut("{gameMasterId}/remove/{participantId}")]
-        public ActionResult RemoveFromActiveEncounter(string gameMasterId, string participantId)
+        [HttpPut("{gameId}/{gameMasterId}/{participantId}/remove")]
+        public ActionResult RemoveFromActiveEncounter(string gameId, string gameMasterId, string participantId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            var encounter = DatabaseUtility.FindActiveEncounter(gameMaster.GameId);
+            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
             var removedParticipant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == participantId);
             encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != participantId);
 
@@ -141,20 +137,19 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 User = removedParticipant.Name,
                 Action = $"has been removed from {encounter.Name} at {DateTime.Now}"
             };
-            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), removalLog);
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), removalLog);
             return Ok();
         }
 
-        [HttpPut("{gameMasterId}/position/{participantId}")]
-        public async Task<ActionResult> UpdatePositionAsync(string gameMasterId, string participantId)
+        [HttpPut("{gameId}/{gameMasterId}/{participantId}/position")]
+        public async Task<ActionResult> UpdatePositionAsync(string gameId, string gameMasterId, string participantId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            var encounter = DatabaseUtility.FindActiveEncounter(gameMaster.GameId);
+            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
             if (encounter == null)
             {
                 return NotFound();
@@ -192,20 +187,19 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest();
             }
 
-            SendRepositionLog(gameMaster.GameId, participant.Name, position);
+            SendRepositionLog(gameId, participant.Name, position);
             return Ok();
         }
 
-        [HttpPut("{trainerId}/trainer_position")]
-        public async Task<ActionResult> UpdateTrainerPositionAsync(string trainerId)
+        [HttpPut("{gameId}/{trainerId}/trainer_position")]
+        public async Task<ActionResult> UpdateTrainerPositionAsync(string gameId, string trainerId)
         {
-            if (!Request.VerifyIdentity(trainerId, false))
+            if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
 
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            var encounter = DatabaseUtility.FindActiveEncounter(trainer.GameId);
+            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
             if (encounter == null)
             {
                 return NotFound();
@@ -247,20 +241,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest();
             }
 
-            SendRepositionLog(trainer.GameId, participant.Name, position);
+            SendRepositionLog(gameId, participant.Name, position);
             return Ok();
         }
 
-        [HttpPut("{trainerId}/pokemon_position/{pokemonId}")]
-        public async Task<ActionResult> UpdateTrainerPokemonPositionAsync(string trainerId, string pokemonId)
+        [HttpPut("{gameId}/{trainerId}/{pokemonId}/pokemon_position")]
+        public async Task<ActionResult> UpdateTrainerPokemonPositionAsync(string gameId, string trainerId, string pokemonId)
         {
-            if (!Request.VerifyIdentity(trainerId, false))
+            if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
 
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            var encounter = DatabaseUtility.FindActiveEncounter(trainer.GameId);
+            var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
+            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
             if (encounter == null)
             {
                 return NotFound();
@@ -312,16 +306,16 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        [HttpPut("{gameMasterId}/active/{encounterId}")]
-        public ActionResult SetEncounterToActive(string gameMasterId, string encounterId)
+        [HttpPut("{gameId}/{gameMasterId}/{encounterId}/active")]
+        public ActionResult SetEncounterToActive(string gameId, string gameMasterId, string encounterId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            if (DatabaseUtility.FindActiveEncounter(gameMaster.GameId) != null)
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId, gameId);
+            if (DatabaseUtility.FindActiveEncounter(gameId) != null)
             {
                 return Conflict();
             }
@@ -347,10 +341,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        [HttpPut("{gameMasterId}/inactive/{encounterId}")]
-        public ActionResult SetEncounterToInactive(string gameMasterId, string encounterId)
+        [HttpPut("{gameId}/{gameMasterId}/{encounterId}/inactive")]
+        public ActionResult SetEncounterToInactive(string gameId, string gameMasterId, string encounterId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
@@ -370,10 +364,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        [HttpPut("{gameMasterId}/hp/{encounterId}")]
-        public ActionResult UpdateParticipantsHp(string gameMasterId, string encounterId)
+        [HttpPut("{gameId}/{gameMasterId}/{encounterId}/hp")]
+        public ActionResult UpdateParticipantsHp(string gameId, string gameMasterId, string encounterId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
@@ -384,7 +378,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(encounterId);
             }
 
-            encounter.ActiveParticipants = encounter.ActiveParticipants.Select(GetWithUpdatedHP);
+            encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant => GetWithUpdatedHP(participant, gameId));
             if (!DatabaseUtility.UpdateEncounter(encounter))
             {
                 return BadRequest();
@@ -393,10 +387,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        [HttpDelete("{gameMasterId}/{encounterId}")]
-        public ActionResult DeleteEncounter(string gameMasterId, string encounterId)
+        [HttpDelete("{gameId}/{gameMasterId}/{encounterId}")]
+        public ActionResult DeleteEncounter(string gameId, string gameMasterId, string encounterId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
@@ -409,16 +403,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
-        [HttpDelete("{gameMasterId}")]
-        public ActionResult DeleteEncounters(string gameMasterId)
+        [HttpDelete("{gameId}/{gameMasterId}")]
+        public ActionResult DeleteEncounters(string gameId, string gameMasterId)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            if (!DatabaseUtility.DeleteEncountersByGameId(gameMaster.GameId))
+            if (!DatabaseUtility.DeleteEncountersByGameId(gameId))
             {
                 return BadRequest();
             }
@@ -451,11 +444,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return (name, type, null);
         }
 
-        private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant)
+        private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant, string gameId)
         {
             return Enum.Parse<EncounterParticipantType>(participant.Type, true) switch
             {
-                EncounterParticipantType.Trainer => EncounterParticipantModel.FromTrainer(participant.ParticipantId, participant.Position),
+                EncounterParticipantType.Trainer => EncounterParticipantModel.FromTrainer(participant.ParticipantId, gameId, participant.Position),
                 EncounterParticipantType.Pokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position),
                 EncounterParticipantType.Npc => EncounterParticipantModel.FromNpc(participant.ParticipantId, participant.Position),
                 _ => throw new ArgumentOutOfRangeException(nameof(participant.Type)),

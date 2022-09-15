@@ -53,6 +53,11 @@ namespace TheReplacement.PTA.Common.Models
         public string TrainerId { get; set; }
 
         /// <summary>
+        /// The game's unique id
+        /// </summary>
+        public string GameId { get; set; }
+
+        /// <summary>
         /// The pokemon's original trainer id
         /// </summary>
         public string OriginalTrainerId { get; set; }

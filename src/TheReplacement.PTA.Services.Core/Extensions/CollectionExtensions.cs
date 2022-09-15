@@ -27,7 +27,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
         public static IEnumerable<TDocument> GetSubset<TDocument>(
             this IEnumerable<TDocument> source,
             int offset,
-            int limit) where TDocument : IDexDocument
+            int limit)
         {
             if (offset < 0 || offset >= source.Count() || limit < 0)
             {

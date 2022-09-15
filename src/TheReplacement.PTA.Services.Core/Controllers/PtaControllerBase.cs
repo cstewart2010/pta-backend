@@ -14,12 +14,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         protected string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
-        protected bool IsGMOnline(string gameMasterId)
-        {
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            return gameMaster?.IsGM == true && gameMaster.IsOnline;
-        }
-
         protected IDocument GetDocument(string id, MongoCollection collection, out ActionResult notFound)
         {
             IDocument document = collection switch
@@ -27,7 +21,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 MongoCollection.Games => DatabaseUtility.FindGame(id),
                 MongoCollection.Npcs => DatabaseUtility.FindNpc(id),
                 MongoCollection.Pokemon => DatabaseUtility.FindPokemonById(id),
-                MongoCollection.Trainers => DatabaseUtility.FindTrainerById(id),
                 _ => throw new ArgumentOutOfRangeException(nameof(collection)),
             };
 
@@ -62,54 +55,42 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return validationPassed;
         }
 
-        protected bool IsTrainerAuthenticated(
+        protected bool IsUserAuthenticated(
             string username,
             string password,
-            string gameId,
-            bool isGM,
             out ActionResult authError)
         {
             string message = string.Empty;
             var validationPassed = true;
-            var trainer = DatabaseUtility.FindTrainerByUsername(username, gameId);
-            if (trainer == null)
+            var user = DatabaseUtility.FindUserByUsername(username);
+            if (user == null)
             {
                 message = "No username found with provided";
                 validationPassed = false;
             }
-            else if (!EncryptionUtility.VerifySecret(password, trainer.PasswordHash))
+            else if (!EncryptionUtility.VerifySecret(password, user.PasswordHash))
             {
                 message = "Invalid password";
-                validationPassed = false;
-            }
-            else if (isGM && !trainer.IsGM)
-            {
-                message = $"This user is not the GM for {gameId}";
                 validationPassed = false;
             }
 
             authError = Unauthorized(new
             {
                 message,
-                username,
-                gameId
+                username
             });
 
             if (validationPassed)
             {
-                DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, true);
-                if (isGM)
-                {
-                    DatabaseUtility.UpdateGameOnlineStatus(gameId, true);
-                }
+                DatabaseUtility.UpdateUserOnlineStatus(user.UserId, true);
             }
 
             return validationPassed;
         }
 
-        internal static GenericMessage GetPokemonDeletion(string trainerId)
+        internal static GenericMessage GetPokemonDeletion(string trainerId, string gameId)
         {
-            string message = DatabaseUtility.DeletePokemonByTrainerId(trainerId) > -1
+            string message = DatabaseUtility.DeletePokemonByTrainerId(gameId, trainerId) > -1
                 ? $"Successfully deleted all pokemon associated with {trainerId}"
                 : $"No pokemon found for trainer {trainerId}";
 

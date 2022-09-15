@@ -41,6 +41,20 @@ const updatedValidators = {
             minLength: 36,
             maxLength: 36
           }
+        },
+        Logs: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'object',
+            properties: {
+              User: {
+                bsonType: 'string'
+              },
+              Action: {
+                bsonType: 'string'
+              }
+            }
+          }
         }
       }
     }
@@ -201,8 +215,7 @@ const updatedValidators = {
           maxLength: 36
         },
         Level: {
-          bsonType: 'int',
-          minimum: 1
+          bsonType: 'int'
         },
         TrainerSkills: {
           bsonType: 'array',
@@ -276,6 +289,9 @@ const updatedValidators = {
         },
         Species: {
           bsonType: 'string'
+        },
+        Sprite: {
+          bsonType: 'string'
         }
       }
     }
@@ -292,6 +308,7 @@ const updatedValidators = {
         'SpeciesName',
         'OriginalTrainerId',
         'TrainerId',
+        'GameId',
         'Nickname',
         'Gender',
         'PokemonStatus',
@@ -354,6 +371,11 @@ const updatedValidators = {
           maxLength: 36
         },
         TrainerId: {
+          bsonType: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
+        GameId: {
           bsonType: 'string',
           minLength: 36,
           maxLength: 36
@@ -582,7 +604,6 @@ const updatedValidators = {
         'TrainerId',
         'Honors',
         'TrainerName',
-        'PasswordHash',
         'TrainerClasses',
         'TrainerStats',
         'CurrentHP',
@@ -591,6 +612,7 @@ const updatedValidators = {
         'IsOnline',
         'Items',
         'IsGM',
+        'IsAllowed',
         'Origin',
         'TrainerSkills'
       ],
@@ -613,13 +635,6 @@ const updatedValidators = {
           }
         },
         TrainerName: {
-          bsonType: 'string'
-        },
-        PasswordHash: {
-          bsonType: 'string',
-          minLength: 1
-        },
-        ActivityToken: {
           bsonType: 'string'
         },
         TrainerClasses: {
@@ -713,6 +728,9 @@ const updatedValidators = {
           }
         },
         IsGM: {
+          bsonType: 'bool'
+        },
+        IsAllowed: {
           bsonType: 'bool'
         },
         Origin: {
@@ -815,7 +833,8 @@ const updatedValidators = {
         'TrainerId',
         'DexNo',
         'IsSeen',
-        'IsCaught'
+        'IsCaught',
+        'GameId'
       ],
       additionalProperties: false,
       properties: {
@@ -823,6 +842,9 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         TrainerId: {
+          bsonType: 'string'
+        },
+        GameId: {
           bsonType: 'string'
         },
         DexNo: {
@@ -1517,12 +1539,13 @@ const updatedValidators = {
       }
     }
   },
-  User: {
+  Users: {
     $jsonSchema:{
       required:[
         'UserId',
         'Username',
         'PasswordHash',
+        'ActivityToken',
         'DateCreated',
         'SiteRole',
         'Games',
@@ -1548,6 +1571,9 @@ const updatedValidators = {
         },
         PasswordHash: {
           bsonType: 'string',
+        },
+        ActivityToken: {
+          bsonType: 'string'
         },
         DateCreated:{
           bsonType: 'string',
@@ -1575,7 +1601,7 @@ const updatedValidators = {
       }
     }
   },
-  UserMessageThreadModel: {
+  UserMessageThreads: {
     $jsonSchema: {
       required: [
         'MessageId',
@@ -1599,9 +1625,6 @@ const updatedValidators = {
                 bsonType: 'string',
               },
               User:{
-                bsonType: 'string',
-              },
-              Game:{
                 bsonType: 'string',
               },
               Timestamp:{

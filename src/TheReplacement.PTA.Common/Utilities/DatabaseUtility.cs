@@ -41,9 +41,45 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="id">The game session id</param>
         public static bool DeleteGame(string id)
         {
-            return MongoCollectionHelper
+            var gameDeletionResult = MongoCollectionHelper
                 .Games
                 .FindOneAndDelete(game => game.GameId == id) != null;
+
+            var trainers = MongoCollectionHelper
+                .Trainers
+                .Find(trainer => trainer.GameId == id)
+                .ToEnumerable()
+                .Select(trainer => trainer.TrainerId);
+
+            var users = MongoCollectionHelper
+                .Users
+                .Find(user => trainers.Contains(user.UserId))
+                .ToEnumerable();
+
+            foreach (var user in users)
+            {
+                user.Games.Remove(id);
+                UpdateUser(user);
+            }
+
+            var trainerDeletionResult = MongoCollectionHelper
+                .Trainers
+                .DeleteMany(trainer => trainers.Contains(trainer.TrainerId)).IsAcknowledged;
+
+            var encounterDeletionResult = MongoCollectionHelper
+                .Encounter
+                .DeleteMany(encounter => encounter.GameId == id);
+
+            var pokedexDeletionResult = MongoCollectionHelper
+                .PokeDex
+                .DeleteMany(pokedex => trainers.Contains(pokedex.TrainerId)).IsAcknowledged;
+
+            var pokemonDeletionResult = MongoCollectionHelper
+                .Pokemon
+                .DeleteMany(pokemon => pokemon.GameId == id).IsAcknowledged;
+
+            var npcDeletionResult = DeleteNpcByGameId(id);
+            return gameDeletionResult && trainerDeletionResult && pokedexDeletionResult && pokemonDeletionResult && npcDeletionResult;
         }
 
         /// <summary>
@@ -67,9 +103,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 .Npcs
                 .DeleteMany(npc => npc.GameId == gameId);
 
-           
-                return deleteResult.IsAcknowledged;
-            
+            return deleteResult.IsAcknowledged;
         }
 
         /// <summary>
@@ -86,16 +120,17 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Searches for all Pokemon using their trainer id, then deletes it
         /// </summary>
+        /// <param name="gameId">The game id</param>
         /// <param name="trainerId">The trainer id</param>
-        public static long DeletePokemonByTrainerId(string trainerId)
+        public static long DeletePokemonByTrainerId(string gameId, string trainerId)
         {
             var deleteResult = MongoCollectionHelper
                 .Pokemon
-                .DeleteMany(pokemon => pokemon.TrainerId == trainerId);
+                .DeleteMany(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
             
             if (deleteResult.IsAcknowledged)
             {
-                MongoCollectionHelper.PokeDex.DeleteMany(pokeDex => pokeDex.TrainerId == trainerId);
+                MongoCollectionHelper.PokeDex.DeleteMany(pokeDex => pokeDex.TrainerId == trainerId && pokeDex.GameId == gameId);
                 return deleteResult.DeletedCount;
             }
             else
@@ -107,13 +142,67 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Searches for a trainer using their id, then deletes it
         /// </summary>
-        /// <param name="id">The trainer id</param>
-        public static bool DeleteTrainer(string id)
+        /// <param name="gameId">The game id</param>
+        /// <param name="userId">The trainer id</param>
+        public static bool DeleteTrainer(string gameId, string userId)
         {
-            return MongoCollectionHelper
+            var trainer = MongoCollectionHelper
                 .Trainers
-                .FindOneAndDelete(trainer => trainer.TrainerId == id) != null;
+                .FindOneAndDelete(trainer => trainer.TrainerId == userId && trainer.GameId == gameId);
+
+            if (trainer.IsGM)
+            {
+                return DeleteGame(trainer.GameId);
+            }
+            else
+            {
+                var pokemonDeletionResult = MongoCollectionHelper
+                    .Pokemon
+                    .DeleteMany(pokemon => pokemon.TrainerId == userId && pokemon.GameId == gameId).IsAcknowledged;
+
+                var pokedexDeletionResult = MongoCollectionHelper
+                    .PokeDex
+                    .DeleteMany(pokedex => pokedex.TrainerId == userId && pokedex.GameId == gameId).IsAcknowledged;
+
+                var encounters = FindAllEncounters(gameId);
+                foreach (var encounter in encounters)
+                {
+                    encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != userId);
+                    UpdateEncounter(encounter);
+                }
+
+                var user = FindUserById(userId);
+
+                return pokedexDeletionResult && pokemonDeletionResult;
+            }
         }
+
+        /// <summary>
+        /// Deletes the user and everything associated with them
+        /// </summary>
+        /// <param name="userId">The user's user id</param>
+        public static bool DeleteUser(string userId)
+        {
+            var userDeletionResult = MongoCollectionHelper
+                .Users
+                .FindOneAndDelete(user => user.UserId == userId) != null;
+
+            var games = MongoCollectionHelper
+                .Trainers
+                .Find(trainer => trainer.TrainerId == userId)
+                .ToEnumerable()
+                .Select(trainer => trainer.GameId);
+
+            var trainerDeletionResult = true;
+            foreach (var game in games)
+            {
+                trainerDeletionResult = trainerDeletionResult && DeleteTrainer(game, userId);
+            }
+
+            return userDeletionResult && trainerDeletionResult;
+        }
+
+
 
         /// <summary>
         /// Searches for all trainers using their game id, then deletes it
@@ -121,6 +210,12 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="gameId">The game id</param>
         public static long DeleteTrainersByGameId(string gameId)
         {
+            foreach (var trainer in FindTrainersByGameId(gameId))
+            {
+                var user = FindUserById(trainer.TrainerId);
+                user.Games.Remove(gameId);
+                UpdateUser(user);
+            }
             var deleteResult =  MongoCollectionHelper
                 .Trainers
                 .DeleteMany(trainer => trainer.GameId == gameId);
@@ -171,10 +266,10 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Returns all games in db
         /// </summary>
-        public static IEnumerable<MinifiedGameModel> FindMostRecent20Games()
+        public static IEnumerable<MinifiedGameModel> FindMostRecent20Games(UserModel user)
         {
             var games = MongoCollectionHelper.Games
-                .Find(game => true)
+                .Find(game => !user.Games.Contains(game.GameId))
                 .ToEnumerable()
                 .Select(game => new MinifiedGameModel(game));
 
@@ -194,6 +289,17 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             return MongoCollectionHelper.Games
                 .Find(game => game.Nickname.ToLower().Contains(nickname.ToLower()))
+                .ToEnumerable();
+        }
+
+        /// <summary>
+        /// Returns all games that the user is a part of
+        /// </summary>
+        /// <param name="user">The user to search with</param>
+        public static IEnumerable<GameModel> FindAllGamesWithUser(UserModel user)
+        {
+            return MongoCollectionHelper.Games
+                .Find(game => user.Games.Contains(game.GameId))
                 .ToEnumerable();
         }
 
@@ -255,6 +361,17 @@ namespace TheReplacement.PTA.Common.Utilities
             );
         }
 
+        /// <summary>
+        /// Returns a message thread matching the id
+        /// </summary>
+        /// <param name="id">The message id</param>
+        public static UserMessageThreadModel FindMessageById(string id)
+        {
+            return MongoCollectionHelper
+                .UserMessageThreads
+                .Find(message => message.MessageId == id)
+                .SingleOrDefault();
+        }
 
         /// <summary>
         /// Returns all npcs matching the npc ids
@@ -308,9 +425,35 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Returns a trainer matching the trainer id
         /// </summary>
         /// <param name="id">The trainer id</param>
-        public static TrainerModel FindTrainerById(string id)
+        /// <param name="gameId">The game session id</param>
+        public static TrainerModel FindTrainerById(string id, string gameId)
         {
-            return FindTrainerById(trainer => trainer.TrainerId == id);
+            return FindTrainerById(trainer => trainer.TrainerId == id && trainer.GameId == gameId);
+        }
+
+        /// <summary>
+        /// Returns a user matching the trainer id
+        /// </summary>
+        /// <param name="id">The user id</param>
+        public static UserModel FindUserById(string id)
+        {
+            var user = MongoCollectionHelper
+                .Users
+                .Find(user => user.UserId == id)
+                .SingleOrDefault();
+
+            return user;
+        }
+
+        /// <summary>
+        /// Returns all users in the database
+        /// </summary>
+        public static IEnumerable<UserModel> FindUsers()
+        {
+            return MongoCollectionHelper
+                .Users
+                .Find(user => true)
+                .ToEnumerable();
         }
 
         /// <summary>
@@ -349,6 +492,20 @@ namespace TheReplacement.PTA.Common.Utilities
                 .Trainers
                 .Find(filter)
                 .SingleOrDefault(); ;
+        }
+
+        /// <summary>
+        /// Returns a trainer matching the trainer name and game session id
+        /// </summary>
+        /// <param name="username">The trainer name</param>
+        public static UserModel FindUserByUsername(string username)
+        {
+            Expression<Func<UserModel, bool>> filter = user => user.Username.ToLower() == username.ToLower();
+
+            return MongoCollectionHelper
+                .Users
+                .Find(filter)
+                .SingleOrDefault();
         }
 
         /// <summary>
@@ -445,6 +602,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to replace the previous thread with the new data
+        /// </summary>
+        /// <param name="updatedThread">The updated thread data</param>
+        public static bool UpdateThread(UserMessageThreadModel updatedThread)
+        {
+            var result = MongoCollectionHelper.UserMessageThreads.ReplaceOne
+            (
+                thread => thread.MessageId == updatedThread.MessageId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatedThread
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
         /// Attempts to replace the previous trainer with the new data
         /// </summary>
         /// <param name="updatedTrainer">The updated trainer data</param>
@@ -455,6 +628,22 @@ namespace TheReplacement.PTA.Common.Utilities
                 trainer => trainer.TrainerId == updatedTrainer.TrainerId,
                 options: new ReplaceOptions { IsUpsert = true },
                 replacement: updatedTrainer
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
+        /// Attempts to replace the previous user with the new data
+        /// </summary>
+        /// <param name="updatedUser">The updated user data</param>
+        public static bool UpdateUser(UserModel updatedUser)
+        {
+            var result = MongoCollectionHelper.Users.ReplaceOne
+            (
+                user => user.UserId == updatedUser.UserId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatedUser
             );
 
             return result.IsAcknowledged;
@@ -561,6 +750,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to add a message thread using the provided document
+        /// </summary>
+        /// <param name="thread">The thread to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryAddThread(
+            UserMessageThreadModel thread,
+            out MongoWriteError error)
+        {
+            return TryAddDocument
+            (
+                () => MongoCollectionHelper.UserMessageThreads.InsertOne(thread),
+                out error
+            );
+        }
+
+        /// <summary>
         /// Attempts to add a trainer using the provided document
         /// </summary>
         /// <param name="trainer">The document to add</param>
@@ -577,15 +782,33 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to add a user using the provided document
+        /// </summary>
+        /// <param name="user">The document to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryAddUser(
+            UserModel user,
+            out MongoWriteError error)
+        {
+            return TryAddDocument
+            (
+                () => MongoCollectionHelper.Users.InsertOne(user),
+                out error
+            );
+        }
+
+        /// <summary>
         /// Attempts to add a dexItem using the provided document
         /// </summary>
         /// <param name="trainerId">The pokedex's trainer id</param>
+        /// <param name="gameId">The pokedex's game id</param>
         /// <param name="dexNo">The dex number</param>
         /// <param name="isSeen">Whether the pokemon was seen</param>
         /// <param name="isCaught">Whether the pokemon was caught</param>
         /// <param name="error">Any error found</param>
         public static bool TryAddDexItem(
             string trainerId,
+            string gameId,
             int dexNo,
             bool isSeen,
             bool isCaught,
@@ -596,7 +819,8 @@ namespace TheReplacement.PTA.Common.Utilities
                 TrainerId = trainerId,
                 DexNo = dexNo,
                 IsSeen = isSeen,
-                IsCaught = isCaught
+                IsCaught = isCaught,
+                GameId = gameId,
             };
 
             return TryAddDocument
@@ -809,17 +1033,17 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Searches for a trainer, then updates their activity token
         /// </summary>
-        /// <param name="trainerId">The trainer id</param>
+        /// <param name="userId">The user id</param>
         /// <param name="token">The new activity token</param>
-        public static bool UpdateTrainerActivityToken(
-            string trainerId,
+        public static bool UpdateUserActivityToken(
+            string userId,
             string token)
         {
             return TryUpdateDocument
             (
-                MongoCollectionHelper.Trainers,
-                trainer => trainer.TrainerId == trainerId,
-                Builders<TrainerModel>.Update.Set("ActivityToken", token)
+                MongoCollectionHelper.Users,
+                user => user.UserId == userId,
+                Builders<UserModel>.Update.Set("ActivityToken", token)
             );
         }
 
@@ -863,6 +1087,25 @@ namespace TheReplacement.PTA.Common.Utilities
                 MongoCollectionHelper.Trainers,
                 trainer => trainer.TrainerId == trainerId,
                 TrainerStatusUpdate(isOnline)
+            );
+        }
+
+        /// <summary>
+        /// Searches for a trainer, then updates their online status
+        /// </summary>
+        /// <param name="userId">The user id</param>
+        /// <param name="isOnline">The updated online status</param>
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="MongoCommandException" />
+        public static bool UpdateUserOnlineStatus(
+            string userId,
+            bool isOnline)
+        {
+            return TryUpdateDocument
+            (
+                MongoCollectionHelper.Users,
+                user => user.UserId == userId,
+                UserStatusUpdate(isOnline)
             );
         }
 
@@ -948,6 +1191,20 @@ namespace TheReplacement.PTA.Common.Utilities
             (
                 Builders<TrainerModel>.Update.Set("IsOnline", isOnline),
                 Builders<TrainerModel>.Update.Set("ActivityToken", string.Empty)
+            );
+        }
+
+        private static UpdateDefinition<UserModel> UserStatusUpdate(bool isOnline)
+        {
+            if (isOnline)
+            {
+                return Builders<UserModel>.Update.Set("IsOnline", isOnline);
+            }
+
+            return Builders<UserModel>.Update.Combine
+            (
+                Builders<UserModel>.Update.Set("IsOnline", isOnline),
+                Builders<UserModel>.Update.Set("ActivityToken", string.Empty)
             );
         }
     }

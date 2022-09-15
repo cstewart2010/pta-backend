@@ -33,6 +33,16 @@
         /// <summary>
         /// Represents the Encounter collection
         /// </summary>
-        Encounters = 6
+        Encounters = 6,
+
+        /// <summary>
+        /// Represents the Users collection
+        /// </summary>
+        Users = 7,
+
+        /// <summary>
+        /// Represents the UserMessageThreads collection
+        /// </summary>
+        UserMessageThreads = 8
     }
 }

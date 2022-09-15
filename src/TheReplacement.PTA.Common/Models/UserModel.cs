@@ -1,6 +1,9 @@
 ﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Interfaces;
+using TheReplacement.PTA.Common.Utilities;
 
 namespace TheReplacement.PTA.Common.Models
 {
@@ -9,6 +12,21 @@ namespace TheReplacement.PTA.Common.Models
     /// </summary>
     public class UserModel : IAuthenticated, IDocument
     {
+        public UserModel() { }
+
+        public UserModel(string username, string password)
+        {
+            UserId = Guid.NewGuid().ToString();
+            Username = username;
+            PasswordHash = EncryptionUtility.HashSecret(password);
+            IsOnline = true;
+            ActivityToken = EncryptionUtility.GenerateToken();
+            DateCreated = DateTime.UtcNow.ToString("u");
+            SiteRole = UserRoleOnSite.Active.ToString();
+            Games = Array.Empty<string>();
+            Messages = Array.Empty<string>();
+        }
+
         /// <inheritdoc />
         public ObjectId _id { get; set; }
 
@@ -29,6 +47,11 @@ namespace TheReplacement.PTA.Common.Models
         public string PasswordHash { get; set; }
 
         /// <summary>
+        /// The 30 minute activity token for trainers
+        /// </summary>
+        public string ActivityToken { get; set; }
+
+        /// <summary>
         /// Date PTA user account was created
         /// </summary>
         public string DateCreated { get; set; }
@@ -41,7 +64,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Games of which the PTA user is a member
         /// </summary>
-        public IEnumerable<string> Games { get; set; }
+        public ICollection<string> Games { get; set; }
 
         /// <summary>
         /// List of PTA user's messages

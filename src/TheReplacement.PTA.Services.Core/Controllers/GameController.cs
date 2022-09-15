@@ -23,16 +23,36 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             Collection = MongoCollection.Games;
         }
 
-        [HttpGet]
-        public IEnumerable FindAllGames()
+        [HttpGet("user/{userId}")]
+        public ActionResult<IEnumerable> FindAllGames(string userId, [FromQuery] string nickname)
         {
-            if (Request.Query.TryGetValue("nickname", out var nickname))
+            if (!Request.VerifyIdentity(userId))
             {
-                return DatabaseUtility.FindAllGames(nickname)
-                    .Select(game => new FoundGameMessage(game.GameId, game.Nickname));
+                return Unauthorized();
             }
 
-            return DatabaseUtility.FindMostRecent20Games();
+            var user = DatabaseUtility.FindUserById(userId);
+            if (!string.IsNullOrWhiteSpace(nickname))
+            {
+                return Ok(DatabaseUtility.FindAllGames(nickname)
+                    .Where(game => !user.Games.Contains(game.GameId))
+                    .Select(game => new FoundGameMessage(game.GameId, game.Nickname)));
+            }
+
+            return Ok(DatabaseUtility.FindMostRecent20Games(user));
+        }
+
+        [HttpGet("user/games/{userId}")]
+        public ActionResult<IEnumerable> FindAllUserGames(string userId)
+        {
+            if (!Request.VerifyIdentity(userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = DatabaseUtility.FindUserById(userId);
+            return Ok(DatabaseUtility.FindAllGamesWithUser(user)
+                    .Select(game => new FoundGameMessage(game.GameId, game.Nickname)));
         }
 
         [HttpGet("sprites/all")]
@@ -41,7 +61,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return DatabaseUtility.GetAllSprites().OrderBy(sprite => sprite.FriendlyText);
         }
 
-        [HttpGet("{gameId}")]
+        [HttpGet("getGame/{gameId}")]
         public ActionResult<FoundGameMessage> FindGame(string gameId)
         {
             if (string.IsNullOrEmpty(gameId))
@@ -58,7 +78,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new FoundGameMessage(gameId);
         }
 
-        [HttpGet("{gameId}/find/{trainerId}")]
+        [HttpGet("{gameId}/{trainerId}/find")]
         public ActionResult<FoundTrainerMessage> FindTrainerInGame(string gameId, string trainerId)
         {
             if (string.IsNullOrEmpty(gameId))
@@ -77,10 +97,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return notFound;
             }
 
-            var trainerDocument = GetDocument(trainerId, MongoCollection.Trainers, out notFound);
-            if (trainerDocument is not TrainerModel trainer)
+            var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
+            if (trainer == null)
             {
-                return notFound;
+                return NotFound(trainerId);
             }
 
             if (trainer.GameId != gameId)
@@ -88,7 +108,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(new InvalidGameIdMessage(trainer));
             }
 
-            return new FoundTrainerMessage(trainer);
+            return new FoundTrainerMessage(trainerId, gameId);
         }
 
         [HttpGet("{gameId}/all_logs")]
@@ -147,38 +167,38 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok(errors);
         }
 
-        [HttpPost("new")]
-        public async Task<ActionResult<CreatedGameMessage>> CreateNewGame()
+        [HttpPost("{userId}/newGame")]
+        public ActionResult<CreatedGameMessage> CreateNewGame(string userId, [FromQuery] string nickname, [FromQuery] string gameSessionPassword, [FromQuery] string username)
         {
-            var game = Request.BuildGame();
+            var game = BuildGame(nickname, gameSessionPassword);
             if (!DatabaseUtility.TryAddGame(game, out var error))
             {
                 return BadRequest(error);
             }
 
-            var (trainer, badRequest) = await Request.BuildGM(game.GameId);
-            if (trainer == null)
+            var (gm, badRequest) = BuildGM(game.GameId, userId, username);
+            if (gm == null)
             {
                 return BadRequest(badRequest);
             }
 
-            if (!DatabaseUtility.TryAddTrainer(trainer, out error))
+            if (!DatabaseUtility.TryAddTrainer(gm, out error))
             {
                 return BadRequest(error);
             }
 
             var gameCreationLog = new LogModel
             {
-                User = trainer.TrainerName,
+                User = gm.TrainerName,
                 Action = $"created a new game and joined as game master at {DateTime.UtcNow}"
             };
             DatabaseUtility.UpdateGameLogs(game, gameCreationLog);
-            Response.AssignAuthAndToken(trainer.TrainerId);
-            return new CreatedGameMessage(trainer);
+            Response.RefreshToken(userId);
+            return new CreatedGameMessage(gm);
         }
 
-        [HttpPost("{gameId}/new")]
-        public async Task<ActionResult<FoundTrainerMessage>> AddPlayerToGame(string gameId)
+        [HttpPost("{gameId}/{userId}/newUser")]
+        public ActionResult<FoundTrainerMessage> AddPlayerToGame(string gameId, string userId, [FromQuery] string username)
         {
             if (string.IsNullOrEmpty(gameId))
             {
@@ -196,7 +216,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(noGMError);
             }
 
-            var (trainer, badRequest) = await Request.BuildTrainer(gameId);
+            var (trainer, badRequest) = BuildTrainer(gameId, userId, username);
             if (trainer == null)
             {
                 return BadRequest(badRequest);
@@ -213,24 +233,19 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 Action = $"joined at {DateTime.UtcNow}"
             };
             DatabaseUtility.UpdateGameLogs(game, trainerCreationLog);
-            Response.AssignAuthAndToken(trainer.TrainerId);
-            return new FoundTrainerMessage(trainer);
+            Response.RefreshToken(userId);
+            return new FoundTrainerMessage(trainer.TrainerId, gameId);
         }
 
-        [HttpPost("{gameMasterId}/wild")]
-        public async Task<ActionResult<PokemonModel>> AddPokemon(string gameMasterId)
+        [HttpPost("{gameId}/{gameMasterId}/wild")]
+        public async Task<ActionResult<PokemonModel>> AddPokemon(string gameId, string gameMasterId)
         {
-            if (string.IsNullOrEmpty(gameMasterId))
-            {
-                return BadRequest(nameof(gameMasterId));
-            }
-
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var (pokemon, error) = await Request.BuildPokemon(gameMasterId);
+            var (pokemon, error) = await Request.BuildPokemon(gameMasterId, gameId);
             if (pokemon == null)
             {
                 return BadRequest(error);
@@ -240,8 +255,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(writeError);
             }
 
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
-            var game = DatabaseUtility.FindGame(gameMaster.GameId);
+            var game = DatabaseUtility.FindGame(gameId);
             var pokemonCreationLog = new LogModel
             {
                 User = pokemon.SpeciesName,
@@ -252,16 +266,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return pokemon;
         }
 
-        [HttpPost("{gameId}/log/{trainerId}")]
+        [HttpPost("{gameId}/{trainerId}/log")]
         public async Task<ActionResult<LogModel>> PostLogAsync(string gameId, string trainerId)
         {
             var body = await Request.GetRequestBody();
-            if (string.IsNullOrEmpty(trainerId))
-            {
-                return BadRequest(nameof(trainerId));
-            }
-
-            if (!Request.VerifyIdentity(trainerId, false))
+            if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
@@ -273,10 +282,62 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return log;
         }
 
-        [HttpPut("{trainerId}/addStats")]
-        public async Task<ActionResult<FoundTrainerMessage>> AddTrainerStats(string trainerId)
+        [HttpPost("{gameId}/{gameMasterId}/{trainerId}/allow")]
+        public ActionResult AllowUser(string gameId, string gameMasterId, string trainerId)
         {
-            if (!Request.VerifyIdentity(trainerId, false))
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
+            if (trainer == null)
+            {
+                return NotFound(trainerId);
+            }
+
+            trainer.IsAllowed = true;
+            DatabaseUtility.UpdateTrainer(trainer);
+            var log = new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"joined the game at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), log);
+            Response.RefreshToken(gameMasterId);
+            return Ok();
+        }
+
+        [HttpPost("{gameId}/{gameMasterId}/{trainerId}/disallow")]
+        public ActionResult DisallowUser(string gameId, string gameMasterId, string trainerId)
+        {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
+            if (trainer == null)
+            {
+                return NotFound(trainerId);
+            }
+
+            trainer.IsAllowed = false;
+            DatabaseUtility.UpdateTrainer(trainer);
+            var log = new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"was removed from the game at {DateTime.UtcNow}"
+            };
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), log);
+            Response.RefreshToken(gameMasterId);
+            return Ok();
+        }
+
+        [HttpPut("{gameId}/{trainerId}/addStats")]
+        public async Task<ActionResult<FoundTrainerMessage>> AddTrainerStats(string gameId, string trainerId)
+        {
+            if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
@@ -286,12 +347,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return BadRequest(new GenericMessage("Failed to update trainer"));
             }
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            return new FoundTrainerMessage(trainer);
+            return new FoundTrainerMessage(trainerId, gameId);
         }
 
-        [HttpPut("{gameId}/start")]
-        public async Task<ActionResult<FoundGameMessage>> StartGame(string gameId)
+        [HttpPut("{gameId}/{gameMasterId}/start")]
+        public ActionResult<FoundGameMessage> StartGame(string gameId, string gameMasterId, [FromQuery] string gameSessionPassword)
         {
             if (string.IsNullOrEmpty(gameId))
             {
@@ -304,40 +364,20 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return notFound;
             }
 
-            var (gamePassword, username, password, credentialErrors) = await Request.GetStartGameCredentials();
-            if (credentialErrors.Any())
-            {
-                return BadRequest(credentialErrors);
-            }
-
-            if (!IsGameAuthenticated(gamePassword, game, out var authError))
+            if (!IsGameAuthenticated(gameSessionPassword, game, out var authError))
             {
                 return authError;
             }
 
-            if (!IsTrainerAuthenticated(username, password, gameId, true, out authError))
-            {
-                return authError;
-            }
-
-            var trainer = DatabaseUtility.FindTrainerByUsername(username, gameId);
+            var trainer = DatabaseUtility.FindTrainerById(gameMasterId, gameId);
             Response.AssignAuthAndToken(trainer.TrainerId);
             return new FoundGameMessage(gameId);
         }
 
-        [HttpPut("{gameId}/end")]
-        public ActionResult EndGame(string gameId)
+        [HttpPut("{gameId}/{gameMasterId}/end")]
+        public ActionResult EndGame(string gameId, string gameMasterId)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
-            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
-            {
-                return BadRequest(nameof(gameMasterId));
-            }
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
@@ -348,29 +388,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return notFound;
             }
 
-            if (!IsGMOnline(gameMasterId))
-            {
-                return NotFound(gameMasterId);
-            }
-
             SetEndGameStatuses(gameId);
             return Ok();
         }
 
-        [HttpPut("{gameId}/addNpcs")]
-        public ActionResult<UpdatedNpcListMessage> AddNPCsToGame(string gameId)
+        [HttpPut("{gameId}/{gameMasterId}/addNpcs")]
+        public ActionResult<UpdatedNpcListMessage> AddNPCsToGame(string gameId, string gameMasterId)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
-
-            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
-            {
-                return BadRequest(nameof(gameMasterId));
-            }
-            var npcIds = GetNpcs(gameMasterId, out var notFound);
+            var npcIds = GetNpcs(gameMasterId, gameId, out var notFound);
             if (npcIds == null)
             {
                 return notFound;
@@ -391,19 +416,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             );
         }
 
-        [HttpPut("{gameId}/removeNpcs")]
-        public ActionResult<UpdatedNpcListMessage> RemovesNPCsFromGame(string gameId)
+        [HttpPut("{gameId}/{gameMasterId}/removeNpcs")]
+        public ActionResult<UpdatedNpcListMessage> RemovesNPCsFromGame(string gameId, string gameMasterId)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
-            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
-            {
-                return BadRequest(nameof(gameMasterId));
-            }
-            var npcIds = GetNpcs(gameMasterId, out var notFound);
+            var npcIds = GetNpcs(gameMasterId, gameId, out var notFound);
             if (npcIds == null)
             {
                 return notFound;
@@ -424,69 +440,21 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             );
         }
 
-        [HttpPut("reset")]
-        public ActionResult<object> ChangeTrainerPassword()
+        [HttpDelete("{gameId}/{gameMasterId}")]
+        public ActionResult<object> DeleteGame(string gameId, string gameMasterId, [FromQuery] string gameSessionPassword)
         {
-            var returnNotFound = true;
-            if (returnNotFound)
-            {
-                return NotFound();
-            }
-
-            if (!Request.Query.TryGetValue("trainerId", out var trainerId))
-            {
-                return BadRequest(nameof(trainerId));
-            }
-
-            if (!Request.Query.TryGetValue("password", out var password))
-            {
-                return BadRequest(nameof(password));
-            }
-
-            var wasUpdateSucessful = DatabaseUtility.UpdateTrainerPassword
-            (
-                trainerId,
-                password
-            );
-
-            if (!wasUpdateSucessful)
-            {
-                return NotFound();
-            }
-
-            var trainer = DatabaseUtility.FindTrainerById(trainerId);
-            Response.AssignAuthAndToken(trainer.TrainerId);
-            return new FoundTrainerMessage(trainer);
-        }
-
-        [HttpDelete("{gameId}")]
-        public ActionResult<object> DeleteGame(string gameId)
-        {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (gameDocument is not GameModel game)
             {
                 return notFound;
             }
 
-            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
+            var trainer = DatabaseUtility.FindTrainerById(gameMasterId, gameId);
+            if (trainer?.IsGM != true)
             {
-                return BadRequest(nameof(gameMasterId));
-            }
-            var trainerDocument = GetDocument(gameMasterId, MongoCollection.Trainers, out notFound);
-            if (!(trainerDocument is TrainerModel trainer && trainer.IsGM))
-            {
-                return notFound;
+                return NotFound(gameMasterId);
             }
 
-            if (!Request.Query.TryGetValue("gameSessionPassword", out var gameSessionPassword))
-            {
-                return BadRequest(nameof(gameSessionPassword));
-            }
             if (!IsGameAuthenticated(gameSessionPassword, game, out var authError))
             {
                 return authError;
@@ -500,34 +468,21 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
         }
 
-        [HttpDelete("{gameId}/export")]
-        public ActionResult ExportGame(string gameId)
+        [HttpDelete("{gameId}/{gameMasterId}/export")]
+        public ActionResult ExportGame(string gameId, string gameMasterId, [FromQuery] string gameSessionPassword)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
             {
                 return NotFound(gameId);
             }
 
-            if (!Request.Query.TryGetValue("gameMasterId", out var gameMasterId))
-            {
-                return BadRequest(nameof(gameMasterId));
-            }
-            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId);
+            var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId, gameId);
             if (gameMaster?.IsGM != true)
             {
                 return NotFound(gameMasterId);
             }
 
-            if (!Request.Query.TryGetValue("gameSessionPassword", out var gameSessionPassword))
-            {
-                return BadRequest(nameof(gameSessionPassword));
-            }
             if (!EncryptionUtility.VerifySecret(gameSessionPassword, game.PasswordHash))
             {
                 return Unauthorized(new UnauthorizedMessage(gameId));
@@ -542,7 +497,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             DatabaseUtility.UpdateGameLogs(game, exportLog);
             var exportStream = ExportUtility.GetExportStream(game);
 
-            DeleteGame(gameId);
+            DeleteGame(gameId, gameMasterId, gameSessionPassword);
             return File
             (
                 exportStream,
@@ -551,19 +506,135 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             );
         }
 
+        private static GameModel BuildGame(string nickname, string gameSessionPassword)
+        {
+            var guid = Guid.NewGuid().ToString();
+            return new GameModel
+            {
+                GameId = guid,
+                Nickname = string.IsNullOrEmpty(nickname)
+                    ? guid.Split('-')[0]
+                    : nickname,
+                IsOnline = true,
+                PasswordHash = EncryptionUtility.HashSecret(gameSessionPassword),
+                NPCs = Array.Empty<string>(),
+                Logs = Array.Empty<LogModel>()
+            };
+        }
+
+        private static (TrainerModel GameMaster, AbstractMessage Message) BuildGM(
+            string gameId,
+            string userId,
+            string username)
+        {
+            var (gm, badRequestMessage) = BuildTrainer
+            (
+                gameId,
+                userId,
+                username,
+                true
+            );
+
+            if (gm != null)
+            {
+                gm.IsGM = true;
+                gm.Sprite = "acetrainer";
+            }
+
+            return (gm, badRequestMessage);
+        }
+
+        private static (TrainerModel Trainer, AbstractMessage Message) BuildTrainer(
+            string gameId,
+            string userId,
+            string username)
+        {
+            var (trainer, badRequestMessage) = BuildTrainer
+            (
+                gameId,
+                userId,
+                username,
+                false
+            );
+
+            if (badRequestMessage != null)
+            {
+                return (null, badRequestMessage);
+            }
+
+            trainer.Sprite = "acetrainer";
+            return (trainer, null);
+        }
+
+        private static (TrainerModel Trainer, AbstractMessage Error) BuildTrainer(
+            string gameId,
+            string userId,
+            string username,
+            bool isGM)
+        {
+            if (DatabaseUtility.FindTrainerByUsername(username, gameId) != null)
+            {
+                return (null, new GenericMessage($"Duplicate username {username}"));
+            }
+
+            var trainer = CreateTrainer(gameId, userId, username);
+            trainer.IsGM = isGM;
+            trainer.IsAllowed = isGM;
+            return (trainer, null);
+        }
+
+        private static TrainerModel CreateTrainer(
+            string gameId,
+            string userId,
+            string username)
+        {
+            var user = DatabaseUtility.FindUserById(userId);
+            user.Games.Add(gameId);
+            DatabaseUtility.UpdateUser(user);
+            return new TrainerModel
+            {
+                GameId = gameId,
+                TrainerId = userId,
+                Honors = Array.Empty<string>(),
+                TrainerName = username,
+                TrainerClasses = Array.Empty<string>(),
+                Feats = Array.Empty<string>(),
+                IsOnline = true,
+                Items = new List<ItemModel>(),
+                TrainerStats = GetStats(),
+                CurrentHP = 20,
+                Origin = string.Empty
+            };
+        }
+
+        private static StatsModel GetStats()
+        {
+            return new StatsModel
+            {
+                HP = 20,
+                Attack = 1,
+                Defense = 1,
+                SpecialAttack = 1,
+                SpecialDefense = 1,
+                Speed = 1
+            };
+        }
+
         private IEnumerable<string> GetNpcs(
             string gameMasterId,
+            string gameId,
             out ActionResult notFound)
         {
-            if (!Request.VerifyIdentity(gameMasterId, true))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 notFound = Unauthorized();
                 return null;
             }
 
-            var trainerDocument = GetDocument(gameMasterId, MongoCollection.Trainers, out notFound);
-            if (!(trainerDocument is TrainerModel trainer && trainer.IsGM))
+            var trainer = DatabaseUtility.FindTrainerById(gameMasterId, gameId);
+            if (trainer?.IsGM != true)
             {
+                notFound = NotFound(gameMasterId);
                 return null;
             }
 
@@ -574,6 +645,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return null;
             }
 
+            notFound = null;
             return npcIds;
         }
 
@@ -633,7 +705,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         private static IEnumerable<GenericMessage> GetMassPokemonDeletion(string gameId)
         {
             return DatabaseUtility.FindTrainersByGameId(gameId)
-                .Select(trainer => GetPokemonDeletion(trainer.TrainerId))
+                .Select(trainer => GetPokemonDeletion(trainer.TrainerId, trainer.GameId))
                 .Where(response => response != null);
         }
     }
