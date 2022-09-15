@@ -10,7 +10,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
         {
             UserId = user.UserId;
             Username = user.Username;
-            DateCreated = DateTime.Parse(user.DateCreated);
+            DateCreated = user.DateCreated;
             Games = user.Games;
             Messages = user.Messages;
         }
@@ -28,7 +28,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
         /// <summary>
         /// Date PTA user account was created
         /// </summary>
-        public DateTime DateCreated { get; set; }
+        public string DateCreated { get; set; }
 
         /// <summary>
         /// Games of which the PTA user is a member

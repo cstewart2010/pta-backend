@@ -51,9 +51,24 @@ namespace TheReplacement.PTA.Common.Utilities
                 .ToEnumerable()
                 .Select(trainer => trainer.TrainerId);
 
+            var users = MongoCollectionHelper
+                .Users
+                .Find(user => trainers.Contains(user.UserId))
+                .ToEnumerable();
+
+            foreach (var user in users)
+            {
+                user.Games.Remove(id);
+                UpdateUser(user);
+            }
+
             var trainerDeletionResult = MongoCollectionHelper
                 .Trainers
                 .DeleteMany(trainer => trainers.Contains(trainer.TrainerId)).IsAcknowledged;
+
+            var encounterDeletionResult = MongoCollectionHelper
+                .Encounter
+                .DeleteMany(encounter => encounter.GameId == id);
 
             var pokedexDeletionResult = MongoCollectionHelper
                 .PokeDex
@@ -128,12 +143,12 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Searches for a trainer using their id, then deletes it
         /// </summary>
         /// <param name="gameId">The game id</param>
-        /// <param name="trainerId">The trainer id</param>
-        public static bool DeleteTrainer(string gameId, string trainerId)
+        /// <param name="userId">The trainer id</param>
+        public static bool DeleteTrainer(string gameId, string userId)
         {
             var trainer = MongoCollectionHelper
                 .Trainers
-                .FindOneAndDelete(trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId);
+                .FindOneAndDelete(trainer => trainer.TrainerId == userId && trainer.GameId == gameId);
 
             if (trainer.IsGM)
             {
@@ -143,31 +158,45 @@ namespace TheReplacement.PTA.Common.Utilities
             {
                 var pokemonDeletionResult = MongoCollectionHelper
                     .Pokemon
-                    .DeleteMany(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId).IsAcknowledged;
+                    .DeleteMany(pokemon => pokemon.TrainerId == userId && pokemon.GameId == gameId).IsAcknowledged;
 
                 var pokedexDeletionResult = MongoCollectionHelper
                     .PokeDex
-                    .DeleteMany(pokedex => pokedex.TrainerId == trainerId && pokedex.GameId == gameId).IsAcknowledged;
+                    .DeleteMany(pokedex => pokedex.TrainerId == userId && pokedex.GameId == gameId).IsAcknowledged;
+
+                var encounters = FindAllEncounters(gameId);
+                foreach (var encounter in encounters)
+                {
+                    encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != userId);
+                    UpdateEncounter(encounter);
+                }
+
+                var user = FindUserById(userId);
 
                 return pokedexDeletionResult && pokemonDeletionResult;
             }
         }
 
+        /// <summary>
+        /// Deletes the user and everything associated with them
+        /// </summary>
+        /// <param name="userId">The user's user id</param>
         public static bool DeleteUser(string userId)
         {
             var userDeletionResult = MongoCollectionHelper
                 .Users
                 .FindOneAndDelete(user => user.UserId == userId) != null;
 
-            var trainers = MongoCollectionHelper
+            var games = MongoCollectionHelper
                 .Trainers
                 .Find(trainer => trainer.TrainerId == userId)
-                .ToEnumerable();
+                .ToEnumerable()
+                .Select(trainer => trainer.GameId);
 
             var trainerDeletionResult = true;
-            foreach (var trainer in trainers)
+            foreach (var game in games)
             {
-                trainerDeletionResult = trainerDeletionResult && DeleteTrainer(trainer.GameId, trainer.TrainerId);
+                trainerDeletionResult = trainerDeletionResult && DeleteTrainer(game, userId);
             }
 
             return userDeletionResult && trainerDeletionResult;
@@ -263,6 +292,10 @@ namespace TheReplacement.PTA.Common.Utilities
                 .ToEnumerable();
         }
 
+        /// <summary>
+        /// Returns all games that the user is a part of
+        /// </summary>
+        /// <param name="user">The user to search with</param>
         public static IEnumerable<GameModel> FindAllGamesWithUser(UserModel user)
         {
             return MongoCollectionHelper.Games
@@ -412,6 +445,9 @@ namespace TheReplacement.PTA.Common.Utilities
             return user;
         }
 
+        /// <summary>
+        /// Returns all users in the database
+        /// </summary>
         public static IEnumerable<UserModel> FindUsers()
         {
             return MongoCollectionHelper

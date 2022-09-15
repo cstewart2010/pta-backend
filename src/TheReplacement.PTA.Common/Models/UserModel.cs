@@ -21,7 +21,7 @@ namespace TheReplacement.PTA.Common.Models
             PasswordHash = EncryptionUtility.HashSecret(password);
             IsOnline = true;
             ActivityToken = EncryptionUtility.GenerateToken();
-            DateCreated = DateTime.UtcNow.ToString();
+            DateCreated = DateTime.UtcNow.ToString("u");
             SiteRole = UserRoleOnSite.Active.ToString();
             Games = Array.Empty<string>();
             Messages = Array.Empty<string>();
