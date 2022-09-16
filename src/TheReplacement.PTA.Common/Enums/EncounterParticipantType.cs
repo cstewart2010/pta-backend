@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheReplacement.PTA.Common.Models;
+﻿using TheReplacement.PTA.Common.Models;
 
 namespace TheReplacement.PTA.Common.Enums
 {
@@ -23,8 +18,23 @@ namespace TheReplacement.PTA.Common.Enums
         Pokemon = 2,
 
         /// <summary>
-        /// Represents an <see cref="NpcModel"/>
+        /// Represents an Enemy <see cref="NpcModel"/>
         /// </summary>
-        Npc = 3
+        EnemyNpc = 3,
+
+        /// <summary>
+        /// Represents a Enemy <see cref="PokemonModel"/>
+        /// </summary>
+        EnemyPokemon = 4,
+
+        /// <summary>
+        /// Represents an Neutral <see cref="NpcModel"/>
+        /// </summary>
+        NeutralNpc = 5,
+
+        /// <summary>
+        /// Represents a Neutral <see cref="PokemonModel"/>
+        /// </summary>
+        NeutralPokemon = 6
     }
 }
