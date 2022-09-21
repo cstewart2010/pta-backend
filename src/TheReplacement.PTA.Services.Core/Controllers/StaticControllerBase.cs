@@ -38,7 +38,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             );
         }
 
-        private string GetPreviousUrl(int offset, int limit)
+        protected string GetPreviousUrl(int offset, int limit)
         {
             int previousOffset = Math.Max(0, offset - limit);
             int previousLimit = offset - limit < 0 ? offset : limit;
@@ -50,7 +50,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return $"{HostUrl}?offset={previousOffset}&limit={previousLimit}";
         }
 
-        private string GetNextUrl(int offset, int limit, int count)
+        protected string GetNextUrl(int offset, int limit, int count)
         {
             int nextOffset = Math.Min(offset + limit, count - limit);
             if (nextOffset <= offset)
@@ -61,7 +61,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return $"{HostUrl}?offset={nextOffset}&limit={limit}";
         }
 
-        private ResultMessage GetResultsMember<TDocument>(TDocument document) where TDocument : IDexDocument
+        protected ResultMessage GetResultsMember<TDocument>(TDocument document) where TDocument : IDexDocument
         {
             if (document == null)
             {

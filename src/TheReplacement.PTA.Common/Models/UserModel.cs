@@ -12,8 +12,14 @@ namespace TheReplacement.PTA.Common.Models
     /// </summary>
     public class UserModel : IAuthenticated, IDocument
     {
+        /// <summary>
+        /// Default Constructor for JSON.Net
+        /// </summary>
         public UserModel() { }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="UserModel"/>
+        /// </summary>
         public UserModel(string username, string password)
         {
             UserId = Guid.NewGuid().ToString();

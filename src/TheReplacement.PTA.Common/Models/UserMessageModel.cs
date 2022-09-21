@@ -7,8 +7,14 @@ namespace TheReplacement.PTA.Common.Models
     /// </summary>
     public class UserMessageModel
     {
+        /// <summary>
+        /// Default constructor for JSON.Net
+        /// </summary>
         public UserMessageModel() { }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="UserMessageModel"/>
+        /// </summary>
         public UserMessageModel(string userId, string messageContent)
         {
             Timestamp = DateTime.UtcNow.ToString();

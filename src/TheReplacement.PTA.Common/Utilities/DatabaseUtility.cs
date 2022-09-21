@@ -143,7 +143,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Searches for a trainer using their id, then deletes it
         /// </summary>
         /// <param name="gameId">The game id</param>
-        /// <param name="userId">The trainer id</param>
+        /// <param name="userId">The user's id</param>
         public static bool DeleteTrainer(string gameId, string userId)
         {
             var trainer = MongoCollectionHelper
@@ -172,6 +172,8 @@ namespace TheReplacement.PTA.Common.Utilities
                 }
 
                 var user = FindUserById(userId);
+                user.Games.Remove(gameId);
+                UpdateUser(user);
 
                 return pokedexDeletionResult && pokemonDeletionResult;
             }
