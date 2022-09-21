@@ -446,11 +446,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant, string gameId)
         {
-            return Enum.Parse<EncounterParticipantType>(participant.Type, true) switch
+            var type = Enum.Parse<EncounterParticipantType>(participant.Type, true);
+            return type switch
             {
                 EncounterParticipantType.Trainer => EncounterParticipantModel.FromTrainer(participant.ParticipantId, gameId, participant.Position),
-                EncounterParticipantType.Pokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position),
-                EncounterParticipantType.Npc => EncounterParticipantModel.FromNpc(participant.ParticipantId, participant.Position),
+                EncounterParticipantType.Pokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
+                EncounterParticipantType.EnemyNpc => EncounterParticipantModel.FromNpc(participant.ParticipantId, participant.Position, type),
+                EncounterParticipantType.EnemyPokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
+                EncounterParticipantType.NeutralNpc => EncounterParticipantModel.FromNpc(participant.ParticipantId, participant.Position, type),
+                EncounterParticipantType.NeutralPokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
                 _ => throw new ArgumentOutOfRangeException(nameof(participant.Type)),
             };
         }
