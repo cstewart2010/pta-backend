@@ -46,16 +46,18 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
         public static bool IsUserGM(
             this HttpRequest request,
-            string userId,
-            string gameId)
+            Guid userId,
+            Guid gameId)
         {
             var gameMaster = DatabaseUtility.FindTrainerById(userId, gameId);
-            return request.VerifyIdentity(userId) && gameMaster?.IsGM == true;
+            var user = DatabaseUtility.FindUserById(userId);
+            var isAdmin = Enum.TryParse<UserRoleOnSite>(user.SiteRole, out var role) && role == UserRoleOnSite.SiteAdmin;
+            return request.VerifyIdentity(userId) && (gameMaster?.IsGM == true || isAdmin);
         }
 
         public static bool VerifyIdentity(
             this HttpRequest request,
-            string id)
+            Guid id)
         {
             var user = DatabaseUtility.FindUserById(id);
             if (user == null)
@@ -139,8 +141,8 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
         public static async Task<(PokemonModel Pokemon, AbstractMessage Message)> BuildPokemon(
             this HttpRequest request,
-            string trainerId,
-            string gameId)
+            Guid trainerId,
+            Guid gameId)
         {
             var (isValid, message) = await ValidateMandatoryPokemonKeys(request);
             if (isValid)
@@ -208,12 +210,12 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return JToken.Parse(json);
         }
 
-        public static IEnumerable<string> GetNpcIds(
+        public static IEnumerable<Guid> GetNpcIds(
             this HttpRequest request,
             out AbstractMessage error)
         {
             error = null;
-            var npcIds = request.Query["npcIds"].ToString().Split(',');
+            var npcIds = request.Query["npcIds"].ToString().Split(',').Select(npc => new Guid(npc));
             if (npcIds.Any())
             {
                 var foundNpcs = DatabaseUtility.FindNpcs(npcIds).Select(npc => npc.NPCId).ToArray();
@@ -233,7 +235,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 MissingParameters = new[] { "npcIds" }
             };
 
-            return Array.Empty<string>();
+            return Array.Empty<Guid>();
         }
 
         private static async Task<(bool IsValid, InvalidQueryStringMessage Message)>  ValidateMandatoryPokemonKeys(

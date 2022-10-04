@@ -24,7 +24,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}/{gameMasterId}/{npcId}")]
-        public ActionResult<PublicNpc> GetNpc(string gameId, string gameMasterId, string npcId)
+        public ActionResult<PublicNpc> GetNpc(Guid gameId, Guid gameMasterId, Guid npcId)
         {
             if (!Request.VerifyIdentity(gameMasterId))
             {
@@ -47,7 +47,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}/{gameMasterId}/{npcId}/{pokemonId}")]
-        public ActionResult<PokemonModel> GetNpcMon(string gameMasterId, string gameId, string npcId, string pokemonId)
+        public ActionResult<PokemonModel> GetNpcMon(Guid gameMasterId, Guid gameId, Guid npcId, Guid pokemonId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -65,7 +65,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}/{gameMasterId}/npcs/all")]
-        public ActionResult<IEnumerable<PublicNpc>> GetNpcsInGame(string gameMasterId, string gameId)
+        public ActionResult<IEnumerable<PublicNpc>> GetNpcsInGame(Guid gameMasterId, Guid gameId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -77,7 +77,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}/new")]
-        public async Task<ActionResult<NpcModel>> CreateNewNpcAsync(string gameMasterId, string gameId)
+        public async Task<ActionResult<NpcModel>> CreateNewNpcAsync(Guid gameMasterId, Guid gameId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -97,7 +97,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}/{npcId}/new")]
-        public async Task<ActionResult> CreateNewNpcMonAsync(string gameMasterId, string gameId, string npcId)
+        public async Task<ActionResult> CreateNewNpcMonAsync(Guid gameMasterId, Guid gameId, Guid npcId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -116,7 +116,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{npcId}/addStats")]
-        public async Task<ActionResult<PublicNpc>> AddNpcStats(string gameMasterId,  string npcId, string gameId)
+        public async Task<ActionResult<PublicNpc>> AddNpcStats(Guid gameMasterId, Guid npcId, Guid gameId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId)) 
             { 
@@ -134,7 +134,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/{npcId}")]
-        public ActionResult DeleteNpc(string gameMasterId, string gameId, string npcId)
+        public ActionResult DeleteNpc(Guid gameMasterId, Guid gameId, Guid npcId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -161,7 +161,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/npcs/all")]
-        public ActionResult DeleteNpcsInGame(string gameMasterId, string gameId) 
+        public ActionResult DeleteNpcsInGame(Guid gameMasterId, Guid gameId) 
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -192,7 +192,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             // add gameMaster's GameId to npc
             return new NpcModel
             {
-                NPCId = Guid.NewGuid().ToString(),
+                NPCId = Guid.NewGuid(),
                 Feats = feats,
                 TrainerClasses = classes,
                 TrainerName = trainerName,
@@ -202,7 +202,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
         }
 
-        private static void AddNpcPokemon(IEnumerable<NewPokemon> pokemon, string npcId, string gameId)
+        private static void AddNpcPokemon(IEnumerable<NewPokemon> pokemon, Guid npcId, Guid gameId)
         {
             foreach (var data in pokemon.Where(data => data != null))
             {

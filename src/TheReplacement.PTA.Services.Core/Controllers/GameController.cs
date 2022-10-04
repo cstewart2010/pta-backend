@@ -24,7 +24,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public ActionResult<IEnumerable> FindAllGames(string userId, [FromQuery] string nickname)
+        public ActionResult<IEnumerable> FindAllGames(Guid userId, [FromQuery] string nickname)
         {
             if (!Request.VerifyIdentity(userId))
             {
@@ -43,7 +43,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("user/games/{userId}")]
-        public ActionResult<IEnumerable> FindAllUserGames(string userId)
+        public ActionResult<IEnumerable> FindAllUserGames(Guid userId)
         {
             if (!Request.VerifyIdentity(userId))
             {
@@ -62,13 +62,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("getGame/{gameId}")]
-        public ActionResult<FoundGameMessage> FindGame(string gameId)
+        public ActionResult<FoundGameMessage> FindGame(Guid gameId)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
             var document = GetDocument(gameId, Collection, out var notFound);
             if (!(document is GameModel))
             {
@@ -79,18 +74,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}/{trainerId}/find")]
-        public ActionResult<FoundTrainerMessage> FindTrainerInGame(string gameId, string trainerId)
+        public ActionResult<FoundTrainerMessage> FindTrainerInGame(Guid gameId, Guid trainerId)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
-            if (string.IsNullOrEmpty(trainerId))
-            {
-                return BadRequest(nameof(trainerId));
-            }
-
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel))
             {
@@ -112,13 +97,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}/all_logs")]
-        public ActionResult<AllLogsMessage> GetAllLogs(string gameId)
+        public ActionResult<AllLogsMessage> GetAllLogs(Guid gameId)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (gameDocument is not GameModel game)
             {
@@ -129,13 +109,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}/logs")]
-        public ActionResult<IEnumerable<LogModel>> GetLogs(string gameId)
+        public ActionResult<IEnumerable<LogModel>> GetLogs(Guid gameId)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (gameDocument is not GameModel game)
             {
@@ -168,7 +143,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{userId}/newGame")]
-        public ActionResult<CreatedGameMessage> CreateNewGame(string userId, [FromQuery] string nickname, [FromQuery] string gameSessionPassword, [FromQuery] string username)
+        public ActionResult<CreatedGameMessage> CreateNewGame(Guid userId, [FromQuery] string nickname, [FromQuery] string gameSessionPassword, [FromQuery] string username)
         {
             var game = BuildGame(nickname, gameSessionPassword);
             if (!DatabaseUtility.TryAddGame(game, out var error))
@@ -198,9 +173,9 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{userId}/newUser")]
-        public ActionResult<FoundTrainerMessage> AddPlayerToGame(string gameId, string userId, [FromQuery] string username)
+        public ActionResult<FoundTrainerMessage> AddPlayerToGame(Guid gameId, Guid userId, [FromQuery] string username)
         {
-            if (string.IsNullOrEmpty(gameId))
+            if (gameId == Guid.Empty)
             {
                 return BadRequest(nameof(gameId));
             }
@@ -238,7 +213,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}/wild")]
-        public async Task<ActionResult<PokemonModel>> AddPokemon(string gameId, string gameMasterId)
+        public async Task<ActionResult<PokemonModel>> AddPokemon(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -267,7 +242,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{trainerId}/log")]
-        public async Task<ActionResult<LogModel>> PostLogAsync(string gameId, string trainerId)
+        public async Task<ActionResult<LogModel>> PostLogAsync(Guid gameId, Guid trainerId)
         {
             var body = await Request.GetRequestBody();
             if (!Request.VerifyIdentity(trainerId))
@@ -283,7 +258,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}/{trainerId}/allow")]
-        public ActionResult AllowUser(string gameId, string gameMasterId, string trainerId)
+        public ActionResult AllowUser(Guid gameId, Guid gameMasterId, Guid trainerId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -309,7 +284,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}/{trainerId}/disallow")]
-        public ActionResult DisallowUser(string gameId, string gameMasterId, string trainerId)
+        public ActionResult DisallowUser(Guid gameId, Guid gameMasterId, Guid trainerId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -335,7 +310,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}/addStats")]
-        public async Task<ActionResult<FoundTrainerMessage>> AddTrainerStats(string gameId, string trainerId)
+        public async Task<ActionResult<FoundTrainerMessage>> AddTrainerStats(Guid gameId, Guid trainerId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -351,13 +326,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/start")]
-        public ActionResult<FoundGameMessage> StartGame(string gameId, string gameMasterId, [FromQuery] string gameSessionPassword)
+        public ActionResult<FoundGameMessage> StartGame(Guid gameId, Guid gameMasterId, [FromQuery] string gameSessionPassword)
         {
-            if (string.IsNullOrEmpty(gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (gameDocument is not GameModel game)
             {
@@ -375,13 +345,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/end")]
-        public ActionResult EndGame(string gameId, string gameMasterId)
+        public ActionResult EndGame(Guid gameId, Guid gameMasterId)
         {
-            if (!Request.IsUserGM(gameMasterId, gameId))
-            {
-                return Unauthorized();
-            }
-
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel))
             {
@@ -393,7 +358,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/addNpcs")]
-        public ActionResult<UpdatedNpcListMessage> AddNPCsToGame(string gameId, string gameMasterId)
+        public ActionResult<UpdatedNpcListMessage> AddNPCsToGame(Guid gameId, Guid gameMasterId)
         {
             var npcIds = GetNpcs(gameMasterId, gameId, out var notFound);
             if (npcIds == null)
@@ -417,7 +382,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/removeNpcs")]
-        public ActionResult<UpdatedNpcListMessage> RemovesNPCsFromGame(string gameId, string gameMasterId)
+        public ActionResult<UpdatedNpcListMessage> RemovesNPCsFromGame(Guid gameId, Guid gameMasterId)
         {
             var npcIds = GetNpcs(gameMasterId, gameId, out var notFound);
             if (npcIds == null)
@@ -441,7 +406,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}")]
-        public ActionResult<object> DeleteGame(string gameId, string gameMasterId, [FromQuery] string gameSessionPassword)
+        public ActionResult<object> DeleteGame(Guid gameId, Guid gameMasterId, [FromQuery] string gameSessionPassword)
         {
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (gameDocument is not GameModel game)
@@ -469,7 +434,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/export")]
-        public ActionResult ExportGame(string gameId, string gameMasterId, [FromQuery] string gameSessionPassword)
+        public ActionResult ExportGame(Guid gameId, Guid gameMasterId, [FromQuery] string gameSessionPassword)
         {
             var game = DatabaseUtility.FindGame(gameId);
             if (game == null)
@@ -508,23 +473,23 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         private static GameModel BuildGame(string nickname, string gameSessionPassword)
         {
-            var guid = Guid.NewGuid().ToString();
+            var guid = Guid.NewGuid();
             return new GameModel
             {
                 GameId = guid,
                 Nickname = string.IsNullOrEmpty(nickname)
-                    ? guid.Split('-')[0]
+                    ? guid.ToString().Split('-')[0]
                     : nickname,
                 IsOnline = true,
                 PasswordHash = EncryptionUtility.HashSecret(gameSessionPassword),
-                NPCs = Array.Empty<string>(),
+                NPCs = Array.Empty<Guid>(),
                 Logs = Array.Empty<LogModel>()
             };
         }
 
         private static (TrainerModel GameMaster, AbstractMessage Message) BuildGM(
-            string gameId,
-            string userId,
+            Guid gameId,
+            Guid userId,
             string username)
         {
             var (gm, badRequestMessage) = BuildTrainer
@@ -545,8 +510,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         private static (TrainerModel Trainer, AbstractMessage Message) BuildTrainer(
-            string gameId,
-            string userId,
+            Guid gameId,
+            Guid userId,
             string username)
         {
             var (trainer, badRequestMessage) = BuildTrainer
@@ -567,8 +532,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         private static (TrainerModel Trainer, AbstractMessage Error) BuildTrainer(
-            string gameId,
-            string userId,
+            Guid gameId,
+            Guid userId,
             string username,
             bool isGM)
         {
@@ -584,8 +549,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         private static TrainerModel CreateTrainer(
-            string gameId,
-            string userId,
+            Guid gameId,
+            Guid userId,
             string username)
         {
             var user = DatabaseUtility.FindUserById(userId);
@@ -620,9 +585,9 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
         }
 
-        private IEnumerable<string> GetNpcs(
-            string gameMasterId,
-            string gameId,
+        private IEnumerable<Guid> GetNpcs(
+            Guid gameMasterId,
+            Guid gameId,
             out ActionResult notFound)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
@@ -650,8 +615,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         private ActionResult<UpdatedNpcListMessage> UpdateNpcList(
-            string gameId,
-            IEnumerable<string> newNpcList)
+            Guid gameId,
+            IEnumerable<Guid> newNpcList)
         {
             if (!DatabaseUtility.UpdateGameNpcList(gameId, newNpcList))
             {
@@ -661,7 +626,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new UpdatedNpcListMessage(newNpcList);
         }
 
-        private static void SetEndGameStatuses(string gameId)
+        private static void SetEndGameStatuses(Guid gameId)
         {
             DatabaseUtility.UpdateGameOnlineStatus
             (
@@ -679,7 +644,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
         }
 
-        private static GenericMessage GetGameDeletion(string gameId)
+        private static GenericMessage GetGameDeletion(Guid gameId)
         {
             string message = DatabaseUtility.DeleteGame(gameId)
                 ? $"Successfully deleted game {gameId}"
@@ -687,7 +652,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new GenericMessage(message);
         }
 
-        private static GenericMessage GetMassTrainerDeletion(string gameId)
+        private static GenericMessage GetMassTrainerDeletion(Guid gameId)
         {
             string message;
             if (DatabaseUtility.DeleteTrainersByGameId(gameId) > -1)
@@ -702,7 +667,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new GenericMessage(message);
         }
 
-        private static IEnumerable<GenericMessage> GetMassPokemonDeletion(string gameId)
+        private static IEnumerable<GenericMessage> GetMassPokemonDeletion(Guid gameId)
         {
             return DatabaseUtility.FindTrainersByGameId(gameId)
                 .Select(trainer => GetPokemonDeletion(trainer.TrainerId, trainer.GameId))

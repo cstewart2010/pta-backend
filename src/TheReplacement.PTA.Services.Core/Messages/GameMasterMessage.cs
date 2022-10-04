@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Objects;
@@ -7,7 +8,7 @@ namespace TheReplacement.PTA.Services.Core.Messages
 {
     public class GameMasterMessage : AbstractMessage
     {
-        internal GameMasterMessage(string userId, string gameId)
+        internal GameMasterMessage(Guid userId, Guid gameId)
         {
             var user = DatabaseUtility.FindUserById(userId);
             User = new PublicUser(user);
@@ -18,8 +19,8 @@ namespace TheReplacement.PTA.Services.Core.Messages
         }
 
         public override string Message { get; }
-        public string GameId { get; }
-        public string GameMasterId { get; }
+        public Guid GameId { get; }
+        public Guid GameMasterId { get; }
         public IEnumerable<PublicTrainer> Trainers { get; }
         public PublicUser User { get; }
     }

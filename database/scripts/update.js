@@ -18,9 +18,7 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         GameId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         Nickname: {
           bsonType: 'string',
@@ -37,9 +35,7 @@ const updatedValidators = {
         NPCs: {
           bsonType: 'array',
           items: {
-            bsonType: 'string',
-            minLength: 36,
-            maxLength: 36
+            bsonType: 'binData'
           }
         },
         Logs: {
@@ -75,14 +71,10 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         EncounterId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         GameId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         Name: {
           bsonType: 'string',
@@ -115,9 +107,7 @@ const updatedValidators = {
             additionalProperties: false,
             properties: {
               ParticipantId: {
-                bsonType: 'string',
-                minLength: 36,
-                maxLength: 36
+                bsonType: 'binData'
               },
               Name: {
                 bsonType: 'string'
@@ -181,9 +171,7 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         NPCId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         TrainerName: {
           bsonType: 'string',
@@ -210,9 +198,7 @@ const updatedValidators = {
           }
         },
         GameId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         Level: {
           bsonType: 'int'
@@ -338,9 +324,7 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         PokemonId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         DexNo: {
           bsonType: 'int',
@@ -366,19 +350,13 @@ const updatedValidators = {
           minLength: 1
         },
         OriginalTrainerId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         TrainerId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         GameId: {
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         Gender: {
           bsonType: 'string',
@@ -622,10 +600,10 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         GameId: {
-          bsonType: 'string'
+          bsonType: 'binData'
         },
         TrainerId: {
-          bsonType: 'string'
+          bsonType: 'binData'
         },
         Honors: {
           bsonType: 'array',
@@ -842,10 +820,10 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         TrainerId: {
-          bsonType: 'string'
+          bsonType: 'binData'
         },
         GameId: {
-          bsonType: 'string'
+          bsonType: 'binData'
         },
         DexNo: {
           bsonType: 'int'
@@ -1557,9 +1535,7 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         UserId:{
-          bsonType: 'string',
-          minLength: 36,
-          maxLength: 36
+          bsonType: 'binData'
         },
         Username:{
           bsonType: 'string',
@@ -1585,17 +1561,13 @@ const updatedValidators = {
         Games:{
           bsonType: 'array',
           items:{
-            bsonType:'string',
-            minLength: 36,
-            maxLength: 36
+            bsonType: 'binData'
           }
         },
         Messages:{
           bsonType: 'array',
           items:{
-            bsonType:'string',
-            minLength: 36,
-            maxLength: 36
+            bsonType: 'binData'
           }
         }
       }
@@ -1613,9 +1585,7 @@ const updatedValidators = {
           bsonType: 'objectId'
         },
         MessageId:{
-          bsonType: 'string',
-            minLength: 36,
-            maxLength: 36
+          bsonType: 'binData'
         },
         Messages:{
           bsonType: 'array',

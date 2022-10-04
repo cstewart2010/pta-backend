@@ -30,7 +30,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
             TrainerClasses = trainer.TrainerClasses;
             TrainerStats = trainer.TrainerStats;
             IsComplete = trainer.IsComplete;
-            var trainerPokemon = DatabaseUtility.FindPokemonByTrainerId(trainer.TrainerId);
+            var trainerPokemon = DatabaseUtility.FindPokemonByTrainerId(TrainerId, GameId);
             PokemonTeam = trainerPokemon
                 .Where(pokemon => pokemon.IsOnActiveTeam);
             PokemonHome = trainerPokemon
@@ -82,12 +82,12 @@ namespace TheReplacement.PTA.Services.Core.Objects
             return trainer;
         }
 
-        public string TrainerId { get; set; }
+        public Guid TrainerId { get; set; }
         public string TrainerName { get; set; }
         public bool IsGM { get; set; }
         public bool IsOnline { get; set; }
         public IEnumerable<string> Feats { get; set; }
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
         public IEnumerable<string> Honors { get; set; }
         public int Money { get; set; }
         public string Origin { get; set; }

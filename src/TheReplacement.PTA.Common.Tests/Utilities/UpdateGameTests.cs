@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using TheReplacement.PTA.Common.Utilities;
 using Xunit;
@@ -27,7 +28,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             DatabaseUtility.TryAddGame(game, out _);
 
             Logger.WriteLine($"Adding {npcCount} npcs to game id {game.GameId}");
-            var npcIds = new List<string>();
+            var npcIds = new List<Guid>();
             for (int i = 0; i < npcCount; i++)
             {
                 npcIds.Add(GetTestNpc().NPCId);
@@ -38,30 +39,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             game = DatabaseUtility.FindGame(game.GameId);
             DatabaseUtility.DeleteGame(game.GameId);
             Assert.Equal(npcIds, game.NPCs);
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("A game that doesn't exist")]
-        public void UpdateGameNpcList_InvalidGameId_False(string gameId)
-        {
-            var game = GetTestGame();
-            var npcCount = 0;
-            Logger.WriteLine($"Adding game id {game.GameId}");
-            DatabaseUtility.TryAddGame(game, out _);
-
-            Logger.WriteLine($"Adding {npcCount} npcs to game id {gameId}");
-            var npcIds = new List<string>();
-            for (int i = 0; i < npcCount; i++)
-            {
-                npcIds.Add(GetTestNpc().NPCId);
-            }
-            Assert.False(DatabaseUtility.UpdateGameNpcList(gameId, npcIds));
-
-            Logger.WriteLine($"Verifying game id {gameId} was not found and updated");
-            Assert.Null(DatabaseUtility.FindGame(gameId));
-            DatabaseUtility.DeleteGame(game.GameId);
         }
 
         [Fact]
@@ -96,25 +73,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             game = DatabaseUtility.FindGame(game.GameId);
             DatabaseUtility.DeleteGame(game.GameId);
             Assert.Equal(isOnline, game.IsOnline);
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("A game that doesn't exist")]
-        public void UpdateGameOnlineStatus_InvalidGameid_False(string gameId)
-        {
-            var game = GetTestGame();
-            Logger.WriteLine($"Adding game id {game.GameId}");
-            DatabaseUtility.TryAddGame(game, out _);
-
-            Logger.WriteLine($"Updating game id {gameId} online status to true");
-            Assert.False(DatabaseUtility.UpdateGameOnlineStatus(gameId, true));
-
-            Logger.WriteLine($"Verifying game online status has not been changed to true");
-            DatabaseUtility.DeleteGame(game.GameId);
-            game = DatabaseUtility.FindGame(gameId);
-            Assert.Null(game);
         }
     }
 }

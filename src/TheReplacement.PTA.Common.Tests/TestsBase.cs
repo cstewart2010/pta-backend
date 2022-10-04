@@ -16,9 +16,9 @@ namespace TheReplacement.PTA.Common.Tests
         {
             return new GameModel
             {
-                GameId = Guid.NewGuid().ToString(),
+                GameId = Guid.NewGuid(),
                 Nickname = "Test Nickname",
-                NPCs = Array.Empty<string>(),
+                NPCs = Array.Empty<Guid>(),
                 PasswordHash = "testpassword"
             };
         }
@@ -27,7 +27,7 @@ namespace TheReplacement.PTA.Common.Tests
         {
             return new NpcModel
             {
-                NPCId = Guid.NewGuid().ToString(),
+                NPCId = Guid.NewGuid(),
                 Feats = Array.Empty<string>(),
                 TrainerClasses = Array.Empty<string>(),
                 TrainerName = "Test Trainername",
@@ -38,7 +38,7 @@ namespace TheReplacement.PTA.Common.Tests
         public static PokemonModel GetTestPokemon()
         {
             var pokemon = DexUtility.GetNewPokemon("Flabébé", Nature.Modest, Gender.Female, Status.Normal, "", "base");
-            pokemon.TrainerId = Guid.NewGuid().ToString();
+            pokemon.TrainerId = Guid.NewGuid();
             return pokemon;
         }
 
@@ -47,10 +47,10 @@ namespace TheReplacement.PTA.Common.Tests
             return new TrainerModel
             {
                 Feats = Array.Empty<string>(),
-                GameId = Guid.NewGuid().ToString(),
+                GameId = Guid.NewGuid(),
                 Items = new List<ItemModel>(),
                 TrainerClasses = Array.Empty<string>(),
-                TrainerId = Guid.NewGuid().ToString(),
+                TrainerId = Guid.NewGuid(),
                 TrainerName = "Test Trainer",
                 TrainerStats = new StatsModel
                 {

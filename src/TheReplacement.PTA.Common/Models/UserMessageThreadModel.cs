@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using TheReplacement.PTA.Common.Interfaces;
 
@@ -15,7 +16,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Id for PTA user Messages
         /// </summary>
-        public string MessageId { get; set; }
+        public Guid MessageId { get; set; }
 
         /// <summary>
         /// Collection of messages shared between two PTA Users

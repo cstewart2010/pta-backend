@@ -12,19 +12,27 @@ namespace TheReplacement.PTA.Common.Models
     /// </summary>
     public class UserModel : IAuthenticated, IDocument
     {
+        /// <summary>
+        /// The default constructor for the MongoDB Csharp Driver
+        /// </summary>
         public UserModel() { }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="UserModel"/>
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
         public UserModel(string username, string password)
         {
-            UserId = Guid.NewGuid().ToString();
+            UserId = Guid.NewGuid();
             Username = username;
             PasswordHash = EncryptionUtility.HashSecret(password);
             IsOnline = true;
             ActivityToken = EncryptionUtility.GenerateToken();
             DateCreated = DateTime.UtcNow.ToString("u");
             SiteRole = UserRoleOnSite.Active.ToString();
-            Games = Array.Empty<string>();
-            Messages = Array.Empty<string>();
+            Games = Array.Empty<Guid>();
+            Messages = Array.Empty<Guid>();
         }
 
         /// <inheritdoc />
@@ -33,7 +41,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Id for PTA user
         /// </summary>
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         /// <summary>
         /// Username for PTA user
@@ -64,11 +72,11 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Games of which the PTA user is a member
         /// </summary>
-        public ICollection<string> Games { get; set; }
+        public ICollection<Guid> Games { get; set; }
 
         /// <summary>
         /// List of PTA user's messages
         /// </summary>
-        public IEnumerable<string> Messages { get; set; }
+        public IEnumerable<Guid> Messages { get; set; }
     }
 }

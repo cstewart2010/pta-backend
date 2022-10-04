@@ -27,15 +27,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             DatabaseUtility.DeleteGame(game.GameId);
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("Invalid Id")]
-        public void FindGame_InvalidId_Null(string id)
-        {
-            Logger.WriteLine($"Retrieving game id {id}");
-            Assert.Null(DatabaseUtility.FindGame(id));
-        }
-
         [Fact, Trait("Category", "smoke")]
         public void FindNpc_SmokeTest_NotNull()
         {
@@ -47,22 +38,13 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("Invalid Id")]
-        public void FindNpc_InvalidId_Null(string id)
-        {
-            Logger.WriteLine($"Retrieving npc id {id}");
-            Assert.Null(DatabaseUtility.FindNpc(id));
-        }
-
-        [Theory]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(5)]
         public void FindNpcs_ValidIds_NpcCount(int npcCount)
         {
             Logger.WriteLine($"Adding {npcCount} npcs");
-            var npcIds = new List<string>();
+            var npcIds = new List<Guid>();
             for (int i = 0; i < npcCount; i++)
             {
                 var npc = GetTestNpc();
@@ -99,15 +81,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("Invalid Id")]
-        public void FindPokemonById_InvalidId_Null(string id)
-        {
-            Logger.WriteLine($"Retrieving npc id {id}");
-            Assert.Null(DatabaseUtility.FindPokemonById(id));
-        }
-
-        [Theory]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(5)]
@@ -117,7 +90,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             DatabaseUtility.TryAddTrainer(trainer, out _);
 
             Logger.WriteLine($"Adding {pokemonCount} pokemon to trainer id {trainer.TrainerId}");
-            var pokemonIds = new List<string>();
+            var pokemonIds = new List<Guid>();
             for (int i = 0; i < pokemonCount; i++)
             {
                 var pokemon = GetTestPokemon();
@@ -137,15 +110,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Logger.WriteLine($"Verifying that the retrieved list matcheds the original set");
             Assert.True(retrievedPokemonIds.All(pokemonId => retrievedPokemonIds.Contains(pokemonId)));
             Assert.Equal(pokemonCount, retrievedPokemonIds.Count);
-        }
-
-        [Fact]
-        public void FindPokemonByTrainerId_NullId_EmptyList()
-        {
-            Logger.WriteLine($"Retrieving pokemon list");
-            var pokemonIds = DatabaseUtility.FindPokemonByTrainerId(null);
-            Logger.WriteLine($"Verifying the pokemon list is empty");
-            Assert.Empty(pokemonIds);
         }
 
         [Fact, Trait("Category", "smoke")]
@@ -177,7 +141,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Assert.True(DatabaseUtility.TryAddGame(game, out _));
 
             Logger.WriteLine($"Adding {trainerCount} trainers to game id {game.GameId}");
-            var trainerIds = new List<string>();
+            var trainerIds = new List<Guid>();
             for (int i = 0; i < trainerCount; i++)
             {
                 var trainer = GetTestTrainer();
@@ -198,15 +162,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Logger.WriteLine($"Verifying that the retrieved list matches the original set");
             Assert.True(retrievedTrainerIds.All(trainerId => trainerIds.Contains(trainerId)));
             Assert.Equal(trainerCount, retrievedTrainerIds.Count());
-        }
-
-        [Fact]
-        public void FindTrainerByGameId_NullId_EmptyList()
-        {
-            Logger.WriteLine($"Retrieving trainer list");
-            var trainerIds = DatabaseUtility.FindTrainersByGameId(null);
-            Logger.WriteLine($"Verifying that the retrieved list is empty");
-            Assert.Empty(trainerIds);
         }
 
         [Theory]
@@ -248,28 +203,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             (
                 username,
                 trainer.GameId
-            );
-
-            Logger.WriteLine($"Verifying that no trainer was found");
-            DatabaseUtility.DeleteTrainer(trainer.GameId, trainer.TrainerId);
-            Assert.Null(retrievedTrainer);
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("A game that doesn't exist")]
-        public void FindTrainerByUsername_InvalidGameId_Null(string gameId)
-        {
-            var trainer = GetTestTrainer();
-            Logger.WriteLine($"Adding trainer with username {trainer.TrainerName}");
-            DatabaseUtility.TryAddTrainer(trainer, out _);
-
-            Logger.WriteLine($"Retrieving trainer with username {trainer.TrainerName}");
-            var retrievedTrainer = DatabaseUtility.FindTrainerByUsername
-            (
-                trainer.TrainerName,
-                gameId
             );
 
             Logger.WriteLine($"Verifying that no trainer was found");

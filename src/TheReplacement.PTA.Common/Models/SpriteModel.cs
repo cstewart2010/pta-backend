@@ -1,12 +1,10 @@
 ﻿using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TheReplacement.PTA.Common.Models
 {
+    /// <summary>
+    /// Represents a sprite in the Pokemon Tabletop adventures app
+    /// </summary>
     public class SpriteModel
     {
         /// <summary>

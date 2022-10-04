@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System;
 using TheReplacement.PTA.Common.Utilities;
 
 namespace TheReplacement.PTA.Services.Core.Extensions
@@ -7,7 +8,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
     {
         public static void AssignAuthAndToken(
             this HttpResponse response,
-            string trainerId)
+            Guid trainerId)
         {
             var token = EncryptionUtility.GenerateToken();
             DatabaseUtility.UpdateUserActivityToken
@@ -22,7 +23,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
         public static void RefreshToken(
             this HttpResponse response,
-            string id)
+            Guid id)
         {
             var updatedToken = EncryptionUtility.GenerateToken();
             DatabaseUtility.UpdateUserActivityToken(id, updatedToken);

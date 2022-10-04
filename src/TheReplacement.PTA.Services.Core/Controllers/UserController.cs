@@ -18,7 +18,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         protected override MongoCollection Collection => throw new NotImplementedException();
 
         [HttpGet("{userId}")]
-        public ActionResult<string> GetUsername(string userId)
+        public ActionResult<string> GetUsername(Guid userId)
         {
             var user = DatabaseUtility.FindUserById(userId);
             if (user == null)
@@ -30,7 +30,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{adminId}/admin/allUsers")]
-        public ActionResult GetUsers(string adminId, [FromQuery] int offset, [FromQuery] int limit)
+        public ActionResult GetUsers(Guid adminId, [FromQuery] int offset, [FromQuery] int limit)
         {
             if (offset < 0 || limit <= 0)
             {
@@ -54,7 +54,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{adminId}/{messageId}/admin/message")]
-        public ActionResult<UserMessageThreadModel> ForceGetMessage(string adminId, string messageId)
+        public ActionResult<UserMessageThreadModel> ForceGetMessage(Guid adminId, Guid messageId)
         {
             if (!IsUserAdmin(adminId))
             {
@@ -65,7 +65,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{userId}/{messageId}")]
-        public ActionResult<UserMessageThreadModel> GetMessage(string userId, string messageId)
+        public ActionResult<UserMessageThreadModel> GetMessage(Guid userId, Guid messageId)
         {
             if (!Request.VerifyIdentity(userId))
             {
@@ -105,7 +105,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{userId}/{recipientId}/sendMessage")]
-        public async Task<ActionResult> SendMessageAsync(string userId, string recipientId)
+        public async Task<ActionResult> SendMessageAsync(Guid userId, Guid recipientId)
         {
             if (!Request.VerifyIdentity(userId))
             {
@@ -138,7 +138,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{userId}/{messageId}/replyMessage")]
-        public async Task<ActionResult> ReplyMessageAsync(string userId, string messageId)
+        public async Task<ActionResult> ReplyMessageAsync(Guid userId, Guid messageId)
         {
             if (!Request.VerifyIdentity(userId))
             {
@@ -165,7 +165,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{userId}/refresh")]
-        public ActionResult RefreshInGame(string userId, string gameId, [FromQuery] bool isGM)
+        public ActionResult RefreshInGame(Guid userId, Guid gameId, [FromQuery] bool isGM)
         {
             if (isGM)
             {
@@ -195,7 +195,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{userId}/logout")]
-        public ActionResult Logout(string userId)
+        public ActionResult Logout(Guid userId)
         {
             if (!Request.VerifyIdentity(userId))
             {
@@ -207,7 +207,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{userId}")]
-        public ActionResult DeleteUser(string userId)
+        public ActionResult DeleteUser(Guid userId)
         {
             if (!Request.VerifyIdentity(userId))
             {
@@ -228,7 +228,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{adminId}/{userId}/admin")]
-        public ActionResult ForceDeleteUser(string adminId, string userId)
+        public ActionResult ForceDeleteUser(Guid adminId, Guid userId)
         {
             if (!IsUserAdmin(adminId))
             {
@@ -249,7 +249,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return BadRequest();
         }
 
-        private ActionResult GetUpdatedTrainer(string userId, string gameId)
+        private ActionResult GetUpdatedTrainer(Guid userId, Guid gameId)
         {
             if (!Request.VerifyIdentity(userId))
             {
@@ -260,7 +260,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok(new FoundTrainerMessage(userId, gameId));
         }
 
-        private ActionResult GetUpdatedGM(string userId, string gameId)
+        private ActionResult GetUpdatedGM(Guid userId, Guid gameId)
         {
             if (!Request.IsUserGM(userId, gameId))
             {
@@ -276,7 +276,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var message = new UserMessageModel(sender.UserId, messageContent);
             var thread = new UserMessageThreadModel
             {
-                MessageId = Guid.NewGuid().ToString(),
+                MessageId = Guid.NewGuid(),
                 Messages = new[] { message }
             };
 
@@ -298,7 +298,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             DatabaseUtility.UpdateThread(thread);
         }
 
-        public static bool IsUserAdmin(string userId)
+        public static bool IsUserAdmin(Guid userId)
         {
             var siteAdmin = DatabaseUtility.FindUserById(userId);
             return Enum.TryParse<UserRoleOnSite>(siteAdmin.SiteRole, out var role) && role == UserRoleOnSite.SiteAdmin;
