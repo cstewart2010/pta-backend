@@ -114,10 +114,13 @@ const updatedValidators = {
               },
               Type: {
                 bsonType: 'string',
-                'enum': [
+                enum: [
                   'Trainer',
                   'Pokemon',
-                  'Npc'
+                  'EnemyNpc',
+                  'EnemyPokemon',
+                  'NeutralNpc',
+                  'NeutralPokemon'
                 ]
               },
               Health: {

@@ -18,7 +18,7 @@ namespace TheReplacement.PTA.Common.Models
         public Guid TrainerId { get; set; }
 
         /// <summary>
-        /// The game session id
+        /// The game's unique id
         /// </summary>
         public Guid GameId { get; set; }
 
