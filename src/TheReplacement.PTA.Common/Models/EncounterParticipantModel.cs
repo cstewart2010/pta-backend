@@ -1,4 +1,5 @@
 ﻿using System;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Utilities;
 
 namespace TheReplacement.PTA.Common.Models
@@ -77,14 +78,15 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         /// <param name="pokemonId"></param>
         /// <param name="position"></param>
-        public static EncounterParticipantModel FromPokemon(Guid pokemonId, MapPositionModel position)
+        /// <param name="type"></param>
+        public static EncounterParticipantModel FromPokemon(Guid pokemonId, MapPositionModel position, EncounterParticipantType type)
         {
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             return new EncounterParticipantModel(pokemon.CurrentHP, pokemon.PokemonStats.HP)
             {
                 ParticipantId = pokemon.PokemonId,
                 Name = pokemon.Nickname,
-                Type = "Pokemon",
+                Type = type.ToString(),
                 Speed = pokemon.PokemonStats.Speed,
                 Position = position
             };
@@ -95,14 +97,15 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         /// <param name="npcId"></param>
         /// <param name="position"></param>
-        public static EncounterParticipantModel FromNpc(Guid npcId, MapPositionModel position)
+        /// <param name="type"></param>
+        public static EncounterParticipantModel FromNpc(Guid npcId, MapPositionModel position, EncounterParticipantType type)
         {
             var npc = DatabaseUtility.FindNpc(npcId);
             return new EncounterParticipantModel(npc.CurrentHP, npc.TrainerStats.HP)
             {
                 ParticipantId = npc.NPCId,
                 Name = npc.TrainerName,
-                Type = "Trainer",
+                Type = type.ToString(),
                 Speed = npc.TrainerStats.Speed,
                 Position = position
             };

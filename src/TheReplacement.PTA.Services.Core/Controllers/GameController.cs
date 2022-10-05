@@ -328,6 +328,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/{gameMasterId}/start")]
         public ActionResult<FoundGameMessage> StartGame(Guid gameId, Guid gameMasterId, [FromQuery] string gameSessionPassword)
         {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (gameDocument is not GameModel game)
             {
@@ -347,6 +352,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpPut("{gameId}/{gameMasterId}/end")]
         public ActionResult EndGame(Guid gameId, Guid gameMasterId)
         {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
             var gameDocument = GetDocument(gameId, Collection, out var notFound);
             if (!(gameDocument is GameModel))
             {
