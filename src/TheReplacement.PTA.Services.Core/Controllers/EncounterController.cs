@@ -19,70 +19,22 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     public class EncounterController : PtaControllerBase
     {
         protected override MongoCollection Collection { get; }
-        private byte[] _buffer;
+        private static readonly byte[] Buffer = new byte[36];
 
         public EncounterController()
         {
             Collection = MongoCollection.Encounters;
         }
 
-        [HttpGet("active")]
-        public async Task<ActionResult<EncounterModel>> GetActiveEncounter()
+        [HttpGet("{gameId}")]
+        public async Task<ActionResult<EncounterModel>> GetActiveEncounter(Guid gameId)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
-                await Echo();
+                await Echo(gameId);
             }
 
             return BadRequest();
-        }
-
-        private async Task Echo()
-        {
-            using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-            _buffer = new byte[36];
-            var recieved = await RecieveAsync(webSocket);
-            while (!recieved.CloseStatus.HasValue)
-            {
-                await SendAsync
-                (
-                    webSocket,
-                    recieved.MessageType,
-                    recieved.EndOfMessage
-                );
-
-                recieved = await RecieveAsync(webSocket);
-            }
-
-            await webSocket.CloseAsync
-            (
-                recieved.CloseStatus.Value,
-                recieved.CloseStatusDescription,
-                CancellationToken.None
-            );
-        }
-
-        private async Task<WebSocketReceiveResult> RecieveAsync(WebSocket webSocket)
-        {
-            return await webSocket.ReceiveAsync(new ArraySegment<byte>(_buffer), CancellationToken.None);
-        }
-
-        private async Task SendAsync(
-            WebSocket webSocket,
-            WebSocketMessageType messageType,
-            bool endOfMessage)
-        {
-            var gameId = new Guid(System.Text.Encoding.Default.GetString(_buffer));
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
-            var message = JsonConvert.SerializeObject(encounter);
-            var messageAsBytes = System.Text.Encoding.ASCII.GetBytes(message);
-            await webSocket.SendAsync
-            (
-                new ArraySegment<byte>(messageAsBytes),
-                messageType,
-                endOfMessage,
-                CancellationToken.None
-            );
         }
 
         [HttpGet("{gameId}/{gameMasterId}/all")]
@@ -499,6 +451,54 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return (name, type, null);
+        }
+
+        private async Task Echo(Guid gameId)
+        {
+            using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+            var recieved = await RecieveAsync(webSocket);
+            while (!recieved.CloseStatus.HasValue)
+            {
+                await SendAsync
+                (
+                    webSocket,
+                    gameId,
+                    recieved.MessageType,
+                    recieved.EndOfMessage
+                );
+
+                recieved = await RecieveAsync(webSocket);
+            }
+
+            await webSocket.CloseAsync
+            (
+                recieved.CloseStatus.Value,
+                recieved.CloseStatusDescription,
+                CancellationToken.None
+            );
+        }
+
+        private static async Task<WebSocketReceiveResult> RecieveAsync(WebSocket webSocket)
+        {
+            return await webSocket.ReceiveAsync(new ArraySegment<byte>(Buffer), CancellationToken.None);
+        }
+
+        private static async Task SendAsync(
+            WebSocket webSocket,
+            Guid gameId,
+            WebSocketMessageType messageType,
+            bool endOfMessage)
+        {
+            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var message = JsonConvert.SerializeObject(encounter);
+            var messageAsBytes = System.Text.Encoding.ASCII.GetBytes(message);
+            await webSocket.SendAsync
+            (
+                new ArraySegment<byte>(messageAsBytes),
+                messageType,
+                endOfMessage,
+                CancellationToken.None
+            );
         }
 
         private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant, Guid gameId)
