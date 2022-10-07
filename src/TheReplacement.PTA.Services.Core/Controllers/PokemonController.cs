@@ -23,13 +23,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{pokemonId}")]
-        public ActionResult<PokemonModel> GetPokemon(string pokemonId)
+        public ActionResult<PokemonModel> GetPokemon(Guid pokemonId)
         {
-            if (string.IsNullOrEmpty(pokemonId))
-            {
-                return BadRequest(nameof(pokemonId));
-            }
-
             var document = GetDocument(pokemonId, Collection, out var notFound);
             if (document is not PokemonModel pokemon)
             {
@@ -40,7 +35,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}/{trainerId}/{pokemonId}/possibleEvolutions")]
-        public ActionResult<IEnumerable<BasePokemonModel>> GetPossibleEvolutions(string gameId, string trainerId, string pokemonId)
+        public ActionResult<IEnumerable<BasePokemonModel>> GetPossibleEvolutions(Guid gameId, Guid trainerId, Guid pokemonId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -57,7 +52,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/trade")]
-        public ActionResult<object> TradePokemon(string gameId, string gameMasterId)
+        public ActionResult<object> TradePokemon(Guid gameId, Guid gameMasterId, [FromQuery] Guid leftPokemonId, [FromQuery] Guid rightPokemonId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -65,7 +60,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId, gameId);
-            var (leftPokemon, rightPokemon) = GetTradePokemon(out var badRequest);
+            var (leftPokemon, rightPokemon) = GetTradePokemon(leftPokemonId, rightPokemonId, out var badRequest);
             if (badRequest != null)
             {
                 return badRequest;
@@ -94,7 +89,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}/{pokemonId}/hp/{hp}")]
-        public ActionResult UpdateHP(string gameId, string trainerId, string pokemonId, int hp)
+        public ActionResult UpdateHP(Guid gameId, Guid trainerId, Guid pokemonId, int hp)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -117,7 +112,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}/{pokemonId}/form/{form}")]
-        public ActionResult<PokemonModel> SwitchForm(string gameId, string trainerId, string pokemonId, string form)
+        public ActionResult<PokemonModel> SwitchForm(Guid gameId, Guid trainerId, Guid pokemonId, string form)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -159,7 +154,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{pokemonId}/canEvolve")]
-        public ActionResult<AbstractMessage> MarkPokemonAsEvolvable(string gameId, string gameMasterId, string pokemonId)
+        public ActionResult<AbstractMessage> MarkPokemonAsEvolvable(Guid gameId, Guid gameMasterId, Guid pokemonId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -188,7 +183,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}/{pokemonId}/evolve")]
-        public async Task<ActionResult<PokemonModel>> EvolvePokemonAsync(string gameId, string trainerId, string pokemonId)
+        public async Task<ActionResult<PokemonModel>> EvolvePokemonAsync(Guid gameId, Guid trainerId, Guid pokemonId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -246,7 +241,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{trainerId}/saw")]
-        public ActionResult<AbstractMessage> UpdateDexItemIsSeen(string gameId, string gameMasterId, string trainerId, [FromQuery] int dexNo)
+        public ActionResult<AbstractMessage> UpdateDexItemIsSeen(Guid gameId, Guid gameMasterId, Guid trainerId, [FromQuery] int dexNo)
         {
             var actionResult = GetDexNoForPokedexUpdate(gameId, gameMasterId, trainerId);
             if (dexNo < 1 || dexNo >= DexUtility.GetDexEntries<BasePokemonModel>(DexType.BasePokemon).Count())
@@ -273,7 +268,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{trainerId}/caught")]
-        public ActionResult<AbstractMessage> UpdateDexItemIsCaught(string gameId, string gameMasterId, string trainerId, [FromQuery] int dexNo)
+        public ActionResult<AbstractMessage> UpdateDexItemIsCaught(Guid gameId, Guid gameMasterId, Guid trainerId, [FromQuery] int dexNo)
         {
             var actionResult = GetDexNoForPokedexUpdate(gameId, gameMasterId, trainerId);
             if (dexNo < 1 || dexNo >= DexUtility.GetDexEntries<BasePokemonModel>(DexType.BasePokemon).Count())
@@ -300,7 +295,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/{pokemonId}")]
-        public ActionResult<GenericMessage> DeletePokemon(string gameId, string gameMasterId, string pokemonId)
+        public ActionResult<GenericMessage> DeletePokemon(Guid gameId, Guid gameMasterId, Guid pokemonId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -329,7 +324,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             );
         }
 
-        private ActionResult<AbstractMessage> AddDexItem(string trainerId, string gameId, int dexNo, bool isSeen = false, bool isCaught = false)
+        private ActionResult<AbstractMessage> AddDexItem(Guid trainerId, Guid gameId, int dexNo, bool isSeen = false, bool isCaught = false)
         {
             if (isCaught)
             {
@@ -352,7 +347,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new GenericMessage("Pokedex item added successfully");
         }
 
-        private ActionResult GetDexNoForPokedexUpdate(string gameId, string gameMasterId, string trainerId)
+        private ActionResult GetDexNoForPokedexUpdate(Guid gameId, Guid gameMasterId, Guid trainerId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -398,22 +393,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             );
         }
 
-        private (PokemonModel LeftPokemon, PokemonModel RightPokemon) GetTradePokemon(out ActionResult notFound)
+        private (PokemonModel LeftPokemon, PokemonModel RightPokemon) GetTradePokemon(
+            Guid leftPokemonId,
+            Guid rightPokemonId,
+            out ActionResult notFound)
         {
-            if (!Request.Query.TryGetValue("leftPokemonId", out var leftPokemonId))
-            {
-                notFound = BadRequest(nameof(leftPokemonId));
-                return default;
-            }
             var leftDocument = GetDocument(leftPokemonId, Collection, out notFound);
             if (leftDocument is not PokemonModel leftPokemon)
             {
-                return default;
-            }
-
-            if (!Request.Query.TryGetValue("rightPokemonId", out var rightPokemonId))
-            {
-                notFound = BadRequest(nameof(rightPokemonId));
                 return default;
             }
 
@@ -433,9 +420,9 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         private PokemonModel GetPokemonFromTrainer(
-            string gameId,
-            string trainerId,
-            string pokemonId,
+            Guid gameId,
+            Guid trainerId,
+            Guid pokemonId,
             out ActionResult error)
         {
             var trainerDocument = DatabaseUtility.FindTrainerById(trainerId, gameId);

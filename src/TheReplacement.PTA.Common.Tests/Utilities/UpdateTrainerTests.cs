@@ -72,24 +72,5 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             //DatabaseUtility.DeleteTrainer(trainer.TrainerId);
             //Assert.Equal(isOnline, trainer.IsOnline);
         }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("A game that doesn't exist")]
-        public void UpdateTrainerOnlineStatus_InvalidGameid_False(string trainerId)
-        {
-            var trainer = GetTestTrainer();
-            Logger.WriteLine($"Adding trainer id {trainer.TrainerId}");
-            DatabaseUtility.TryAddTrainer(trainer, out _);
-
-            Logger.WriteLine($"Updating trainer id {trainer.TrainerId} online status to true");
-            Assert.False(DatabaseUtility.UpdateTrainerOnlineStatus(trainerId, true));
-
-            Logger.WriteLine($"Verifying trainer id {trainer.TrainerId} online status has not been changed to true");
-            DatabaseUtility.DeleteTrainer(trainer.GameId, trainer.TrainerId);
-            //trainer = DatabaseUtility.FindTrainerById(trainerId);
-            //Assert.Null(trainer);
-        }
     }
 }

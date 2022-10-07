@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TheReplacement.PTA.Common.Interfaces;
@@ -52,12 +53,12 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The PTA game session id
         /// </summary>
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
 
         /// <summary>
         /// The trainer's unique id
         /// </summary>
-        public string TrainerId { get; set; }
+        public Guid TrainerId { get; set; }
 
         /// <inheritdoc />
         public string TrainerName { get; set; }

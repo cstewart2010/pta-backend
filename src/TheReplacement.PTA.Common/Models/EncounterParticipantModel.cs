@@ -1,4 +1,5 @@
-﻿using TheReplacement.PTA.Common.Enums;
+﻿using System;
+using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Utilities;
 
 namespace TheReplacement.PTA.Common.Models
@@ -26,7 +27,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The paticipant's id
         /// </summary>
-        public string ParticipantId { get; set; }
+        public Guid ParticipantId { get; set; }
 
         /// <summary>
         /// The paticipant's name
@@ -59,7 +60,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="trainerId"></param>
         /// <param name="gameId"></param>
         /// <param name="position"></param>
-        public static EncounterParticipantModel FromTrainer(string trainerId, string gameId, MapPositionModel position)
+        public static EncounterParticipantModel FromTrainer(Guid trainerId, Guid gameId, MapPositionModel position)
         {
             var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
             return new EncounterParticipantModel(trainer.CurrentHP, trainer.TrainerStats.HP)
@@ -78,7 +79,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="pokemonId"></param>
         /// <param name="position"></param>
         /// <param name="type"></param>
-        public static EncounterParticipantModel FromPokemon(string pokemonId, MapPositionModel position, EncounterParticipantType type)
+        public static EncounterParticipantModel FromPokemon(Guid pokemonId, MapPositionModel position, EncounterParticipantType type)
         {
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
             return new EncounterParticipantModel(pokemon.CurrentHP, pokemon.PokemonStats.HP)
@@ -97,7 +98,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="npcId"></param>
         /// <param name="position"></param>
         /// <param name="type"></param>
-        public static EncounterParticipantModel FromNpc(string npcId, MapPositionModel position, EncounterParticipantType type)
+        public static EncounterParticipantModel FromNpc(Guid npcId, MapPositionModel position, EncounterParticipantType type)
         {
             var npc = DatabaseUtility.FindNpc(npcId);
             return new EncounterParticipantModel(npc.CurrentHP, npc.TrainerStats.HP)

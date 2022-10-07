@@ -13,7 +13,7 @@ namespace TheReplacement.PTA.Common.Internal
             trainer.IsOnline = false;
             Trainer = trainer;
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
-            Pokemon = DatabaseUtility.FindPokemonByTrainerId(trainer.TrainerId);
+            Pokemon = DatabaseUtility.FindPokemonByTrainerId(trainer.TrainerId, trainer.GameId);
         }
         public TrainerModel Trainer { get; set; }
         public IEnumerable<PokemonModel> Pokemon { get; set; }

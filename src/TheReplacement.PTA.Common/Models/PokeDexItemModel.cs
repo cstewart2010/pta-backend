@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using System;
 using TheReplacement.PTA.Common.Interfaces;
 
 namespace TheReplacement.PTA.Common.Models
@@ -14,12 +15,12 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The trainer's unique id
         /// </summary>
-        public string TrainerId { get; set; }
+        public Guid TrainerId { get; set; }
 
         /// <summary>
         /// The game's unique id
         /// </summary>
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
 
         /// <summary>
         /// The Pokemon species' dex number

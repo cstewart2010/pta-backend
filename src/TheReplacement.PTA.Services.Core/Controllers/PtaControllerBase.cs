@@ -14,7 +14,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         protected string ClientIp => Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
-        protected IDocument GetDocument(string id, MongoCollection collection, out ActionResult notFound)
+        protected IDocument GetDocument(Guid id, MongoCollection collection, out ActionResult notFound)
         {
             IDocument document = collection switch
             {
@@ -88,7 +88,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return validationPassed;
         }
 
-        internal static GenericMessage GetPokemonDeletion(string trainerId, string gameId)
+        internal static GenericMessage GetPokemonDeletion(Guid trainerId, Guid gameId)
         {
             string message = DatabaseUtility.DeletePokemonByTrainerId(gameId, trainerId) > -1
                 ? $"Successfully deleted all pokemon associated with {trainerId}"

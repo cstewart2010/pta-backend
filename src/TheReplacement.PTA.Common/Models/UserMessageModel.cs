@@ -8,14 +8,16 @@ namespace TheReplacement.PTA.Common.Models
     public class UserMessageModel
     {
         /// <summary>
-        /// Default constructor for JSON.Net
+        /// The default constructor for the MongoDb Csharp Driver
         /// </summary>
         public UserMessageModel() { }
 
         /// <summary>
         /// Initializes a new instance of <see cref="UserMessageModel"/>
         /// </summary>
-        public UserMessageModel(string userId, string messageContent)
+        /// <param name="userId"></param>
+        /// <param name="messageContent"></param>
+        public UserMessageModel(Guid userId, string messageContent)
         {
             Timestamp = DateTime.UtcNow.ToString();
             Message = messageContent;
@@ -25,7 +27,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// User that sent the message
         /// </summary>
-        public string User { get; set; }
+        public Guid User { get; set; }
 
         /// <summary>
         /// Contents of what was sent

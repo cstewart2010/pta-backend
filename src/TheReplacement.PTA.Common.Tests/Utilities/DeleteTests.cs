@@ -24,15 +24,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Assert.True(DatabaseUtility.DeleteGame(game.GameId));
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("Invalid id")]
-        public void DeleteGame_InvalidId_False(string id)
-        {
-            Logger.WriteLine($"Attempting to delete game with game id {id}");
-            Assert.False(DatabaseUtility.DeleteGame(id));
-        }
-
         [Fact, Trait("Category", "smoke")]
         public void DeleteNpc_SmokeTest_True()
         {
@@ -43,15 +34,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Assert.True(DatabaseUtility.DeleteNpc(npc.NPCId));
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("Invalid id")]
-        public void DeleteNpc_InvalidId_False(string id)
-        {
-            Logger.WriteLine($"Attempting to delete npc with npc id {id}");
-            Assert.False(DatabaseUtility.DeleteNpc(id));
-        }
-
         [Fact, Trait("Category", "smoke")]
         public void DeletePokemon_SmokeTest_True()
         {
@@ -60,15 +42,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             DatabaseUtility.TryAddPokemon(pokemon, out _);
             Logger.WriteLine($"Attempting to delete pokemon with pokemon id {pokemon.PokemonId}");
             Assert.True(DatabaseUtility.DeletePokemon(pokemon.PokemonId));
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("Invalid id")]
-        public void DeletePokemon_InvalidId_False(string id)
-        {
-            Logger.WriteLine($"Attempting to delete pokemon with pokemon id {id}");
-            Assert.False(DatabaseUtility.DeletePokemon(id));
         }
 
         [Fact]
@@ -101,15 +74,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Logger.WriteLine($"Attempting to delete all pokemon from trainer id {trainer.TrainerId}");
             Assert.Equal(pokemonCount, DatabaseUtility.DeletePokemonByTrainerId(trainer.GameId, trainer.TrainerId));
             DatabaseUtility.DeleteTrainer(trainer.GameId, trainer.TrainerId);
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("Invalid id")]
-        public void DeletePokemonByTrainerId_InvalidTrainerId_Zero(string id)
-        {
-            Logger.WriteLine($"Attempting to delete all pokemon with trainer id {id}");
-            Assert.Equal(0, DatabaseUtility.DeletePokemonByTrainerId(id, id));
         }
 
         [Fact, Trait("Category", "smoke")]
@@ -152,15 +116,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Logger.WriteLine($"Attempting to delete all trainers from game id {game.GameId}");
             Assert.Equal(trainerCount, DatabaseUtility.DeleteTrainersByGameId(game.GameId));
             DatabaseUtility.DeleteGame(game.GameId);
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("Invalid id")]
-        public void DeleteTrainersByGameId_InvalidGameId_Zero(string id)
-        {
-            Logger.WriteLine($"Attempting to delete all trainers with game id {id}");
-            Assert.Equal(0, DatabaseUtility.DeleteTrainersByGameId(id));
         }
     }
 }

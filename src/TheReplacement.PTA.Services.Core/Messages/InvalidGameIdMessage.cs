@@ -1,4 +1,5 @@
-﻿using TheReplacement.PTA.Common.Models;
+﻿using System;
+using TheReplacement.PTA.Common.Models;
 
 namespace TheReplacement.PTA.Services.Core.Messages
 {
@@ -11,6 +12,6 @@ namespace TheReplacement.PTA.Services.Core.Messages
         }
 
         public override string Message { get; }
-        public string GameId { get; }
+        public Guid GameId { get; }
     }
 }

@@ -18,7 +18,7 @@ namespace TheReplacement.PTA.Services.Core.Objects
         /// <summary>
         /// Id for PTA user
         /// </summary>
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         /// <summary>
         /// Username for PTA user
@@ -33,11 +33,11 @@ namespace TheReplacement.PTA.Services.Core.Objects
         /// <summary>
         /// Games of which the PTA user is a member
         /// </summary>
-        public IEnumerable<string> Games { get; set; }
+        public IEnumerable<Guid> Games { get; set; }
 
         /// <summary>
         /// List of PTA user's messages
         /// </summary>
-        public IEnumerable<string> Messages { get; set; }
+        public IEnumerable<Guid> Messages { get; set; }
     }
 }

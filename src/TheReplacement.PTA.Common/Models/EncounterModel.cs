@@ -19,12 +19,12 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The encounter's id
         /// </summary>
-        public string EncounterId { get; set; }
+        public Guid EncounterId { get; set; }
 
         /// <summary>
         /// The game id associated with the encounter
         /// </summary>
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
 
         /// <summary>
         /// The encounter's friendly nickname

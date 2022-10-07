@@ -261,7 +261,7 @@ namespace TheReplacement.PTA.Common.Utilities
 
             return new PokemonModel
             {
-                PokemonId = Guid.NewGuid().ToString(),
+                PokemonId = Guid.NewGuid(),
                 DexNo = basePokemon.DexNo,
                 SpeciesName = basePokemon.Name,
                 Nickname = updatedNickname,

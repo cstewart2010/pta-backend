@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TheReplacement.PTA.Common.Models;
@@ -60,9 +61,9 @@ namespace TheReplacement.PTA.Services.Core.Objects
             return npc;
         }
 
-        public string NpcId { get; set; }
+        public Guid NpcId { get; set; }
 
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
 
         public string TrainerName { get; set; }
 

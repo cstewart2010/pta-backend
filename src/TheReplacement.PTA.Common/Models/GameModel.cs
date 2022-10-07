@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using TheReplacement.PTA.Common.Interfaces;
 
@@ -15,7 +16,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The PTA game session id
         /// </summary>
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
 
         /// <summary>
         /// A user-friendly nickname for the game session
@@ -31,7 +32,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Collection of NPC ids that used in this game session
         /// </summary>
-        public IEnumerable<string> NPCs { get; set; }
+        public IEnumerable<Guid> NPCs { get; set; }
 
         /// <summary>
         /// Collection of logs related to the game

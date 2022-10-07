@@ -1,4 +1,5 @@
-﻿using TheReplacement.PTA.Common.Models;
+﻿using System;
+using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Objects;
 
@@ -6,7 +7,7 @@ namespace TheReplacement.PTA.Services.Core.Messages
 {
     public class FoundTrainerMessage : AbstractMessage
     {
-        internal FoundTrainerMessage(string userId, string gameId)
+        internal FoundTrainerMessage(Guid userId, Guid gameId)
         {
             var trainer = DatabaseUtility.FindTrainerById(userId, gameId);
             var user = DatabaseUtility.FindUserById(userId);

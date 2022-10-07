@@ -33,24 +33,6 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Assert.Equal(newTrainer.TrainerId, updatedPokemon.TrainerId);
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("invalid id")]
-        public void UpdatePokemonTrainerId_InvalidTrainerId_ThrowsMongoCommandException(string trainerId)
-        {
-            var pokemon = GetTestPokemon();
-            Logger.WriteLine($"Adding pokemon id {pokemon.PokemonId}");
-            DatabaseUtility.TryAddPokemon(pokemon, out _);
-
-            Logger.WriteLine($"Updating pokemon id {pokemon.PokemonId} with trainer id {trainerId}");
-            Assert.Throws<MongoCommandException>(() => DatabaseUtility.UpdatePokemonTrainerId(pokemon.PokemonId, trainerId));
-            var updatedPokemon = DatabaseUtility.FindPokemonById(pokemon.PokemonId);
-            DatabaseUtility.DeletePokemon(pokemon.PokemonId);
-
-            Logger.WriteLine($"Verify pokemon id was not updated with trainer id {trainerId}");
-            Assert.Equal(pokemon.TrainerId, updatedPokemon.TrainerId);
-        }
-
         [Fact, Trait("Category", "smoke")]
         public void UpdatePokemonWithEvolution_SmokeTest_True()
         {

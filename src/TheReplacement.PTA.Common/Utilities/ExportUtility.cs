@@ -116,7 +116,7 @@ namespace TheReplacement.PTA.Common.Utilities
 
         private static void CleanlyAddTrainer(
             ExportedTrainer import,
-            string gameId,
+            Guid gameId,
             out List<string> errors)
         {
             errors = new List<string>();
@@ -135,7 +135,7 @@ namespace TheReplacement.PTA.Common.Utilities
 
         private static string AddPokemon(
             PokemonModel pokemon,
-            string trainerId)
+            Guid trainerId)
         {
             if (pokemon.TrainerId == trainerId)
             {

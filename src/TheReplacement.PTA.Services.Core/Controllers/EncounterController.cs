@@ -23,13 +23,13 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}")]
-        public ActionResult<EncounterModel> GetActiveEncounter(string gameId)
+        public ActionResult<EncounterModel> GetActiveEncounter(Guid gameId)
         {
             return DatabaseUtility.FindActiveEncounter(gameId) ?? new EncounterModel();
         }
 
         [HttpGet("{gameId}/{gameMasterId}/all")]
-        public ActionResult<IEnumerable<EncounterModel>> GetAllEncounters(string gameId, string gameMasterId)
+        public ActionResult<IEnumerable<EncounterModel>> GetAllEncounters(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -40,7 +40,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}")]
-        public async Task<ActionResult> CreateEncounterAsync(string gameId, string gameMasterId)
+        public async Task<ActionResult> CreateEncounterAsync(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -55,7 +55,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var encounter = new EncounterModel
             {
-                EncounterId = Guid.NewGuid().ToString(),
+                EncounterId = Guid.NewGuid(),
                 GameId = gameId,
                 Name = name,
                 Type = type,
@@ -72,7 +72,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}")]
-        public async Task<ActionResult> AddToActiveEncounterAsync(string gameId, string trainerId)
+        public async Task<ActionResult> AddToActiveEncounterAsync(Guid gameId, Guid trainerId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -116,7 +116,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{participantId}/remove")]
-        public ActionResult RemoveFromActiveEncounter(string gameId, string gameMasterId, string participantId)
+        public ActionResult RemoveFromActiveEncounter(Guid gameId, Guid gameMasterId, Guid participantId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -142,7 +142,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{participantId}/position")]
-        public async Task<ActionResult> UpdatePositionAsync(string gameId, string gameMasterId, string participantId)
+        public async Task<ActionResult> UpdatePositionAsync(Guid gameId, Guid gameMasterId, Guid participantId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -192,7 +192,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}/trainer_position")]
-        public async Task<ActionResult> UpdateTrainerPositionAsync(string gameId, string trainerId)
+        public async Task<ActionResult> UpdateTrainerPositionAsync(Guid gameId, Guid trainerId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -246,7 +246,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}/{pokemonId}/pokemon_position")]
-        public async Task<ActionResult> UpdateTrainerPokemonPositionAsync(string gameId, string trainerId, string pokemonId)
+        public async Task<ActionResult> UpdateTrainerPokemonPositionAsync(Guid gameId, Guid trainerId, Guid pokemonId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -307,7 +307,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{encounterId}/active")]
-        public ActionResult SetEncounterToActive(string gameId, string gameMasterId, string encounterId)
+        public ActionResult SetEncounterToActive(Guid gameId, Guid gameMasterId, Guid encounterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -342,7 +342,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{encounterId}/inactive")]
-        public ActionResult SetEncounterToInactive(string gameId, string gameMasterId, string encounterId)
+        public ActionResult SetEncounterToInactive(Guid gameId, Guid gameMasterId, Guid encounterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -365,7 +365,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{encounterId}/hp")]
-        public ActionResult UpdateParticipantsHp(string gameId, string gameMasterId, string encounterId)
+        public ActionResult UpdateParticipantsHp(Guid gameId, Guid gameMasterId, Guid encounterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -388,7 +388,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/{encounterId}")]
-        public ActionResult DeleteEncounter(string gameId, string gameMasterId, string encounterId)
+        public ActionResult DeleteEncounter(Guid gameId, Guid gameMasterId, Guid encounterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -404,7 +404,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}")]
-        public ActionResult DeleteEncounters(string gameId, string gameMasterId)
+        public ActionResult DeleteEncounters(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -444,7 +444,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return (name, type, null);
         }
 
-        private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant, string gameId)
+        private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant, Guid gameId)
         {
             var type = Enum.Parse<EncounterParticipantType>(participant.Type, true);
             return type switch
@@ -459,7 +459,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
         }
 
-        private static void SendRepositionLog(string gameId, string participantName, MapPositionModel position)
+        private static void SendRepositionLog(Guid gameId, string participantName, MapPositionModel position)
         {
             var repositionLog = new LogModel
             {

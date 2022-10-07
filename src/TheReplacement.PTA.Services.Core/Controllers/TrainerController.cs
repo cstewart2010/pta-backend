@@ -24,28 +24,23 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpGet("{gameId}/trainers")]
-        public ActionResult<IEnumerable<PublicTrainer>> FindTrainers(string gameId)
+        public ActionResult<IEnumerable<PublicTrainer>> FindTrainers(Guid gameId)
         {
             return GetTrainers(gameId);
         }
 
         [HttpGet("trainers/{trainerName}")]
-        public ActionResult<FoundTrainerMessage> FindTrainer(string trainerName)
+        public ActionResult<FoundTrainerMessage> FindTrainer(string trainerName, [FromQuery] Guid gameId)
         {
-            if (!Request.Query.TryGetValue("gameId", out var gameId))
-            {
-                return BadRequest(nameof(gameId));
-            }
-
             var trainer = DatabaseUtility.FindTrainerByUsername(trainerName, gameId);
             return new FoundTrainerMessage(trainer.TrainerId, gameId);
         }
 
         [HttpGet("{gameId}/{trainerId}/{pokemonId}")]
         public ActionResult<PokemonModel> FindTrainerMon(
-            string gameId,
-            string trainerId,
-            string pokemonId)
+            Guid gameId,
+            Guid trainerId,
+            Guid pokemonId)
         {
             var document = GetDocument(pokemonId, MongoCollection.Pokemon, out var notFound);
             if (document is not PokemonModel pokemon)
@@ -61,7 +56,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}/{trainerId}")]
-        public async Task<ActionResult<PokemonModel>> AddPokemon(string gameId, string gameMasterId, string trainerId)
+        public async Task<ActionResult<PokemonModel>> AddPokemon(Guid gameId, Guid gameMasterId, Guid trainerId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -83,7 +78,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/groupHonor")]
-        public async Task<ActionResult<GenericMessage>> AddGroupHonor(string gameId, string gameMasterId)
+        public async Task<ActionResult<GenericMessage>> AddGroupHonor(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -114,7 +109,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/honor")]
-        public async Task<ActionResult<GenericMessage>> AddSingleHonor(string gameId, string gameMasterId)
+        public async Task<ActionResult<GenericMessage>> AddSingleHonor(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -123,7 +118,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var body = await Request.GetRequestBody();
             var honor = body["honor"].ToString();
-            var trainerId = body["trainerId"].ToString();
+            var trainerId = (Guid)body["trainerId"];
             var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId, gameId);
             if (gameMaster.GameId != trainer.GameId)
@@ -151,7 +146,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}/addItems")]
-        public async Task<ActionResult<FoundTrainerMessage>> AddItemsToTrainerAsync(string gameId, string trainerId)
+        public async Task<ActionResult<FoundTrainerMessage>> AddItemsToTrainerAsync(Guid gameId, Guid trainerId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -198,7 +193,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}/removeItems")]
-        public async Task<ActionResult<FoundTrainerMessage>> RemoveItemsFromTrainerAsync(string gameId, string trainerId)
+        public async Task<ActionResult<FoundTrainerMessage>> RemoveItemsFromTrainerAsync(Guid gameId, Guid trainerId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
@@ -244,7 +239,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/{trainerId}")]
-        public ActionResult<GenericMessage> DeleteTrainer(string gameId, string trainerId, string gameMasterId)
+        public ActionResult<GenericMessage> DeleteTrainer(Guid gameId, Guid trainerId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -313,7 +308,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return itemList;
         }
 
-        private static List<PublicTrainer> GetTrainers(string gameId)
+        private static List<PublicTrainer> GetTrainers(Guid gameId)
         {
             return DatabaseUtility.FindTrainersByGameId(gameId)
                 .Select(trainer => new PublicTrainer(trainer)).ToList();
