@@ -50,6 +50,8 @@ namespace TheReplacement.PTA.Services.Core
 
             app.UseAuthorization();
 
+            app.UseWebSockets();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

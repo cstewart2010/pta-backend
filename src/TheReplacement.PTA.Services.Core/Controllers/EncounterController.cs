@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
+using System.Threading;
 using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Models;
@@ -16,16 +19,70 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     public class EncounterController : PtaControllerBase
     {
         protected override MongoCollection Collection { get; }
+        private byte[] _buffer;
 
         public EncounterController()
         {
             Collection = MongoCollection.Encounters;
         }
 
-        [HttpGet("{gameId}")]
-        public ActionResult<EncounterModel> GetActiveEncounter(Guid gameId)
+        [HttpGet("active")]
+        public async Task<ActionResult<EncounterModel>> GetActiveEncounter()
         {
-            return DatabaseUtility.FindActiveEncounter(gameId) ?? new EncounterModel();
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                await Echo();
+            }
+
+            return BadRequest();
+        }
+
+        private async Task Echo()
+        {
+            using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+            _buffer = new byte[36];
+            var recieved = await RecieveAsync(webSocket);
+            while (!recieved.CloseStatus.HasValue)
+            {
+                await SendAsync
+                (
+                    webSocket,
+                    recieved.MessageType,
+                    recieved.EndOfMessage
+                );
+
+                recieved = await RecieveAsync(webSocket);
+            }
+
+            await webSocket.CloseAsync
+            (
+                recieved.CloseStatus.Value,
+                recieved.CloseStatusDescription,
+                CancellationToken.None
+            );
+        }
+
+        private async Task<WebSocketReceiveResult> RecieveAsync(WebSocket webSocket)
+        {
+            return await webSocket.ReceiveAsync(new ArraySegment<byte>(_buffer), CancellationToken.None);
+        }
+
+        private async Task SendAsync(
+            WebSocket webSocket,
+            WebSocketMessageType messageType,
+            bool endOfMessage)
+        {
+            var gameId = new Guid(System.Text.Encoding.Default.GetString(_buffer));
+            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var message = JsonConvert.SerializeObject(encounter);
+            var messageAsBytes = System.Text.Encoding.ASCII.GetBytes(message);
+            await webSocket.SendAsync
+            (
+                new ArraySegment<byte>(messageAsBytes),
+                messageType,
+                endOfMessage,
+                CancellationToken.None
+            );
         }
 
         [HttpGet("{gameId}/{gameMasterId}/all")]
