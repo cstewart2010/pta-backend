@@ -119,6 +119,11 @@ namespace TheReplacement.PTA.Common.Models
         public StatsModel PokemonStats { get; set; }
 
         /// <summary>
+        /// The pokemon's current pokeball
+        /// </summary>
+        public string Pokeball { get; set; }
+
+        /// <summary>
         /// The pokemon'ss current hp
         /// </summary>
         public int CurrentHP { get; set; }

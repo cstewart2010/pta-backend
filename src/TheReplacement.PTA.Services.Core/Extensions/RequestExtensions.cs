@@ -120,6 +120,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 pokemonModel.OriginalTrainerId = trainer.TrainerId;
                 pokemonModel.TrainerId = trainer.TrainerId;
                 pokemonModel.GameId = trainer.GameId;
+                pokemonModel.Pokeball = Pokeball.Basic_Ball.ToString();
                 DatabaseUtility.TryAddPokemon(pokemonModel, out _);
                 var game = DatabaseUtility.FindGame(trainer.GameId);
                 var caughtPokemonLog = new LogModel
@@ -139,18 +140,13 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             }
         }
 
-        public static async Task<(PokemonModel Pokemon, AbstractMessage Message)> BuildPokemon(
+        public static (PokemonModel Pokemon, AbstractMessage Message) BuildPokemon(
             this HttpRequest request,
             Guid trainerId,
-            Guid gameId)
+            Guid gameId,
+            WildPokemon wild)
         {
-            var (isValid, message) = await ValidateMandatoryPokemonKeys(request);
-            if (isValid)
-            {
-                return (null, message);
-            }
-
-            var (pokemon, error) = await BuildDefaultPokemon(request);
+            var (pokemon, error) = BuildDefaultPokemon(wild);
             if (pokemon == null)
             {
                 return (null, error);
@@ -250,37 +246,39 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return (fails.Any(), error);
         }
 
-        private static async Task<(PokemonModel Pokemon, AbstractMessage Message)> BuildDefaultPokemon(HttpRequest request)
+        private static (PokemonModel Pokemon, AbstractMessage Message) BuildDefaultPokemon(WildPokemon wild)
         {
-            var body = await request.GetRequestBody();
-            if (!Enum.TryParse((string)body["gender"], true, out Gender gender))
+            var random = new Random();
+            if (!Enum.TryParse(wild.Gender, true, out Gender gender))
             {
-                return (null, new GenericMessage($"Invalid gender in request"));
+                var genders = Enum.GetValues<Gender>();
+                gender = genders[random.Next(genders.Length)];
             }
 
-            if (!Enum.TryParse((string)body["nature"], true, out Nature nature))
+            if (!Enum.TryParse(wild.Nature, true, out Nature nature))
             {
-                return (null, new GenericMessage($"Invalid nature in request"));
+                var natures = Enum.GetValues<Nature>();
+                nature = natures[random.Next(1, natures.Length)];
             }
 
-            if (!Enum.TryParse((string)body["status"], true, out Status status))
+            if (!Enum.TryParse(wild.Status, true, out Status status))
             {
-                return (null, new GenericMessage($"Invalid status in request"));
+                status = Status.Normal;
             }
 
-            var form = (string)body["form"];
-            if (!string.IsNullOrWhiteSpace(form))
+            var form = wild.Form.Replace('_', '/');
+            if (string.IsNullOrWhiteSpace(form))
             {
                 return (null, new GenericMessage($"Mission form in request"));
             }
 
             var pokemon = DexUtility.GetNewPokemon
             (
-                (string)body["pokemon"],
+                wild.Pokemon,
                 nature,
                 gender,
                 status,
-                (string)body["nickname"],
+                null,
                 form
             );
 
@@ -289,6 +287,11 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 return (null, new GenericMessage("Failed to build pokemon"));
             }
 
+            if (wild.ForceShiny)
+            {
+                pokemon.IsShiny = true;
+            }
+            pokemon.Pokeball = Pokeball.Basic_Ball.ToString().Replace("_", "");
             return (pokemon, null);
         }
     }

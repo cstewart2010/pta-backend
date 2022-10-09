@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using TheReplacement.PTA.Common.Enums;
 using TheReplacement.PTA.Common.Interfaces;
 using TheReplacement.PTA.Common.Models;
@@ -31,6 +33,31 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return document;
+        }
+
+        protected static void RemoveItemsFromTrainer(TrainerModel trainer, IEnumerable<ItemModel> items)
+        {
+            var itemList = trainer.Items;
+            foreach (var item in items)
+            {
+                itemList = UpdateAllItemsWithReduction
+                (
+                    itemList,
+                    item,
+                    trainer
+                );
+            }
+
+            var result = DatabaseUtility.UpdateTrainerItemList
+            (
+                trainer.TrainerId,
+                trainer.GameId,
+                itemList
+            );
+            if (!result)
+            {
+                throw new Exception();
+            }
         }
 
         protected bool IsGameAuthenticated(
@@ -95,6 +122,35 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 : $"No pokemon found for trainer {trainerId}";
 
             return new GenericMessage(message);
+        }
+
+        private static List<ItemModel> UpdateAllItemsWithReduction(
+            List<ItemModel> itemList,
+            ItemModel itemToken,
+            TrainerModel trainer)
+        {
+            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemToken.Name, StringComparison.CurrentCultureIgnoreCase));
+            if ((item?.Amount ?? 0) >= itemToken.Amount)
+            {
+                itemList = trainer.Items
+                    .Select(item => UpdateItemWithReduction(item, itemToken))
+                    .Where(item => item.Amount > 0)
+                    .ToList();
+            }
+
+            return itemList;
+        }
+
+        private static ItemModel UpdateItemWithReduction(
+            ItemModel item,
+            ItemModel newItem)
+        {
+            if (item.Name == newItem.Name)
+            {
+                item.Amount -= newItem.Amount;
+            }
+
+            return item;
         }
     }
 }

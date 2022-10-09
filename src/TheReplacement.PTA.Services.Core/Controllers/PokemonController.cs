@@ -138,6 +138,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             result.IsOnActiveTeam = pokemon.IsOnActiveTeam;
             result.IsShiny = pokemon.IsShiny;
             result.CanEvolve = pokemon.CanEvolve;
+            result.Pokeball = pokemon.Pokeball;
             if (!DatabaseUtility.TryChangePokemonForm(result, out var writeError))
             {
                 return BadRequest(writeError);
@@ -486,6 +487,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 badRequest = BadRequest(new GenericMessage($"Could not evolve {currentForm.Nickname} to {evolvedFormName}"));
             }
 
+            evolvedForm.Pokeball = currentForm.Pokeball;
             return evolvedForm;
         }
     }

@@ -617,6 +617,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to replace the previous pokemon with the new data
+        /// </summary>
+        /// <param name="updatePokemon">The updated pokemon data</param>
+        public static bool UpdatePokemon(PokemonModel updatePokemon)
+        {
+            var result = MongoCollectionHelper.Pokemon.ReplaceOne
+            (
+                pokemon => pokemon.PokemonId == updatePokemon.PokemonId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatePokemon
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
         /// Attempts to replace the previous thread with the new data
         /// </summary>
         /// <param name="updatedThread">The updated thread data</param>
@@ -1066,11 +1082,13 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Searches for a trainer, then updates their item list
         /// </summary>
         /// <param name="trainerId">The trainer id</param>
+        /// <param name="gameId">The game session id</param>
         /// <param name="itemList">The updated item list</param>
         /// <exception cref="ArgumentNullException" />
         /// <exception cref="MongoCommandException" />
         public static bool UpdateTrainerItemList(
             Guid trainerId,
+            Guid gameId,
             IEnumerable<ItemModel> itemList)
         {
             if (itemList == null)
@@ -1081,7 +1099,7 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryUpdateDocument
             (
                 MongoCollectionHelper.Trainers,
-                trainer => trainer.TrainerId == trainerId,
+                trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
                 Builders<TrainerModel>.Update.Set("Items", itemList)
             );
         }

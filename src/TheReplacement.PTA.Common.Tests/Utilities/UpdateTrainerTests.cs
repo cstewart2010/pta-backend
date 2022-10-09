@@ -34,7 +34,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
                     Amount = 5
                 }
             };
-            Assert.True(DatabaseUtility.UpdateTrainerItemList(trainer.TrainerId, itemList));
+            Assert.True(DatabaseUtility.UpdateTrainerItemList(trainer.TrainerId, trainer.GameId, itemList));
 
             Logger.WriteLine($"Verifying that the item list updated properly");
             //var updatedTrainer = DatabaseUtility.FindTrainerById(trainer.TrainerId);
@@ -51,7 +51,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             DatabaseUtility.TryAddTrainer(trainer, out _);
 
             Logger.WriteLine($"Updating trainer id {trainer.TrainerId} with null items");
-            Assert.Throws<ArgumentNullException>(() => DatabaseUtility.UpdateTrainerItemList(trainer.TrainerId, null));
+            Assert.Throws<ArgumentNullException>(() => DatabaseUtility.UpdateTrainerItemList(trainer.TrainerId, trainer.GameId, null));
             DatabaseUtility.DeleteTrainer(trainer.GameId, trainer.TrainerId);
         }
 

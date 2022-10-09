@@ -9,6 +9,7 @@ using TheReplacement.PTA.Services.Core.Messages;
 using System.Collections;
 using System.Threading.Tasks;
 using System;
+using TheReplacement.PTA.Services.Core.Objects;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -213,18 +214,19 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}/wild")]
-        public async Task<ActionResult<PokemonModel>> AddPokemon(Guid gameId, Guid gameMasterId)
+        public ActionResult<PokemonModel> AddPokemon(Guid gameId, Guid gameMasterId, [FromQuery] WildPokemon wild)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var (pokemon, error) = await Request.BuildPokemon(gameMasterId, gameId);
+            var (pokemon, error) = Request.BuildPokemon(Guid.Empty, gameId, wild);
             if (pokemon == null)
             {
                 return BadRequest(error);
             }
+
             if (!DatabaseUtility.TryAddPokemon(pokemon, out var writeError))
             {
                 return BadRequest(writeError);
@@ -237,7 +239,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 Action = $"spawned at {DateTime.UtcNow}"
             };
             DatabaseUtility.UpdateGameLogs(game, pokemonCreationLog);
-            Response.RefreshToken(gameMasterId);
             return pokemon;
         }
 
