@@ -7,6 +7,7 @@ using TheReplacement.PTA.Common.Interfaces;
 using TheReplacement.PTA.Common.Models;
 using TheReplacement.PTA.Common.Utilities;
 using TheReplacement.PTA.Services.Core.Messages;
+using TheReplacement.PTA.Services.Core.Objects;
 
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
@@ -35,7 +36,56 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return document;
         }
 
-        protected static void RemoveItemsFromTrainer(TrainerModel trainer, IEnumerable<ItemModel> items)
+        protected static (PokemonModel Pokemon, AbstractMessage Message) BuildPokemon(
+            Guid trainerId,
+            Guid gameId,
+            WildPokemon wild)
+        {
+            var (pokemon, error) = BuildDefaultPokemon(wild);
+            if (pokemon == null)
+            {
+                return (null, error);
+            }
+
+            pokemon.TrainerId = trainerId;
+            pokemon.OriginalTrainerId = trainerId;
+            pokemon.GameId = gameId;
+            return (pokemon, null);
+        }
+
+        protected static IEnumerable<LogModel> AddItemsToTrainer(TrainerModel trainer, IEnumerable<ItemModel> items)
+        {
+            var itemList = trainer.Items;
+            foreach (var item in items)
+            {
+                itemList = UpdateAllItemsWithAddition
+                (
+                    itemList,
+                    item,
+                    trainer
+                );
+            }
+
+            var result = DatabaseUtility.UpdateTrainerItemList
+            (
+                trainer.TrainerId,
+                trainer.GameId,
+                itemList
+            );
+
+            if (!result)
+            {
+                throw new Exception();
+            }
+
+            return items.Select(item => new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"added ({item.Amount}) {item.Name} at {DateTime.UtcNow}"
+            });
+        }
+
+        protected static IEnumerable<LogModel> RemoveItemsFromTrainer(TrainerModel trainer, IEnumerable<ItemModel> items)
         {
             var itemList = trainer.Items;
             foreach (var item in items)
@@ -54,10 +104,17 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 trainer.GameId,
                 itemList
             );
+
             if (!result)
             {
                 throw new Exception();
             }
+
+            return items.Select(item => new LogModel
+            {
+                User = trainer.TrainerName,
+                Action = $"removed ({item.Amount}) {item.Name} at {DateTime.UtcNow}"
+            });
         }
 
         protected bool IsGameAuthenticated(
@@ -124,6 +181,38 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new GenericMessage(message);
         }
 
+        private static List<ItemModel> UpdateAllItemsWithAddition(
+            List<ItemModel> itemList,
+            ItemModel itemToken,
+            TrainerModel trainer)
+        {
+            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemToken.Name, StringComparison.CurrentCultureIgnoreCase));
+            if (item == null)
+            {
+                itemList.Add(itemToken);
+            }
+            else
+            {
+                itemList = trainer.Items.Select(item => UpdateItemWithAddition(item, itemToken)).ToList();
+            }
+
+            return itemList;
+        }
+
+        private static ItemModel UpdateItemWithAddition(
+            ItemModel item,
+            ItemModel newItem)
+        {
+            if (item.Name == newItem.Name)
+            {
+                item.Amount = item.Amount + newItem.Amount > 100
+                        ? 100
+                        : item.Amount + newItem.Amount;
+            }
+
+            return item;
+        }
+
         private static List<ItemModel> UpdateAllItemsWithReduction(
             List<ItemModel> itemList,
             ItemModel itemToken,
@@ -151,6 +240,55 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return item;
+        }
+
+        private static (PokemonModel Pokemon, AbstractMessage Message) BuildDefaultPokemon(WildPokemon wild)
+        {
+            var random = new Random();
+            if (!Enum.TryParse(wild.Gender, true, out Gender gender))
+            {
+                var genders = Enum.GetValues<Gender>();
+                gender = genders[random.Next(genders.Length)];
+            }
+
+            if (!Enum.TryParse(wild.Nature, true, out Nature nature))
+            {
+                var natures = Enum.GetValues<Nature>();
+                nature = natures[random.Next(1, natures.Length)];
+            }
+
+            if (!Enum.TryParse(wild.Status, true, out Status status))
+            {
+                status = Status.Normal;
+            }
+
+            var form = wild.Form.Replace('_', '/');
+            if (string.IsNullOrWhiteSpace(form))
+            {
+                return (null, new GenericMessage($"Mission form in request"));
+            }
+
+            var pokemon = DexUtility.GetNewPokemon
+            (
+                wild.Pokemon,
+                nature,
+                gender,
+                status,
+                null,
+                form
+            );
+
+            if (pokemon == null)
+            {
+                return (null, new GenericMessage("Failed to build pokemon"));
+            }
+
+            if (wild.ForceShiny)
+            {
+                pokemon.IsShiny = true;
+            }
+            pokemon.Pokeball = Pokeball.Basic_Ball.ToString().Replace("_", "");
+            return (pokemon, null);
         }
     }
 }

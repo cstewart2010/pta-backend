@@ -221,7 +221,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            var (pokemon, error) = Request.BuildPokemon(Guid.Empty, gameId, wild);
+            var (pokemon, error) = BuildPokemon(Guid.Empty, gameId, wild);
             if (pokemon == null)
             {
                 return BadRequest(error);
