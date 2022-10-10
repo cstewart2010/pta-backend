@@ -46,7 +46,7 @@ namespace TheReplacement.PTA.Common.Utilities
 
             DateTime tokenTime = DateTime.FromBinary(BitConverter.ToInt64(data));
             var now = DateTime.UtcNow;
-            return tokenTime >= now.AddMinutes(-30) && tokenTime <= now;
+            return tokenTime >= now.AddHours(-1) && tokenTime <= now;
         }
 
         /// <summary>

@@ -45,5 +45,10 @@ namespace TheReplacement.PTA.Common.Models
         /// The encounters participants
         /// </summary>
         public IEnumerable<EncounterParticipantModel> ActiveParticipants { get; set; }
+
+        /// <summary>
+        /// The encounter's environment
+        /// </summary>
+        public string[] Environment { get; set; }
     }
 }

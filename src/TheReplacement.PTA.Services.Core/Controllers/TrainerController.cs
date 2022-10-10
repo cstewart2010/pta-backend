@@ -56,14 +56,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPost("{gameId}/{gameMasterId}/{trainerId}")]
-        public async Task<ActionResult<PokemonModel>> AddPokemon(Guid gameId, Guid gameMasterId, Guid trainerId)
+        public ActionResult<PokemonModel> AddPokemon(Guid gameId, Guid gameMasterId, Guid trainerId, [FromQuery] WildPokemon wild)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var (pokemon, error) = await Request.BuildPokemon(trainerId, gameId);
+            var (pokemon, error) = BuildPokemon(trainerId, gameId, wild);
             if (pokemon == null)
             {
                 return BadRequest(error);
@@ -159,34 +159,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(trainerId);
             }
 
-            var itemList = trainer.Items;
             var items = (await Request.GetRequestBody()).Select(token => token.ToObject<ItemModel>());
-            foreach (var item in items)
-            {
-                itemList = UpdateAllItemsWithAddition
-                (
-                    itemList,
-                    item,
-                    trainer
-                );
-            }
-
-            var result = DatabaseUtility.UpdateTrainerItemList
-            (
-                trainerId,
-                itemList
-            );
-
-            if (!result)
-            {
-                throw new Exception();
-            }
-
-            var addedItemsLogs = items.Select(item => new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"added ({item.Amount}) {item.Name} at {DateTime.UtcNow}"
-            });
+            var addedItemsLogs = AddItemsToTrainer(trainer, items);
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), addedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
             return new FoundTrainerMessage(trainerId, gameId);
@@ -206,33 +180,8 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(trainerId);
             }
 
-            var itemList = trainer.Items;
             var items = (await Request.GetRequestBody()).Select(token => token.ToObject<ItemModel>());
-            foreach (var item in items)
-            {
-                itemList = UpdateAllItemsWithReduction
-                (
-                    itemList,
-                    item,
-                    trainer
-                );
-            }
-
-            var result = DatabaseUtility.UpdateTrainerItemList
-            (
-                trainerId,
-                itemList
-            );
-            if (!result)
-            {
-                throw new Exception();
-            }
-
-            var removedItemsLogs = items.Select(item => new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"removed ({item.Amount}) {item.Name} at {DateTime.UtcNow}"
-            });
+            var removedItemsLogs = RemoveItemsFromTrainer(trainer, items);
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), removedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
             return new FoundTrainerMessage(trainerId, gameId);
@@ -273,71 +222,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new GenericMessage($"Successfully deleted all pokemon associated with {trainerId}");
         }
 
-        private static List<ItemModel> UpdateAllItemsWithReduction(
-            List<ItemModel> itemList,
-            ItemModel itemToken,
-            TrainerModel trainer)
-        {
-            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemToken.Name, StringComparison.CurrentCultureIgnoreCase));
-            if ((item?.Amount ?? 0) >= itemToken.Amount)
-            {
-                itemList = trainer.Items
-                    .Select(item => UpdateItemWithReduction(item, itemToken))
-                    .Where(item => item.Amount > 0)
-                    .ToList();
-            }
-
-            return itemList;
-        }
-
-        private static List<ItemModel> UpdateAllItemsWithAddition(
-            List<ItemModel> itemList,
-            ItemModel itemToken,
-            TrainerModel trainer)
-        {
-            var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemToken.Name, StringComparison.CurrentCultureIgnoreCase));
-            if (item == null)
-            {
-                itemList.Add(itemToken);
-            }
-            else
-            {
-                itemList = trainer.Items.Select(item => UpdateItemWithAddition(item, itemToken)).ToList();
-            }
-
-            return itemList;
-        }
-
         private static List<PublicTrainer> GetTrainers(Guid gameId)
         {
             return DatabaseUtility.FindTrainersByGameId(gameId)
                 .Select(trainer => new PublicTrainer(trainer)).ToList();
-        }
-
-        private static ItemModel UpdateItemWithReduction(
-            ItemModel item,
-            ItemModel newItem)
-        {
-            if (item.Name == newItem.Name)
-            {
-                item.Amount -= newItem.Amount;
-            }
-
-            return item;
-        }
-
-        private static ItemModel UpdateItemWithAddition(
-            ItemModel item,
-            ItemModel newItem)
-        {
-            if (item.Name == newItem.Name)
-            {
-                item.Amount = item.Amount + newItem.Amount > 100
-                        ? 100
-                        : item.Amount + newItem.Amount;
-            }
-
-            return item;
         }
     }
 }

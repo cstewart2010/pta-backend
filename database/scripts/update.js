@@ -63,7 +63,8 @@ const updatedValidators = {
         'Name',
         'IsActive',
         'Type',
-        'ActiveParticipants'
+        'ActiveParticipants',
+        'Environment'
       ],
       additionalProperties: false,
       properties: {
@@ -117,6 +118,7 @@ const updatedValidators = {
                 enum: [
                   'Trainer',
                   'Pokemon',
+                  'WildPokemon',
                   'EnemyNpc',
                   'EnemyPokemon',
                   'NeutralNpc',
@@ -150,6 +152,30 @@ const updatedValidators = {
                 }
               }
             }
+          }
+        },
+        Environment: {
+          bsonType: 'array',
+          items: {
+            enum: [
+              'Safari',
+              'Rainforest',
+              'Cave',
+              'Taiga',
+              'Artic',
+              'Desert',
+              'Urban',
+              'Freshwater',
+              'Beach',
+              'Tundra',
+              'Grassland',
+              'Marsh',
+              'NoSunlight',
+              'Forest',
+              'OnWater',
+              'Mountain',
+              'InCombat'
+            ]
           }
         }
       }
@@ -319,7 +345,8 @@ const updatedValidators = {
         'EggHatchRate',
         'Diet',
         'Habitats',
-        'Proficiencies'
+        'Proficiencies',
+        'Pokeball'
       ],
       additionalProperties: false,
       properties: {
@@ -466,6 +493,58 @@ const updatedValidators = {
               minimum: 1
             }
           }
+        },
+        Pokeball: {
+          bsonType: 'string',
+          enum: [
+            'BasicBall',
+            'ParkBall',
+            'CherishBall',
+            'PremierBall',
+            'SportBall',
+            'HeavyBall',
+            'LevelBall',
+            'NestBall',
+            'RainforestBall',
+            'GreatBall',
+            'SafariBall',
+            'LuxuryBall',
+            'LureBall',
+            'HeatBall',
+            'CaveBall',
+            'EarthBall',
+            'FineBall',
+            'TaigaBall',
+            'SaveBall',
+            'ArticBall',
+            'DesertBall',
+            'HauntBall',
+            'UrbanBall',
+            'NetBall',
+            'FreshwaterBall',
+            'BeachBall',
+            'TimerBall',
+            'MysticBall',
+            'AirBall',
+            'FastBall',
+            'UltraBall',
+            'HealBall',
+            'MasterBall',
+            'TundraBall',
+            'FriendBall',
+            'GrasslandBall',
+            'MarshBall',
+            'QuickBall',
+            'RepeatBall',
+            'DreamBall',
+            'MoonBall',
+            'DuskBall',
+            'MoldBall',
+            'SolidBall',
+            'ForestBall',
+            'LoveBall',
+            'MountainBall'
+          ]
         },
         Size: {
           bsonType: 'string',
