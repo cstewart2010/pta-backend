@@ -134,22 +134,25 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
-            var removedParticipant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == participantId);
-            encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != participantId);
+            return RemoveFromParticipants(gameId, participantId);
+        }
 
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+
+        [HttpPut("{gameId}/{trainerId}/{pokemonId}/return")]
+        public ActionResult ReturnToPokeball(Guid gameId, Guid trainerId, Guid pokemonId)
+        {
+            if (!Request.VerifyIdentity(trainerId)) 
+            { 
+                return Unauthorized();
+            }
+
+            var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
+            if (pokemon.TrainerId != trainerId)
             {
                 return BadRequest();
             }
 
-            var removalLog = new LogModel
-            {
-                User = removedParticipant.Name,
-                Action = $"has been removed from {encounter.Name} at {DateTime.Now}"
-            };
-            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), removalLog);
-            return Ok();
+            return RemoveFromParticipants(gameId, pokemonId);
         }
 
         [HttpPut("{gameId}/{trainerId}/{pokemonId}/catch")]
@@ -549,6 +552,27 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 recieved.CloseStatusDescription,
                 CancellationToken.None
             );
+        }
+
+        private ActionResult RemoveFromParticipants(Guid gameId, Guid participantId)
+        {
+            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var removedParticipant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == participantId);
+            encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != participantId);
+
+            if (!DatabaseUtility.UpdateEncounter(encounter))
+            {
+                return BadRequest();
+            }
+
+            var removalLog = new LogModel
+            {
+                User = removedParticipant.Name,
+                Action = $"has been removed from {encounter.Name} at {DateTime.Now}"
+            };
+
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), removalLog);
+            return Ok();
         }
 
         private static async Task<WebSocketReceiveResult> RecieveAsync(WebSocket webSocket)
