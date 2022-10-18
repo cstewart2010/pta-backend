@@ -13,18 +13,23 @@ namespace TheReplacement.PTA.Services.Core.Controllers
     [Route("api/v1/pokedex")]
     public class BasePokemonController : StaticControllerBase
     {
-        private static readonly IEnumerable<BasePokemonModel> BasePokemon = DexUtility.GetDexEntries<BasePokemonModel>(DexType.BasePokemon);
+        private static readonly IEnumerable<BasePokemonModel> AllPokemon = DexUtility.GetDexEntries<BasePokemonModel>(DexType.BasePokemon);
+        private static readonly IEnumerable<BasePokemonModel> BasePokemon = AllPokemon
+            .GroupBy(pokemon => pokemon.DexNo)
+            .Select(group => group.First())
+            .OrderBy(pokemon => pokemon.DexNo)
+            .ToList();
 
         [HttpGet]
         public StaticCollectionMessage FindPokemon()
         {
-            return GetStaticCollectionResponse(BasePokemon.GroupBy(pokemon => pokemon.DexNo).Select(group => group.First()));
+            return GetStaticCollectionResponse(BasePokemon);
         }
 
         [HttpGet("{name}")]
         public ActionResult<BasePokemonModel> FindPokemon(string name)
         {
-            var document = BasePokemon.GetStaticDocument(name);
+            var document = AllPokemon.GetStaticDocument(name);
             if (document != null)
             {
                 return document;
@@ -36,7 +41,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         [HttpGet("form/{form}")]
         public IEnumerable<object> FindPokemonByForm(string form)
         {
-            return BasePokemon.Where(pokemon => pokemon.Form.Contains(form)).Select(pokemon => new
+            return AllPokemon.Where(pokemon => pokemon.Form.Contains(form)).Select(pokemon => new
             {
                 pokemon.Name,
                 pokemon.Form
