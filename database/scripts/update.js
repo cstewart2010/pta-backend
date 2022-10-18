@@ -1364,7 +1364,8 @@ const updatedValidators = {
         'Savings',
         'Equipment',
         'StartingPokemon',
-        'Feature'
+        'Feature',
+        'StartingEquipmentList'
       ],
       additionalProperties: false,
       properties: {
@@ -1420,6 +1421,24 @@ const updatedValidators = {
             Effects: {
               bsonType: 'string',
               minLength: 1
+            }
+          }
+        },
+        StartingEquipmentList: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'object',
+            additionalProperties: false,
+            properties: {
+              Name: {
+                bsonType: 'string'
+              },
+              Type: {
+                bsonType: 'int'
+              },
+              Amount: {
+                bsonType: 'int'
+              }
             }
           }
         }

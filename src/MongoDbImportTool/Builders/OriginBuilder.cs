@@ -7,9 +7,12 @@ namespace MongoDbImportTool.Builders
     internal static class OriginBuilder
     {
         private static readonly string OriginsJson = $"{JsonHelper.CurrentDirectory}/json/origins.min.json";
+        private static readonly string OriginEquipmentJson = $"{JsonHelper.CurrentDirectory}/json/origin_equipment.min.json";
+        private static JToken _equipmentToken;
 
         public static void AddOrigins()
         {
+            _equipmentToken = JsonHelper.GetToken(OriginEquipmentJson);
             DatabaseHelper.AddDocuments("Origins", GetOrigins(OriginsJson));
         }
 
@@ -23,7 +26,7 @@ namespace MongoDbImportTool.Builders
 
         private static OriginModel Build(JToken originToken)
         {
-            return new OriginModel
+            var model =  new OriginModel
             {
                 Name = JsonHelper.GetNameFromToken(originToken),
                 Skill = JsonHelper.GetStringFromToken(originToken, "Skill Talent"),
@@ -35,8 +38,11 @@ namespace MongoDbImportTool.Builders
                 {
                     Name = JsonHelper.GetStringFromToken(originToken, "Feature Name"),
                     Effects = JsonHelper.GetStringFromToken(originToken, "Feature Effects")
-                }
+                }                
             };
+
+            model.StartingEquipmentList = _equipmentToken[model.Name].ToObject<IEnumerable<StartingEquipment>>();
+            return model;
         }
     }
 }
