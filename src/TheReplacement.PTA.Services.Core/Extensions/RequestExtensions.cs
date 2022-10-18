@@ -15,14 +15,6 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 {
     internal static class RequestExtensions
     {
-        private static readonly IEnumerable<string> MandatoryPokemonKeys = new[]
-        {
-            "pokemon",
-            "nature",
-            "gender",
-            "status"
-        };
-
         static RequestExtensions()
         {
             AuthKey = Environment.GetEnvironmentVariable("CookieKey");

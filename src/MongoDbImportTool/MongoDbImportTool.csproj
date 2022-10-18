@@ -38,6 +38,9 @@
     <None Update="json\origins.min.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="json\origin_equipment.min.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="json\passives.min.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
