@@ -16,41 +16,41 @@ using TheReplacement.PTA.Services.Core.Objects;
 namespace TheReplacement.PTA.Services.Core.Controllers
 {
     [ApiController]
-    [Route("api/v1/encounter")]
-    public class EncounterController : PtaControllerBase
+    [Route("api/v1/setting")]
+    public class SettingController : PtaControllerBase
     {
         protected override MongoCollection Collection { get; }
         private static readonly byte[] Buffer = new byte[36];
 
-        public EncounterController()
+        public SettingController()
         {
-            Collection = MongoCollection.Encounters;
+            Collection = MongoCollection.Settings;
         }
 
         [HttpGet("{gameId}")]
-        public async Task<ActionResult<EncounterModel>> GetActiveEncounter(Guid gameId)
+        public async Task<ActionResult<SettingModel>> GetActiveSetting(Guid gameId)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
-                await StreamEncounter(gameId);
+                await StreamSetting(gameId);
             }
 
             return BadRequest();
         }
 
         [HttpGet("{gameId}/{gameMasterId}/all")]
-        public ActionResult<IEnumerable<EncounterModel>> GetAllEncounters(Guid gameId, Guid gameMasterId)
+        public ActionResult<IEnumerable<SettingModel>> GetAllSettings(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            return DatabaseUtility.FindAllEncounters(gameId).ToList();
+            return DatabaseUtility.FindAllSettings(gameId).ToList();
         }
 
         [HttpPost("{gameId}/{gameMasterId}")]
-        public async Task<ActionResult> CreateEncounterAsync(Guid gameId, Guid gameMasterId)
+        public async Task<ActionResult> CreateSettingAsync(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -63,17 +63,18 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(message);
             }
 
-            var encounter = new EncounterModel
+            var encounter = new SettingModel
             {
-                EncounterId = Guid.NewGuid(),
+                SettingId = Guid.NewGuid(),
                 GameId = gameId,
                 Name = name,
                 Type = type,
-                ActiveParticipants = Array.Empty<EncounterParticipantModel>(),
-                Environment = Array.Empty<string>()
+                ActiveParticipants = Array.Empty<SettingParticipantModel>(),
+                Environment = Array.Empty<string>(),
+                Shops = Array.Empty<Guid>()
             };
 
-            var (addResult, error) = DatabaseUtility.TryAddEncounter(encounter);
+            var (addResult, error) = DatabaseUtility.TryAddSetting(encounter);
             if (!addResult)
             {
                 return BadRequest(error);
@@ -83,21 +84,21 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{trainerId}")]
-        public async Task<ActionResult> AddToActiveEncounterAsync(Guid gameId, Guid trainerId)
+        public async Task<ActionResult> AddToActiveSettingAsync(Guid gameId, Guid trainerId)
         {
             if (!Request.VerifyIdentity(trainerId))
             {
                 return Unauthorized();
             }
 
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var encounter = DatabaseUtility.FindActiveSetting(gameId);
             if (encounter == null)
             {
                 return NotFound();
             }
 
             var json = await Request.GetRequestBody();
-            var participant = json.ToObject<EncounterParticipantModel>();
+            var participant = json.ToObject<SettingParticipantModel>();
             if (encounter.ActiveParticipants.Any(activeParticipant => activeParticipant.ParticipantId == participant.ParticipantId))
             {
                 return Conflict();
@@ -118,7 +119,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Conflict();
             }
             encounter.ActiveParticipants = encounter.ActiveParticipants.Append(participant);
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateSetting(encounter))
             {
                 return BadRequest();
             }
@@ -127,7 +128,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{participantId}/remove")]
-        public ActionResult RemoveFromActiveEncounter(Guid gameId, Guid gameMasterId, Guid participantId)
+        public ActionResult RemoveFromActiveSetting(Guid gameId, Guid gameMasterId, Guid participantId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -169,7 +170,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(pokemonId);
             }
 
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var encounter = DatabaseUtility.FindActiveSetting(gameId);
             if (encounter == null || pokemon.GameId != gameId)
             {
                 return BadRequest(gameId);
@@ -208,7 +209,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             if (check < catchRate)
             {
                 encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != pokemonId);
-                DatabaseUtility.UpdateEncounter(encounter);
+                DatabaseUtility.UpdateSetting(encounter);
                 pokemon.Pokeball = pokeballEnum.ToString().Replace("_","");
                 pokemon.OriginalTrainerId = trainerId;
                 pokemon.TrainerId = trainerId;
@@ -234,7 +235,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var encounter = DatabaseUtility.FindActiveSetting(gameId);
             if (encounter == null)
             {
                 return NotFound();
@@ -267,7 +268,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return participant;
             });
 
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateSetting(encounter))
             {
                 return BadRequest();
             }
@@ -284,7 +285,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var encounter = DatabaseUtility.FindActiveSetting(gameId);
             if (encounter == null)
             {
                 return NotFound();
@@ -321,7 +322,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return participant;
             });
 
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateSetting(encounter))
             {
                 return BadRequest();
             }
@@ -339,7 +340,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var encounter = DatabaseUtility.FindActiveSetting(gameId);
             if (encounter == null)
             {
                 return NotFound();
@@ -382,7 +383,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return participant;
             });
 
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateSetting(encounter))
             {
                 return BadRequest();
             }
@@ -392,7 +393,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{encounterId}/active")]
-        public ActionResult SetEncounterToActive(Guid gameId, Guid gameMasterId, Guid encounterId)
+        public ActionResult SetSettingToActive(Guid gameId, Guid gameMasterId, Guid encounterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
@@ -400,48 +401,48 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameMaster = DatabaseUtility.FindTrainerById(gameMasterId, gameId);
-            if (DatabaseUtility.FindActiveEncounter(gameId) != null)
+            if (DatabaseUtility.FindActiveSetting(gameId) != null)
             {
                 return Conflict();
             }
 
-            var encounter = DatabaseUtility.FindEncounter(encounterId);
+            var encounter = DatabaseUtility.FindSetting(encounterId);
             if (encounter == null)
             {
                 return NotFound(encounterId);
             }
 
             encounter.IsActive = true;
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateSetting(encounter))
             {
                 return BadRequest();
             }
 
-            var newEncounterLog = new LogModel
+            var newSettingLog = new LogModel
             {
                 User = gameMaster.TrainerName,
                 Action = $"activated a new encounter ({encounter.Name}) at {DateTime.Now}"
             };
-            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), newEncounterLog);
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), newSettingLog);
             return Ok();
         }
 
         [HttpPut("{gameId}/{gameMasterId}/{encounterId}/inactive")]
-        public ActionResult SetEncounterToInactive(Guid gameId, Guid gameMasterId, Guid encounterId)
+        public ActionResult SetSettingToInactive(Guid gameId, Guid gameMasterId, Guid encounterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            var encounter = DatabaseUtility.FindEncounter(encounterId);
+            var encounter = DatabaseUtility.FindSetting(encounterId);
             if (encounter == null)
             {
                 return NotFound(encounterId);
             }
 
             encounter.IsActive = false;
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateSetting(encounter))
             {
                 return BadRequest();
             }
@@ -457,14 +458,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            var encounter = DatabaseUtility.FindEncounter(encounterId);
+            var encounter = DatabaseUtility.FindSetting(encounterId);
             if (encounter == null)
             {
                 return NotFound(encounterId);
             }
 
             encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant => GetWithUpdatedHP(participant, gameId));
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateSetting(encounter))
             {
                 return BadRequest();
             }
@@ -473,14 +474,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/{encounterId}")]
-        public ActionResult DeleteEncounter(Guid gameId, Guid gameMasterId, Guid encounterId)
+        public ActionResult DeleteSetting(Guid gameId, Guid gameMasterId, Guid encounterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            if (!DatabaseUtility.DeleteEncounter(encounterId))
+            if (!DatabaseUtility.DeleteSetting(encounterId))
             {
                 return BadRequest();
             }
@@ -489,14 +490,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         }
 
         [HttpDelete("{gameId}/{gameMasterId}")]
-        public ActionResult DeleteEncounters(Guid gameId, Guid gameMasterId)
+        public ActionResult DeleteSettings(Guid gameId, Guid gameMasterId)
         {
             if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
 
-            if (!DatabaseUtility.DeleteEncountersByGameId(gameId))
+            if (!DatabaseUtility.DeleteSettingsByGameId(gameId))
             {
                 return BadRequest();
             }
@@ -521,15 +522,15 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             {
                 return (null, null, new GenericMessage("Make sure the name parameter is between 1 and 30 characters"));
             }
-            if (!Enum.TryParse<EncounterType>(type, true, out _))
+            if (!Enum.TryParse<SettingType>(type, true, out _))
             {
-                return (null, null, new GenericMessage($"Make sure the type parameter is one of {string.Join(',', Enum.GetNames(typeof(EncounterType)))}"));
+                return (null, null, new GenericMessage($"Make sure the type parameter is one of {string.Join(',', Enum.GetNames(typeof(SettingType)))}"));
             }
 
             return (name, type, null);
         }
 
-        private async Task StreamEncounter(Guid gameId)
+        private async Task StreamSetting(Guid gameId)
         {
             using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
             var recieved = await RecieveAsync(webSocket);
@@ -556,11 +557,11 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
         private ActionResult RemoveFromParticipants(Guid gameId, Guid participantId)
         {
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var encounter = DatabaseUtility.FindActiveSetting(gameId);
             var removedParticipant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == participantId);
             encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != participantId);
 
-            if (!DatabaseUtility.UpdateEncounter(encounter))
+            if (!DatabaseUtility.UpdateSetting(encounter))
             {
                 return BadRequest();
             }
@@ -586,7 +587,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             WebSocketMessageType messageType,
             bool endOfMessage)
         {
-            var encounter = DatabaseUtility.FindActiveEncounter(gameId);
+            var encounter = DatabaseUtility.FindActiveSetting(gameId);
             var message = JsonConvert.SerializeObject(encounter);
             var messageAsBytes = System.Text.Encoding.ASCII.GetBytes(message);
             await webSocket.SendAsync
@@ -673,17 +674,17 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             };
         }
 
-        private static EncounterParticipantModel GetWithUpdatedHP(EncounterParticipantModel participant, Guid gameId)
+        private static SettingParticipantModel GetWithUpdatedHP(SettingParticipantModel participant, Guid gameId)
         {
-            var type = Enum.Parse<EncounterParticipantType>(participant.Type, true);
+            var type = Enum.Parse<SettingParticipantType>(participant.Type, true);
             return type switch
             {
-                EncounterParticipantType.Trainer => EncounterParticipantModel.FromTrainer(participant.ParticipantId, gameId, participant.Position),
-                EncounterParticipantType.Pokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
-                EncounterParticipantType.EnemyNpc => EncounterParticipantModel.FromNpc(participant.ParticipantId, participant.Position, type),
-                EncounterParticipantType.EnemyPokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
-                EncounterParticipantType.NeutralNpc => EncounterParticipantModel.FromNpc(participant.ParticipantId, participant.Position, type),
-                EncounterParticipantType.NeutralPokemon => EncounterParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
+                SettingParticipantType.Trainer => SettingParticipantModel.FromTrainer(participant.ParticipantId, gameId, participant.Position),
+                SettingParticipantType.Pokemon => SettingParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
+                SettingParticipantType.EnemyNpc => SettingParticipantModel.FromNpc(participant.ParticipantId, participant.Position, type),
+                SettingParticipantType.EnemyPokemon => SettingParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
+                SettingParticipantType.NeutralNpc => SettingParticipantModel.FromNpc(participant.ParticipantId, participant.Position, type),
+                SettingParticipantType.NeutralPokemon => SettingParticipantModel.FromPokemon(participant.ParticipantId, participant.Position, type),
                 _ => throw new ArgumentOutOfRangeException(nameof(participant.Type)),
             };
         }

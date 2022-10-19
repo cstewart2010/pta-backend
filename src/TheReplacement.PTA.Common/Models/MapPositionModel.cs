@@ -6,12 +6,12 @@
     public class MapPositionModel
     {
         /// <summary>
-        /// The x position on the Encounter map
+        /// The x position on the Setting map
         /// </summary>
         public int X { get; set; }
 
         /// <summary>
-        /// The y position on the Encounter map
+        /// The y position on the Setting map
         /// </summary>
         public int Y { get; set; }
     }

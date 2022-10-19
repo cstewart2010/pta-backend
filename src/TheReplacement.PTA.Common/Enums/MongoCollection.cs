@@ -31,9 +31,9 @@
         PokeDex = 5,
 
         /// <summary>
-        /// Represents the Encounter collection
+        /// Represents the Settings collection
         /// </summary>
-        Encounters = 6,
+        Settings = 6,
 
         /// <summary>
         /// Represents the Users collection

@@ -1,9 +1,6 @@
 ﻿using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheReplacement.PTA.Common.Interfaces;
 
 namespace TheReplacement.PTA.Common.Models
@@ -11,7 +8,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an encounter during a PTA session
     /// </summary>
-    public class EncounterModel : IDocument
+    public class SettingModel : IDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }
@@ -19,7 +16,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The encounter's id
         /// </summary>
-        public Guid EncounterId { get; set; }
+        public Guid SettingId { get; set; }
 
         /// <summary>
         /// The game id associated with the encounter
@@ -37,18 +34,24 @@ namespace TheReplacement.PTA.Common.Models
         public bool IsActive { get; set; }
 
         /// <summary>
-        /// The type of Encounter (Wild, Trainer, Hybrid)
+        /// The type of Setting 
         /// </summary>
         public string Type { get; set; }
 
         /// <summary>
-        /// The encounters participants
+        /// The settings participants
         /// </summary>
-        public IEnumerable<EncounterParticipantModel> ActiveParticipants { get; set; }
+        public IEnumerable<SettingParticipantModel> ActiveParticipants { get; set; }
 
         /// <summary>
         /// The encounter's environment
         /// </summary>
         public string[] Environment { get; set; }
+
+
+        /// <summary>
+        /// The encounter's shops
+        /// </summary>
+        public IEnumerable<Guid> Shops { get; set; }
     }
 }

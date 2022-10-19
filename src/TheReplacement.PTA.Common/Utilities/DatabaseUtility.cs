@@ -17,21 +17,21 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Searches for a encounter using its id, then deletes it
         /// </summary>
         /// <param name="id">The encounter id</param>
-        public static bool DeleteEncounter(Guid id)
+        public static bool DeleteSetting(Guid id)
         {
             return MongoCollectionHelper
-                .Encounter
-                .FindOneAndDelete(encounter => encounter.EncounterId == id) != null;
+                .Settings
+                .FindOneAndDelete(encounter => encounter.SettingId == id) != null;
         }
 
         /// <summary>
         /// Searches for encounter using their game id, then deletes them
         /// </summary>
         /// <param name="gameId">The game session id</param>
-        public static bool DeleteEncountersByGameId(Guid gameId)
+        public static bool DeleteSettingsByGameId(Guid gameId)
         {
             return MongoCollectionHelper
-                .Encounter
+                .Settings
                 .DeleteMany(encounter => encounter.GameId == gameId)?.IsAcknowledged == true;
         }
 
@@ -67,7 +67,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 .DeleteMany(trainer => trainers.Contains(trainer.TrainerId)).IsAcknowledged;
 
             var encounterDeletionResult = MongoCollectionHelper
-                .Encounter
+                .Settings
                 .DeleteMany(encounter => encounter.GameId == id);
 
             var pokedexDeletionResult = MongoCollectionHelper
@@ -164,11 +164,11 @@ namespace TheReplacement.PTA.Common.Utilities
                     .PokeDex
                     .DeleteMany(pokedex => pokedex.TrainerId == userId && pokedex.GameId == gameId).IsAcknowledged;
 
-                var encounters = FindAllEncounters(gameId);
-                foreach (var encounter in encounters)
+                var settings = FindAllSettings(gameId);
+                foreach (var encounter in settings)
                 {
                     encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != userId);
-                    UpdateEncounter(encounter);
+                    UpdateSetting(encounter);
                 }
 
                 var user = FindUserById(userId);
@@ -236,31 +236,31 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Returns an active encounter (if any) matching the game session id
         /// </summary>
         /// <param name="gameId">The game id</param>
-        public static EncounterModel FindActiveEncounter(Guid gameId)
+        public static SettingModel FindActiveSetting(Guid gameId)
         {
-            return MongoCollectionHelper.Encounter
+            return MongoCollectionHelper.Settings
                 .Find(encounter => encounter.GameId == gameId && encounter.IsActive)
                 .SingleOrDefault();
         }
 
         /// <summary>
-        /// Returns an encounter matching the id
+        /// Returns an setting matching the id
         /// </summary>
-        /// <param name="encounterId">The encounter id</param>
-        public static EncounterModel FindEncounter(Guid encounterId)
+        /// <param name="encounterId">The setting id</param>
+        public static SettingModel FindSetting(Guid encounterId)
         {
-            return MongoCollectionHelper.Encounter
-                .Find(encounter => encounter.EncounterId == encounterId)
+            return MongoCollectionHelper.Settings
+                .Find(encounter => encounter.SettingId == encounterId)
                 .SingleOrDefault();
         }
 
         /// <summary>
-        /// Returns all encounters associated with the game session
+        /// Returns all settings associated with the game session
         /// </summary>
         /// <param name="gameId">The game id</param>
-        public static IEnumerable<EncounterModel> FindAllEncounters(Guid gameId)
+        public static IEnumerable<SettingModel> FindAllSettings(Guid gameId)
         {
-            return MongoCollectionHelper.Encounter
+            return MongoCollectionHelper.Settings
                 .Find(encounter => encounter.GameId == gameId)
                 .ToEnumerable();
         }
@@ -587,14 +587,14 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <summary>
         /// Attempts to replace the previous encounter with the new data
         /// </summary>
-        /// <param name="updatedEncounter">The updated encounter data</param>
-        public static bool UpdateEncounter(EncounterModel updatedEncounter)
+        /// <param name="updatedSetting">The updated encounter data</param>
+        public static bool UpdateSetting(SettingModel updatedSetting)
         {
-            var result = MongoCollectionHelper.Encounter.ReplaceOne
+            var result = MongoCollectionHelper.Settings.ReplaceOne
             (
-                encounter => encounter.EncounterId == updatedEncounter.EncounterId,
+                encounter => encounter.SettingId == updatedSetting.SettingId,
                 options: new ReplaceOptions { IsUpsert = true },
-                replacement: updatedEncounter
+                replacement: updatedSetting
             );
 
             return result.IsAcknowledged;
@@ -684,11 +684,11 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Attempts to add a encounter using the provided document
         /// </summary>
         /// <param name="encounter">The document to add</param>
-        public static (bool Result, MongoWriteError Error) TryAddEncounter(EncounterModel encounter)
+        public static (bool Result, MongoWriteError Error) TryAddSetting(SettingModel encounter)
         {
             return (TryAddDocument
             (
-                () => MongoCollectionHelper.Encounter.InsertOne(encounter),
+                () => MongoCollectionHelper.Settings.InsertOne(encounter),
                 out var error
             ), error);
         }

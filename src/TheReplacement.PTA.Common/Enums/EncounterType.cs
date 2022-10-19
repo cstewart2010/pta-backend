@@ -8,22 +8,22 @@ using TheReplacement.PTA.Common.Models;
 namespace TheReplacement.PTA.Common.Enums
 {
     /// <summary>
-    /// Container for all possible <see cref="EncounterModel"/> types
+    /// Container for all possible <see cref="SettingModel"/> types
     /// </summary>
-    public enum EncounterType
+    public enum SettingType
     {
         /// <summary>
-        /// Represents a Wild Encounter 
+        /// Represents a Hostile Setting 
         /// </summary>
-        Wild = 1,
+        Hostile = 1,
 
         /// <summary>
-        /// Represents a Trainer Encounter 
+        /// Represents a NonHostile Setting 
         /// </summary>
-        Trainer = 2,
+        NonHostile = 2,
 
         /// <summary>
-        /// Represents an Encounter with both Wild and Trainer participants
+        /// Represents an Setting with both Wild and Trainer participants
         /// </summary>
         Hybrid = 3
     }
