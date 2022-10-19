@@ -89,6 +89,29 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return Ok();
         }
 
+        [HttpPut("{gameId}/{gameMasterId}/environment")]
+        public ActionResult SetEnvironment(Guid gameId, Guid gameMasterId, [FromQuery] string environments)
+        {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
+            var setting = DatabaseUtility.FindActiveSetting(gameId);
+            if (setting == null)
+            {
+                return NotFound(gameId);
+            }
+
+            setting.Environment = environments.Split(',');
+            if (DatabaseUtility.UpdateSetting(setting))
+            {
+                return Ok();
+            }
+
+            return BadRequest();
+        }
+
         [HttpPut("{gameId}/{trainerId}")]
         public async Task<ActionResult> AddToActiveSettingAsync(Guid gameId, Guid trainerId)
         {
