@@ -27,6 +27,12 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             Collection = MongoCollection.Settings;
         }
 
+        [HttpGet]
+        public IEnumerable<string> GetEnvironments()
+        {
+            return Enum.GetNames<Environments>().Where(environment => environment != "Default");
+        }
+
         [HttpGet("{gameId}")]
         public async Task<ActionResult<SettingModel>> GetActiveSetting(Guid gameId)
         {
