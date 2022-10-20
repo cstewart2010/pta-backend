@@ -145,10 +145,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             return new GenericMessage($"Granted {trainerId} honor: {honor}");
         }
 
-        [HttpPut("{gameId}/{trainerId}/addItems")]
-        public async Task<ActionResult<FoundTrainerMessage>> AddItemsToTrainerAsync(Guid gameId, Guid trainerId)
+        [HttpPut("{gameId}/{gameMasterId}/{trainerId}/addItems")]
+        public async Task<ActionResult<FoundTrainerMessage>> AddItemsToTrainerAsync(Guid gameId, Guid gameMasterId, Guid trainerId)
         {
-            if (!Request.VerifyIdentity(trainerId))
+            if (!Request.IsUserGM(gameMasterId, gameId))
             {
                 return Unauthorized();
             }
@@ -159,11 +159,34 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(trainerId);
             }
 
-            var items = (await Request.GetRequestBody()).Select(token => token.ToObject<ItemModel>());
+            var items = await Request.GetRequestBody<IEnumerable<ItemModel>>();
             var addedItemsLogs = AddItemsToTrainer(trainer, items);
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), addedItemsLogs.ToArray());
-            Response.RefreshToken(trainerId);
+            Response.RefreshToken(gameMasterId);
             return new FoundTrainerMessage(trainerId, gameId);
+        }
+
+        [HttpPut("{gameId}/{gameMasterId}/addItems/all")]
+        public async Task<ActionResult> AddItemsToAllTrainersAsync(Guid gameId, Guid gameMasterId)
+        {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
+            var trainers = DatabaseUtility.FindTrainersByGameId(gameId);
+            if (trainers.Any())
+            {
+                var items = await Request.GetRequestBody<IEnumerable<ItemModel>>();
+                foreach (var trainer in trainers)
+                {
+                    var addedItemsLogs = AddItemsToTrainer(trainer, items);
+                    DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), addedItemsLogs.ToArray());
+                }
+            }
+
+            Response.RefreshToken(gameMasterId);
+            return Ok();
         }
 
         [HttpPut("{gameId}/{trainerId}/removeItems")]
@@ -180,11 +203,97 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound(trainerId);
             }
 
-            var items = (await Request.GetRequestBody()).Select(token => token.ToObject<ItemModel>());
+            var items = await Request.GetRequestBody<IEnumerable<ItemModel>>();
             var removedItemsLogs = RemoveItemsFromTrainer(trainer, items);
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), removedItemsLogs.ToArray());
             Response.RefreshToken(trainerId);
             return new FoundTrainerMessage(trainerId, gameId);
+        }
+
+        [HttpPut("{gameId}/{gameMasterId}/{trainerId}/removeItems")]
+        public async Task<ActionResult<FoundTrainerMessage>> RemoveItemsFromTrainerGMAsync(Guid gameId, Guid gameMasterId, Guid trainerId)
+        {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
+            if (trainer?.IsOnline != true)
+            {
+                return NotFound(trainerId);
+            }
+
+            var items = await Request.GetRequestBody<IEnumerable<ItemModel>>();
+            var removedItemsLogs = RemoveItemsFromTrainer(trainer, items);
+            DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), removedItemsLogs.ToArray());
+            Response.RefreshToken(gameMasterId);
+            return new FoundTrainerMessage(trainerId, gameId);
+        }
+
+        [HttpPut("{gameId}/{gameMasterId}/removeItems/all")]
+        public async Task<ActionResult> RemoveItemsFromAllTrainersAsync(Guid gameId, Guid gameMasterId)
+        {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
+            var trainers = DatabaseUtility.FindTrainersByGameId(gameId);
+            if (trainers.Any())
+            {
+                var items = await Request.GetRequestBody<IEnumerable<ItemModel>>();
+                foreach (var trainer in trainers)
+                {
+                    var removedItemsLogs = RemoveItemsFromTrainer(trainer, items);
+                    DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), removedItemsLogs.ToArray());
+                }
+            }
+
+            Response.RefreshToken(gameMasterId);
+            return Ok();
+        }
+
+        [HttpPut("{gameId}/{gameMasterId}/{trainerId}/money")]
+        public ActionResult UpdateTrainerMoney(Guid gameId, Guid gameMasterId, Guid trainerId, [FromQuery] int addition)
+        {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
+            var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
+            if (trainer == null)
+            {
+                return NotFound(trainerId);
+            }
+
+            trainer.Money += addition;
+
+            if (!DatabaseUtility.UpdateTrainer(trainer))
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
+        [HttpPut("{gameId}/{gameMasterId}/money/all")]
+        public ActionResult UpdateAllTrainersMoney(Guid gameId, Guid gameMasterId, [FromQuery] int addition)
+        {
+            if (!Request.IsUserGM(gameMasterId, gameId))
+            {
+                return Unauthorized();
+            }
+
+            var trainers = DatabaseUtility.FindTrainersByGameId(gameId);
+            foreach (var trainer in trainers.Where(trainer => !trainer.IsGM))
+            {
+                trainer.Money += addition;
+                DatabaseUtility.UpdateTrainer(trainer);
+            }
+
+            return Ok();
         }
 
         [HttpDelete("{gameId}/{gameMasterId}/{trainerId}")]
