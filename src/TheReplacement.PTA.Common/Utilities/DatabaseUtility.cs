@@ -79,7 +79,8 @@ namespace TheReplacement.PTA.Common.Utilities
                 .DeleteMany(pokemon => pokemon.GameId == id).IsAcknowledged;
 
             var npcDeletionResult = DeleteNpcByGameId(id);
-            return gameDeletionResult && trainerDeletionResult && pokedexDeletionResult && pokemonDeletionResult && npcDeletionResult;
+            var shopDeletionResult = DeleteShopByGameId(id);
+            return gameDeletionResult && trainerDeletionResult && pokedexDeletionResult && pokemonDeletionResult && npcDeletionResult && shopDeletionResult;
         }
 
         /// <summary>
@@ -137,6 +138,32 @@ namespace TheReplacement.PTA.Common.Utilities
             {
                 return -1;
             }
+        }
+
+        /// <summary>
+        /// Searches for a shop using their id, then deletes it
+        /// </summary>
+        /// <param name="id">The shop id</param>
+        /// <param name="gameId">The game id</param>
+        public static bool DeleteShop(Guid id, Guid gameId)
+        {
+            return MongoCollectionHelper
+                .Shops
+                .FindOneAndDelete(shop => shop.ShopId == id && shop.GameId == gameId) != null;
+        }
+
+
+        /// <summary>
+        /// Searches for all shops using the game id, then deletes it
+        /// </summary>
+        /// <param name="gameId">The game id</param>
+        public static bool DeleteShopByGameId(Guid gameId)
+        {
+            var deleteResult = MongoCollectionHelper
+                .Shops
+                .DeleteMany(shop => shop.GameId == gameId);
+
+            return deleteResult.IsAcknowledged;
         }
 
         /// <summary>
@@ -437,6 +464,43 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Returns a shop matching the id
+        /// </summary>
+        /// <param name="id">The shop id</param>
+        /// <param name="gameId">The game id</param>
+        public static ShopModel FindShopById(Guid id, Guid gameId)
+        {
+            return MongoCollectionHelper
+                .Shops
+                .Find(shop => shop.ShopId == id && shop.GameId == gameId)
+                .SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Returns a shops matches contained in the setting
+        /// </summary>
+        /// <param name="setting">The setting in the game</param>
+        public static IEnumerable<ShopModel> FindShopsBySetting(SettingModel setting)
+        {
+            return MongoCollectionHelper
+                .Shops
+                .Find(shop => setting.Shops.Contains(shop.ShopId) && setting.GameId == shop.GameId)
+                .ToEnumerable();
+        }
+
+        /// <summary>
+        /// Returns a shop contained in the game
+        /// </summary>
+        /// <param name="gameId">The game id</param>
+        public static IEnumerable<ShopModel> FindShopsByGameId(Guid gameId)
+        {
+            return MongoCollectionHelper
+                .Shops
+                .Find(shop => shop.GameId == gameId)
+                .ToEnumerable();
+        }
+
+        /// <summary>
         /// Returns a trainer matching the trainer id
         /// </summary>
         /// <param name="id">The trainer id</param>
@@ -633,6 +697,22 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Attempts to replace the previous shop with the new data
+        /// </summary>
+        /// <param name="updatedShop">the update shop data</param>
+        public static bool UpdateShop(ShopModel updatedShop)
+        {
+            var result = MongoCollectionHelper.Shops.ReplaceOne
+            (
+                shop => shop.ShopId == updatedShop.ShopId,
+                options: new ReplaceOptions { IsUpsert = true },
+                replacement: updatedShop
+            );
+
+            return result.IsAcknowledged;
+        }
+
+        /// <summary>
         /// Attempts to replace the previous thread with the new data
         /// </summary>
         /// <param name="updatedThread">The updated thread data</param>
@@ -656,7 +736,7 @@ namespace TheReplacement.PTA.Common.Utilities
         {
             var result = MongoCollectionHelper.Trainers.ReplaceOne
             (
-                trainer => trainer.TrainerId == updatedTrainer.TrainerId,
+                trainer => trainer.TrainerId == updatedTrainer.TrainerId && trainer.GameId == updatedTrainer.GameId,
                 options: new ReplaceOptions { IsUpsert = true },
                 replacement: updatedTrainer
             );
@@ -721,6 +801,22 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryAddDocument
             (
                 () => MongoCollectionHelper.Npcs.InsertOne(npc),
+                out error
+            );
+        }
+
+        /// <summary>
+        /// Attempts to add an shop using the provided document
+        /// </summary>
+        /// <param name="shop">The document to add</param>
+        /// <param name="error">Any error found</param>
+        public static bool TryAddShop(
+            ShopModel shop,
+            out MongoWriteError error)
+        {
+            return TryAddDocument
+            (
+                () => MongoCollectionHelper.Shops.InsertOne(shop),
                 out error
             );
         }

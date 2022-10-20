@@ -35,6 +35,11 @@ namespace TheReplacement.PTA.Common.Enums
         /// <summary>
         /// Represents a Neutral <see cref="PokemonModel"/>
         /// </summary>
-        NeutralPokemon = 6
+        NeutralPokemon = 6,
+
+        /// <summary>
+        /// Represents a Shop
+        /// </summary>
+        Shop = 7
     }
 }
