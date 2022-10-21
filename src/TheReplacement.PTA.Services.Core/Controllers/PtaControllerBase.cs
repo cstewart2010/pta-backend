@@ -58,7 +58,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var itemList = trainer.Items;
             foreach (var item in items)
             {
-                itemList = UpdateAllItemsWithAddition
+                trainer.Items = UpdateAllItemsWithAddition
                 (
                     itemList,
                     item,
@@ -66,12 +66,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 );
             }
 
-            var result = DatabaseUtility.UpdateTrainerItemList
-            (
-                trainer.TrainerId,
-                trainer.GameId,
-                itemList
-            );
+            var result = DatabaseUtility.UpdateTrainer(trainer);
 
             if (!result)
             {

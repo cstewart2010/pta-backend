@@ -123,7 +123,8 @@ const updatedValidators = {
                   'EnemyNpc',
                   'EnemyPokemon',
                   'NeutralNpc',
-                  'NeutralPokemon'
+                  'NeutralPokemon',
+                  'Shop'
                 ]
               },
               Health: {
@@ -922,6 +923,75 @@ const updatedValidators = {
         },
         IsCaught: {
           bsonType: 'bool'
+        }
+      }
+    }
+  },
+  Shops: {
+    $jsonSchema: {
+      required: [
+        'ShopId',
+        'GameId',
+        'IsActive',
+        'Inventory',
+        'Name'
+      ],
+      additionalProperties: false,
+      properties: {
+        _id: {
+          bsonType: 'objectId'
+        },
+        Name: {
+          bsonType: 'string',
+          minLength: 6,
+          maxLength: 16
+        },
+        ShopId: {
+          bsonType: 'binData'
+        },
+        GameId: {
+          bsonType: 'binData'
+        },
+        IsActive: {
+          bsonType: 'bool'
+        },
+        Inventory: {
+          bsonType: 'object',
+          additionalProperties: false,
+          patternProperties: {
+            '^\\w+( +\\w+)*$': {
+              additionalProperties: false,
+              required: [
+                'Cost',
+                'Effects',
+                'Type',
+                'Quantity'
+              ],
+              properties: {
+                Cost: {
+                  bsonType: 'int',
+                  minimum: 1
+                },
+                Effects: {
+                  bsonType: 'string'
+                },
+                Type: {
+                  bsonType: 'string',
+                  'enum': [
+                    'Key',
+                    'Medical',
+                    'Pokeball',
+                    'Pokemon',
+                    'Trainer'
+                  ]
+                },
+                Quantity: {
+                  bsonType: 'int',
+                  minimum: -1
+                }
+              }
+            }
+          }
         }
       }
     }

@@ -22,6 +22,7 @@ namespace TheReplacement.PTA.Common.Internal
             Logs = Database.GetCollection<LoggerModel>("Logs");
             PokeDex = Database.GetCollection<PokeDexItemModel>(MongoCollection.PokeDex.ToString());
             Settings = Database.GetCollection<SettingModel>(MongoCollection.Settings.ToString());
+            Shops = Database.GetCollection<ShopModel>("Shops");
             Sprite = Database.GetCollection<SpriteModel>("Sprites");
         }
 
@@ -69,6 +70,11 @@ namespace TheReplacement.PTA.Common.Internal
         /// Represents the Settings Collection
         /// </summary>
         public static IMongoCollection<SettingModel> Settings { get; }
+
+        /// <summary>
+        /// Represents the Shops Collection
+        /// </summary>
+        public static IMongoCollection<ShopModel> Shops { get; }
 
         /// <summary>
         /// Represents the Sprites Collection

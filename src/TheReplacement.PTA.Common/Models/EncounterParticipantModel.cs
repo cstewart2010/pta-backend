@@ -74,6 +74,24 @@ namespace TheReplacement.PTA.Common.Models
         }
 
         /// <summary>
+        /// Returns the Shop as a participant
+        /// </summary>
+        /// <param name="shopId"></param>
+        /// <param name="gameId"></param>
+        /// <param name="position"></param>
+        public static SettingParticipantModel FromShop(Guid shopId, Guid gameId, MapPositionModel position)
+        {
+            var shop = DatabaseUtility.FindShopById(shopId, gameId);
+            return new SettingParticipantModel
+            {
+                ParticipantId = shop.ShopId,
+                Name = shop.Name,
+                Type = SettingParticipantType.Shop.ToString(),
+                Position = position
+            };
+        }
+
+        /// <summary>
         /// Returns the pokemon as a participant
         /// </summary>
         /// <param name="pokemonId"></param>

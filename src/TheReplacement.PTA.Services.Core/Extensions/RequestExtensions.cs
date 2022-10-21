@@ -152,6 +152,13 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return JToken.Parse(json);
         }
 
+        public static async Task<T> GetRequestBody<T>(this HttpRequest request)
+        {
+            using var reader = new StreamReader(request.Body);
+            var json = await reader.ReadToEndAsync();
+            return JToken.Parse(json).ToObject<T>();
+        }
+
         public static IEnumerable<Guid> GetNpcIds(
             this HttpRequest request,
             out AbstractMessage error)
