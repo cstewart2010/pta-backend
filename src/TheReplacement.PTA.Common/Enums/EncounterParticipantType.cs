@@ -3,9 +3,9 @@
 namespace TheReplacement.PTA.Common.Enums
 {
     /// <summary>
-    /// Container for all possible <see cref="EncounterParticipantModel"/> types
+    /// Container for all possible <see cref="SettingParticipantModel"/> types
     /// </summary>
-    public enum EncounterParticipantType
+    public enum SettingParticipantType
     {
         /// <summary>
         /// Represents a <see cref="TrainerModel"/>

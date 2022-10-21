@@ -55,23 +55,24 @@ const updatedValidators = {
       }
     }
   },
-  Encounters: {
+  Settings: {
     $jsonSchema: {
       required: [
-        'EncounterId',
+        'SettingId',
         'GameId',
         'Name',
         'IsActive',
         'Type',
         'ActiveParticipants',
-        'Environment'
+        'Environment',
+        'Shops'
       ],
       additionalProperties: false,
       properties: {
         _id: {
           bsonType: 'objectId'
         },
-        EncounterId: {
+        SettingId: {
           bsonType: 'binData'
         },
         GameId: {
@@ -88,8 +89,8 @@ const updatedValidators = {
         Type: {
           bsonType: 'string',
           'enum': [
-            'Wild',
-            'Trainer',
+            'Hostile',
+            'NonHostile',
             'Hybrid'
           ]
         },
@@ -176,6 +177,12 @@ const updatedValidators = {
               'Mountain',
               'InCombat'
             ]
+          }
+        },
+        Shops: {
+          bsonType: 'array',
+          items: {
+            bsonType: 'binData'
           }
         }
       }
@@ -1429,17 +1436,7 @@ const updatedValidators = {
           items: {
             bsonType: 'object',
             additionalProperties: false,
-            properties: {
-              Name: {
-                bsonType: 'string'
-              },
-              Type: {
-                bsonType: 'int'
-              },
-              Amount: {
-                bsonType: 'int'
-              }
-            }
+            properties: {}
           }
         }
       }

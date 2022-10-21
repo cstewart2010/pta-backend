@@ -21,7 +21,7 @@ namespace TheReplacement.PTA.Common.Internal
             Npcs = Database.GetCollection<NpcModel>("NPCs");
             Logs = Database.GetCollection<LoggerModel>("Logs");
             PokeDex = Database.GetCollection<PokeDexItemModel>(MongoCollection.PokeDex.ToString());
-            Encounter = Database.GetCollection<EncounterModel>(MongoCollection.Encounters.ToString());
+            Settings = Database.GetCollection<SettingModel>(MongoCollection.Settings.ToString());
             Sprite = Database.GetCollection<SpriteModel>("Sprites");
         }
 
@@ -66,9 +66,9 @@ namespace TheReplacement.PTA.Common.Internal
         public static IMongoCollection<PokeDexItemModel> PokeDex { get; }
 
         /// <summary>
-        /// Represents the Encounter Collection
+        /// Represents the Settings Collection
         /// </summary>
-        public static IMongoCollection<EncounterModel> Encounter { get; }
+        public static IMongoCollection<SettingModel> Settings { get; }
 
         /// <summary>
         /// Represents the Sprites Collection

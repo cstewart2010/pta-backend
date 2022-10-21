@@ -7,19 +7,19 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a participant to an encounter during a PTA session
     /// </summary>
-    public class EncounterParticipantModel
+    public class SettingParticipantModel
     {
         /// <summary>
         /// Default constructor
         /// </summary>
-        public EncounterParticipantModel() { }
+        public SettingParticipantModel() { }
 
         /// <summary>
-        /// Initiziles a new instance of <see cref="EncounterParticipantModel"/>
+        /// Initiziles a new instance of <see cref="SettingParticipantModel"/>
         /// </summary>
         /// <param name="currentHp">The participant's current hp</param>
         /// <param name="totalHp">The participant's total hp</param>
-        public EncounterParticipantModel(double currentHp, double totalHp)
+        public SettingParticipantModel(double currentHp, double totalHp)
         {
             Health = GetHealth(currentHp, totalHp);
         }
@@ -60,10 +60,10 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="trainerId"></param>
         /// <param name="gameId"></param>
         /// <param name="position"></param>
-        public static EncounterParticipantModel FromTrainer(Guid trainerId, Guid gameId, MapPositionModel position)
+        public static SettingParticipantModel FromTrainer(Guid trainerId, Guid gameId, MapPositionModel position)
         {
             var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
-            return new EncounterParticipantModel(trainer.CurrentHP, trainer.TrainerStats.HP)
+            return new SettingParticipantModel(trainer.CurrentHP, trainer.TrainerStats.HP)
             {
                 ParticipantId = trainer.TrainerId,
                 Name = trainer.TrainerName,
@@ -79,10 +79,10 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="pokemonId"></param>
         /// <param name="position"></param>
         /// <param name="type"></param>
-        public static EncounterParticipantModel FromPokemon(Guid pokemonId, MapPositionModel position, EncounterParticipantType type)
+        public static SettingParticipantModel FromPokemon(Guid pokemonId, MapPositionModel position, SettingParticipantType type)
         {
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
-            return new EncounterParticipantModel(pokemon.CurrentHP, pokemon.PokemonStats.HP)
+            return new SettingParticipantModel(pokemon.CurrentHP, pokemon.PokemonStats.HP)
             {
                 ParticipantId = pokemon.PokemonId,
                 Name = pokemon.Nickname,
@@ -98,10 +98,10 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="npcId"></param>
         /// <param name="position"></param>
         /// <param name="type"></param>
-        public static EncounterParticipantModel FromNpc(Guid npcId, MapPositionModel position, EncounterParticipantType type)
+        public static SettingParticipantModel FromNpc(Guid npcId, MapPositionModel position, SettingParticipantType type)
         {
             var npc = DatabaseUtility.FindNpc(npcId);
-            return new EncounterParticipantModel(npc.CurrentHP, npc.TrainerStats.HP)
+            return new SettingParticipantModel(npc.CurrentHP, npc.TrainerStats.HP)
             {
                 ParticipantId = npc.NPCId,
                 Name = npc.TrainerName,
