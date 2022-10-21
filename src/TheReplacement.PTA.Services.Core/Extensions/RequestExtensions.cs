@@ -17,7 +17,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
     {
         static RequestExtensions()
         {
-            AuthKey = Environment.GetEnvironmentVariable("CookieKey");
+            AuthKey = Environment.GetEnvironmentVariable("CookieKey", EnvironmentVariableTarget.Process);
         }
 
         internal static string AuthKey { get; }

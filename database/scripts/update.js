@@ -1506,7 +1506,17 @@ const updatedValidators = {
           items: {
             bsonType: 'object',
             additionalProperties: false,
-            properties: {}
+            properties: {
+              Name: {
+                bsonType: 'string'
+              },
+              Type: {
+                bsonType: 'int'
+              },
+              Amount: {
+                bsonType: 'int'
+              }
+            }
           }
         }
       }
