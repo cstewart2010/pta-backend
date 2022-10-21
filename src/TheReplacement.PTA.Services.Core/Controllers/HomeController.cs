@@ -35,10 +35,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 },
                 Movedex = $"{HostUrl}/{Version}/movedex",
                 Origindex = $"{HostUrl}/{Version}/origindex",
-                Classdex = $"{HostUrl}/{Version}/classdex",
-                DatabaseProcess = Environment.GetEnvironmentVariable("Database", EnvironmentVariableTarget.Process),
-                DatabaseUser = Environment.GetEnvironmentVariable("Database", EnvironmentVariableTarget.User),
-                DatabaseMachine = Environment.GetEnvironmentVariable("Database", EnvironmentVariableTarget.Machine),
+                Classdex = $"{HostUrl}/{Version}/classdex"
             };
         }
     }
