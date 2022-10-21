@@ -5,6 +5,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <RootNamespace>TheReplacement.PTA.Services.Core</RootNamespace>
     <AssemblyName>TheReplacement.PTA.Services.Core</AssemblyName>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
