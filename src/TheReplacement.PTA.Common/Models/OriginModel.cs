@@ -107,4 +107,6 @@ namespace TheReplacement.PTA.Common.Models
         /// </summary>
         public int Amount { get; set; }
     }
+
+
 }
