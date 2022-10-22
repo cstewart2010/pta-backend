@@ -157,6 +157,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
 
             return Array.Empty<Guid>();
         }
+
         private static void AddTrainerPokemon(IEnumerable<NewPokemon> pokemon, TrainerModel trainer)
         {
             foreach (var data in pokemon.Where(data => data != null))
