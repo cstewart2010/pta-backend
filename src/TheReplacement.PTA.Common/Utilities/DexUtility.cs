@@ -156,6 +156,17 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
+        /// Returns an origin model from the origin collection
+        /// </summary>
+        /// <param name="Origin">The name of the origin</param>
+        public static OriginModel GetOrigin(String Origin) 
+        { 
+            var collection = MongoCollectionHelper.Database.GetCollection<OriginModel>(DexType.Origins.ToString());
+            var model = collection.Find(document => document.Name.ToLower() == Origin.ToLower()).SingleOrDefault();
+                return model;
+        }
+
+        /// <summary>
         /// Returns a specific Dex entry from a specific Dex collection
         /// </summary>
         /// <param name="documentType">The dex collection you wish to return data from</param>

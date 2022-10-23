@@ -87,6 +87,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             var publicTrainer = PublicTrainer.FromJson(json);
             var trainer = publicTrainer.ParseBackToModel();
             AddTrainerPokemon(publicTrainer.NewPokemon, trainer);
+            SetStartingEquipmentWithOrigin(trainer);
             var result = DatabaseUtility.UpdateTrainer(trainer);
             if (result)
             {
@@ -100,36 +101,6 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             }
 
             return result;
-        }
-
-        private static void AddTrainerPokemon(IEnumerable<NewPokemon> pokemon, TrainerModel trainer)
-        {
-            foreach (var data in pokemon.Where(data => data != null))
-            {
-                var nickname = data.Nickname.Length > 18 ? data.Nickname.Substring(0, 18) : data.Nickname;
-                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, nickname, data.Form);
-                pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
-                pokemonModel.OriginalTrainerId = trainer.TrainerId;
-                pokemonModel.TrainerId = trainer.TrainerId;
-                pokemonModel.GameId = trainer.GameId;
-                pokemonModel.Pokeball = Pokeball.Basic_Ball.ToString().Replace("_", "");
-                DatabaseUtility.TryAddPokemon(pokemonModel, out _);
-                var game = DatabaseUtility.FindGame(trainer.GameId);
-                var caughtPokemonLog = new LogModel
-                {
-                    User = trainer.TrainerName,
-                    Action = $"caught a {pokemonModel.SpeciesName} named {pokemonModel.Nickname} at {DateTime.UtcNow}"
-                };
-                DatabaseUtility.UpdateGameLogs(game, caughtPokemonLog);
-                if (DatabaseUtility.GetPokedexItem(trainer.TrainerId, pokemonModel.DexNo) == null)
-                {
-                    DatabaseUtility.TryAddDexItem(trainer.TrainerId, trainer.GameId, pokemonModel.DexNo, true, true, out _);
-                }
-                else
-                {
-                    DatabaseUtility.UpdateDexItemIsCaught(trainer.TrainerId, pokemonModel.DexNo);
-                }
-            }
         }
 
         public static async Task<(string Username, string Password, IEnumerable<string> Errors)> GetUserCredentials(
@@ -185,6 +156,64 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             };
 
             return Array.Empty<Guid>();
+        }
+
+        private static void AddTrainerPokemon(IEnumerable<NewPokemon> pokemon, TrainerModel trainer)
+        {
+            foreach (var data in pokemon.Where(data => data != null))
+            {
+                var nickname = data.Nickname.Length > 18 ? data.Nickname.Substring(0, 18) : data.Nickname;
+                var pokemonModel = DexUtility.GetNewPokemon(data.SpeciesName, nickname, data.Form);
+                pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
+                pokemonModel.OriginalTrainerId = trainer.TrainerId;
+                pokemonModel.TrainerId = trainer.TrainerId;
+                pokemonModel.GameId = trainer.GameId;
+                pokemonModel.Pokeball = Pokeball.Basic_Ball.ToString().Replace("_", "");
+                DatabaseUtility.TryAddPokemon(pokemonModel, out _);
+                var game = DatabaseUtility.FindGame(trainer.GameId);
+                var caughtPokemonLog = new LogModel
+                {
+                    User = trainer.TrainerName,
+                    Action = $"caught a {pokemonModel.SpeciesName} named {pokemonModel.Nickname} at {DateTime.UtcNow}"
+                };
+                DatabaseUtility.UpdateGameLogs(game, caughtPokemonLog);
+                if (DatabaseUtility.GetPokedexItem(trainer.TrainerId, pokemonModel.DexNo) == null)
+                {
+                    DatabaseUtility.TryAddDexItem(trainer.TrainerId, trainer.GameId, pokemonModel.DexNo, true, true, out _);
+                }
+                else
+                {
+                    DatabaseUtility.UpdateDexItemIsCaught(trainer.TrainerId, pokemonModel.DexNo);
+                }
+            }
+        }
+        
+        private static void SetStartingEquipmentWithOrigin(TrainerModel trainer)
+        {
+            var OriginModel = DexUtility.GetOrigin(trainer.Origin);
+            trainer.Items = OriginModel.StartingEquipmentList.Select(ConvertStartingEquipment).ToList();
+        }
+
+        private static ItemModel ConvertStartingEquipment(StartingEquipment s)
+        {
+            BaseItemModel baseItem = s.Type switch
+            {
+                StartingEquipmentType.Trainer => DexUtility.GetDexEntry<BaseItemModel>(DexType.TrainerEquipment, s.Name),
+                StartingEquipmentType.None => throw new ArgumentOutOfRangeException(nameof(s.Type)),
+                StartingEquipmentType.Pokeball => DexUtility.GetDexEntry<BaseItemModel>(DexType.Pokeballs, s.Name),
+                StartingEquipmentType.Medical => DexUtility.GetDexEntry<BaseItemModel>(DexType.MedicalItems, s.Name),
+                StartingEquipmentType.Berry => DexUtility.GetDexEntry<BaseItemModel>(DexType.Berries, s.Name),
+                StartingEquipmentType.Pokemon => DexUtility.GetDexEntry<BaseItemModel>(DexType.PokemonItems, s.Name),
+                _ => throw new ArgumentOutOfRangeException(nameof(s.Type)),
+            };
+            var item = new ItemModel
+            {
+                Name = baseItem.Name,
+                Effects = baseItem.Effects,
+                Amount = s.Amount,
+                Type = s.Type.ToString()
+            };
+            return item;
         }
     }
 }
