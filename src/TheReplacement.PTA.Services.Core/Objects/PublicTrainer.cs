@@ -79,6 +79,10 @@ namespace TheReplacement.PTA.Services.Core.Objects
             trainer.Species = Species;
             trainer.CurrentHP = CurrentHP;
             trainer.Sprite = Sprite;
+            if (!(IsComplete || string.IsNullOrEmpty(Origin)))
+            {
+                trainer.IsComplete = true;
+            }
             return trainer;
         }
 
