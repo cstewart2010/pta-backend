@@ -92,7 +92,6 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(error);
             }
 
-            Response.RefreshToken(gameMasterId);
             return npc;
         }
 
