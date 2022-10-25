@@ -11,6 +11,14 @@ namespace TheReplacement.PTA.Common.Models
     /// </summary>
     public class LogModel
     {
+        private LogModel() { }
+
+        public LogModel(string user, string action)
+        {
+            User = user;
+            Action = action;
+            LogTimestamp = DateTime.UtcNow;
+        }
         /// <summary>
         /// The user that the log comes from
         /// </summary>
@@ -20,5 +28,7 @@ namespace TheReplacement.PTA.Common.Models
         /// The action being logged
         /// </summary>
         public string Action { get; set; }
+
+        public DateTime? LogTimestamp { get; set; }
     }
 }

@@ -74,10 +74,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return items.Select(item => new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"added ({item.Amount}) {item.Name} at {DateTime.UtcNow}"
-            });
+            (
+                user: trainer.TrainerName,
+                action: $"added ({item.Amount}) {item.Name}"
+            ));
         }
 
         protected static IEnumerable<LogModel> RemoveItemsFromTrainer(TrainerModel trainer, IEnumerable<ItemModel> items)
@@ -106,10 +106,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             return items.Select(item => new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"removed ({item.Amount}) {item.Name} at {DateTime.UtcNow}"
-            });
+            (
+                user: trainer.TrainerName,
+                action: $"removed ({item.Amount}) {item.Name}"
+            ));
         }
 
         protected bool IsGameAuthenticated(

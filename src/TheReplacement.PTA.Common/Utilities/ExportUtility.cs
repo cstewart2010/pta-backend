@@ -101,10 +101,10 @@ namespace TheReplacement.PTA.Common.Utilities
                 game.Logs = Array.Empty<LogModel>();
             }
             game.Logs = game.Logs.Append(new LogModel
-            {
-                User = "Import Tool",
-                Action = $"Recreated game {game.GameId} at {DateTime.Now}"
-            });
+            (
+                user:"Import Tool",
+                action: $"Recreated game {game.GameId}"
+            ));
             if (!DatabaseUtility.TryAddGame(game, out var error))
             {
                 errors.Add(error.WriteErrorJsonString);

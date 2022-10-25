@@ -92,11 +92,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             if (result)
             {
                 var game = DatabaseUtility.FindGame(trainer.GameId);
-                var statsAddedLog = new LogModel
-                {
-                    User = trainer.TrainerName,
-                    Action = $"updated their stats at {DateTime.UtcNow}"
-                };
+                var statsAddedLog = new LogModel(trainer.TrainerName, $"updated their stats");
                 DatabaseUtility.UpdateGameLogs(game, statsAddedLog);
             }
 
@@ -171,11 +167,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 pokemonModel.Pokeball = Pokeball.Basic_Ball.ToString().Replace("_", "");
                 DatabaseUtility.TryAddPokemon(pokemonModel, out _);
                 var game = DatabaseUtility.FindGame(trainer.GameId);
-                var caughtPokemonLog = new LogModel
-                {
-                    User = trainer.TrainerName,
-                    Action = $"caught a {pokemonModel.SpeciesName} named {pokemonModel.Nickname} at {DateTime.UtcNow}"
-                };
+                var caughtPokemonLog = new LogModel(trainer.TrainerName, $"caught a {pokemonModel.SpeciesName} named {pokemonModel.Nickname}");
                 DatabaseUtility.UpdateGameLogs(game, caughtPokemonLog);
                 if (DatabaseUtility.GetPokedexItem(trainer.TrainerId, pokemonModel.DexNo) == null)
                 {

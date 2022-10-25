@@ -75,10 +75,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var leftTrainer = DatabaseUtility.FindTrainerById(rightPokemon.TrainerId, gameId);
             var rightTrainer = DatabaseUtility.FindTrainerById(leftPokemon.TrainerId, gameId);
             var tradeLog = new LogModel
-            {
-                User = gameMaster.TrainerName,
-                Action = $"authorized a trade between {leftTrainer.TrainerName} and {rightTrainer.TrainerName} at {DateTime.UtcNow}"
-            };
+            (
+                user: gameMaster.TrainerName,
+                action: $"authorized a trade between {leftTrainer.TrainerName} and {rightTrainer.TrainerName}"
+            );
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), tradeLog);
             Response.RefreshToken(gameMasterId);
             return new
@@ -145,10 +145,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
             var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
             var changedFormLog = new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"changed their {pokemon.Nickname} to its {form} form at {DateTime.UtcNow}"
-            };
+            (
+                user: trainer.TrainerName,
+                action: $"changed their {pokemon.Nickname} to its {form} form"
+            );
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), changedFormLog);
             Response.RefreshToken(trainerId);
             return result;
@@ -174,10 +174,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest(new GenericMessage($"Failed to mark pokemon {pokemonId} as evolvable"));
             }
             var evolutionLog = new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"can now evolve their {pokemon.Nickname} at {DateTime.UtcNow}"
-            };
+            (
+                user: trainer.TrainerName,
+                action: $"can now evolve their {pokemon.Nickname}"
+            );
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), evolutionLog);
             Response.RefreshToken(gameMasterId);
             return Ok();
@@ -217,10 +217,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
             var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
             var evolutionLog = new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"evolved their {pokemon.Nickname} to an {evolvedForm.SpeciesName} at {DateTime.UtcNow}"
-            };
+            (
+                user: trainer.TrainerName,
+                action: $"evolved their {pokemon.Nickname} to an {evolvedForm.SpeciesName}"
+            );
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), evolutionLog);
             var dexItem = DatabaseUtility.GetPokedexItem(trainerId, evolvedForm.DexNo);
             if (dexItem != null)

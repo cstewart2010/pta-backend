@@ -98,10 +98,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var updatedHonorsLog = new LogModel
-            {
-                User = "The party",
-                Action = $"has earned a new honor: {honor}"
-            };
+            (
+                user: "The party",
+                action: $"has earned a new honor: {honor}"
+            );
 
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), updatedHonorsLog);
             Response.RefreshToken(gameMasterId);
@@ -134,12 +134,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 throw new Exception();
             }
 
-            var updatedHonorsLog = new LogModel
-            {
-                User = gameMaster.TrainerName,
-                Action = $"has granted {trainer.TrainerName} a new honor"
-            };
-
+            var updatedHonorsLog = new LogModel(user: gameMaster.TrainerName, action: $"has granted {trainer.TrainerName} a new honor");
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), updatedHonorsLog);
             Response.RefreshToken(gameMasterId);
             return new GenericMessage($"Granted {trainerId} honor: {honor}");
@@ -321,11 +316,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return NotFound();
             }
 
-            var deleteTrainerLog = new LogModel
-            {
-                User = gameMaster.TrainerName,
-                Action = $"removed {trainer.TrainerName} and all of their pokemon from the game at {DateTime.UtcNow}"
-            };
+            var deleteTrainerLog = new LogModel(user: gameMaster.TrainerName, action: $"removed {trainer.TrainerName} and all of their pokemon from the game");
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), deleteTrainerLog);
             Response.RefreshToken(gameMasterId);
             return new GenericMessage($"Successfully deleted all pokemon associated with {trainerId}");

@@ -16,7 +16,7 @@ namespace TheReplacement.PTA.Services.Core.Messages
                 return;
             }
 
-            var logs = game.Logs.Reverse();
+            var logs = game.Logs.OrderByDescending(log => log.LogTimestamp);
             for (int i = 0; i < logs.Count(); i += 50)
             {
                 LogPages.Add(GetPage(logs, i, 50));

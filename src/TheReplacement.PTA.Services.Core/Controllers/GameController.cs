@@ -123,7 +123,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Array.Empty<LogModel>();
             }
 
-            return game.Logs.Reverse().Take(50).ToArray();
+            return game.Logs.OrderByDescending(log => log.LogTimestamp).Take(50).ToArray();
         }
 
         [HttpPost("import")]
@@ -164,10 +164,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var gameCreationLog = new LogModel
-            {
-                User = gm.TrainerName,
-                Action = $"created a new game and joined as game master at {DateTime.UtcNow}"
-            };
+            (
+                user: gm.TrainerName,
+                action: "created a new game and joined as game master"
+            );
             DatabaseUtility.UpdateGameLogs(game, gameCreationLog);
             Response.RefreshToken(userId);
             return new CreatedGameMessage(gm);
@@ -204,10 +204,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var trainerCreationLog = new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"joined at {DateTime.UtcNow}"
-            };
+            (
+                user: trainer.TrainerName,
+                action: "joined"
+            );
             DatabaseUtility.UpdateGameLogs(game, trainerCreationLog);
             Response.RefreshToken(userId);
             return new FoundTrainerMessage(trainer.TrainerId, gameId);
@@ -234,10 +234,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
 
             var game = DatabaseUtility.FindGame(gameId);
             var pokemonCreationLog = new LogModel
-            {
-                User = pokemon.SpeciesName,
-                Action = $"spawned at {DateTime.UtcNow}"
-            };
+            (
+                user: pokemon.SpeciesName,
+                action: "spawned"
+            );
             DatabaseUtility.UpdateGameLogs(game, pokemonCreationLog);
             return pokemon;
         }
@@ -275,10 +275,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             trainer.IsAllowed = true;
             DatabaseUtility.UpdateTrainer(trainer);
             var log = new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"joined the game at {DateTime.UtcNow}"
-            };
+            (
+                user: trainer.TrainerName,
+                action: "joined the game"
+            );
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), log);
             Response.RefreshToken(gameMasterId);
             return Ok();
@@ -301,10 +301,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             trainer.IsAllowed = false;
             DatabaseUtility.UpdateTrainer(trainer);
             var log = new LogModel
-            {
-                User = trainer.TrainerName,
-                Action = $"was removed from the game at {DateTime.UtcNow}"
-            };
+            (
+                user: trainer.TrainerName,
+                action: "was removed from the game"
+            );
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), log);
             Response.RefreshToken(gameMasterId);
             return Ok();
@@ -465,10 +465,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             }
 
             var exportLog = new LogModel
-            {
-                User = gameMaster.TrainerName,
-                Action = $"exported game session at {DateTime.UtcNow}"
-            };
+            (
+                user: gameMaster.TrainerName,
+                action: "exported game session"
+            );
             DatabaseUtility.UpdateGameOnlineStatus(gameId, false);
             DatabaseUtility.UpdateGameLogs(game, exportLog);
             var exportStream = ExportUtility.GetExportStream(game);

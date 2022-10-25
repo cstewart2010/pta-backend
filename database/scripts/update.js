@@ -48,6 +48,16 @@ const updatedValidators = {
               },
               Action: {
                 bsonType: 'string'
+              },
+              LogTimestamp: {
+                oneOf: [
+                  {
+                    bsonType: 'date'
+                  },
+                  {
+                    bsonType: 'null'
+                  }
+                ]
               }
             }
           }

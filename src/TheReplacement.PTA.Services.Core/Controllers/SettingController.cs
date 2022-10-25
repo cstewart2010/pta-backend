@@ -230,10 +230,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
             var random = new Random();
             var check = random.Next(1, 101) + pokeballModifier;
             var log = new LogModel
-            {
-                User = DatabaseUtility.FindTrainerById(trainerId, gameId).TrainerName,
-                Action = $"failed to catch {pokemon.Nickname} at {DateTime.UtcNow}"
-            };
+            (
+                user: DatabaseUtility.FindTrainerById(trainerId, gameId).TrainerName,
+                action: $"failed to catch {pokemon.Nickname}"
+            );
 
             if (check < catchRate)
             {
@@ -447,11 +447,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest();
             }
 
-            var newSettingLog = new LogModel
-            {
-                User = gameMaster.TrainerName,
-                Action = $"activated a new encounter ({encounter.Name}) at {DateTime.Now}"
-            };
+            var newSettingLog = new LogModel(user: gameMaster.TrainerName, action: $"activated a new encounter ({encounter.Name})");
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameMaster.GameId), newSettingLog);
             return Ok();
         }
@@ -595,12 +591,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return BadRequest();
             }
 
-            var removalLog = new LogModel
-            {
-                User = removedParticipant.Name,
-                Action = $"has been removed from {encounter.Name} at {DateTime.Now}"
-            };
-
+            var removalLog = new LogModel(user: removedParticipant.Name, action: $"has been removed from {encounter.Name}");
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), removalLog);
             return Ok();
         }
@@ -721,10 +712,10 @@ namespace TheReplacement.PTA.Services.Core.Controllers
         private static void SendRepositionLog(Guid gameId, string participantName, MapPositionModel position)
         {
             var repositionLog = new LogModel
-            {
-                User = participantName,
-                Action = $"moved to point ({position.X}, {position.Y}) at {DateTime.Now}"
-            };
+            (
+                user: participantName,
+                action: $"moved to point ({position.X}, {position.Y})"
+            );
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(gameId), repositionLog);
         }
 
