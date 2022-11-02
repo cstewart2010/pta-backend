@@ -619,11 +619,12 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Searches the database for a pokedex entry
         /// </summary>
         /// <param name="trainerId">The trainer's id to search with</param>
+        /// <param name="gameId">The game session id</param>
         /// <param name="dexNo">The dex number for the pokemon</param>
-        public static PokeDexItemModel GetPokedexItem(Guid trainerId, int dexNo)
+        public static PokeDexItemModel GetPokedexItem(Guid trainerId, Guid gameId, int dexNo)
         {
             return MongoCollectionHelper.PokeDex
-                .Find(dexItem => dexItem.TrainerId == trainerId && dexItem.DexNo == dexNo)
+                .Find(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo)
                 .SingleOrDefault();
         }
 
@@ -961,13 +962,14 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Updates the pokedex entry for a seen pokemon
         /// </summary>
         /// <param name="trainerId">The trainer's id to search with</param>
+        /// <param name="gameId">The game session id</param>
         /// <param name="dexNo">The dex number for the pokemon</param>
-        public static bool UpdateDexItemIsSeen(Guid trainerId, int dexNo)
+        public static bool UpdateDexItemIsSeen(Guid trainerId, Guid gameId, int dexNo)
         {
             return TryUpdateDocument
             (
                 MongoCollectionHelper.PokeDex,
-                dexItem => dexItem.TrainerId == trainerId && dexItem.DexNo == dexNo,
+                dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
                 Builders<PokeDexItemModel>.Update.Set("IsSeen", true)
             );
         }
@@ -976,8 +978,9 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Updates the pokedex entry for a caught pokemon
         /// </summary>
         /// <param name="trainerId">The trainer's id to search with</param>
+        /// <param name="gameId">The game session id</param>
         /// <param name="dexNo">The dex number for the pokemon</param>
-        public static bool UpdateDexItemIsCaught(Guid trainerId, int dexNo)
+        public static bool UpdateDexItemIsCaught(Guid trainerId, Guid gameId, int dexNo)
         {
             var updates = Builders<PokeDexItemModel>
                 .Update
@@ -990,7 +993,7 @@ namespace TheReplacement.PTA.Common.Utilities
             return TryUpdateDocument
             (
                 MongoCollectionHelper.PokeDex,
-                dexItem => dexItem.TrainerId == trainerId && dexItem.DexNo == dexNo,
+                dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
                 updates
             );
         }

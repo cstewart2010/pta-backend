@@ -318,7 +318,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return Unauthorized();
             }
 
-            var result = await Request.TryCompleteTrainer();
+            var result = await Request.TryCompleteTrainer(trainerId, gameId);
             if (!result)
             {
                 return BadRequest(new GenericMessage("Failed to update trainer"));

@@ -222,18 +222,18 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 action: $"evolved their {pokemon.Nickname} to an {evolvedForm.SpeciesName}"
             );
             DatabaseUtility.UpdateGameLogs(DatabaseUtility.FindGame(trainer.GameId), evolutionLog);
-            var dexItem = DatabaseUtility.GetPokedexItem(trainerId, evolvedForm.DexNo);
+            var dexItem = DatabaseUtility.GetPokedexItem(trainerId, gameId, evolvedForm.DexNo);
             if (dexItem != null)
             {
                 if (!dexItem.IsCaught)
                 {
-                    if (!DatabaseUtility.UpdateDexItemIsCaught(trainerId, evolvedForm.DexNo))
+                    if (!DatabaseUtility.UpdateDexItemIsCaught(trainerId, gameId, evolvedForm.DexNo))
                     {
                         return BadRequest(new GenericMessage("Failed to update Dex Item"));
                     }
                 }
             }
-            else if (!DatabaseUtility.UpdateDexItemIsCaught(trainerId, evolvedForm.DexNo))
+            else if (!DatabaseUtility.UpdateDexItemIsCaught(trainerId, gameId, evolvedForm.DexNo))
             {
                 return BadRequest(new GenericMessage("Failed to update Dex Item"));
             }
@@ -250,14 +250,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return actionResult;
             }
 
-            var dexItem = DatabaseUtility.GetPokedexItem(trainerId, dexNo);
+            var dexItem = DatabaseUtility.GetPokedexItem(trainerId, gameId, dexNo);
             if (dexItem != null)
             {
                 if (dexItem.IsSeen)
                 {
                     return new GenericMessage("Pokemon was already seen");
                 }
-                if (!DatabaseUtility.UpdateDexItemIsSeen(trainerId, dexNo))
+                if (!DatabaseUtility.UpdateDexItemIsSeen(trainerId, gameId, dexNo))
                 {
                     return BadRequest(new GenericMessage("Failed to update Dex Item"));
                 }
@@ -277,14 +277,14 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 return actionResult;
             }
 
-            var dexItem = DatabaseUtility.GetPokedexItem(trainerId, dexNo);
+            var dexItem = DatabaseUtility.GetPokedexItem(trainerId, gameId, dexNo);
             if (dexItem != null)
             {
                 if (dexItem.IsCaught)
                 {
                     return new GenericMessage("Pokemon was already caught");
                 }
-                if (!DatabaseUtility.UpdateDexItemIsCaught(trainerId, dexNo))
+                if (!DatabaseUtility.UpdateDexItemIsCaught(trainerId, gameId, dexNo))
                 {
                     return BadRequest(new GenericMessage("Failed to update Dex Item"));
                 }

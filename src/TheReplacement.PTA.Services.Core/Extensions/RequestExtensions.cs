@@ -81,10 +81,14 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             var result = DatabaseUtility.UpdateNpc(npc);
             return result;
         }
-        public static async Task<bool> TryCompleteTrainer(this HttpRequest request)
+        public static async Task<bool> TryCompleteTrainer(this HttpRequest request, Guid trainerId, Guid gameId)
         {
             var json = await request.GetRequestBody();
             var publicTrainer = PublicTrainer.FromJson(json);
+            if (!CheckRequestingTrainer(trainerId, gameId, publicTrainer))
+            {
+                return false;
+            }
             var trainer = publicTrainer.ParseBackToModel();
             AddTrainerPokemon(publicTrainer.NewPokemon, trainer);
             SetStartingEquipmentWithOrigin(trainer);
@@ -92,7 +96,7 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             if (result)
             {
                 var game = DatabaseUtility.FindGame(trainer.GameId);
-                var statsAddedLog = new LogModel(trainer.TrainerName, $"updated their stats");
+                var statsAddedLog = new LogModel(trainer.TrainerName, $"has updated stats");
                 DatabaseUtility.UpdateGameLogs(game, statsAddedLog);
             }
 
@@ -154,6 +158,23 @@ namespace TheReplacement.PTA.Services.Core.Extensions
             return Array.Empty<Guid>();
         }
 
+        private static bool CheckRequestingTrainer(Guid trainerId, Guid gameId, PublicTrainer trainer)
+        {
+            var user = DatabaseUtility.FindUserById(trainerId);
+            var requestingTrainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
+            if (Enum.TryParse<UserRoleOnSite>(user.SiteRole, true, out var result) && result == UserRoleOnSite.SiteAdmin)
+            {
+                return true;
+            }
+
+            if (trainer.GameId != requestingTrainer.GameId)
+            {
+                return false;
+            }
+
+            return trainer.TrainerId == trainerId || requestingTrainer.IsGM;
+        }
+
         private static void AddTrainerPokemon(IEnumerable<NewPokemon> pokemon, TrainerModel trainer)
         {
             foreach (var data in pokemon.Where(data => data != null))
@@ -169,13 +190,13 @@ namespace TheReplacement.PTA.Services.Core.Extensions
                 var game = DatabaseUtility.FindGame(trainer.GameId);
                 var caughtPokemonLog = new LogModel(trainer.TrainerName, $"caught a {pokemonModel.SpeciesName} named {pokemonModel.Nickname}");
                 DatabaseUtility.UpdateGameLogs(game, caughtPokemonLog);
-                if (DatabaseUtility.GetPokedexItem(trainer.TrainerId, pokemonModel.DexNo) == null)
+                if (DatabaseUtility.GetPokedexItem(trainer.TrainerId, trainer.GameId, pokemonModel.DexNo) == null)
                 {
                     DatabaseUtility.TryAddDexItem(trainer.TrainerId, trainer.GameId, pokemonModel.DexNo, true, true, out _);
                 }
                 else
                 {
-                    DatabaseUtility.UpdateDexItemIsCaught(trainer.TrainerId, pokemonModel.DexNo);
+                    DatabaseUtility.UpdateDexItemIsCaught(trainer.TrainerId, trainer.GameId, pokemonModel.DexNo);
                 }
             }
         }

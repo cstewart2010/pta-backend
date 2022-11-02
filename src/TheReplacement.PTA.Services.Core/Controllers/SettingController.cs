@@ -681,7 +681,7 @@ namespace TheReplacement.PTA.Services.Core.Controllers
                 Pokeball.Grassland_Ball => environment.HasFlag(Environments.Grassland) ? -12 : consideredBasic,
                 Pokeball.Marsh_Ball => environment.HasFlag(Environments.Marsh) ? -12 : consideredBasic,
                 Pokeball.Quick_Ball => consideredBasic,
-                Pokeball.Repeat_Ball => DatabaseUtility.GetPokedexItem(trainerId, pokemon.DexNo)?.IsCaught == true ? -10 : consideredBasic,
+                Pokeball.Repeat_Ball => DatabaseUtility.GetPokedexItem(trainerId, pokemon.GameId, pokemon.DexNo)?.IsCaught == true ? -10 : consideredBasic,
                 Pokeball.Dream_Ball => Enum.TryParse<Status>(pokemon.PokemonStatus, true, out var result) && result == Status.Asleep ? -10 : consideredBasic,
                 Pokeball.Moon_Ball => consideredBasic,
                 Pokeball.Dusk_Ball => environment.HasFlag(Environments.NoSunlight) ? -12 : consideredBasic,
