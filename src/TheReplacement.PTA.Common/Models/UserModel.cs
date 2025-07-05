@@ -10,19 +10,19 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a User in Pokemon Tabletop Adventures 
     /// </summary>
-    public class UserModel : IAuthenticated, IDocument
+    public class UserModelv1 : IAuthenticated, IDocument
     {
         /// <summary>
         /// The default constructor for the MongoDB Csharp Driver
         /// </summary>
-        public UserModel() { }
+        public UserModelv1() { }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="UserModel"/>
+        /// Initializes a new instance of <see cref="UserModelv1"/>
         /// </summary>
         /// <param name="username"></param>
         /// <param name="password"></param>
-        public UserModel(string username, string password)
+        public UserModelv1(string username, string password)
         {
             UserId = Guid.NewGuid();
             Username = username;

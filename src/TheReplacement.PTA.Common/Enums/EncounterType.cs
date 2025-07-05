@@ -8,7 +8,7 @@ using TheReplacement.PTA.Common.Models;
 namespace TheReplacement.PTA.Common.Enums
 {
     /// <summary>
-    /// Container for all possible <see cref="SettingModel"/> types
+    /// Container for all possible <see cref="SettingModelv1"/> types
     /// </summary>
     public enum SettingType
     {

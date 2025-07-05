@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a container for data regarding a particular trainer skill
     /// </summary>
-    public class TrainerSkill
+    public class TrainerSkillv1
     {
         /// <summary>
         /// The skill name

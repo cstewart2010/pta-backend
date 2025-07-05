@@ -8,7 +8,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a shop in a PTA session
     /// </summary>
-    public class ShopModel : IDocument
+    public class ShopModelv1 : IDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }
@@ -36,6 +36,6 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// A collection of items on sale
         /// </summary>
-        public Dictionary<string, WareModel> Inventory { get; set; }
+        public Dictionary<string, WareModelv1> Inventory { get; set; }
     }
 }

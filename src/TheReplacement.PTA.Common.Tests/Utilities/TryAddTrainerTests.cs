@@ -108,7 +108,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
         public void TryAddTrainer_ItemValid_True()
         {
             var trainer = GetTestTrainer();
-            trainer.Items.Add(new ItemModel
+            trainer.Items.Add(new ItemModelv1
             {
                 Name = "Test Item",
                 Effects = "",
@@ -128,7 +128,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             int amount)
         {
             var trainer = GetTestTrainer();
-            trainer.Items.Add(new ItemModel
+            trainer.Items.Add(new ItemModelv1
             {
                 Name = name,
                 Amount = amount

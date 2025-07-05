@@ -31,11 +31,11 @@ namespace MongoDbImportTool.Builders
             }
         }
 
-        private static IEnumerable<SpriteModel> GetSprites(string path)
+        private static IEnumerable<SpriteModelv1> GetSprites(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {
-                yield return child.ToObject<SpriteModel>();
+                yield return child.ToObject<SpriteModelv1>();
             }
         }
     }

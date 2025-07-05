@@ -5,19 +5,19 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a message in Pokemon Tabletop Adventures 
     /// </summary>
-    public class UserMessageModel
+    public class UserMessageModelv1
     {
         /// <summary>
         /// The default constructor for the MongoDb Csharp Driver
         /// </summary>
-        public UserMessageModel() { }
+        public UserMessageModelv1() { }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="UserMessageModel"/>
+        /// Initializes a new instance of <see cref="UserMessageModelv1"/>
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="messageContent"></param>
-        public UserMessageModel(Guid userId, string messageContent)
+        public UserMessageModelv1(Guid userId, string messageContent)
         {
             Timestamp = DateTime.UtcNow.ToString();
             Message = messageContent;

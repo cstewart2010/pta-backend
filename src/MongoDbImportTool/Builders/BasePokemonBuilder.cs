@@ -31,7 +31,7 @@ namespace MongoDbImportTool.Builders
             DexUtility.AddPokedexEntries(GetPokemon(BasePokemonJson));
         }
 
-        private static IEnumerable<BasePokemonModel> GetPokemon(string path)
+        private static IEnumerable<BasePokemonModelv1> GetPokemon(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {
@@ -39,9 +39,9 @@ namespace MongoDbImportTool.Builders
             }
         }
 
-        private static BasePokemonModel Build(JToken pokemonToken)
+        private static BasePokemonModelv1 Build(JToken pokemonToken)
         {
-            var pokemon = new BasePokemonModel
+            var pokemon = new BasePokemonModelv1
             {
                 Name = BuildPokemonName(pokemonToken),
                 BaseFormName = BuildBaseForm(pokemonToken),
@@ -81,9 +81,9 @@ namespace MongoDbImportTool.Builders
             return JsonHelper.GetStringFromToken(pokemonToken, "Pokemon");
         }
 
-        private static StatsModel BuildStats(JToken pokemonToken)
+        private static StatsModelv1 BuildStats(JToken pokemonToken)
         {
-            return new StatsModel
+            return new StatsModelv1
             {
                 HP = (int)pokemonToken["HP"],
                 Attack = (int)pokemonToken["Attack"],
@@ -221,7 +221,7 @@ namespace MongoDbImportTool.Builders
             return JsonHelper.GetIntFromToken(pokemonToken, "Stage");
         }
 
-        private static LegendaryStatsModel BuildLegendaryStats(JToken pokemonToken)
+        private static LegendaryStatsModelv1 BuildLegendaryStats(JToken pokemonToken)
         {
             var hp = JsonHelper.GetStringFromTokenOrDefault(pokemonToken, "Legendary HP");
             if (string.IsNullOrEmpty(hp))
@@ -229,7 +229,7 @@ namespace MongoDbImportTool.Builders
                 return GetNonLegendaryStats();
             }
 
-            return new LegendaryStatsModel
+            return new LegendaryStatsModelv1
             {
                 HP = int.Parse(hp),
                 Moves = pokemonToken.Children<JProperty>()
@@ -250,9 +250,9 @@ namespace MongoDbImportTool.Builders
                 .Where(JsonHelper.IsStringWithValue),
             };
         }
-        private static LegendaryStatsModel GetNonLegendaryStats()
+        private static LegendaryStatsModelv1 GetNonLegendaryStats()
         {
-            return new LegendaryStatsModel
+            return new LegendaryStatsModelv1
             {
                 Moves = Array.Empty<string>(),
                 LegendaryMoves = Array.Empty<string>(),

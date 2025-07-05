@@ -27,7 +27,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             Logger.WriteLine($"Updating trainer id {trainer.TrainerId} with new items");
             var itemList = new[]
             {
-                new ItemModel
+                new ItemModelv1
                 {
                     Name = "Potion",
                     Effects= "Restores 20 HPs",

@@ -8,7 +8,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a Pokemon Tabletop Adventures game session
     /// </summary>
-    public class GameModel : IAuthenticated, IDocument
+    public class GameModelv1 : IAuthenticated, IDocument
     {
         /// <inheritdoc />
         public ObjectId _id { get; set; }
@@ -37,6 +37,6 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Collection of logs related to the game
         /// </summary>
-        public IEnumerable<LogModel> Logs { get; set; }
+        public IEnumerable<LogModelv1> Logs { get; set; }
     }
 }

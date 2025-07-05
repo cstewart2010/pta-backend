@@ -16,7 +16,7 @@ namespace MongoDbImportTool.Builders
             DatabaseHelper.AddDocuments("Origins", GetOrigins(OriginsJson));
         }
 
-        private static IEnumerable<OriginModel> GetOrigins(string path)
+        private static IEnumerable<OriginModelv1> GetOrigins(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {
@@ -24,9 +24,9 @@ namespace MongoDbImportTool.Builders
             }
         }
 
-        private static OriginModel Build(JToken originToken)
+        private static OriginModelv1 Build(JToken originToken)
         {
-            var model =  new OriginModel
+            var model =  new OriginModelv1
             {
                 Name = JsonHelper.GetNameFromToken(originToken),
                 Skill = JsonHelper.GetStringFromToken(originToken, "Skill Talent"),
@@ -34,7 +34,7 @@ namespace MongoDbImportTool.Builders
                 Savings = JsonHelper.GetIntFromToken(originToken, "Savings"),
                 Equipment = JsonHelper.GetStringFromToken(originToken, "Starting Equipment"),
                 StartingPokemon = JsonHelper.GetStringFromToken(originToken, "Starting Pokemon"),
-                Feature = new FeatureModel
+                Feature = new FeatureModelv1
                 {
                     Name = JsonHelper.GetStringFromToken(originToken, "Feature Name"),
                     Effects = JsonHelper.GetStringFromToken(originToken, "Feature Effects")

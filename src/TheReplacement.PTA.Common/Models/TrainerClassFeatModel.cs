@@ -1,9 +1,9 @@
 ﻿namespace TheReplacement.PTA.Common.Models
 {
     /// <summary>
-    /// Represents a <see cref="FeatureModel"/> learned as part of a <see cref="TrainerClassModel"/>
+    /// Represents a <see cref="FeatureModelv1"/> learned as part of a <see cref="TrainerClassModelv1"/>
     /// </summary>
-    public class TrainerClassFeatModel
+    public class TrainerClassFeatModelv1
     {
         /// <summary>
         /// The naem of the feature

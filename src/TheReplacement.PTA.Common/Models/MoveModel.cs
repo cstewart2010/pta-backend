@@ -7,7 +7,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an move in the MoveDex
     /// </summary>
-    public class MoveModel : IDocument, IDexDocument
+    public class MoveModelv1 : IDocument, IDexDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }

@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a participant's position on the Enocunter Map
     /// </summary>
-    public class MapPositionModel
+    public class MapPositionModelv1
     {
         /// <summary>
         /// The x position on the Setting map

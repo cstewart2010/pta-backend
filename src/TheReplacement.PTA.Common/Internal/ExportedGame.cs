@@ -9,14 +9,14 @@ namespace TheReplacement.PTA.Common.Internal
     {
         public ExportedGame() { }
 
-        public ExportedGame(GameModel game)
+        public ExportedGame(GameModelv1 game)
         {
             GameSession = game;
             var trainers = DatabaseUtility.FindTrainersByGameId(game.GameId);
             Trainers = trainers.Select(trainer => new ExportedTrainer(trainer));
         }
 
-        public GameModel GameSession { get; set; }
+        public GameModelv1 GameSession { get; set; }
         public IEnumerable<ExportedTrainer> Trainers { get; set; }
     }
 }

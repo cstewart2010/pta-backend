@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31025.194
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36202.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheReplacement.PTA.Services.Core", "TheReplacement.PTA.Services.Core\TheReplacement.PTA.Services.Core.csproj", "{19DE7314-AADA-4386-86FD-DD65BFDC7EE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonTabletopAdventures.CoreApi", "TheReplacement.PTA.Services.Core\PokemonTabletopAdventures.CoreApi.csproj", "{19DE7314-AADA-4386-86FD-DD65BFDC7EE0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheReplacement.PTA.Common", "TheReplacement.PTA.Common\TheReplacement.PTA.Common.csproj", "{CA082826-74F3-4550-876E-0EB13FB3238E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheReplacement.PTA.Common.Tests", "TheReplacement.PTA.Common.Tests\TheReplacement.PTA.Common.Tests.csproj", "{23F42E15-63F4-49CE-8650-DF39112B50BD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoDbImportTool", "MongoDbImportTool\MongoDbImportTool.csproj", "{BEBA12BA-4956-4D4D-8D07-6F5E039A05FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonTabletopAdventures.Models", "PokemonTabletopAdventures.Models\PokemonTabletopAdventures.Models.csproj", "{185033D1-418F-4143-BB7C-346497A49DA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,14 +35,6 @@ Global
 		{CA082826-74F3-4550-876E-0EB13FB3238E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CA082826-74F3-4550-876E-0EB13FB3238E}.Release|x64.ActiveCfg = Release|Any CPU
 		{CA082826-74F3-4550-876E-0EB13FB3238E}.Release|x64.Build.0 = Release|Any CPU
-		{23F42E15-63F4-49CE-8650-DF39112B50BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23F42E15-63F4-49CE-8650-DF39112B50BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23F42E15-63F4-49CE-8650-DF39112B50BD}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{23F42E15-63F4-49CE-8650-DF39112B50BD}.Debug|x64.Build.0 = Debug|Any CPU
-		{23F42E15-63F4-49CE-8650-DF39112B50BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23F42E15-63F4-49CE-8650-DF39112B50BD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{23F42E15-63F4-49CE-8650-DF39112B50BD}.Release|x64.ActiveCfg = Release|Any CPU
-		{23F42E15-63F4-49CE-8650-DF39112B50BD}.Release|x64.Build.0 = Release|Any CPU
 		{BEBA12BA-4956-4D4D-8D07-6F5E039A05FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BEBA12BA-4956-4D4D-8D07-6F5E039A05FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEBA12BA-4956-4D4D-8D07-6F5E039A05FD}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -51,6 +43,14 @@ Global
 		{BEBA12BA-4956-4D4D-8D07-6F5E039A05FD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BEBA12BA-4956-4D4D-8D07-6F5E039A05FD}.Release|x64.ActiveCfg = Release|Any CPU
 		{BEBA12BA-4956-4D4D-8D07-6F5E039A05FD}.Release|x64.Build.0 = Release|Any CPU
+		{185033D1-418F-4143-BB7C-346497A49DA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{185033D1-418F-4143-BB7C-346497A49DA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{185033D1-418F-4143-BB7C-346497A49DA1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{185033D1-418F-4143-BB7C-346497A49DA1}.Debug|x64.Build.0 = Debug|Any CPU
+		{185033D1-418F-4143-BB7C-346497A49DA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{185033D1-418F-4143-BB7C-346497A49DA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{185033D1-418F-4143-BB7C-346497A49DA1}.Release|x64.ActiveCfg = Release|Any CPU
+		{185033D1-418F-4143-BB7C-346497A49DA1}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

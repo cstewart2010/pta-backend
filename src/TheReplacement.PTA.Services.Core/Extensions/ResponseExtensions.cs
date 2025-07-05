@@ -1,38 +1,41 @@
 ﻿using Microsoft.AspNetCore.Http;
+using PokemonTabletopAdventures.CoreApi.Services;
 using System;
-using TheReplacement.PTA.Common.Utilities;
+using System.Threading.Tasks;
 
-namespace TheReplacement.PTA.Services.Core.Extensions
+namespace PokemonTabletopAdventures.CoreApi.Extensions;
+
+internal static class ResponseExtensions
 {
-    internal static class ResponseExtensions
+    public static async Task AssignAuthAndToken(
+        this HttpResponse response,
+        IEncryptionService encryptionService,
+        IUserService userService,
+        Guid trainerId)
     {
-        public static void AssignAuthAndToken(
-            this HttpResponse response,
-            Guid trainerId)
-        {
-            var token = EncryptionUtility.GenerateToken();
-            DatabaseUtility.UpdateUserActivityToken
-            (
-                trainerId,
-                token
-            );
+#if !DEBUG
+        var token = await encryptionService.GenerateToken();
+        await userService.UpdateUserActivityToken(trainerId, token);
+        var authHash = await encryptionService.HashSecret(RequestExtensions.AuthKey); ;
+        response.Headers.Append("pta-session-auth", authHash);
+        response.Headers.Append("pta-activity-token", token);
+#else
+        await Task.CompletedTask;
+#endif
+    }
 
-            response.Headers.Append("pta-session-auth", GetSessionAuth());
-            response.Headers.Append("pta-activity-token", token);
-        }
-
-        public static void RefreshToken(
-            this HttpResponse response,
-            Guid id)
-        {
-            var updatedToken = EncryptionUtility.GenerateToken();
-            DatabaseUtility.UpdateUserActivityToken(id, updatedToken);
-            response.Headers.Append("pta-activity-token", updatedToken);
-        }
-
-        private static string GetSessionAuth()
-        {
-            return EncryptionUtility.HashSecret(RequestExtensions.AuthKey);
-        }
+    public static async Task RefreshToken(
+        this HttpResponse response,
+        IEncryptionService encryptionService,
+        IUserService userService,
+        Guid id)
+    {
+#if !DEBUG
+        var updatedToken = await encryptionService.GenerateToken();
+        await userService.UpdateUserActivityToken(id, updatedToken);
+        response.Headers.Append("pta-activity-token", updatedToken);
+#else
+        await Task.CompletedTask;
+#endif
     }
 }

@@ -7,7 +7,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an origin in the OriginDex
     /// </summary>
-    public class OriginModel : IDocument, IDexDocument
+    public class OriginModelv1 : IDocument, IDexDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }
@@ -48,7 +48,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The Origin's specialized feature
         /// </summary>
-        public FeatureModel Feature { get; set; }
+        public FeatureModelv1 Feature { get; set; }
     }
 
     /// <summary>

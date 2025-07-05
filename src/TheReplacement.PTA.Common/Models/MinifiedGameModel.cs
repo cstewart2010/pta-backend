@@ -9,9 +9,9 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a Game Session for external use
     /// </summary>
-    public class MinifiedGameModel
+    public class MinifiedGameModelv1
     {
-        internal MinifiedGameModel(GameModel game)
+        internal MinifiedGameModelv1(GameModelv1 game)
         {
             GameId = game.GameId;
             Nickname = game.Nickname;

@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a Pokemon Tabletop Adventures item
     /// </summary>
-    public class ItemModel
+    public class ItemModelv1
     {
         /// <summary>
         /// The name of the item

@@ -13,7 +13,7 @@ namespace MongoDbImportTool.Builders
             DatabaseHelper.AddDocuments("Berries", GetBerries(BerryJson));
         }
 
-        private static IEnumerable<BerryModel> GetBerries(string path)
+        private static IEnumerable<BerryModelv1> GetBerries(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {
@@ -21,9 +21,9 @@ namespace MongoDbImportTool.Builders
             }
         }
 
-        private static BerryModel Build(JToken berryToken)
+        private static BerryModelv1 Build(JToken berryToken)
         {
-            return new BerryModel
+            return new BerryModelv1
             {
                 Name = JsonHelper.GetNameFromToken(berryToken),
                 Price = JsonHelper.GetIntFromToken(berryToken, "Price"),

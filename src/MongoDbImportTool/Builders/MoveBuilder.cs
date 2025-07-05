@@ -13,7 +13,7 @@ namespace MongoDbImportTool.Builders
             DatabaseHelper.AddDocuments("Moves", GetMoves(MovesJson));
         }
 
-        private static IEnumerable<MoveModel> GetMoves(string path)
+        private static IEnumerable<MoveModelv1> GetMoves(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {
@@ -21,9 +21,9 @@ namespace MongoDbImportTool.Builders
             }
         }
 
-        private static MoveModel Build(JToken moveToken)
+        private static MoveModelv1 Build(JToken moveToken)
         {
-            return new MoveModel
+            return new MoveModelv1
             {
                 Name = JsonHelper.GetNameFromToken(moveToken),
                 Range = JsonHelper.GetStringFromToken(moveToken, "Range"),

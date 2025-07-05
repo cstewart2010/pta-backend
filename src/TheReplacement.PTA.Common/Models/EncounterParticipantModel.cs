@@ -7,19 +7,19 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a participant to an encounter during a PTA session
     /// </summary>
-    public class SettingParticipantModel
+    public class SettingParticipantModelv1
     {
         /// <summary>
         /// Default constructor
         /// </summary>
-        public SettingParticipantModel() { }
+        public SettingParticipantModelv1() { }
 
         /// <summary>
-        /// Initiziles a new instance of <see cref="SettingParticipantModel"/>
+        /// Initiziles a new instance of <see cref="SettingParticipantModelv1"/>
         /// </summary>
         /// <param name="currentHp">The participant's current hp</param>
         /// <param name="totalHp">The participant's total hp</param>
-        public SettingParticipantModel(double currentHp, double totalHp)
+        public SettingParticipantModelv1(double currentHp, double totalHp)
         {
             Health = GetHealth(currentHp, totalHp);
         }
@@ -52,7 +52,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The participants's position on the map
         /// </summary>
-        public MapPositionModel Position { get; set; }
+        public MapPositionModelv1 Position { get; set; }
 
         /// <summary>
         /// Returns the trainer as a participant
@@ -60,10 +60,10 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="trainerId"></param>
         /// <param name="gameId"></param>
         /// <param name="position"></param>
-        public static SettingParticipantModel FromTrainer(Guid trainerId, Guid gameId, MapPositionModel position)
+        public static SettingParticipantModelv1 FromTrainer(Guid trainerId, Guid gameId, MapPositionModelv1 position)
         {
             var trainer = DatabaseUtility.FindTrainerById(trainerId, gameId);
-            return new SettingParticipantModel(trainer.CurrentHP, trainer.TrainerStats.HP)
+            return new SettingParticipantModelv1(trainer.CurrentHP, trainer.TrainerStats.HP)
             {
                 ParticipantId = trainer.TrainerId,
                 Name = trainer.TrainerName,
@@ -79,10 +79,10 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="shopId"></param>
         /// <param name="gameId"></param>
         /// <param name="position"></param>
-        public static SettingParticipantModel FromShop(Guid shopId, Guid gameId, MapPositionModel position)
+        public static SettingParticipantModelv1 FromShop(Guid shopId, Guid gameId, MapPositionModelv1 position)
         {
             var shop = DatabaseUtility.FindShopById(shopId, gameId);
-            return new SettingParticipantModel
+            return new SettingParticipantModelv1
             {
                 ParticipantId = shop.ShopId,
                 Name = shop.Name,
@@ -97,10 +97,10 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="pokemonId"></param>
         /// <param name="position"></param>
         /// <param name="type"></param>
-        public static SettingParticipantModel FromPokemon(Guid pokemonId, MapPositionModel position, SettingParticipantType type)
+        public static SettingParticipantModelv1 FromPokemon(Guid pokemonId, MapPositionModelv1 position, SettingParticipantType type)
         {
             var pokemon = DatabaseUtility.FindPokemonById(pokemonId);
-            return new SettingParticipantModel(pokemon.CurrentHP, pokemon.PokemonStats.HP)
+            return new SettingParticipantModelv1(pokemon.CurrentHP, pokemon.PokemonStats.HP)
             {
                 ParticipantId = pokemon.PokemonId,
                 Name = pokemon.Nickname,
@@ -116,10 +116,10 @@ namespace TheReplacement.PTA.Common.Models
         /// <param name="npcId"></param>
         /// <param name="position"></param>
         /// <param name="type"></param>
-        public static SettingParticipantModel FromNpc(Guid npcId, MapPositionModel position, SettingParticipantType type)
+        public static SettingParticipantModelv1 FromNpc(Guid npcId, MapPositionModelv1 position, SettingParticipantType type)
         {
             var npc = DatabaseUtility.FindNpc(npcId);
-            return new SettingParticipantModel(npc.CurrentHP, npc.TrainerStats.HP)
+            return new SettingParticipantModelv1(npc.CurrentHP, npc.TrainerStats.HP)
             {
                 ParticipantId = npc.NPCId,
                 Name = npc.TrainerName,

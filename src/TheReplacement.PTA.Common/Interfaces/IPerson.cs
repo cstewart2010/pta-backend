@@ -21,7 +21,7 @@ namespace TheReplacement.PTA.Common.Interfaces
         /// <summary>
         /// The trainers player stats
         /// </summary>
-        public StatsModel TrainerStats { get; set; }
+        public StatsModelv1 TrainerStats { get; set; }
 
         /// <summary>
         /// Collection of Trainer Feats

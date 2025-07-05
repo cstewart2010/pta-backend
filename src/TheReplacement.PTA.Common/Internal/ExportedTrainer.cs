@@ -8,14 +8,14 @@ namespace TheReplacement.PTA.Common.Internal
     {
         public ExportedTrainer() { }
 
-        public ExportedTrainer(TrainerModel trainer)
+        public ExportedTrainer(TrainerModelv1 trainer)
         {
             trainer.IsOnline = false;
             Trainer = trainer;
             DatabaseUtility.UpdateTrainerOnlineStatus(trainer.TrainerId, false);
             Pokemon = DatabaseUtility.FindPokemonByTrainerId(trainer.TrainerId, trainer.GameId);
         }
-        public TrainerModel Trainer { get; set; }
-        public IEnumerable<PokemonModel> Pokemon { get; set; }
+        public TrainerModelv1 Trainer { get; set; }
+        public IEnumerable<PokemonModelv1> Pokemon { get; set; }
     }
 }

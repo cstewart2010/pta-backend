@@ -6,7 +6,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an item in the ItemDex
     /// </summary>
-    public class BaseItemModel : IDocument, IDexDocument
+    public class BaseItemModelV1 : IDocument, IDexDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }

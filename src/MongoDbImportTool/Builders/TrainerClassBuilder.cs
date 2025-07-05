@@ -14,7 +14,7 @@ namespace MongoDbImportTool.Builders
             DatabaseHelper.AddDocuments("TrainerClasses", GetClassess(TrainerClassesJson));
         }
 
-        private static IEnumerable<TrainerClassModel> GetClassess(string path)
+        private static IEnumerable<TrainerClassModelv1> GetClassess(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {
@@ -22,10 +22,10 @@ namespace MongoDbImportTool.Builders
             }
         }
 
-        private static TrainerClassModel Build(JToken trainerClassToken)
+        private static TrainerClassModelv1 Build(JToken trainerClassToken)
         {
             var baseClass = JsonHelper.GetStringFromToken(trainerClassToken, "BaseClass");
-            return new TrainerClassModel
+            return new TrainerClassModelv1
             {
                 Name = JsonHelper.GetNameFromToken(trainerClassToken),
                 BaseClass = baseClass,
@@ -43,9 +43,9 @@ namespace MongoDbImportTool.Builders
             };
         }
 
-        private static TrainerClassFeatModel BuildFeat(string feat, int level)
+        private static TrainerClassFeatModelv1 BuildFeat(string feat, int level)
         {
-            return new TrainerClassFeatModel
+            return new TrainerClassFeatModelv1
             {
                 Name = feat,
                 LevelLearned = level

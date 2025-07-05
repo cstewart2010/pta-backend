@@ -9,7 +9,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an NPC in Pokemon Tabletop Adventures
     /// </summary>
-    public class NpcModel : IPerson, IDocument
+    public class NpcModelv1 : IPerson, IDocument
     {
 
         private static readonly IReadOnlyDictionary<string, string> TrainerSkillNames = new Dictionary<string, string>
@@ -35,11 +35,11 @@ namespace TheReplacement.PTA.Common.Models
         };
 
         /// <summary>
-        /// Initializes a new instance of <see cref="NpcModel"/> with default values
+        /// Initializes a new instance of <see cref="NpcModelv1"/> with default values
         /// </summary>
-        public NpcModel()
+        public NpcModelv1()
         {
-            TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkill { Name = skill.Key, ModifierStat = skill.Value });
+            TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkillv1 { Name = skill.Key, ModifierStat = skill.Value });
             Gender = "Agender";
             Description = string.Empty;
             Personality = string.Empty;
@@ -68,7 +68,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The trainer's stats
         /// </summary>
-        public StatsModel TrainerStats { get; set; }
+        public StatsModelv1 TrainerStats { get; set; }
 
         /// <summary>
         /// The npc's current hp
@@ -93,7 +93,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The trainer's skills
         /// </summary>
-        public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
+        public IEnumerable<TrainerSkillv1> TrainerSkills { get; set; }
 
         /// <summary>
         /// The trainer's age

@@ -6,7 +6,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents that Stats attributed for Legendary Pokemon
     /// </summary>
-    public class LegendaryStatsModel
+    public class LegendaryStatsModelv1
     {
         /// <summary>
         /// The Legendary HP stat

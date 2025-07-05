@@ -23,7 +23,7 @@ namespace MongoDbImportTool.Builders
             );
         }
 
-        private static IEnumerable<BaseItemModel> GetItems(string path)
+        private static IEnumerable<BaseItemModelV1> GetItems(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {

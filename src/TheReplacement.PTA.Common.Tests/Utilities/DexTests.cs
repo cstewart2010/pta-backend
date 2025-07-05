@@ -40,7 +40,7 @@ namespace TheReplacement.PTA.Common.Tests.Utilities
             var flabebe = GetTestPokemon();
             Logger.WriteLine($"Generating pokemon {flabebe.SpeciesName}");
             Logger.WriteLine($"Attempting to evolve {flabebe.SpeciesName}");
-            var baseFloette = DexUtility.GetDexEntry<BasePokemonModel>(DexType.BasePokemon, "floette");
+            var baseFloette = DexUtility.GetDexEntry<BasePokemonModelv1>(DexType.BasePokemon, "floette");
             var floette = DexUtility.GetEvolved(flabebe, flabebe.Moves, "Floette", baseFloette.Moves);
             Logger.WriteLine($"Verifying the evolution was a success");
             Assert.NotNull(floette);

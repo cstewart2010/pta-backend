@@ -21,7 +21,7 @@ namespace MongoDbImportTool.Builders
             );
         }
 
-        private static IEnumerable<FeatureModel> GetFeatures(string path)
+        private static IEnumerable<FeatureModelv1> GetFeatures(string path)
         {
             foreach (var child in JsonHelper.GetToken(path))
             {

@@ -8,7 +8,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a Pokemon in Pokemon Tabletop Adventures
     /// </summary>
-    public class PokemonModel: IDocument
+    public class PokemonModelv1: IDocument
     {
         /// <inheritdoc />
         public ObjectId _id { get; set; }
@@ -116,7 +116,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Collection of Pokemon stats
         /// </summary>
-        public StatsModel PokemonStats { get; set; }
+        public StatsModelv1 PokemonStats { get; set; }
 
         /// <summary>
         /// The pokemon's current pokeball
@@ -191,6 +191,6 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The Pokemon's legendary stats, if applicable
         /// </summary>
-        public LegendaryStatsModel LegendaryStats { get; set; }
+        public LegendaryStatsModelv1 LegendaryStats { get; set; }
     }
 }

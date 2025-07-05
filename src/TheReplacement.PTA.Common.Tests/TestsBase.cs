@@ -12,9 +12,9 @@ namespace TheReplacement.PTA.Common.Tests
     {
         public abstract ITestOutputHelper Logger { get; }
 
-        public static GameModel GetTestGame()
+        public static GameModelv1 GetTestGame()
         {
-            return new GameModel
+            return new GameModelv1
             {
                 GameId = Guid.NewGuid(),
                 Nickname = "Test Nickname",
@@ -23,36 +23,36 @@ namespace TheReplacement.PTA.Common.Tests
             };
         }
 
-        public static NpcModel GetTestNpc()
+        public static NpcModelv1 GetTestNpc()
         {
-            return new NpcModel
+            return new NpcModelv1
             {
                 NPCId = Guid.NewGuid(),
                 Feats = Array.Empty<string>(),
                 TrainerClasses = Array.Empty<string>(),
                 TrainerName = "Test Trainername",
-                TrainerStats = new StatsModel()
+                TrainerStats = new StatsModelv1()
             };
         }
 
-        public static PokemonModel GetTestPokemon()
+        public static PokemonModelv1 GetTestPokemon()
         {
             var pokemon = DexUtility.GetNewPokemon("Flabébé", Nature.Modest, Gender.Female, Status.Normal, "", "base");
             pokemon.TrainerId = Guid.NewGuid();
             return pokemon;
         }
 
-        public static TrainerModel GetTestTrainer()
+        public static TrainerModelv1 GetTestTrainer()
         {
-            return new TrainerModel
+            return new TrainerModelv1
             {
                 Feats = Array.Empty<string>(),
                 GameId = Guid.NewGuid(),
-                Items = new List<ItemModel>(),
+                Items = new List<ItemModelv1>(),
                 TrainerClasses = Array.Empty<string>(),
                 TrainerId = Guid.NewGuid(),
                 TrainerName = "Test Trainer",
-                TrainerStats = new StatsModel
+                TrainerStats = new StatsModelv1
                 {
                     HP = 20,
                     Attack = 1,
@@ -66,7 +66,7 @@ namespace TheReplacement.PTA.Common.Tests
             };
         }
 
-        public static void PerformTryAddGamePassTest(GameModel game, ITestOutputHelper logger)
+        public static void PerformTryAddGamePassTest(GameModelv1 game, ITestOutputHelper logger)
         {
             logger.WriteLine($"Adding new game with game id {game.GameId}");
             Assert.True(DatabaseUtility.TryAddGame(game, out var error));
@@ -76,7 +76,7 @@ namespace TheReplacement.PTA.Common.Tests
             DatabaseUtility.DeleteGame(game.GameId);
         }
 
-        public static void PerformTryAddGameFailTest(GameModel game, ITestOutputHelper logger)
+        public static void PerformTryAddGameFailTest(GameModelv1 game, ITestOutputHelper logger)
         {
             logger.WriteLine($"Adding new game with game id {game.GameId}");
             Assert.False(DatabaseUtility.TryAddGame(game, out var error));
@@ -86,7 +86,7 @@ namespace TheReplacement.PTA.Common.Tests
             Assert.Null(DatabaseUtility.FindGame(game.GameId));
         }
 
-        public static void PerformTryAddNpcPassTest(NpcModel npc, ITestOutputHelper logger)
+        public static void PerformTryAddNpcPassTest(NpcModelv1 npc, ITestOutputHelper logger)
         {
             logger.WriteLine($"Adding new game with npc id {npc.NPCId}");
             Assert.True(DatabaseUtility.TryAddNpc(npc, out var error));
@@ -96,7 +96,7 @@ namespace TheReplacement.PTA.Common.Tests
             DatabaseUtility.DeleteNpc(npc.NPCId);
         }
 
-        public static void PerformTryAddNpcFailTest(NpcModel npc, ITestOutputHelper logger)
+        public static void PerformTryAddNpcFailTest(NpcModelv1 npc, ITestOutputHelper logger)
         {
             logger.WriteLine($"Adding new npc with npc id {npc.NPCId}");
             Assert.False(DatabaseUtility.TryAddNpc(npc, out var error));
@@ -106,7 +106,7 @@ namespace TheReplacement.PTA.Common.Tests
             Assert.Empty(DatabaseUtility.FindNpcs(new[] { npc.NPCId }));
         }
 
-        public static void PerformTryAddPokemonFailTest(PokemonModel pokemon, ITestOutputHelper logger)
+        public static void PerformTryAddPokemonFailTest(PokemonModelv1 pokemon, ITestOutputHelper logger)
         {
             logger.WriteLine($"Adding new pokemon with pokemon id {pokemon.PokemonId}");
             Assert.False(DatabaseUtility.TryAddPokemon(pokemon, out var error));
@@ -116,7 +116,7 @@ namespace TheReplacement.PTA.Common.Tests
             Assert.Null(DatabaseUtility.FindPokemonById(pokemon.PokemonId));
         }
 
-        public static void PerformTryAddPokemonPassTest(PokemonModel pokemon, ITestOutputHelper logger)
+        public static void PerformTryAddPokemonPassTest(PokemonModelv1 pokemon, ITestOutputHelper logger)
         {
             logger.WriteLine($"Adding new pokemon with pokemon id {pokemon.PokemonId}");
             Assert.True(DatabaseUtility.TryAddPokemon(pokemon, out var error));
@@ -126,7 +126,7 @@ namespace TheReplacement.PTA.Common.Tests
             DatabaseUtility.DeletePokemon(pokemon.PokemonId);
         }
 
-        public static void PerformTryAddTrainerFailTest(TrainerModel trainer, ITestOutputHelper logger)
+        public static void PerformTryAddTrainerFailTest(TrainerModelv1 trainer, ITestOutputHelper logger)
         {
             logger.WriteLine($"Adding new trainer with trainer id {trainer.TrainerId}");
             Assert.False(DatabaseUtility.TryAddTrainer(trainer, out var error));
@@ -136,7 +136,7 @@ namespace TheReplacement.PTA.Common.Tests
             //Assert.Null(DatabaseUtility.FindTrainerById(trainer.TrainerId));
         }
 
-        public static void PerformTryAddTrainerPassTest(TrainerModel trainer, ITestOutputHelper logger)
+        public static void PerformTryAddTrainerPassTest(TrainerModelv1 trainer, ITestOutputHelper logger)
         {
             logger.WriteLine($"Adding new trainer with trainer id {trainer.TrainerId}");
             Assert.True(DatabaseUtility.TryAddTrainer(trainer, out var error));

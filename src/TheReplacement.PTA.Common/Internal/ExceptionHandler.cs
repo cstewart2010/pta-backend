@@ -8,10 +8,5 @@ namespace TheReplacement.PTA.Common.Internal
         {
             return new ArgumentException("String value was null or empty", argumentName);
         }
-
-        public static ArgumentNullException ArgumentNull(string argumentName)
-        {
-            return new ArgumentNullException(argumentName);
-        }
     }
 }

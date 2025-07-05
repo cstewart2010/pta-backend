@@ -5,7 +5,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a sprite in the Pokemon Tabletop adventures app
     /// </summary>
-    public class SpriteModel
+    public class SpriteModelv1
     {
         /// <summary>
         /// MongoDB id

@@ -3,7 +3,7 @@
     /// <summary>
     /// Stats values for Pokemon and Trainers
     /// </summary>
-    public class StatsModel
+    public class StatsModelv1
     {
         /// <summary>
         /// The HP stat

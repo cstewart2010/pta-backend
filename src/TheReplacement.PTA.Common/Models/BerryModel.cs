@@ -6,7 +6,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an berry in the BerryDex
     /// </summary>
-    public class BerryModel : IDocument, IDexDocument
+    public class BerryModelv1 : IDocument, IDexDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }

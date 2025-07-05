@@ -7,7 +7,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an pokemon in the PokeDex
     /// </summary>
-    public class BasePokemonModel : IDocument, IDexDocument
+    public class BasePokemonModelv1 : IDocument, IDexDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }
@@ -38,7 +38,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Collection of Pokemon stats
         /// </summary>
-        public StatsModel PokemonStats { get; set; }
+        public StatsModelv1 PokemonStats { get; set; }
 
         /// <summary>
         /// The Pokemon species' type positioning
@@ -128,6 +128,6 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The Pokemon species' legendary stats, if applicable
         /// </summary>
-        public LegendaryStatsModel LegendaryStats { get; set; }
+        public LegendaryStatsModelv1 LegendaryStats { get; set; }
     }
 }

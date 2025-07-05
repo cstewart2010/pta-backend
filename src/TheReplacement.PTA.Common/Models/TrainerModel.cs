@@ -9,7 +9,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a Trainer in Pokemon Tabletop Adventures
     /// </summary>
-    public class TrainerModel : IPerson, IDocument
+    public class TrainerModelv1 : IPerson, IDocument
     {
         private static readonly IReadOnlyDictionary<string, string> TrainerSkillNames = new Dictionary<string,string>
         {
@@ -34,11 +34,11 @@ namespace TheReplacement.PTA.Common.Models
         };
 
         /// <summary>
-        /// Initializes a new instance of <see cref="TrainerModel"/> with default values
+        /// Initializes a new instance of <see cref="TrainerModelv1"/> with default values
         /// </summary>
-        public TrainerModel()
+        public TrainerModelv1()
         {
-            TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkill { Name = skill.Key, ModifierStat = skill.Value });
+            TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkillv1 { Name = skill.Key, ModifierStat = skill.Value });
             Gender = "Agender";
             Description = string.Empty;
             Personality = string.Empty;
@@ -67,7 +67,7 @@ namespace TheReplacement.PTA.Common.Models
         public IEnumerable<string> TrainerClasses { get; set; }
 
         /// <inheritdoc />
-        public StatsModel TrainerStats { get; set; }
+        public StatsModelv1 TrainerStats { get; set; }
 
         /// <summary>
         /// The trainer's current hp
@@ -88,7 +88,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// A collection of the trainer's items
         /// </summary>
-        public List<ItemModel> Items { get; set; }
+        public List<ItemModelv1> Items { get; set; }
 
         /// <summary>
         /// Whether the trainer is the Game Master of the session
@@ -118,7 +118,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The trainer's skills
         /// </summary>
-        public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
+        public IEnumerable<TrainerSkillv1> TrainerSkills { get; set; }
 
         /// <summary>
         /// The trainer's age

@@ -6,7 +6,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an feature in the FeatureDex
     /// </summary>
-    public class FeatureModel : IDocument, IDexDocument
+    public class FeatureModelv1 : IDocument, IDexDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }

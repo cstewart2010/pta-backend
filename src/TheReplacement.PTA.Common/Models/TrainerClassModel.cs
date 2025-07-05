@@ -7,7 +7,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an trainer class in the TrainerClassDex
     /// </summary>
-    public class TrainerClassModel :  IDocument, IDexDocument
+    public class TrainerClassModelv1 :  IDocument, IDexDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }
@@ -28,7 +28,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The Features learned by the class
         /// </summary>
-        public IEnumerable<TrainerClassFeatModel> Feats { get; set; }
+        public IEnumerable<TrainerClassFeatModelv1> Feats { get; set; }
 
         /// <summary>
         /// The Class' primary stat

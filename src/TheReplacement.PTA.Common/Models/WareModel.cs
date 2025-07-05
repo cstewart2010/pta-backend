@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an item sold at a shop
     /// </summary>
-    public class WareModel
+    public class WareModelv1
     {
         /// <summary>
         /// The item's cost

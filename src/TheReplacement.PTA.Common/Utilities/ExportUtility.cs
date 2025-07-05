@@ -20,7 +20,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Returns a file stream for the a json file of the game session
         /// </summary>
         /// <param name="game">The game session to export</param>
-        public static FileStream GetExportStream(GameModel game)
+        public static FileStream GetExportStream(GameModelv1 game)
         {
             var (path, json) = GetStreamParts(game);
             using var writer = new StreamWriter(path);
@@ -96,11 +96,8 @@ namespace TheReplacement.PTA.Common.Utilities
                 return false;
             }
 
-            if (game.Logs == null)
-            {
-                game.Logs = Array.Empty<LogModel>();
-            }
-            game.Logs = game.Logs.Append(new LogModel
+            game.Logs ??= [];
+            game.Logs = game.Logs.Append(new LogModelv1
             (
                 user:"Import Tool",
                 action: $"Recreated game {game.GameId}"
@@ -134,7 +131,7 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         private static string AddPokemon(
-            PokemonModel pokemon,
+            PokemonModelv1 pokemon,
             Guid trainerId)
         {
             if (pokemon.TrainerId == trainerId)
@@ -150,7 +147,7 @@ namespace TheReplacement.PTA.Common.Utilities
             return $"Invalid trainer id from pokemon {pokemon.PokemonId}. Skipping...";
         }
 
-        private static (string Path, string Json) GetStreamParts(GameModel game)
+        private static (string Path, string Json) GetStreamParts(GameModelv1 game)
         {
             game.IsOnline = false;
             var exportedGame = new ExportedGame(game);

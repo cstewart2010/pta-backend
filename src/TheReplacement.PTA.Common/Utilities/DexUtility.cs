@@ -22,14 +22,14 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="keptMoves">The moves you wish to keep</param>
         /// <param name="evolvedName">The name of the evolved form</param>
         /// <param name="newMoves">The moves you wish to add</param>
-        public static PokemonModel GetEvolved(
-            PokemonModel pokemon,
+        public static PokemonModelv1 GetEvolved(
+            PokemonModelv1 pokemon,
             IEnumerable<string> keptMoves,
             string evolvedName,
             IEnumerable<string> newMoves)
         {
-            if (pokemon == null) throw ExceptionHandler.ArgumentNull(nameof(pokemon));
-            if (keptMoves == null) throw ExceptionHandler.ArgumentNull(nameof(keptMoves));
+            ArgumentNullException.ThrowIfNull(pokemon, nameof(pokemon));
+            ArgumentNullException.ThrowIfNull(keptMoves, nameof(keptMoves));
             if (string.IsNullOrEmpty(evolvedName)) throw ExceptionHandler.IsNullOrEmpty(nameof(evolvedName));
 
             var (basePokemon, altForms) = GetPokedexEntry(evolvedName, pokemon.Form);
@@ -44,7 +44,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 return null;
             }
 
-            return new PokemonModel
+            return new PokemonModelv1
             {
                 PokemonId = pokemon.PokemonId,
                 DexNo = basePokemon.DexNo,
@@ -85,20 +85,20 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Returns a collection of possible evolutions
         /// </summary>
         /// <param name="pokemon"></param>
-        public static IEnumerable<BasePokemonModel> GetPossibleEvolutions(PokemonModel pokemon)
+        public static IEnumerable<BasePokemonModelv1> GetPossibleEvolutions(PokemonModelv1 pokemon)
         {
-            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModel>(DexType.BasePokemon.ToString());
-            var allEvolutions = collection.Find(document => document.EvolvesFrom.ToLower() == pokemon.SpeciesName.ToLower()).ToEnumerable();
+            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModelv1>(DexType.BasePokemon.ToString());
+            var allEvolutions = collection.Find(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable();
             return allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase));
         }
 
         /// <summary>
-        /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
+        /// Builds a <see cref="PokemonModelv1"/> using information from the <see cref="BasePokemonModelv1"/>
         /// </summary>
         /// <param name="name">The pokemon's species name</param>
         /// <param name="nickname">The pokemon's nickname, if applicable</param>
         /// <param name="form">The pokemon's form</param>
-        public static PokemonModel GetNewPokemon(string name, string nickname, string form)
+        public static PokemonModelv1 GetNewPokemon(string name, string nickname, string form)
         {
             var random = new Random();
             var nature = (Nature)random.Next(1, 21);
@@ -108,7 +108,7 @@ namespace TheReplacement.PTA.Common.Utilities
         }
 
         /// <summary>
-        /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
+        /// Builds a <see cref="PokemonModelv1"/> using information from the <see cref="BasePokemonModelv1"/>
         /// </summary>
         /// <param name="name">The pokemon's species name</param>
         /// <param name="nature">The nature to give the pokemon</param>
@@ -116,7 +116,7 @@ namespace TheReplacement.PTA.Common.Utilities
         /// <param name="status">The pokemon's status</param>
         /// <param name="nickname">The pokemon's nickname, if applicable</param>
         /// <param name="form">The pokemon's form</param>
-        public static PokemonModel GetNewPokemon(
+        public static PokemonModelv1 GetNewPokemon(
             string name,
             Nature nature,
             Gender gender,
@@ -143,12 +143,12 @@ namespace TheReplacement.PTA.Common.Utilities
         /// </summary>
         /// <param name="name">The name of the dex entry</param>
         /// <param name="form">The pokemon form to select</param>
-        public static (BasePokemonModel Model, IEnumerable<string> AlternateForms) GetPokedexEntry(
+        public static (BasePokemonModelv1 Model, IEnumerable<string> AlternateForms) GetPokedexEntry(
             string name,
             string form)
         {
-            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModel>(DexType.BasePokemon.ToString());
-            var allForms = collection.Find(document => document.Name.ToLower() == name.ToLower()).ToEnumerable();
+            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModelv1>(DexType.BasePokemon.ToString());
+            var allForms = collection.Find(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable();
             var model = allForms.First(document => document.Form.Equals(form, StringComparison.CurrentCultureIgnoreCase));
             var alternateForms = allForms.Where(document => !document.Form.Equals(form, StringComparison.CurrentCultureIgnoreCase))
                 .Select(document => document.Form);
@@ -159,10 +159,10 @@ namespace TheReplacement.PTA.Common.Utilities
         /// Returns an origin model from the origin collection
         /// </summary>
         /// <param name="Origin">The name of the origin</param>
-        public static OriginModel GetOrigin(String Origin) 
+        public static OriginModelv1 GetOrigin(String Origin) 
         { 
-            var collection = MongoCollectionHelper.Database.GetCollection<OriginModel>(DexType.Origins.ToString());
-            var model = collection.Find(document => document.Name.ToLower() == Origin.ToLower()).SingleOrDefault();
+            var collection = MongoCollectionHelper.Database.GetCollection<OriginModelv1>(DexType.Origins.ToString());
+            var model = collection.Find(document => document.Name.Equals(Origin, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
                 return model;
         }
 
@@ -176,16 +176,16 @@ namespace TheReplacement.PTA.Common.Utilities
             string name) where TDocument : IDexDocument
         {
             var collection = MongoCollectionHelper.Database.GetCollection<TDocument>(documentType.ToString());
-            return collection.Find(document => document.Name.ToLower() == name.ToLower()).FirstOrDefault();
+            return collection.Find(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
         }
 
         /// <summary>
         /// Adds a collection of dex entry to a specific dex collection
         /// </summary>
         /// <param name="documents">The documents to add to collection</param>
-        public static void AddPokedexEntries(IEnumerable<BasePokemonModel> documents)
+        public static void AddPokedexEntries(IEnumerable<BasePokemonModelv1> documents)
         {
-            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModel>(DexType.BasePokemon.ToString());
+            var collection = MongoCollectionHelper.Database.GetCollection<BasePokemonModelv1>(DexType.BasePokemon.ToString());
             foreach (var document in documents)
             {
                 if (collection.Find(currentDocument => document.Name == currentDocument.Name && document.Form == currentDocument.Form).Any())
@@ -242,8 +242,8 @@ namespace TheReplacement.PTA.Common.Utilities
             }
         }
 
-        private static PokemonModel GetPokemonFromBase(
-            BasePokemonModel basePokemon,
+        private static PokemonModelv1 GetPokemonFromBase(
+            BasePokemonModelv1 basePokemon,
             Nature nature,
             Gender gender,
             Status status,
@@ -260,7 +260,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 : nickname;
 
             var modifier = nature.GetNatureModifier();
-            var stats = new StatsModel
+            var stats = new StatsModelv1
             {
                 HP = basePokemon.PokemonStats.HP,
                 Attack = basePokemon.PokemonStats.Attack + modifier.AttackModifier,
@@ -270,7 +270,7 @@ namespace TheReplacement.PTA.Common.Utilities
                 Speed = basePokemon.PokemonStats.Speed + modifier.SpeedModifier,
             };
 
-            return new PokemonModel
+            return new PokemonModelv1
             {
                 PokemonId = Guid.NewGuid(),
                 DexNo = basePokemon.DexNo,
@@ -305,7 +305,7 @@ namespace TheReplacement.PTA.Common.Utilities
             };
         }
 
-        private static int GetCatchRate(BasePokemonModel basePokemon)
+        private static int GetCatchRate(BasePokemonModelv1 basePokemon)
         {
             Enum.TryParse(basePokemon.Rarity, true, out Rarity rarity);
             return rarity switch

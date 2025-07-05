@@ -8,7 +8,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents a message thread in Pokemon Tabletop Adventures 
     /// </summary>
-    public class UserMessageThreadModel : IDocument
+    public class UserMessageThreadModelv1 : IDocument
     {
         /// <inheritdoc />
         public ObjectId _id { get; set; }
@@ -21,6 +21,6 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// Collection of messages shared between two PTA Users
         /// </summary>
-        public IEnumerable<UserMessageModel> Messages { get; set; }
+        public IEnumerable<UserMessageModelv1> Messages { get; set; }
     }
 }

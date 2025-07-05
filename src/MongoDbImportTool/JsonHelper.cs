@@ -21,9 +21,9 @@ namespace MongoDbImportTool
             return JToken.ReadFrom(reader);
         }
 
-        internal static BaseItemModel BuildItem(JToken itemToken)
+        internal static BaseItemModelV1 BuildItem(JToken itemToken)
         {
-            return new BaseItemModel
+            return new BaseItemModelV1
             {
                 Name = GetNameFromToken(itemToken),
                 Price = GetIntFromToken(itemToken, "Price"),
@@ -31,9 +31,9 @@ namespace MongoDbImportTool
             };
         }
 
-        internal static FeatureModel BuildFeature(JToken featureToken)
+        internal static FeatureModelv1 BuildFeature(JToken featureToken)
         {
-            return new FeatureModel
+            return new FeatureModelv1
             {
                 Name = GetNameFromToken(featureToken),
                 Effects = GetEffectsFromToken(featureToken)

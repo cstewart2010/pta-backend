@@ -8,7 +8,7 @@ namespace TheReplacement.PTA.Common.Models
     /// <summary>
     /// Represents an encounter during a PTA session
     /// </summary>
-    public class SettingModel : IDocument
+    public class SettingModelv1 : IDocument
     {
         /// <inheritdoc/>
         public ObjectId _id { get; set; }
@@ -41,7 +41,7 @@ namespace TheReplacement.PTA.Common.Models
         /// <summary>
         /// The settings participants
         /// </summary>
-        public IEnumerable<SettingParticipantModel> ActiveParticipants { get; set; }
+        public IEnumerable<SettingParticipantModelv1> ActiveParticipants { get; set; }
 
         /// <summary>
         /// The encounter's environment
