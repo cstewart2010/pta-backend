@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36202.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonTabletopAdventures.CoreApi", "TheReplacement.PTA.Services.Core\PokemonTabletopAdventures.CoreApi.csproj", "{19DE7314-AADA-4386-86FD-DD65BFDC7EE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonTabletopAdventures.CoreApi", "PokemonTabletopAdventures.CoreApi\PokemonTabletopAdventures.CoreApi.csproj", "{19DE7314-AADA-4386-86FD-DD65BFDC7EE0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheReplacement.PTA.Common", "TheReplacement.PTA.Common\TheReplacement.PTA.Common.csproj", "{CA082826-74F3-4550-876E-0EB13FB3238E}"
 EndProject
