@@ -5,11 +5,11 @@ on:
     - develop
 env:
   AZURE_WEBAPP_NAME: TheReplacementPTAServicesCore20220223200441
-  AZURE_WEBAPP_PACKAGE_PATH: TheReplacement.PTA.Services.Core\published
+  AZURE_WEBAPP_PACKAGE_PATH: PokemonTabletopAdventures.CoreApi\published
   AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
   CONFIGURATION: Release
-  DOTNET_CORE_VERSION: 5.0.x
-  WORKING_DIRECTORY: src/TheReplacement.PTA.Services.Core
+  DOTNET_CORE_VERSION: 8.0.x
+  WORKING_DIRECTORY: src/PokemonTabletopAdventures.CoreApi
 jobs:
   build:
     runs-on: windows-latest
