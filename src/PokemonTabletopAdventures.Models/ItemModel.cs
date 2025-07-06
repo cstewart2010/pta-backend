@@ -1,4 +1,7 @@
-﻿namespace PokemonTabletopAdventures.Models;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace PokemonTabletopAdventures.Models;
 
 /// <summary>
 /// Represents a Pokemon Tabletop Adventures item
@@ -23,5 +26,6 @@ public class ItemModel
     /// <summary>
     /// The type of item it is
     /// </summary>
-    public string Type { get; set; } = string.Empty;
+    [BsonRepresentation(BsonType.String)]
+    public StartingEquipmentType Type { get; set; }
 }

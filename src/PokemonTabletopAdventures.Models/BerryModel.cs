@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
-using PokemonTabletopAdventures.Interfaces;
+using MongoDB.Bson.Serialization.Attributes;
 using PokemonTabletopAdventures.Models.Enums;
+using PokemonTabletopAdventures.Models.Interfaces;
 
 namespace PokemonTabletopAdventures.Models;
 
@@ -33,5 +34,6 @@ public class BerryModel : IDocument, IDexDocument
     /// <summary>
     /// The berry's rarity
     /// </summary>
+    [BsonRepresentation(BsonType.String)]
     public Rarity Rarity { get; set; }
 }

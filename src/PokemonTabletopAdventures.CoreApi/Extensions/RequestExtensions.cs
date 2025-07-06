@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
@@ -12,14 +13,14 @@ internal static class RequestExtensions
 {
     static RequestExtensions()
     {
-        AuthKey = Environment.GetEnvironmentVariable("CookieKey", EnvironmentVariableTarget.Process)!;
+        AuthKey = Environment.GetEnvironmentVariable(HeaderNames.CookieKey, EnvironmentVariableTarget.Process)!;
     }
 
     internal static string AuthKey { get; }
 
     public static string? GetJsonFromRequest(this HttpRequest request)
     {
-        var jsonFile = request.Form.Files.First(file => Path.GetExtension(file.FileName).Equals(".json", StringComparison.CurrentCultureIgnoreCase));
+        var jsonFile = request.Form.Files.First(file => Path.GetExtension(file.FileName).Equals(Paths.JsonExt, StringComparison.CurrentCultureIgnoreCase));
         if (jsonFile.Length > 0)
         {
             using var reader = new StreamReader(jsonFile.OpenReadStream());
@@ -56,7 +57,7 @@ internal static class RequestExtensions
 #if !DEBUG
         if (user.ActivityToken != accessToken)
         {
-            throw new PtaUnauthorizedException("Activity token is incorrect");
+            throw new PtaUnauthorizedException(PtaExceptionParts.ExpiredTokenMessage);
         }
 
         encryptionService.ValidateToken(accessToken);

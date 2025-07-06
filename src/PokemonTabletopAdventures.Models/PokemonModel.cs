@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
-using PokemonTabletopAdventures.Interfaces;
+using MongoDB.Bson.Serialization.Attributes;
+using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models.Enums;
 
 namespace PokemonTabletopAdventures.Models;
@@ -130,11 +131,13 @@ public class PokemonModel: IDocument
     /// <summary>
     /// The Pokemon species' <see cref="Enums.Size"/>
     /// </summary>
+    [BsonRepresentation(BsonType.String)]
     public Size Size { get; set; }
 
     /// <summary>
     /// The Pokemon species' <see cref="Enums.Weight"/>
     /// </summary>
+    [BsonRepresentation(BsonType.String)]
     public Weight Weight { get; set; }
 
     /// <summary>
@@ -150,7 +153,7 @@ public class PokemonModel: IDocument
     /// <summary>
     /// The Pokemon's <see cref="Enums.EggGroups"/>
     /// </summary>
-    public IEnumerable<EggGroups> EggGroups { get; set; } = [];
+    public IEnumerable<string> EggGroups { get; set; } = [];
 
     /// <summary>
     /// The Pokemon's Proficiencies

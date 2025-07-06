@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
-using PokemonTabletopAdventures.Interfaces;
+using MongoDB.Bson.Serialization.Attributes;
+using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models.Enums;
 
 namespace PokemonTabletopAdventures.Models;
@@ -21,8 +22,9 @@ public class MoveModel : IDocument, IDexDocument
     public string Range { get; set; } = string.Empty;
 
     /// <summary>
-    /// The move's <see cref="Enums.PokemonTypes"/>
+    /// The move's <see cref="PokemonTypes"/>
     /// </summary>
+    [BsonRepresentation(BsonType.String)]
     public PokemonTypes Type { get; set; }
 
     /// <summary>

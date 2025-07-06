@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

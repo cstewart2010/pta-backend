@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
-using PokemonTabletopAdventures.Interfaces;
+using MongoDB.Bson.Serialization.Attributes;
+using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models.Enums;
 
 namespace PokemonTabletopAdventures.Models;
@@ -41,11 +42,13 @@ public class UserModel : IAuthenticated, IDocument
     /// <summary>
     /// Date PTA user account was created
     /// </summary>
-    public string DateCreated { get; set; } = string.Empty;
+    [BsonRepresentation(BsonType.String)]
+    public DateTimeOffset DateCreated { get; set; }
 
     /// <summary>
     /// Site role for PTA user
     /// </summary>
+    [BsonRepresentation(BsonType.String)]
     public UserRoleOnSite SiteRole { get; set; }
 
     /// <summary>

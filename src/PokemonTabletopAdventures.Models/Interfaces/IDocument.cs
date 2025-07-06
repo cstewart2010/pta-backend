@@ -1,15 +1,14 @@
 ﻿using MongoDB.Bson;
 
-namespace PokemonTabletopAdventures.Interfaces
+namespace PokemonTabletopAdventures.Models.Interfaces;
+
+/// <summary>
+/// Provides a collection of properties for MongoDB documents
+/// </summary>
+public interface IDocument
 {
     /// <summary>
-    /// Provides a collection of properties for MongoDB documents
+    /// MongoDB id
     /// </summary>
-    public interface IDocument
-    {
-        /// <summary>
-        /// MongoDB id
-        /// </summary>
-        public ObjectId _id { get; set; }
-    }
+    public ObjectId _id { get; set; }
 }

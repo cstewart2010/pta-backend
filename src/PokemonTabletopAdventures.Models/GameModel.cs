@@ -1,5 +1,5 @@
 ﻿using MongoDB.Bson;
-using PokemonTabletopAdventures.Interfaces;
+using PokemonTabletopAdventures.Models.Interfaces;
 
 namespace PokemonTabletopAdventures.Models;
 
@@ -30,10 +30,10 @@ public class GameModel : IAuthenticated, IDocument
     /// <summary>
     /// Collection of NPC ids that used in this game session
     /// </summary>
-    public IEnumerable<Guid> NPCs { get; set; } = [];
+    public ICollection<Guid> NPCs { get; set; } = [];
 
     /// <summary>
     /// Collection of logs related to the game
     /// </summary>
-    public IEnumerable<LogModel> Logs { get; set; } = [];
+    public ICollection<LogModel> Logs { get; set; } = [];
 }

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -41,36 +42,22 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
         /// <param name="json">The stringified json object to parse</param>
         /// <param name="errors">The errors found while attempting to import the game session</param>
         /// <returns></returns>
-        public async Task TryParseImport(string json)
+        public async Task<GameModel> ParseImport(string json)
         {
-            var import = GetParsedImportFromExport(json, out List<string> errors);
-            if (errors.Count == 0)
-            {
-                errors = CleanyAddGame(import!);
-            }
-            if (errors.Count == 0)
-            {
-                throw new GeneralErrorsException(errors);
-            }
-
-            await Task.CompletedTask;
+            var import = GetParsedImportFromExport(json);
+            return await CleanyAddGame(import!);
         }
 
-        private List<string> CleanyAddGame(ExportedGame import)
+        private async Task<GameModel> CleanyAddGame(ExportedGame import)
         {
-            var errors = AddGame(import);
-            if (errors.Count != 0)
-            {
-                return errors;
-            }
-
+            AddGame(import);
             var gameId = import.GameSession.GameId;
             foreach (var trainer in import.Trainers)
             {
-                errors.AddRange(CleanlyAddTrainer(trainer, gameId));
+                CleanlyAddTrainer(trainer, gameId);
             }
 
-            return errors;
+            return await _gameService.GetGame(gameId);
         }
 
         private List<string> AddGame(ExportedGame import)
@@ -88,16 +75,14 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
             }
 
             game.Logs ??= [];
-            game.Logs = game.Logs.Append(new LogModel
-            (
-                user: "Import Tool",
-                action: $"Recreated game {game.GameId}"
-            ));
+            game.Logs.Add(new LogModel(
+                user: GameLogMessages.ImportTool,
+                action: $"Recreated game {game.GameId}"));
             _gameService.PostGame(game);
             return errors;
         }
 
-        private List<string> CleanlyAddTrainer(
+        private void CleanlyAddTrainer(
             ExportedTrainer import,
             Guid gameId)
         {
@@ -106,7 +91,6 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
             if (!(trainer.GameId == gameId))
             {
                 errors.Add($"Failed to import trainer {trainer.TrainerId}");
-                return errors;
             }
 
             _trainerService.PostTrainer(trainer);
@@ -114,7 +98,10 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
                 .Select(pokemon => AddPokemon(pokemon, trainer.TrainerId))
                 .Where(error => !string.IsNullOrEmpty(error))];
 
-            return errors;
+            if (errors.Count > 0)
+            {
+                throw new ImportFailedException(errors);
+            }
         }
 
         private string AddPokemon(
@@ -137,17 +124,15 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
             return (Path.GetTempFileName(), JsonSerializer.Serialize(exportedGame));
         }
 
-        private static ExportedGame? GetParsedImportFromExport(
-            string json,
-            out List<string> errors)
+        private static ExportedGame? GetParsedImportFromExport(string json)
         {
-            JSchema schema = JSchema.Parse(File.ReadAllText("./ExportedGame.schema.json"));
+            JSchema schema = JSchema.Parse(File.ReadAllText(Paths.SchemaPath));
             var jsonObject = JObject.Parse(json);
-            errors = [];
+            var errors = new List<string>();
             if (!jsonObject.IsValid(schema, out IList<string> errorMessages))
             {
                 errors.AddRange(errorMessages);
-                return null;
+                throw new ImportFailedException(errors);
             }
 
             return jsonObject.ToObject<ExportedGame>();

@@ -1,6 +1,6 @@
-﻿using PokemonTabletopAdventures.Models;
+﻿using PokemonTabletopAdventures.CoreApi.DTOs.Users;
+using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
-using System;
 
 namespace PokemonTabletopAdventures.CoreApi.DTOs;
 

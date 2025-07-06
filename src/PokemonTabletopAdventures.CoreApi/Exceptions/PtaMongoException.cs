@@ -1,8 +1,8 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 
-namespace PokemonTabletopAdventures.CoreApi.Exceptions
+namespace PokemonTabletopAdventures.CoreApi.Exceptions;
+
+public class PtaMongoException(MongoWriteException exception) : PtaException(exception.WriteError.Details.GetValue("details").AsBsonDocument.ToString(), PtaExceptionParts.MongoDbErrorTitle, System.Net.HttpStatusCode.BadRequest)
 {
-    public class PtaMongoException(MongoWriteException exception) : PtaException(exception.WriteError.Details.GetValue("details").AsBsonDocument.ToString(), "MongoDB Exception", System.Net.HttpStatusCode.BadRequest)
-    {
-    }
 }

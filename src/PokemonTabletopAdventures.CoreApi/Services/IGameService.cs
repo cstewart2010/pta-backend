@@ -1,5 +1,4 @@
-﻿using PokemonTabletopAdventures.CoreApi.Domain.Models;
-using PokemonTabletopAdventures.Models;
+﻿using PokemonTabletopAdventures.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -29,7 +28,7 @@ public interface IGameService
     /// <summary>
     /// Returns all games in db
     /// </summary>
-    public Task<IEnumerable<MinifiedGameModel>> GetMostRecent20Games(UserModel user);
+    public Task<IEnumerable<GameModel>> GetMostRecent20Games(UserModel user);
 
     /// <summary>
     /// Returns a game's nickname using the game id

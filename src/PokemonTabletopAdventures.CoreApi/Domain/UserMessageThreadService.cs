@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Threading.Tasks;
 
@@ -16,7 +16,7 @@ internal class UserMessageThreadService : AbstractService<UserMessageThreadModel
         return await ThrowIfNull(
             id,
             id => Collection.Find(message => message.MessageId == id).SingleOrDefault(),
-            "MessageId");
+            PropertyNames.MessageId);
     }
 
     public async Task PostThread(UserMessageThreadModel thread)

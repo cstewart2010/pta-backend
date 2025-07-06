@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ internal class NpcService : AbstractService<NpcModel>, INpcService
         await ThrowIfNull(
             id,
             npcId => Collection.FindOneAndDelete(npc => npc.NPCId == npcId),
-            "NPCId");
+            PropertyNames.NpcId);
     }
 
     public async Task DeleteNpcByGameId(Guid gameId)
@@ -26,7 +26,7 @@ internal class NpcService : AbstractService<NpcModel>, INpcService
         await ThrowIfNull(
             gameId,
             gameId => Collection.FindOneAndDelete(npc => npc.GameId == gameId),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task<NpcModel> GetNpc(Guid id)
@@ -34,7 +34,7 @@ internal class NpcService : AbstractService<NpcModel>, INpcService
         return await ThrowIfNull(
             id,
             id => Collection.Find(npc => npc.NPCId == id).SingleOrDefault(),
-            "NPCId");
+            PropertyNames.NpcId);
     }
 
     public async Task<IEnumerable<NpcModel>> GetNpcs(IEnumerable<Guid> npcIds)
@@ -42,7 +42,7 @@ internal class NpcService : AbstractService<NpcModel>, INpcService
         return await ThrowIfNull(
             npcIds,
             id => Collection.Find(npc => npcIds.Contains(npc.NPCId)).ToEnumerable(),
-            "NPCId");
+            PropertyNames.NpcId);
     }
 
     public async Task<IEnumerable<NpcModel>> GetNpcsByGameId(Guid gameId)
@@ -50,7 +50,7 @@ internal class NpcService : AbstractService<NpcModel>, INpcService
         return await ThrowIfNull(
             gameId,
             id => Collection.Find(npc => npc.GameId == id).ToEnumerable(),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task PostNpc(NpcModel npc)

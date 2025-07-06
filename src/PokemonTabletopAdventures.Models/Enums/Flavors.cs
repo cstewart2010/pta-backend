@@ -3,7 +3,6 @@
 /// <summary>
 /// Containers for all berry flavors
 /// </summary>
-[Flags]
 public enum Flavors
 {
     /// <summary>

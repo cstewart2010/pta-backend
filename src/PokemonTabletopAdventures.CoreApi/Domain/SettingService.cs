@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,7 +17,7 @@ internal class SettingService : AbstractService<SettingModel>, ISettingService
         await ThrowIfNull(
             id,
             settingId => Collection.FindOneAndDelete(setting => setting.SettingId == settingId),
-            "SettingId");
+            PropertyNames.SettingId);
     }
 
     public async Task DeleteSettingsByGameId(Guid gameId)
@@ -25,7 +25,7 @@ internal class SettingService : AbstractService<SettingModel>, ISettingService
         await ThrowIfNull(
             gameId,
             id => Collection.FindOneAndDelete(setting => setting.GameId == id),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task<SettingModel?> GetActiveSetting(Guid gameId)
@@ -38,7 +38,7 @@ internal class SettingService : AbstractService<SettingModel>, ISettingService
         return await ThrowIfNull(
             gameId,
             id => Collection.Find(setting => setting.GameId == gameId && setting.IsActive).ToEnumerable(),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task<SettingModel> GetSetting(Guid settingId)
@@ -46,7 +46,7 @@ internal class SettingService : AbstractService<SettingModel>, ISettingService
         return await ThrowIfNull(
             settingId,
             id => Collection.Find(setting => setting.SettingId == settingId && setting.IsActive).SingleOrDefault(),
-            "SettingId");
+            PropertyNames.SettingId);
     }
 
     public async Task PostSetting(SettingModel setting)

@@ -3,7 +3,6 @@
 /// <summary>
 /// Container for all possible egg group combinations
 /// </summary>
-[Flags]
 public enum EggGroups
 {
     /// <summary>

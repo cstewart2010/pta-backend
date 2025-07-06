@@ -1,4 +1,7 @@
-﻿namespace PokemonTabletopAdventures.Models;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace PokemonTabletopAdventures.Models;
 
 /// <summary>
 /// Represents an item sold at a shop
@@ -18,7 +21,8 @@ public class WareModel
     /// <summary>
     /// The type of item it is
     /// </summary>
-    public string Type { get; set; } = string.Empty;
+    [BsonRepresentation(BsonType.String)]
+    public StartingEquipmentType Type { get; set; }
 
     /// <summary>
     /// The amount of item on sale

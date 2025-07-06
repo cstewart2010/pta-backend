@@ -1,7 +1,5 @@
 ﻿using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using PokemonTabletopAdventures.Interfaces;
+using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models.Enums;
 
 namespace PokemonTabletopAdventures.Models;
@@ -48,7 +46,6 @@ public class SettingModel : IDocument
     /// The encounter's environment
     /// </summary>
     public string[] Environment { get; set; } = [];
-
 
     /// <summary>
     /// The encounter's shops

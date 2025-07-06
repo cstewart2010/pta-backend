@@ -1,11 +1,11 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
-using PokemonTabletopAdventures.CoreApi.DTOs;
+using PokemonTabletopAdventures.CoreApi.DTOs.Indicies;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Interfaces;
+using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Extensions;
 using System;
@@ -25,10 +25,11 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
         return await Task.FromResult(collection.Find(document => true).ToEnumerable());
     }
 
-    public async Task<TDocument> GetDexEntry<TDocument>(DexType documentType, string name) where TDocument : IDexDocument
+    public async Task<IndexResponse<TDocument>> GetDexEntry<TDocument>(DexType documentType, string name) where TDocument : IDexDocument
     {
         var collection = MongoCollectionHelper.GetMongoCollection<TDocument>(documentType.ToString());
-        return await Task.FromResult(collection.Find(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault());
+        var item = collection.Find(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
+        return item == null ? throw new ItemNotFoundException(name) : await Task.FromResult(new IndexResponse<TDocument> { Data = item });
     }
 
     public async Task<PokemonModel> GetNewPokemon(string name, string nickname, string form)
@@ -65,7 +66,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
         return await Task.FromResult(allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)));
     }
 
-    public async Task<StaticCollectionResponse<string>> GetStaticCollectionResponse<TDocument>(
+    public async Task<IndexCollectionResponse> GetIndexCollectionResponse<TDocument>(
         DexType documentType,
         int offset,
         int limit) where TDocument : IDexDocument
@@ -75,7 +76,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
         var count = documents.Count();
         var results = documents.Select(x => x.Name);
 
-        return await Task.FromResult(new StaticCollectionResponse<string>(
+        return await Task.FromResult(new IndexCollectionResponse(
             count,
             results));
     }
@@ -117,14 +118,14 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
         var basePokemon = forms.Pokemon;
         if (!string.Equals(basePokemon.EvolvesFrom, pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase))
         {
-            throw new PtaException($"{pokemon.SpeciesName} cannot evolve into {evolvedName}", "Invalid evolution", System.Net.HttpStatusCode.BadRequest);
+            throw new InvalidEvolutionException($"{pokemon.SpeciesName} cannot evolve into {evolvedName}");
         }
 
         var evolvedMoves = basePokemon.Moves.Select(move => move.ToLower());
         var invalidMoves = newMoves.Where(move => !evolvedMoves.Contains(move.ToLower(System.Globalization.CultureInfo.CurrentCulture))).ToArray();
         if (invalidMoves.Length != 0)
         {
-            throw new PtaException($"{basePokemon.Name} cannot learn {string.Join(", ", invalidMoves)}", "Invalid evolution", System.Net.HttpStatusCode.BadRequest);
+            throw new InvalidEvolutionException($"{basePokemon.Name} cannot learn {string.Join(", ", invalidMoves)}");
         }
 
         return await Task.FromResult(new PokemonModel
@@ -146,7 +147,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
             Skills = basePokemon.Skills,
             Passives = basePokemon.Passives,
             Proficiencies = basePokemon.Proficiencies,
-            EggGroups = basePokemon.EggGroups,
+            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()),
             EggHatchRate = basePokemon.EggHatchRate,
             Habitats = basePokemon.Habitats,
             Diet = basePokemon.Diet,
@@ -207,7 +208,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
             Skills = basePokemon.Skills,
             Passives = basePokemon.Passives,
             Proficiencies = basePokemon.Proficiencies,
-            EggGroups = basePokemon.EggGroups,
+            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()),
             EggHatchRate = basePokemon.EggHatchRate,
             Habitats = basePokemon.Habitats,
             Diet = basePokemon.Diet,

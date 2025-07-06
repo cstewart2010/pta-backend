@@ -54,7 +54,7 @@ public abstract class AbstractService<T>(string collectionName)
             replacement: entity);
         if (!result.IsAcknowledged)
         {
-            throw new PtaException($"Failed to upsert at {typeof(T).Name}", "Failure at update", System.Net.HttpStatusCode.BadRequest);
+            throw new UpdateException($"Failed to upsert at {typeof(T).Name}");
         }
 
         await Task.CompletedTask;
@@ -67,7 +67,7 @@ public abstract class AbstractService<T>(string collectionName)
     {
         var update = Builders<T>.Update.Combine(updates);
         var item = Collection.FindOneAndUpdate(filter, update)
-            ?? throw new PtaException($"Failed to update {typeof(T).Name} {id}", "Failure at update", System.Net.HttpStatusCode.BadRequest);
+            ?? throw new UpdateException($"Failed to update {typeof(T).Name} {id}");
         return await Task.FromResult(item);
     }
 }

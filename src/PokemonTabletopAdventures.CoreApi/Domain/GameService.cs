@@ -1,8 +1,7 @@
 ﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Domain.Models;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +18,7 @@ internal class GameService(ITrainerService trainerService) : AbstractService<Gam
         await ThrowIfNull(
             id,
             gameId => Collection.FindOneAndDelete(game => game.GameId == gameId),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task<IEnumerable<GameModel>> GetAllGames(string nickname)
@@ -27,15 +26,15 @@ internal class GameService(ITrainerService trainerService) : AbstractService<Gam
         return await ThrowIfNull(
             nickname,
             name => Collection.Find(game => !game.Nickname.Contains(name, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable(),
-            "Nickname");
+            PropertyNames.Nickname);
     }
 
     public async Task<IEnumerable<GameModel>> GetAllGamesWithUser(UserModel user)
     {
         return await ThrowIfNull(
             user.Games,
-            games => Collection.Find(game => !games.Contains(game.GameId)).ToEnumerable(),
-            "User.Games");
+            games => Collection.Find(game => games.Contains(game.GameId)).ToEnumerable(),
+            PropertyNames.UserGames);
     }
 
     public async Task<GameModel> GetGame(Guid id)
@@ -43,7 +42,7 @@ internal class GameService(ITrainerService trainerService) : AbstractService<Gam
         return await ThrowIfNull(
             id,
             id => Collection.Find(game => game.GameId == id).SingleOrDefault(),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task<string> GetGameNickname(Guid gameId)
@@ -52,14 +51,12 @@ internal class GameService(ITrainerService trainerService) : AbstractService<Gam
         return game.Nickname;
     }
 
-    public async Task<IEnumerable<MinifiedGameModel>> GetMostRecent20Games(UserModel user)
+    public async Task<IEnumerable<GameModel>> GetMostRecent20Games(UserModel user)
     {
-        var games = await ThrowIfNull(
+        return await ThrowIfNull(
             user.Games,
             games => Collection.Find(x => !games.Contains(x.GameId)).Limit(20).ToEnumerable(),
-            "User.Games");
-
-        return await Task.WhenAll(games.Select(async game => await MinifiedGameModel.ParseFromModel(game, _trainerService)));
+            PropertyNames.GameId);
     }
 
     public async Task<bool> HasGM(Guid gameId)
@@ -79,7 +76,7 @@ internal class GameService(ITrainerService trainerService) : AbstractService<Gam
         return await UpdateDocument(
             theGame.GameId,
             game => game.GameId == theGame.GameId,
-            Builders<GameModel>.Update.Set("Logs", theGame.Logs?.Union(logs) ?? logs));
+            Builders<GameModel>.Update.Set(PropertyNames.Logs, theGame.Logs?.Union(logs) ?? logs));
     }
 
     public async Task<GameModel> UpdateGameNpcList(Guid gameId, IEnumerable<Guid> npcIds)
@@ -87,7 +84,7 @@ internal class GameService(ITrainerService trainerService) : AbstractService<Gam
         return await UpdateDocument(
             gameId,
             game => game.GameId == gameId,
-            Builders<GameModel>.Update.Set("NPCs", npcIds));
+            Builders<GameModel>.Update.Set(PropertyNames.Npcs, npcIds));
     }
 
     public async Task<GameModel> UpdateGameOnlineStatus(Guid gameId, bool isOnline)
@@ -95,6 +92,6 @@ internal class GameService(ITrainerService trainerService) : AbstractService<Gam
         return await UpdateDocument(
             gameId,
             game => game.GameId == gameId,
-            Builders<GameModel>.Update.Set("IsOnline", isOnline));
+            Builders<GameModel>.Update.Set(PropertyNames.IsOnline, isOnline));
     }
 }

@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,7 +24,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         return await ThrowIfNull(
             id,
             id => Collection.Find(pokemon => pokemon.PokemonId == id).SingleOrDefault(),
-            "PokemonId");
+            PropertyNames.PokemonId);
     }
 
     public async Task<IEnumerable<PokemonModel>> GetPokemonByTrainerId(Guid trainerId)
@@ -32,7 +32,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         return await ThrowIfNull(
             trainerId,
             id => Collection.Find(pokemon => pokemon.TrainerId == id).ToEnumerable(),
-            "TrainerId");
+            PropertyNames.TrainerId);
     }
 
     public async Task<IEnumerable<PokemonModel>> GetPokemonByTrainerId(Guid trainerId, Guid gameId)
@@ -40,7 +40,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         return await ThrowIfNull(
             gameId,
             id => Collection.Find(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == id).ToEnumerable(),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task PostPokemon(PokemonModel pokemon)
@@ -62,7 +62,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         return await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonModel>.Update.Set("CanEvolve", isEvolvable));
+            Builders<PokemonModel>.Update.Set(PropertyNames.CanEvolve, isEvolvable));
     }
 
     public async Task<PokemonModel> UpdatePokemonHP(Guid pokemonId, int hp)
@@ -70,7 +70,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         return await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonModel>.Update.Set("CurrentHP", hp));
+            Builders<PokemonModel>.Update.Set(PropertyNames.CurrentHP, hp));
     }
 
     public async Task<PokemonModel> UpdatePokemonLocation(Guid pokemonId, bool isOnActiveTeam)
@@ -78,7 +78,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         return await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonModel>.Update.Set("IsOnActiveTeam", isOnActiveTeam));
+            Builders<PokemonModel>.Update.Set(PropertyNames.IsOnActiveTeam, isOnActiveTeam));
     }
 
     public async Task<PokemonModel> UpdatePokemonTrainerId(Guid pokemonId, Guid trainerId)
@@ -86,7 +86,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         return await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonModel>.Update.Set("TrainerId", trainerId));
+            Builders<PokemonModel>.Update.Set(PropertyNames.TrainerId, trainerId));
     }
 
     public async Task DeletePokemon(Guid id)
@@ -94,6 +94,6 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         await ThrowIfNull(
             id,
             pokemonId => Collection.FindOneAndDelete(pokemon => pokemon.PokemonId == pokemonId),
-            "PokemonId");
+            PropertyNames.PokemonId);
     }
 }

@@ -17,8 +17,8 @@ internal static class ResponseExtensions
         var token = await encryptionService.GenerateToken();
         await userService.UpdateUserActivityToken(trainerId, token);
         var authHash = await encryptionService.HashSecret(RequestExtensions.AuthKey); ;
-        response.Headers.Append("pta-session-auth", authHash);
-        response.Headers.Append("pta-activity-token", token);
+        response.Headers.Append(HeaderNames.SessionAuth, authHash);
+        response.Headers.Append(HeaderNames.AccessToken, token);
 #else
         await Task.CompletedTask;
 #endif
@@ -33,7 +33,7 @@ internal static class ResponseExtensions
 #if !DEBUG
         var updatedToken = await encryptionService.GenerateToken();
         await userService.UpdateUserActivityToken(id, updatedToken);
-        response.Headers.Append("pta-activity-token", updatedToken);
+        response.Headers.Append(HeaderNames.AccessToken, updatedToken);
 #else
         await Task.CompletedTask;
 #endif

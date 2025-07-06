@@ -1,5 +1,5 @@
-﻿using PokemonTabletopAdventures.CoreApi.DTOs;
-using PokemonTabletopAdventures.Interfaces;
+﻿using PokemonTabletopAdventures.CoreApi.DTOs.Indicies;
+using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ public interface IDexService
     /// </summary>
     /// <param name="documentType">The dex collection you wish to return data from</param>
     /// <param name="name">The name of the dex entry</param>
-    public Task<TDocument> GetDexEntry<TDocument>(
+    public Task<IndexResponse<TDocument>> GetDexEntry<TDocument>(
         DexType documentType,
         string name) where TDocument : IDexDocument;
 
@@ -46,10 +46,11 @@ public interface IDexService
         string evolvedName,
         IEnumerable<string> newMoves);
 
-    public Task<StaticCollectionResponse<string>> GetStaticCollectionResponse<TDocument>(
+    public Task<IndexCollectionResponse> GetIndexCollectionResponse<TDocument>(
         DexType documentType,
         int offset,
         int limit) where TDocument : IDexDocument;
+
     /// <summary>
     /// Returns a collection of possible evolutions
     /// </summary>
@@ -63,7 +64,6 @@ public interface IDexService
     /// <param name="nickname">The pokemon's nickname, if applicable</param>
     /// <param name="form">The pokemon's form</param>
     public Task<PokemonModel> GetNewPokemon(string name, string nickname, string form);
-
 
     /// <summary>
     /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>

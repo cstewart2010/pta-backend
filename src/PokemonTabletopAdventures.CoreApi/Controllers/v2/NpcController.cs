@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs;
+using PokemonTabletopAdventures.CoreApi.DTOs.Npcs;
+using PokemonTabletopAdventures.CoreApi.DTOs.Pokemons;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
 [ApiController]
-[Route("api/v2/npc")]
+[Route(Routes.NpcRoute)]
 public class NpcController(
     IUserService userService,
     ITrainerService trainerService,
@@ -170,11 +171,11 @@ public class NpcController(
         var trainerName = request.TrainerName;
         var feats = (await Task.WhenAll(request.Feat.Select(async feat => await DexService.GetDexEntry<FeatureModel>(DexType.Features, feat.ToString()))
             .Where(feat => feat != null)))
-            .Select(feat => feat.Name);
+            .Select(feat => feat.Data.Name);
 
         var classes = (await Task.WhenAll(request.Classes.Select(@class => DexService.GetDexEntry<TrainerClassModel>(DexType.TrainerClasses, @class.ToString()))
             .Where(@class => @class != null)))
-            .Select(@class => @class.Name);
+            .Select(@class => @class.Data.Name);
 
         // add gameMaster's GameId to npc
         return new NpcModel

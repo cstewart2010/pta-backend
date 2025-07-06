@@ -1,4 +1,6 @@
-﻿using PokemonTabletopAdventures.Models.Enums;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using PokemonTabletopAdventures.Models.Enums;
 
 namespace PokemonTabletopAdventures.Models;
 
@@ -35,6 +37,7 @@ public class SettingParticipantModel
     /// <summary>
     /// The pariticipant's type (Trainer/Pokemon/Npc)
     /// </summary>
+    [BsonRepresentation(BsonType.String)]
     public SettingParticipantType Type { get; set; }
 
     /// <summary>

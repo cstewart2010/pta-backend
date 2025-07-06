@@ -1,18 +1,17 @@
-﻿namespace PokemonTabletopAdventures.Interfaces
+﻿namespace PokemonTabletopAdventures.Models.Interfaces;
+
+/// <summary>
+/// Provides a collection of properties for Authenticated types
+/// </summary>
+public interface IAuthenticated
 {
     /// <summary>
-    /// Provides a collection of properties for Authenticated types
+    /// An encrypted password
     /// </summary>
-    public interface IAuthenticated
-    {
-        /// <summary>
-        /// An encrypted password
-        /// </summary>
-        public string PasswordHash { get; set; }
+    public string PasswordHash { get; set; }
 
-        /// <summary>
-        /// The online status
-        /// </summary>
-        public bool IsOnline { get; set; }
-    }
+    /// <summary>
+    /// The online status
+    /// </summary>
+    public bool IsOnline { get; set; }
 }

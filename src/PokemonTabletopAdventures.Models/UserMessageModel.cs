@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace PokemonTabletopAdventures.Models;
 
@@ -19,7 +20,7 @@ public class UserMessageModel
     /// <param name="messageContent"></param>
     public UserMessageModel(Guid userId, string messageContent)
     {
-        Timestamp = DateTime.UtcNow.ToString();
+        Timestamp = DateTimeOffset.Now;
         Message = messageContent;
         User = userId;
     }
@@ -37,5 +38,6 @@ public class UserMessageModel
     /// <summary>
     /// Timestamp for when the message was created
     /// </summary>
-    public string Timestamp { get; set; } = string.Empty;
+    [BsonRepresentation(BsonType.String)]
+    public DateTimeOffset Timestamp { get; set; }
 }

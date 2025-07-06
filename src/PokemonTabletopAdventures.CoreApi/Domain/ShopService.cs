@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ internal class ShopService : AbstractService<ShopModel>, IShopService
         await ThrowIfNull(
             id,
             shopId => Collection.FindOneAndDelete(shop => shop.ShopId == shopId && shop.GameId == gameId),
-            "ShopId");
+            PropertyNames.ShopId);
     }
 
     public async Task DeleteShopByGameId(Guid gameId)
@@ -26,7 +26,7 @@ internal class ShopService : AbstractService<ShopModel>, IShopService
         await ThrowIfNull(
             gameId,
             id => Collection.FindOneAndDelete(shop => shop.GameId == id),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task<IEnumerable<ShopModel>> GetShopsByGameId(Guid gameId)
@@ -34,7 +34,7 @@ internal class ShopService : AbstractService<ShopModel>, IShopService
         return await ThrowIfNull(
             gameId,
             id => Collection.Find(shop => shop.GameId == id).ToEnumerable(),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task<ShopModel> GetShopById(Guid id, Guid gameId)
@@ -42,7 +42,7 @@ internal class ShopService : AbstractService<ShopModel>, IShopService
         return await ThrowIfNull(
             id,
             id => Collection.Find(shop => shop.GameId == gameId && shop.ShopId == id).SingleOrDefault(),
-            "ShopId");
+            PropertyNames.ShopId);
     }
 
     public async Task<IEnumerable<ShopModel>> GetShopsBySetting(SettingModel setting)
@@ -50,7 +50,7 @@ internal class ShopService : AbstractService<ShopModel>, IShopService
         return await ThrowIfNull(
             setting,
             id => Collection.Find(shop => setting.Shops.Contains(shop.ShopId) && setting.GameId == shop.GameId).ToEnumerable(),
-            "setting.Shops");
+            PropertyNames.SettingShops);
     }
 
     public async Task PostShop(ShopModel shop)

@@ -1,8 +1,8 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,11 +31,11 @@ internal class TrainerService(
         return await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId,
-            Builders<TrainerModel>.Update.Set("Origin", origin),
-            Builders<TrainerModel>.Update.Set("TrainerClasses", new[] { trainerClass }),
-            Builders<TrainerModel>.Update.Set("Feats", feats),
-            Builders<TrainerModel>.Update.Set("TrainerStats", stats),
-            Builders<TrainerModel>.Update.Set("IsComplete", true));
+            Builders<TrainerModel>.Update.Set(PropertyNames.Origin, origin),
+            Builders<TrainerModel>.Update.Set(PropertyNames.TrainerClasses, new[] { trainerClass }),
+            Builders<TrainerModel>.Update.Set(PropertyNames.Feats, feats),
+            Builders<TrainerModel>.Update.Set(PropertyNames.TrainerStats, stats),
+            Builders<TrainerModel>.Update.Set(PropertyNames.IsComplete, true));
     }
 
     public async Task DeleteTrainer(Guid gameId, Guid userId)
@@ -43,7 +43,7 @@ internal class TrainerService(
         var trainer = await ThrowIfNull(
             userId,
             id => Collection.FindOneAndDelete(x => x.TrainerId == id && x.GameId == gameId),
-            "TrainerId");
+            PropertyNames.TrainerId);
 
         if (trainer.IsGM)
         {
@@ -78,7 +78,7 @@ internal class TrainerService(
         return await ThrowIfNull(
             (id, gameId),
             x => Collection.Find(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId && !trainer.IsComplete).SingleOrDefault(),
-            "IsComplete");
+            PropertyNames.IsComplete);
     }
 
     public async Task<TrainerModel> GetTrainerById(Guid id, Guid gameId)
@@ -86,7 +86,7 @@ internal class TrainerService(
         return await ThrowIfNull(
             (id, gameId),
             x => Collection.Find(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId).SingleOrDefault(),
-            "TrainerId");
+            PropertyNames.TrainerId);
     }
 
     public async Task<TrainerModel> GetTrainerByUsername(string username, Guid gameId)
@@ -94,7 +94,7 @@ internal class TrainerService(
         return await ThrowIfNull(
             (username, gameId),
             x => Collection.Find(trainer => trainer.TrainerName.Equals(x.username, StringComparison.CurrentCultureIgnoreCase) && trainer.GameId == x.gameId).SingleOrDefault(),
-            "TrainerId");
+            PropertyNames.TrainerId);
     }
 
     public async Task<IEnumerable<TrainerModel>> GetTrainersByGameId(Guid gameId)
@@ -102,7 +102,7 @@ internal class TrainerService(
         return await ThrowIfNull(
             gameId,
             id => Collection.Find(trainer => trainer.GameId == id).ToEnumerable(),
-            "GameId");
+            PropertyNames.GameId);
     }
 
     public async Task PostTrainer(TrainerModel trainer)
@@ -127,7 +127,7 @@ internal class TrainerService(
         return await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
-            Builders<TrainerModel>.Update.Set("Honors", honors));
+            Builders<TrainerModel>.Update.Set(PropertyNames.Honors, honors));
     }
 
     public async Task<TrainerModel> UpdateTrainerItemList(
@@ -138,7 +138,7 @@ internal class TrainerService(
         return await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
-            Builders<TrainerModel>.Update.Set("Items", itemList));
+            Builders<TrainerModel>.Update.Set(PropertyNames.Items, itemList));
     }
 
     public async Task<TrainerModel> UpdateTrainerOnlineStatus(
@@ -161,8 +161,8 @@ internal class TrainerService(
         return await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
-            Builders<TrainerModel>.Update.Set("Items", passwordHash),
-            Builders<TrainerModel>.Update.Set("IsOnline", true));
+            Builders<TrainerModel>.Update.Set(PropertyNames.Items, passwordHash),
+            Builders<TrainerModel>.Update.Set(PropertyNames.IsOnline, true));
     }
 
     public async Task<IEnumerable<TrainerModel>> GetAllUserTrainers(Guid userId)
@@ -170,7 +170,7 @@ internal class TrainerService(
         return await  ThrowIfNull(
             userId,
             id => Collection.Find(trainer => trainer.TrainerId == id).ToEnumerable(),
-            "TrainerId");
+            PropertyNames.TrainerId);
     }
 
     private static void UpdateUserAfterTrainerDeletion(Guid gameId, Guid userId)
@@ -185,11 +185,10 @@ internal class TrainerService(
     {
         if (isOnline)
         {
-            return Builders<TrainerModel>.Update.Set("IsOnline", isOnline);
+            return Builders<TrainerModel>.Update.Set(PropertyNames.IsOnline, isOnline);
         }
 
         return Builders<TrainerModel>.Update.Combine(
-            Builders<TrainerModel>.Update.Set("IsOnline", isOnline),
-            Builders<TrainerModel>.Update.Set("ActivityToken", string.Empty));
-    }
-}
+            Builders<TrainerModel>.Update.Set(PropertyNames.IsOnline, isOnline),
+            Builders<TrainerModel>.Update.Set(PropertyNames.ActivityToken, string.Empty));
+    }}

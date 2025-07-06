@@ -1,4 +1,6 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using System;
 
@@ -8,6 +10,7 @@ internal static class MongoCollectionHelper
 {
     static MongoCollectionHelper()
     {
+        BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.GuidRepresentation.Standard));
         var settings = GetMongoClientSettings();
         var client = new MongoClient(settings);
         var databaseName = Environment.GetEnvironmentVariable(EnvironmentVariableNames.Database, EnvironmentVariableTarget.Process);

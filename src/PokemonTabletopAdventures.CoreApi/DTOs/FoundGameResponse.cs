@@ -1,4 +1,5 @@
-﻿using PokemonTabletopAdventures.CoreApi.Services;
+﻿using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
+using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
 using System;
 using System.Collections.Generic;

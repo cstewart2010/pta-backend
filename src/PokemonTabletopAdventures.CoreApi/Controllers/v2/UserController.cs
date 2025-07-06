@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs;
+using PokemonTabletopAdventures.CoreApi.DTOs.Users;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
 [ApiController]
-[Route("api/v2/user")]
+[Route(Routes.UserRoute)]
 public class UserController(
     IUserService userService,
     ITrainerService trainerService,
@@ -101,7 +102,7 @@ public class UserController(
     [ProducesResponseType(typeof(FoundUserResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CreateNewUser(
-        [FromQuery] PutLoginRequest request)
+        [FromBody] PutLoginRequest request)
     {
         var passHash = await _encryptionService.HashSecret(request.Password);
         var user = new UserModel
@@ -110,6 +111,7 @@ public class UserController(
             Username = request.Username,
             SiteRole = UserRoleOnSite.Active,
             PasswordHash = passHash,
+            DateCreated = DateTimeOffset.Now
         };
         await UserService.PostUser(user);
         await AssignAuthAndToken(user.UserId);
@@ -176,7 +178,7 @@ public class UserController(
         return await GetUpdatedTrainer(accessToken, sessionAuth, userId, gameId);
     }
 
-    [HttpPut("login")]
+    [HttpPatch("login")]
     [ProducesResponseType(typeof(FoundUserResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> Login(
@@ -184,6 +186,7 @@ public class UserController(
     {
         await IsUserAuthenticated(request);
         var user = await UserService.GetUserByUsername(request.Username);
+        await UserService.UpdateUserOnlineStatus(user.UserId, true);
         await AssignAuthAndToken(user.UserId);
         return Ok(new FoundUserResponse(user));
     }

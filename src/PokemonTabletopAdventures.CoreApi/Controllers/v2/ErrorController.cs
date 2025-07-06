@@ -8,7 +8,7 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 [ApiController]
 public class ErrorsController : ControllerBase
 {
-    [Route("error-other")]
+    [Route("error")]
     [ApiExplorerSettings(IgnoreApi = true)]
     public IActionResult HandleErrorDevelopment([FromServices] IHostEnvironment hostEnvironment)
     {
@@ -23,7 +23,7 @@ public class ErrorsController : ControllerBase
             instance: exceptionHandlerFeature.Path);
     }
 
-    [Route("error")]
+    [Route("error-")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [AllowAnonymous]
     public IActionResult HandleError() => Problem();

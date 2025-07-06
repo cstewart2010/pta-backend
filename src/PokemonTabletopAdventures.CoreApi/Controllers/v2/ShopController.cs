@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs;
+using PokemonTabletopAdventures.CoreApi.DTOs.Shops;
+using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
-using PokemonTabletopAdventures.CoreApi.Extensions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
 using System;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
 [ApiController]
-[Route("api/v2/shop")]
+[Route(Routes.ShopRoute)]
 public class ShopController(
     IUserService userService,
     ITrainerService trainerService,
@@ -98,7 +98,7 @@ public class ShopController(
         var setting = await _settingService.GetSetting(settingId);
         if (setting?.GameId != gameId)
         {
-            throw new PtaException($"The request setting {settingId} is associated with game {gameId}", "Invalid setting search", System.Net.HttpStatusCode.BadRequest);
+            throw new InvalidSettingException($"The request setting {settingId} is associated with game {gameId}");
         }
 
         var shops = await _shopService.GetShopsBySetting(setting);
@@ -175,7 +175,7 @@ public class ShopController(
         var shop = await _shopService.GetShopById(shopId, gameId);
         if (shop?.IsActive != true)
         {
-            throw new PtaException($"No active shop found with id: {shopId}", "Invalid shop request", System.Net.HttpStatusCode.BadRequest);
+            throw new InvalidShopException($"No active shop found with id: {shopId}");
         }
         var game = await GameService.GetGame(gameId);
         var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
@@ -183,7 +183,7 @@ public class ShopController(
 
         if (cost > trainer.Money)
         {
-            throw new PtaException($"Not enough money to purchase all items on list", "Invalid shop request", System.Net.HttpStatusCode.BadRequest);
+            throw new InvalidShopException("Not enough money to purchase all items on list");
         }
         foreach (var ware in validWares.Where(ware => shop.Inventory[ware.Name].Quantity != -1))
         {

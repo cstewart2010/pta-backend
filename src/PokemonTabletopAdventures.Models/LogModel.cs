@@ -1,4 +1,7 @@
-﻿namespace PokemonTabletopAdventures.Models;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace PokemonTabletopAdventures.Models;
 
 /// <summary>
 /// Represents a Pokemon Tabletop Adventures log
@@ -14,7 +17,7 @@ public class LogModel
     {
         User = user;
         Action = action;
-        LogTimestamp = DateTime.UtcNow;
+        LogTimestamp = DateTimeOffset.Now;
     }
 
     /// <summary>
@@ -30,5 +33,6 @@ public class LogModel
     /// <summary>
     /// The timestamp for the Log
     /// </summary>
-    public DateTime? LogTimestamp { get; set; }
+    [BsonRepresentation(BsonType.String)]
+    public DateTimeOffset? LogTimestamp { get; set; }
 }

@@ -1,9 +1,8 @@
 ﻿using System.Collections;
+using PokemonTabletopAdventures.CoreApi.Constants;
 
-namespace PokemonTabletopAdventures.CoreApi.Exceptions
+namespace PokemonTabletopAdventures.CoreApi.Exceptions;
+
+public class ImportFailedException(params object[] errors) : PtaException(string.Join("\n", errors), PtaExceptionParts.OneOrMoreTitle, System.Net.HttpStatusCode.BadRequest)
 {
-    public class GeneralErrorsException : PtaException
-    {
-        public GeneralErrorsException(IEnumerable errors) : base(string.Join("\n", errors), "One or more errors occurs", System.Net.HttpStatusCode.BadRequest) { }
-    }
 }

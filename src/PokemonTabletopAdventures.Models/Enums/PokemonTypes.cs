@@ -3,7 +3,6 @@
 /// <summary>
 /// Represents a container for Pokemon typings
 /// </summary>
-[Flags]
 public enum PokemonTypes
 {
     /// <summary>

@@ -25,7 +25,7 @@ internal class ExportedGame
             NPCs = game.NPCs,
             PasswordHash = game.PasswordHash
         };
-        var exportedTrainers = await Task.WhenAll(trainers.Select(async trainer => await  ExportedTrainer.ParseFromModel(trainer, trainerService, pokemonService)));
+        var exportedTrainers = await Task.WhenAll(trainers.Select(async trainer => await ExportedTrainer.ParseFromModel(trainer, trainerService, pokemonService)));
 
         return new ExportedGame
         {

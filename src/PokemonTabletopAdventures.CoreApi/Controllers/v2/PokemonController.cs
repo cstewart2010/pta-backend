@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs;
+using PokemonTabletopAdventures.CoreApi.DTOs.Pokemons;
+using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
-using PokemonTabletopAdventures.CoreApi.Extensions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
 [ApiController]
-[Route("api/v2/pokemon")]
+[Route(Routes.PokemonRoute)]
 public class PokemonController(
     IUserService userService,
     ITrainerService trainerService,
@@ -54,7 +54,7 @@ public class PokemonController(
         var pokemon = await PokemonService.GetPokemonById(pokemonId);
         if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
         {
-            throw new PtaUnauthorizedException("This pokemon can only be accessed by it's trainer or the game master");
+            throw new PtaUnauthorizedException(Constants.PtaExceptionParts.UnauthorizedPokemonUseMessage);
         }
         var models = await DexService.GetPossibleEvolutions(pokemon);
 		return Ok(models.ToList());
@@ -73,13 +73,14 @@ public class PokemonController(
         [FromQuery] Guid rightPokemonId)
     {
         await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
+        var gm = await TrainerService.GetTrainerById(gameMasterId, gameId);
         var game = await GameService.GetGame(gameId);
         var (leftPokemon, rightPokemon) = await GetTradePokemon(leftPokemonId, rightPokemonId);
         await UpdatePokemonTrainerIds(leftPokemon, rightPokemon);
         var leftTrainer = await TrainerService.GetTrainerById(rightPokemon.TrainerId, gameId);
         var rightTrainer = await TrainerService.GetTrainerById(leftPokemon.TrainerId, gameId);
         var tradeLog = new LogModel(
-            user: "The Game Master",
+            user: gm.TrainerName,
             action: $"authorized a trade between {leftTrainer.TrainerName} and {rightTrainer.TrainerName}");
         await GameService.UpdateGameLogs(game, tradeLog);
         await RefreshToken(gameMasterId);
@@ -107,7 +108,7 @@ public class PokemonController(
         var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
         if (!(pokemon.TrainerId == trainerId || trainer.IsGM == true))
         {
-            throw new PtaUnauthorizedException("Only the pokemon's trainer or the game master can update pokemon's health");
+            throw new PtaUnauthorizedException(Constants.PtaExceptionParts.UnauthorizedPokemonUseMessage);
         }
 
         OutofRangeException.CheckValue(-pokemon.PokemonStats.HP, pokemon.PokemonStats.HP, hp);
@@ -133,13 +134,13 @@ public class PokemonController(
         var pokemon = await PokemonService.GetPokemonById(pokemonId);
         if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
         {
-            throw new PtaUnauthorizedException("This pokemon can only be accessed by it's trainer or the game master");
+            throw new PtaUnauthorizedException(Constants.PtaExceptionParts.UnauthorizedPokemonUseMessage);
         }
 
         form = form.Replace('_', '/');
         if (!pokemon.AlternateForms.Contains(form))
         {
-            throw new PtaException($"Invalid form for {pokemon.SpeciesName}", "Invalid Form", HttpStatusCode.BadRequest);
+            throw new Exceptions.PtaException($"Invalid form for {pokemon.SpeciesName}", "Invalid Form", HttpStatusCode.BadRequest);
         }
 
         var result = await GetDifferentForm(pokemon, form);
@@ -202,7 +203,7 @@ public class PokemonController(
         var pokemon = await PokemonService.GetPokemonById(pokemonId);
         if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
         {
-            throw new PtaUnauthorizedException("This pokemon can only be accessed by it's trainer or the game master");
+            throw new PtaUnauthorizedException(Constants.PtaExceptionParts.UnauthorizedPokemonUseMessage);
         }
         var evolvedForm = await GetEvolved(pokemon, request);
 
@@ -244,10 +245,6 @@ public class PokemonController(
         var dexItem = await PokedexService.GetPokedexItem(trainerId, gameId, dexNo);
         if (dexItem != null)
         {
-            if (dexItem.IsSeen)
-            {
-                throw new PtaException("This pokemon has already been registered as seend", "Invalid pokedex registration", HttpStatusCode.BadRequest);
-            }
             await PokedexService.UpdateDexItemIsSeen(trainerId, gameId, dexNo);
             return Ok();
         }
@@ -273,10 +270,6 @@ public class PokemonController(
         var dexItem = await PokedexService.GetPokedexItem(trainerId, gameId, dexNo);
         if (dexItem != null)
         {
-            if (dexItem.IsCaught)
-            {
-                throw new PtaException("This pokemon has already been registered as caught", "Invalid pokedex registration", HttpStatusCode.BadRequest);
-            }
             await PokedexService.UpdateDexItemIsCaught(trainerId, gameId, dexNo);
             return Ok();
         }
@@ -314,7 +307,7 @@ public class PokemonController(
             form);
     }
 
-    private async Task<ActionResult<AbstractDto>> AddDexItem(Guid trainerId, Guid gameId, int dexNo, bool isSeen = false, bool isCaught = false)
+    private async Task AddDexItem(Guid trainerId, Guid gameId, int dexNo, bool isSeen = false, bool isCaught = false)
     {
         if (isCaught)
         {
@@ -327,7 +320,6 @@ public class PokemonController(
             dexNo,
             isSeen,
             isCaught);
-        return new GenericResponse("Pokedex item added successfully");
     }
 
     private async Task UpdatePokemonTrainerIds(
@@ -368,7 +360,7 @@ public class PokemonController(
         var rightPokemon = await PokemonService.GetPokemonById(rightPokemonId);
         if (leftPokemon.TrainerId == rightPokemon.TrainerId)
         {
-            throw new PtaException("Cannot trade with oneself", "Invalid trade request", HttpStatusCode.BadRequest);
+            throw new InvalidTradeException();
         }
 
         return (leftPokemon, rightPokemon);
@@ -384,7 +376,7 @@ public class PokemonController(
         var moveComparer = currentForm.Moves.Select(move => move.ToLower());
         if (!request.KeptMoves.All(move => moveComparer.Contains(move.ToLower())))
         {
-            throw new PtaException($"{currentForm.Nickname} doesn't contain one of {string.Join(", ", request.KeptMoves)}", "Invalid Request", HttpStatusCode.BadRequest);
+            throw new Exceptions.PtaException($"{currentForm.Nickname} doesn't contain one of {string.Join(", ", request.KeptMoves)}", "Invalid Request", HttpStatusCode.BadRequest);
         }
 
         var evolvedForm = await DexService.GetEvolved(currentForm, request.KeptMoves, request.NextForm, request.NewMoves);

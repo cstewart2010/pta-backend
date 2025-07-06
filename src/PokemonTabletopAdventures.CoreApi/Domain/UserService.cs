@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class UserService(ITrainerService trainerService) : AbstractService<UserModel>(MongoCollection.UserMessageThreads), IUserService
+internal class UserService(ITrainerService trainerService) : AbstractService<UserModel>(MongoCollection.Users), IUserService
 {
     private readonly ITrainerService _trainerService = trainerService;
 
@@ -18,7 +18,7 @@ internal class UserService(ITrainerService trainerService) : AbstractService<Use
         await ThrowIfNull(
             userId,
             id => Collection.FindOneAndDelete(user => user.UserId == id),
-            "UserId");
+            PropertyNames.UserId);
         
         var trainers = await _trainerService.GetAllUserTrainers(userId);
         var games = trainers.Select(trainer => trainer.GameId);
@@ -33,7 +33,7 @@ internal class UserService(ITrainerService trainerService) : AbstractService<Use
         return await ThrowIfNull(
             id,
             id => Collection.Find(user => user.UserId == id).SingleOrDefault(),
-            "UserId");
+            PropertyNames.UserId);
     }
 
     public async Task<UserModel> GetUserByUsername(string username)
@@ -41,7 +41,7 @@ internal class UserService(ITrainerService trainerService) : AbstractService<Use
         return await ThrowIfNull(
             username,
             username => Collection.Find(user => user.Username == username).SingleOrDefault(),
-            "Username");
+            PropertyNames.Username);
     }
 
     public async Task<IEnumerable<UserModel>> GetUsers()
@@ -73,7 +73,7 @@ internal class UserService(ITrainerService trainerService) : AbstractService<Use
         return await UpdateDocument(
             userId,
             user => user.UserId == userId,
-            Builders<UserModel>.Update.Set("ActivityToken", token));
+            Builders<UserModel>.Update.Set(PropertyNames.ActivityToken, token));
     }
 
     public async Task<UserModel> UpdateUserOnlineStatus(Guid userId, bool isOnline)
@@ -88,11 +88,11 @@ internal class UserService(ITrainerService trainerService) : AbstractService<Use
     {
         if (isOnline)
         {
-            return Builders<UserModel>.Update.Set("IsOnline", isOnline);
+            return Builders<UserModel>.Update.Set(PropertyNames.IsOnline, isOnline);
         }
 
         return Builders<UserModel>.Update.Combine(
-            Builders<UserModel>.Update.Set("IsOnline", isOnline),
-            Builders<UserModel>.Update.Set("ActivityToken", string.Empty));
+            Builders<UserModel>.Update.Set(PropertyNames.IsOnline, isOnline),
+            Builders<UserModel>.Update.Set(PropertyNames.ActivityToken, string.Empty));
     }
 }

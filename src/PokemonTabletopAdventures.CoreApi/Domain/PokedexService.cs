@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,7 +17,7 @@ internal class PokedexService : AbstractService<PokeDexItemModel>, IPokedexServi
         await ThrowIfNull(
             (trainerId, gameId),
             x => Collection.FindOneAndDelete(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId),
-            "TrainerId");
+            PropertyNames.TrainerId);
     }
 
     public async Task<PokeDexItemModel> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo)
@@ -25,7 +25,7 @@ internal class PokedexService : AbstractService<PokeDexItemModel>, IPokedexServi
         return await ThrowIfNull(
             (trainerId, gameId, dexNo),
             x => Collection.Find(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId && dexItem.DexNo == dexNo).SingleOrDefault(),
-            "DexNo");
+            PropertyNames.DexNo);
     }
 
     public async Task<IEnumerable<PokeDexItemModel>> GetTrainerPokeDex(Guid trainerId, Guid gameId)
@@ -33,7 +33,7 @@ internal class PokedexService : AbstractService<PokeDexItemModel>, IPokedexServi
         return await ThrowIfNull(
             (trainerId, gameId),
             x => Collection.Find(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId).ToEnumerable(),
-            "Trainer");
+            $"{PropertyNames.TrainerId} {PropertyNames.GameId}");
     }
 
     public async Task PostDexItem(Guid trainerId, Guid gameId, int dexNo, bool isSeen, bool isCaught)
@@ -55,7 +55,7 @@ internal class PokedexService : AbstractService<PokeDexItemModel>, IPokedexServi
         return await UpdateDocument(
             dexNo,
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
-            Builders<PokeDexItemModel>.Update.Set("IsSeen", true));
+            Builders<PokeDexItemModel>.Update.Set(PropertyNames.IsSeen, true));
     }
 
     public async Task<PokeDexItemModel> UpdateDexItemIsSeen(Guid trainerId, Guid gameId, int dexNo)
@@ -63,7 +63,7 @@ internal class PokedexService : AbstractService<PokeDexItemModel>, IPokedexServi
         return await UpdateDocument(
             dexNo,
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
-            Builders<PokeDexItemModel>.Update.Set("IsSeen", true),
-            Builders<PokeDexItemModel>.Update.Set("IsCaught", true));
+            Builders<PokeDexItemModel>.Update.Set(PropertyNames.IsSeen, true),
+            Builders<PokeDexItemModel>.Update.Set(PropertyNames.IsCaught, true));
     }
 }

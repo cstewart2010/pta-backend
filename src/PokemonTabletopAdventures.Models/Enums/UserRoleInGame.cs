@@ -3,7 +3,6 @@
 /// <summary>
 /// Represents a User's Role within a PTA Game Session
 /// </summary>
-[Flags]
 public enum UserRoleInGame
 {
     /// <summary>

@@ -1,5 +1,5 @@
 ﻿using MongoDB.Bson;
-using PokemonTabletopAdventures.Interfaces;
+using PokemonTabletopAdventures.Models.Interfaces;
 
 namespace PokemonTabletopAdventures.Models;
 

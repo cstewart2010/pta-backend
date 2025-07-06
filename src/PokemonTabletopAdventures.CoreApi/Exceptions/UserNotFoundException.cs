@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
+using PokemonTabletopAdventures.CoreApi.Constants;
 
-namespace PokemonTabletopAdventures.CoreApi.Exceptions
+namespace PokemonTabletopAdventures.CoreApi.Exceptions;
+
+public class UserNotFoundException(Guid userId) : PtaException(userId.ToString(), PtaExceptionParts.UserNotFoundTitle, HttpStatusCode.NotFound)
 {
-    public class UserNotFoundException(Guid userId) : PtaException(userId.ToString(), "User was not found", HttpStatusCode.NotFound)
-    {
-    }
 }
