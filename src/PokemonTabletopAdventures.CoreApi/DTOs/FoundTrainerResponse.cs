@@ -1,5 +1,4 @@
-﻿using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
-using PokemonTabletopAdventures.CoreApi.DTOs.Users;
+﻿using PokemonTabletopAdventures.CoreApi.DTOs.Users;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
 using System.Threading.Tasks;
@@ -18,13 +17,11 @@ public class FoundTrainerResponse : AbstractDto
         return new FoundTrainerResponse
         {
             Message = "Trainer was found",
-            Trainer = await Trainer.ParseFromModel(model, pokemonService, pokedexService),
             User = new User(user),
             GameNickname = await gameService.GetGameNickname(model.GameId),
         };
     }
 
-    public required Trainer Trainer { get; init; }
     public required User User { get; init; }
     public required string GameNickname { get; init; }
 }

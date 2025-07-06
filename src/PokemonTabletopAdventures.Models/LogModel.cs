@@ -34,5 +34,5 @@ public class LogModel
     /// The timestamp for the Log
     /// </summary>
     [BsonRepresentation(BsonType.String)]
-    public DateTimeOffset? LogTimestamp { get; set; }
+    public DateTimeOffset LogTimestamp { get; set; }
 }

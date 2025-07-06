@@ -90,25 +90,6 @@ public class TrainerController(
         return await Task.FromResult(NotFound());
     }
 
-    [HttpPost("{gameId}/{gameMasterId}/{trainerId}")]
-    [ProducesResponseType(typeof(PokemonModel), 200)]
-    [ProducesResponseType(typeof(ProblemDetails), 400)]
-    [ProducesResponseType(typeof(ProblemDetails), 401)]
-    public async Task<IActionResult> AddPokemon(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
-        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid trainerId,
-        [FromQuery] WildPokemon wild)
-    {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var pokemon = await BuildPokemon(trainerId, gameId, wild);
-        await PokemonService.PostPokemon(pokemon);
-        await RefreshToken(gameMasterId);
-        return Ok(pokemon);
-    }
-
     [HttpPut("{gameId}/{userId}/newUser")]
     [ProducesResponseType(typeof(FoundTrainerResponse), 201)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -524,7 +505,7 @@ public class TrainerController(
     private async Task<List<Trainer>> GetTrainers(Guid gameId)
     {
         var models = await TrainerService.GetTrainersByGameId(gameId);
-        var trainers = await Task.WhenAll(models.Select(async trainer => await Trainer.ParseFromModel(trainer, PokemonService, PokedexService)));
+        var trainers = await Task.WhenAll(models.Select(async trainer => await ParseFromModel(trainer)));
         return [.. trainers];
     }
 

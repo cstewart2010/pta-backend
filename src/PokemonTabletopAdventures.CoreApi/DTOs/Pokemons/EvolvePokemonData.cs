@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PokemonTabletopAdventures.CoreApi.DTOs.Pokemons;
 
-public class EvolvePokemonRequest
+public class EvolvePokemonData
 {
     [Required, StringLength(255, MinimumLength = 1)]
     public required string NextForm { get; set; }

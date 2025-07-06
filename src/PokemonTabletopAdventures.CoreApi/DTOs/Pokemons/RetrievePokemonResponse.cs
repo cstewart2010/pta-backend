@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using PokemonTabletopAdventures.Models;
+using System.Collections.Generic;
 
-namespace PokemonTabletopAdventures.CoreApi.DTOs.Pokemons
+namespace PokemonTabletopAdventures.CoreApi.DTOs.Pokemons;
+
+public class RetrievePokemonResponse
 {
-    public class RetrievePokemonResponse
-    {
-        public required ICollection<Pokemon> Pokemons { get; set; }
-    }
+    public ICollection<Pokemon> Pokemon { get; set; } = [];
+    public ICollection<BasePokemonModel> Models { get; set; } = [];
 }

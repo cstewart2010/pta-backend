@@ -22,10 +22,11 @@ internal class PokedexService : AbstractService<PokeDexItemModel>, IPokedexServi
 
     public async Task<PokeDexItemModel> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo)
     {
-        return await ThrowIfNull(
-            (trainerId, gameId, dexNo),
-            x => Collection.Find(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId && dexItem.DexNo == dexNo).SingleOrDefault(),
-            PropertyNames.DexNo);
+        return await Task.FromResult(Collection.Find(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo).SingleOrDefault());
+        //return await ThrowIfNull(
+        //    (trainerId, gameId, dexNo),
+        //    x => Collection.Find(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId && dexItem.DexNo == dexNo).SingleOrDefault(),
+        //    PropertyNames.DexNo);
     }
 
     public async Task<IEnumerable<PokeDexItemModel>> GetTrainerPokeDex(Guid trainerId, Guid gameId)

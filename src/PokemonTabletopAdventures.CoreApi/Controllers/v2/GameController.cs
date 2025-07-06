@@ -122,7 +122,7 @@ public class GameController(
         Guid gameId)
     {
         var game = await GameService.GetGame(gameId);
-        return Ok(new RetrieveLogsResponse(game, count));
+        return Ok(CreateRetrieveLogsResponse(game, count));
     }
 
     [HttpPost("import")]
@@ -185,11 +185,7 @@ public class GameController(
     {
         await VerifyIdentity(accessToken, sessionAuth, request.UserId);
         var game = await GameService.GetGame(gameId);
-        var logs = request.Game.Logs;
-        foreach (var log in logs)
-        {
-            log.LogTimestamp = DateTimeOffset.Now;
-        }
+        var logs = request.Game.Logs.Select(ParseBackToModel);
         await GameService.UpdateGameLogs(game, [.. logs]);
         await RefreshToken(request.UserId);
         var games = await ParseFromModel(

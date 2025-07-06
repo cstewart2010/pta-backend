@@ -196,7 +196,7 @@ public class ShopController(
         await GameService.UpdateGameLogs(game, [.. logs]);
         return Ok(new PutShopResponse
         {
-            Trainer = await Trainer.ParseFromModel(trainer, PokemonService, PokedexService),
+            Trainer = await ParseFromModel(trainer),
             Shop = shop
         });
     }

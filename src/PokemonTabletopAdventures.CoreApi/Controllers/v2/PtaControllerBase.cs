@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 using PokemonTabletopAdventures.CoreApi.DTOs.Enums;
 using PokemonTabletopAdventures.CoreApi.DTOs.Games;
 using PokemonTabletopAdventures.CoreApi.DTOs.Npcs;
@@ -60,7 +63,7 @@ public abstract class PtaControllerBase(
             var trainerModels = await TrainerService.GetTrainersByGameId(model.GameId);
             var npcModels = isGM ? [] : await Task.WhenAll(model.NPCs.Select(async id => await npcService.GetNpc(id)));
             var settingModels = await settingService.GetAllSettings(model.GameId);
-            var trainers = await Task.WhenAll(trainerModels.Select(async trainer => await Trainer.ParseFromModel(trainer, PokemonService, PokedexService)));
+            var trainers = await Task.WhenAll(trainerModels.Select(async trainer => await ParseFromModel(trainer)));
             var npcs = await Task.WhenAll(npcModels.Select(async npc => await ParseFromModel(npc)));
             var settings = await Task.WhenAll(settingModels.Select(async setting => await Setting.ParseFromModel(setting, isGM, model.GameId, shopService)));
             return new Game
@@ -70,7 +73,7 @@ public abstract class PtaControllerBase(
                 Trainers = trainers,
                 Npcs = npcs,
                 Settings = settings,
-                Logs = model.Logs
+                Logs = model.Logs.Select(ParseFromModel)
             };
         }));
 
@@ -169,6 +172,18 @@ public abstract class PtaControllerBase(
         };
     }
 
+    protected PokedexItem ParseFromModel(PokeDexItemModel pokeDexItem)
+    {
+        return new PokedexItem
+        {
+            DexNo = pokeDexItem.DexNo,
+            GameId = pokeDexItem.GameId,
+            IsCaught = pokeDexItem.IsCaught,
+            IsSeen = pokeDexItem.IsSeen,
+            TrainerId = pokeDexItem.TrainerId
+        };
+    }
+
     protected PokemonModel ParseBackToModel(Pokemon pokemon)
     {
         var model = PokemonService.GetPokemonById(pokemon.PokemonId);
@@ -210,6 +225,79 @@ public abstract class PtaControllerBase(
             Type = pokemon.Type,
             Weight = pokemon.Weight
         };
+    }
+
+
+    internal async Task<Trainer> ParseFromModel(TrainerModel trainer)
+    {
+        var trainerPokemon = await PokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId);
+        var pokedex = (await PokedexService.GetTrainerPokeDex(trainer.TrainerId, trainer.GameId)).OrderBy(item => item.DexNo);
+        var caught = pokedex.Count(dexItem => dexItem.IsCaught);
+        return new Trainer
+        {
+            TrainerId = trainer.TrainerId,
+            TrainerName = trainer.TrainerName,
+            IsGM = trainer.IsGM,
+            IsOnline = trainer.IsOnline,
+            Feats = trainer.Feats,
+            GameId = trainer.GameId,
+            Honors = trainer.Honors,
+            Money = trainer.Money,
+            Origin = trainer.Origin,
+            TrainerClasses = trainer.TrainerClasses,
+            TrainerStats = trainer.TrainerStats,
+            IsComplete = trainer.IsComplete,
+            PokemonTeam = trainerPokemon.Where(pokemon => pokemon.IsOnActiveTeam).Select(ParseFromModel),
+            PokemonHome = trainerPokemon.Where(pokemon => !pokemon.IsOnActiveTeam).Select(ParseFromModel),
+            PokeDex = pokedex.Select(ParseFromModel).OrderBy(item => item.DexNo),
+            SeenTotal = pokedex.Count(dexItem => dexItem.IsSeen),
+            CaughtTotal = caught,
+            Level = trainer.Honors.Count() + caught / 30 + 1,
+            TrainerSkills = trainer.TrainerSkills,
+            Age = trainer.Age,
+            Gender = trainer.Gender,
+            Height = trainer.Height,
+            Weight = trainer.Weight,
+            Description = trainer.Description,
+            Personality = trainer.Personality,
+            Background = trainer.Background,
+            Goals = trainer.Goals,
+            Species = trainer.Species,
+            Items = trainer.Items,
+            CurrentHP = trainer.CurrentHP,
+            IsAllowed = trainer.IsAllowed,
+            NewPokemon = [],
+            Sprite = trainer.Sprite,
+        };
+    }
+
+    internal async Task<TrainerModel> ParseBackToModel(Trainer trainer)
+    {
+        var model = await TrainerService.GetTrainerById(trainer.TrainerId, trainer.GameId);
+        trainer.TrainerName = trainer.TrainerName;
+        trainer.Feats = trainer.Feats;
+        trainer.Money = trainer.Money;
+        trainer.Origin = trainer.Origin;
+        trainer.TrainerClasses = trainer.TrainerClasses;
+        trainer.TrainerStats = trainer.TrainerStats;
+        trainer.TrainerSkills = trainer.TrainerSkills;
+        trainer.Age = trainer.Age;
+        trainer.Gender = trainer.Gender;
+        trainer.Height = trainer.Height;
+        trainer.Weight = trainer.Weight;
+        trainer.Description = trainer.Description;
+        trainer.Personality = trainer.Personality;
+        trainer.Background = trainer.Background;
+        trainer.Goals = trainer.Goals;
+        trainer.Items = [.. trainer.Items];
+        trainer.Species = trainer.Species;
+        trainer.CurrentHP = trainer.CurrentHP;
+        trainer.Sprite = trainer.Sprite;
+        if (!(trainer.IsComplete || string.IsNullOrEmpty(trainer.Origin)))
+        {
+            trainer.IsComplete = true;
+        }
+        return model;
     }
 
     protected async Task<IEnumerable<LogModel>> AddItemsToTrainer(TrainerModel trainer, IEnumerable<ItemModel> items)
@@ -347,6 +435,102 @@ public abstract class PtaControllerBase(
         };
     }
 
+    private async Task<PokemonModel> BuildDefaultPokemon(WildPokemon wild)
+    {
+        var random = new Random();
+        if (!Enum.TryParse(wild.Gender, true, out Gender gender))
+        {
+            var genders = Enum.GetValues<Gender>();
+            gender = genders[random.Next(genders.Length)];
+        }
+
+        if (!Enum.TryParse(wild.Nature, true, out Nature nature))
+        {
+            var natures = Enum.GetValues<Nature>();
+            nature = natures[random.Next(1, natures.Length)];
+        }
+
+        if (!Enum.TryParse(wild.Status, true, out Status status))
+        {
+            status = Status.Normal;
+        }
+
+        var form = wild.Form.Replace('_', '/');
+        var pokemon = await DexService.GetNewPokemon(
+            wild.Pokemon,
+            nature,
+            gender,
+            status,
+            null,
+            form);
+
+        if (wild.ForceShiny)
+        {
+            pokemon.IsShiny = true;
+        }
+        pokemon.Pokeball = Pokeball.Basic_Ball.ToString();
+        return pokemon;
+    }
+
+    #region Helper functions
+    internal static RetrieveLogsResponse CreateRetrieveLogsResponse(GameModel game, int count)
+    {
+        if (count > game.Logs.Count)
+        {
+            count = game.Logs.Count;
+        }
+
+        var response = new RetrieveLogsResponse { LogPages = [] };
+        if (game.Logs != null)
+        {
+            var logs = game.Logs.OrderByDescending(log => log.LogTimestamp);
+            for (int i = 0; i < count; i += 50)
+            {
+                response.LogPages.Add(GetPage(logs, i, 50));
+            }
+        }
+
+        return response;
+    }
+
+    internal static LogModel ParseBackToModel(Log log)
+    {
+        return new LogModel(log.User, log.Action);
+    }
+
+    private static IEnumerable<Log> GetPage(
+        IEnumerable<LogModel> source,
+        int offset,
+        int limit)
+    {
+        if (offset < 0 || offset >= source.Count() || limit < 0)
+        {
+            return [];
+        }
+
+        if (limit >= source.Count())
+        {
+            return source.Skip(offset).Select(ParseFromModel);
+        }
+
+        if (offset + limit > source.Count())
+        {
+            limit = source.Count() - offset;
+        }
+
+        return source.Skip(offset).Take(limit).Select(ParseFromModel);
+    }
+
+    private static Log ParseFromModel(LogModel log)
+    {
+        return new Log
+        {
+            LogTimestamp = log.LogTimestamp,
+            Action = log.Action,
+            User = log.User,
+        };
+    }
+
     private static List<ItemModel> UpdateAllItemsWithAddition(
         List<ItemModel> itemList,
         ItemModel itemToken,
@@ -406,41 +590,5 @@ public abstract class PtaControllerBase(
 
         return item;
     }
-
-    private async Task<PokemonModel> BuildDefaultPokemon(WildPokemon wild)
-    {
-        var random = new Random();
-        if (!Enum.TryParse(wild.Gender, true, out Gender gender))
-        {
-            var genders = Enum.GetValues<Gender>();
-            gender = genders[random.Next(genders.Length)];
-        }
-
-        if (!Enum.TryParse(wild.Nature, true, out Nature nature))
-        {
-            var natures = Enum.GetValues<Nature>();
-            nature = natures[random.Next(1, natures.Length)];
-        }
-
-        if (!Enum.TryParse(wild.Status, true, out Status status))
-        {
-            status = Status.Normal;
-        }
-
-        var form = wild.Form.Replace('_', '/');
-        var pokemon = await DexService.GetNewPokemon(
-            wild.Pokemon,
-            nature,
-            gender,
-            status,
-            null,
-            form);
-
-        if (wild.ForceShiny)
-        {
-            pokemon.IsShiny = true;
-        }
-        pokemon.Pokeball = Pokeball.Basic_Ball.ToString();
-        return pokemon;
-    }
+#endregion
 }

@@ -21,7 +21,7 @@ public class GameMasterResponse : AbstractDto
         var message = "Game was found";
         var gameMasterId = user.UserId;
         var models = await trainerService.GetTrainersByGameId(gameId);
-        var trainers = await Task.WhenAll(models.Select(async trainer => await Trainer.ParseFromModel(trainer, pokemonService, pokedexService)));
+        //var trainers = await Task.WhenAll(models.Select(async trainer => await Trainer.ParseFromModel(trainer, pokemonService, pokedexService)));
 
         return new GameMasterResponse
         {
@@ -29,7 +29,7 @@ public class GameMasterResponse : AbstractDto
             GameId = gameId,
             GameMasterId = gameMasterId,
             Message = message,
-            Trainers = trainers
+            Trainers = []
         };
     }
 
