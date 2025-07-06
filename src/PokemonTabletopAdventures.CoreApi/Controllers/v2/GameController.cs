@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs;
 using PokemonTabletopAdventures.CoreApi.DTOs.Games;
 using PokemonTabletopAdventures.CoreApi.DTOs.Npcs;
 using PokemonTabletopAdventures.CoreApi.DTOs.Settings;
@@ -43,7 +42,7 @@ public class GameController(
     private readonly IShopService _shopService = shopService;
 
     [HttpGet("retrieve", Name = nameof(GetAllGames))]
-    [ProducesResponseType(typeof(IEnumerable<GetGamesResponse>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<RetrieveGameResponse>), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetAllGames(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
@@ -63,12 +62,17 @@ public class GameController(
             gameModels = await GameService.GetMostRecent20Games(user);
         }
 
-        var games = await ParseFromModel(gameModels, false);
-        return Ok(new GetGamesResponse { Games = games });
+        var games = await ParseFromModel(
+            gameModels,
+            false,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new RetrieveGameResponse { Games = games });
     }
 
     [HttpGet("user/{userId}/retrieve", Name = nameof(GetAllUserGames))]
-    [ProducesResponseType(typeof(GetGamesResponse), 200)]
+    [ProducesResponseType(typeof(RetrieveGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetAllUserGames(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
@@ -78,8 +82,13 @@ public class GameController(
         await VerifyIdentity(accessToken, sessionAuth, userId);
         var user = await UserService.GetUserById(userId);
         var gameModels = await GameService.GetAllGamesWithUser(user);
-        var games = await ParseFromModel(gameModels, false);
-        return Ok(new GetGamesResponse { Games = games });
+        var games = await ParseFromModel(
+            gameModels,
+            false,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new RetrieveGameResponse { Games = games });
     }
 
     [HttpGet("sprites/retrieve", Name = nameof(GetAllSprites))]
@@ -91,28 +100,33 @@ public class GameController(
     }
 
     [HttpGet("{gameId}/retrieve", Name = nameof(GetGame))]
-    [ProducesResponseType(typeof(GetGamesResponse), 200)]
+    [ProducesResponseType(typeof(RetrieveGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetGame(Guid gameId)
     {
         var game = await GameService.GetGame(gameId);
-        var games = await ParseFromModel([game], false);
-        return Ok(new GetGamesResponse { Games = games });
+        var games = await ParseFromModel(
+            [game],
+            false,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new RetrieveGameResponse { Games = games });
     }
 
     [HttpGet("{gameId}/logs/retrieve", Name = nameof(GetLogs))]
-    [ProducesResponseType(typeof(GetLogsResponse), 200)]
+    [ProducesResponseType(typeof(RetrieveLogsResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetLogs(
         [FromQuery] int count,
         Guid gameId)
     {
         var game = await GameService.GetGame(gameId);
-        return Ok(new GetLogsResponse(game, count));
+        return Ok(new RetrieveLogsResponse(game, count));
     }
 
     [HttpPost("import")]
-    [ProducesResponseType(typeof(PostGameResponse), 200)]
+    [ProducesResponseType(typeof(CreateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     public async Task<IActionResult> ImportGame()
     {
@@ -122,15 +136,20 @@ public class GameController(
             throw new ImportFailedException(Constants.PtaExceptionParts.EmptyImportJsonMessage);
         }
         var game = await _exportService.ParseImport(json);
-        var games = await ParseFromModel([game], true);
-        return Ok(new PostGameResponse { Games = games });
+        var games = await ParseFromModel(
+            [game],
+            true,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new CreateGameResponse { Games = games });
     }
 
-    [HttpPost("register")]
-    [ProducesResponseType(typeof(PostGameResponse), 201)]
+    [HttpPost("create")]
+    [ProducesResponseType(typeof(CreateGameResponse), 201)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     public async Task<IActionResult> CreateNewGame(
-        [FromBody] PostGameRequest request)
+        [FromBody] CreateGameRequest request)
     {
         var game = await BuildGame(request.GameNickname, request.GameSessionPassword);
         await GameService.PostGame(game);
@@ -145,18 +164,23 @@ public class GameController(
         );
         await GameService.UpdateGameLogs(game, gameCreationLog);
         await RefreshToken(request.UserId);
-        var games = await ParseFromModel([game], true);
-        return Ok(new PostGameResponse { Games = games });
+        var games = await ParseFromModel(
+            [game],
+            true,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new CreateGameResponse { Games = games });
     }
 
     [HttpPatch("{gameId}/logs/add")]
-    [ProducesResponseType(typeof(PatchGameResponse), 201)]
+    [ProducesResponseType(typeof(UpdateGameResponse), 201)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddLogsAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] PatchGameRequest request,
+        [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
         await VerifyIdentity(accessToken, sessionAuth, request.UserId);
@@ -168,18 +192,23 @@ public class GameController(
         }
         await GameService.UpdateGameLogs(game, [.. logs]);
         await RefreshToken(request.UserId);
-        var games = await ParseFromModel([game], false);
-        return Ok(new PatchGameResponse { Games = games });
+        var games = await ParseFromModel(
+            [game],
+            false,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new UpdateGameResponse { Games = games });
     }
 
     [HttpPatch("{gameId}/start")]
-    [ProducesResponseType(typeof(PatchGameResponse), 200)]
+    [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> StartGame(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] PatchGameRequest request,
+        [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
         await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
@@ -188,35 +217,45 @@ public class GameController(
         await IsGameAuthenticated(request.GameSessionPassword!, game);
         await GameService.UpdateGameOnlineStatus(gameId, true);
         await AssignAuthAndToken(trainer.TrainerId);
-        var games = await ParseFromModel([game], true);
-        return Ok(new PatchGameResponse { Games = games });
+        var games = await ParseFromModel(
+            [game],
+            true,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new UpdateGameResponse { Games = games });
     }
 
     [HttpPatch("{gameId}/end")]
-    [ProducesResponseType(typeof(PatchGameResponse), 200)]
+    [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> EndGame(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] PatchGameRequest request,
+        [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
         await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
         await SetEndGameStatuses(gameId);
         var game = await GameService.GetGame(gameId);
-        var games = await ParseFromModel([game], true);
-        return Ok(new PatchGameResponse { Games = games });
+        var games = await ParseFromModel(
+            [game],
+            true,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new UpdateGameResponse { Games = games });
     }
 
     [HttpPatch("{gameId}/npcs/add")]
-    [ProducesResponseType(typeof(PatchGameResponse), 200)]
+    [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddNPCsToGame(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] PatchGameRequest request,
+        [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
         var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
@@ -226,18 +265,23 @@ public class GameController(
         var newNpcList = game.NPCs.Union(foundNpcIds);
         await RefreshToken(request.GameMasterId);
         var updatedGame = await GameService.UpdateGameNpcList(gameId, newNpcList);
-        var games = await ParseFromModel([updatedGame], true);
-        return Ok(new PatchGameResponse { Games = games });
+        var games = await ParseFromModel(
+            [updatedGame],
+            true,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new UpdateGameResponse { Games = games });
     }
 
     [HttpPatch("{gameId}/npcs/remove")]
-    [ProducesResponseType(typeof(PatchGameResponse), 200)]
+    [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> RemovesNPCsFromGame(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] PatchGameRequest request,
+        [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
         var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
@@ -247,8 +291,13 @@ public class GameController(
         var newNpcList = game.NPCs.Except(foundNpcIds);
         await RefreshToken(request.GameMasterId);
         var updatedGame = await GameService.UpdateGameNpcList(gameId, newNpcList);
-        var games = await ParseFromModel([updatedGame], true);
-        return Ok(new PatchGameResponse { Games = games });
+        var games = await ParseFromModel(
+            [updatedGame],
+            true,
+            _npcService,
+            _settingService,
+            _shopService);
+        return Ok(new UpdateGameResponse { Games = games });
     }
 
     [HttpDelete("{gameId}/delete")]
@@ -367,29 +416,5 @@ public class GameController(
         {
             await PokemonService.DeletePokemonByTrainerId(gameId, trainer.TrainerId);
         }
-    }
-
-    private async Task<ICollection<Game>> ParseFromModel(IEnumerable<GameModel> models, bool isGM)
-    {
-        var games = await Task.WhenAll(models.Select(async model =>
-        {
-            var trainerModels = await TrainerService.GetTrainersByGameId(model.GameId);
-            var npcModels = isGM ? [] : await Task.WhenAll(model.NPCs.Select(async id => await _npcService.GetNpc(id)));
-            var settingModels = await _settingService.GetAllSettings(model.GameId);
-            var trainers = await Task.WhenAll(trainerModels.Select(async trainer => await Trainer.ParseFromModel(trainer, PokemonService, PokedexService)));
-            var npcs = await Task.WhenAll(npcModels.Select(async npc => await Npc.ParseFromModel(npc, PokemonService)));
-            var settings = await Task.WhenAll(settingModels.Select(async setting => await Setting.ParseFromModel(setting, isGM, model.GameId, _shopService)));
-            return new Game
-            {
-                GameId = model.GameId,
-                Nickname = model.Nickname,
-                Trainers = trainers,
-                Npcs = npcs,
-                Settings = settings,
-                Logs = model.Logs
-            };
-        }));
-
-        return games;
     }
 }

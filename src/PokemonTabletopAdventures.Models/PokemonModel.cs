@@ -66,12 +66,14 @@ public class PokemonModel: IDocument
     /// <summary>
     /// The Pokemon's gender
     /// </summary>
-    public string Gender { get; set; } = string.Empty;
+    [BsonRepresentation(BsonType.String)]
+    public Gender Gender { get; set; }
 
     /// <summary>
     /// The Pokemon's status
     /// </summary>
-    public string PokemonStatus { get; set; } = string.Empty;
+    [BsonRepresentation(BsonType.String)]
+    public Status PokemonStatus { get; set; }
 
     /// <summary>
     /// The Pokemon's nickname. Defaults to the Species name is nothing is selected
@@ -96,7 +98,8 @@ public class PokemonModel: IDocument
     /// <summary>
     /// The Pokemon's nature positioning
     /// </summary>
-    public string Nature { get; set; } = string.Empty;
+    [BsonRepresentation(BsonType.String)]
+    public Nature Nature { get; set; }
 
     /// <summary>
     /// Whether the pokemon is shiny or not
@@ -193,5 +196,5 @@ public class PokemonModel: IDocument
     /// <summary>
     /// The Pokemon's legendary stats, if applicable
     /// </summary>
-    public LegendaryStatsModel LegendaryStats { get; set; } = new();
+    public LegendaryStatsModel? LegendaryStats { get; set; }
 }

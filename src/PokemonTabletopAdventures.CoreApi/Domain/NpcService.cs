@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.DTOs.Npcs;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
 using System;
@@ -9,24 +10,34 @@ using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class NpcService : AbstractService<NpcModel>, INpcService
+internal class NpcService(IGameService gameService) : AbstractService<NpcModel>(MongoCollection.NPCs), INpcService
 {
-    public NpcService() : base(MongoCollection.NPCs) { }
+    private readonly IGameService _gameService = gameService;
 
     public async Task DeleteNpc(Guid id)
     {
+        var npc = await GetNpc(id);
         await ThrowIfNull(
             id,
             npcId => Collection.FindOneAndDelete(npc => npc.NPCId == npcId),
             PropertyNames.NpcId);
+
+        var game = await _gameService.GetGame(npc.GameId);
+        game.NPCs.Remove(id);
+        await _gameService.UpdateGameNpcList(npc.GameId, game.NPCs);
     }
 
     public async Task DeleteNpcByGameId(Guid gameId)
     {
-        await ThrowIfNull(
-            gameId,
-            gameId => Collection.FindOneAndDelete(npc => npc.GameId == gameId),
-            PropertyNames.GameId);
+        var game = await _gameService.GetGame(gameId);
+        foreach (var npcId in game.NPCs)
+        {
+            await ThrowIfNull(
+                gameId,
+                gameId => Collection.FindOneAndDelete(npc => npc.NPCId == npcId),
+                PropertyNames.GameId);
+        }
+        await _gameService.UpdateGameNpcList(gameId, []);
     }
 
     public async Task<NpcModel> GetNpc(Guid id)

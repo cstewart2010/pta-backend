@@ -1,6 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PokemonTabletopAdventures.CoreApi.Domain;
 using PokemonTabletopAdventures.CoreApi.DTOs.Enums;
+using PokemonTabletopAdventures.CoreApi.DTOs.Games;
+using PokemonTabletopAdventures.CoreApi.DTOs.Npcs;
 using PokemonTabletopAdventures.CoreApi.DTOs.Pokemons;
+using PokemonTabletopAdventures.CoreApi.DTOs.Settings;
+using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
 using PokemonTabletopAdventures.CoreApi.DTOs.Users;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Extensions;
@@ -41,6 +46,170 @@ public abstract class PtaControllerBase(
         pokemon.OriginalTrainerId = trainerId;
         pokemon.GameId = gameId;
         return pokemon;
+    }
+
+    protected async Task<ICollection<Game>> ParseFromModel(
+        IEnumerable<GameModel> models,
+        bool isGM,
+        INpcService npcService,
+        ISettingService settingService,
+        IShopService shopService)
+    {
+        var games = await Task.WhenAll(models.Select(async model =>
+        {
+            var trainerModels = await TrainerService.GetTrainersByGameId(model.GameId);
+            var npcModels = isGM ? [] : await Task.WhenAll(model.NPCs.Select(async id => await npcService.GetNpc(id)));
+            var settingModels = await settingService.GetAllSettings(model.GameId);
+            var trainers = await Task.WhenAll(trainerModels.Select(async trainer => await Trainer.ParseFromModel(trainer, PokemonService, PokedexService)));
+            var npcs = await Task.WhenAll(npcModels.Select(async npc => await ParseFromModel(npc)));
+            var settings = await Task.WhenAll(settingModels.Select(async setting => await Setting.ParseFromModel(setting, isGM, model.GameId, shopService)));
+            return new Game
+            {
+                GameId = model.GameId,
+                Nickname = model.Nickname,
+                Trainers = trainers,
+                Npcs = npcs,
+                Settings = settings,
+                Logs = model.Logs
+            };
+        }));
+
+        return games;
+    }
+
+    protected async Task<Npc> ParseFromModel(NpcModel npc)
+    {
+        var npcPokemon = await PokemonService.GetPokemonByTrainerId(npc.NPCId);
+        return new Npc
+        {
+            NpcId = npc.NPCId,
+            GameId = npc.GameId,
+            TrainerName = npc.TrainerName,
+            Feats = npc.Feats,
+            TrainerClasses = npc.TrainerClasses,
+            TrainerStats = npc.TrainerStats,
+            PokemonTeam = npcPokemon.Where(pokemon => pokemon.IsOnActiveTeam).Select(ParseFromModel),
+            Level = npc.Level,
+            TrainerSkills = npc.TrainerSkills,
+            Gender = npc.Gender,
+            Height = npc.Height,
+            Weight = npc.Weight,
+            Description = npc.Description,
+            Personality = npc.Personality,
+            Background = npc.Background,
+            Goals = npc.Goals,
+            Species = npc.Species,
+            Sprite = npc.Sprite,
+            Age = npc.Age,
+        };
+    }
+
+    protected async Task<NpcModel> ParseBackToModel(Npc npc, Guid gameId, INpcService npcService)
+    {
+        var model = await npcService.GetNpc(npc.NpcId);
+        model.TrainerName = npc.TrainerName;
+        model.Feats = npc.Feats;
+        model.TrainerClasses = npc.TrainerClasses;
+        model.TrainerStats = npc.TrainerStats;
+        model.Level = npc.Level;
+        model.TrainerSkills = npc.TrainerSkills;
+        model.Gender = npc.Gender;
+        model.Height = npc.Height;
+        model.Weight = npc.Weight;
+        model.Description = npc.Description;
+        model.Personality = npc.Personality;
+        model.Background = npc.Background;
+        model.Goals = npc.Goals;
+        model.Species = npc.Species;
+        model.Sprite = npc.Sprite;
+        model.Age = npc.Age;
+        model.GameId = gameId;
+        return model;
+    }
+
+    protected Pokemon ParseFromModel(PokemonModel pokemon)
+    {
+        return new Pokemon
+        {
+            AlternateForms = pokemon.AlternateForms,
+            IsOnActiveTeam = pokemon.IsOnActiveTeam,
+            CanEvolve = pokemon.CanEvolve,
+            CurrentHP = pokemon.CurrentHP,
+            DexNo = pokemon.DexNo,
+            Diet = pokemon.Diet,
+            EggGroups = pokemon.EggGroups,
+            EggHatchRate = pokemon.EggHatchRate,
+            EvolvedFrom = pokemon.EvolvedFrom,
+            Form = pokemon.Form,
+            GameId = pokemon.GameId,
+            Gender = pokemon.Gender,
+            GMaxMove = pokemon.GMaxMove,
+            Habitats = pokemon.Habitats,
+            IsShiny = pokemon.IsShiny,
+            LegendaryStats = pokemon.LegendaryStats,
+            Moves = pokemon.Moves,
+            Nature = pokemon.Nature,
+            Nickname = pokemon.Nickname,
+            NormalPortrait = pokemon.NormalPortrait,
+            OriginalTrainerId = pokemon.OriginalTrainerId,
+            Passives = pokemon.Passives,
+            Pokeball = pokemon.Pokeball,
+            PokemonId = pokemon.PokemonId,
+            PokemonStats = pokemon.PokemonStats,
+            PokemonStatus = pokemon.PokemonStatus,
+            Proficiencies = pokemon.Proficiencies,
+            Rarity = pokemon.Rarity,
+            ShinyPortrait = pokemon.ShinyPortrait,
+            Size = pokemon.Size,
+            Skills = pokemon.Skills,
+            SpeciesName = pokemon.SpeciesName,
+            TrainerId = pokemon.TrainerId,
+            Type = pokemon.Type,
+            Weight = pokemon.Weight
+        };
+    }
+
+    protected PokemonModel ParseBackToModel(Pokemon pokemon)
+    {
+        var model = PokemonService.GetPokemonById(pokemon.PokemonId);
+        return new PokemonModel
+        {
+            AlternateForms = pokemon.AlternateForms,
+            IsOnActiveTeam = pokemon.IsOnActiveTeam,
+            CanEvolve = pokemon.CanEvolve,
+            CurrentHP = pokemon.CurrentHP,
+            DexNo = pokemon.DexNo,
+            Diet = pokemon.Diet,
+            EggGroups = pokemon.EggGroups,
+            EggHatchRate = pokemon.EggHatchRate,
+            EvolvedFrom = pokemon.EvolvedFrom,
+            Form = pokemon.Form,
+            GameId = pokemon.GameId,
+            Gender = pokemon.Gender,
+            GMaxMove = pokemon.GMaxMove,
+            Habitats = pokemon.Habitats,
+            IsShiny = pokemon.IsShiny,
+            LegendaryStats = pokemon.LegendaryStats,
+            Moves = pokemon.Moves,
+            Nature = pokemon.Nature,
+            Nickname = pokemon.Nickname,
+            NormalPortrait = pokemon.NormalPortrait,
+            OriginalTrainerId = pokemon.OriginalTrainerId,
+            Passives = pokemon.Passives,
+            Pokeball = pokemon.Pokeball,
+            PokemonId = pokemon.PokemonId,
+            PokemonStats = pokemon.PokemonStats,
+            PokemonStatus = pokemon.PokemonStatus,
+            Proficiencies = pokemon.Proficiencies,
+            Rarity = pokemon.Rarity,
+            ShinyPortrait = pokemon.ShinyPortrait,
+            Size = pokemon.Size,
+            Skills = pokemon.Skills,
+            SpeciesName = pokemon.SpeciesName,
+            TrainerId = pokemon.TrainerId,
+            Type = pokemon.Type,
+            Weight = pokemon.Weight
+        };
     }
 
     protected async Task<IEnumerable<LogModel>> AddItemsToTrainer(TrainerModel trainer, IEnumerable<ItemModel> items)

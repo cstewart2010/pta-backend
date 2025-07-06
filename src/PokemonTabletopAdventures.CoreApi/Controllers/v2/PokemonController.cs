@@ -29,12 +29,35 @@ public class PokemonController(
 {
     private readonly ILogger<PokemonController> _logger = logger;
 
-    [HttpGet("{pokemonId}")]
+    [HttpGet("{pokemonId}/retrieve")]
     [ProducesResponseType(typeof(PokemonModel), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemon(Guid pokemonId)
     {
-        var pokemon = await PokemonService.GetPokemonById(pokemonId);
+        var model = await PokemonService.GetPokemonById(pokemonId);
+        return Ok();
+    }
+
+
+    [HttpGet("{gameId}/{gameMasterId}/{npcId}/{pokemonId}")]
+    [ProducesResponseType(typeof(PokemonModel), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
+    [ProducesResponseType(typeof(ProblemDetails), 401)]
+    public async Task<IActionResult> GetNpcMon(
+        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
+        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
+        Guid gameMasterId,
+        Guid gameId,
+        Guid npcId,
+        Guid pokemonId)
+    {
+        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
+        var pokemon = (await PokemonService.GetPokemonByTrainerId(npcId)).SingleOrDefault(pokemon => pokemon.PokemonId == pokemonId);
+        if (pokemon == null)
+        {
+            return NotFound(pokemonId);
+        }
+
         return Ok(pokemon);
     }
 
@@ -91,6 +114,23 @@ public class PokemonController(
         });
     }
 
+    [HttpPost("{gameId}/{gameMasterId}/{npcId}/new")]
+    [ProducesResponseType(typeof(IEnumerable<PokemonModel>), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
+    [ProducesResponseType(typeof(ProblemDetails), 401)]
+    public async Task<IActionResult> CreateNewNpcMonAsync(
+        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
+        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
+        [FromBody] IEnumerable<NewPokemon> newPokemon,
+        Guid gameMasterId,
+        Guid gameId,
+        Guid npcId)
+    {
+        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
+        var pokemon = await AddNpcPokemon(newPokemon, npcId, gameId);
+        return Ok(pokemon);
+    }
+
     [HttpPatch("{gameId}/{trainerId}/{pokemonId}/hp/{hp}")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -108,7 +148,7 @@ public class PokemonController(
         var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
         if (!(pokemon.TrainerId == trainerId || trainer.IsGM == true))
         {
-            throw new PtaUnauthorizedException(Constants.PtaExceptionParts.UnauthorizedPokemonUseMessage);
+            throw new PtaUnauthorizedException(PtaExceptionParts.UnauthorizedPokemonUseMessage);
         }
 
         OutofRangeException.CheckValue(-pokemon.PokemonStats.HP, pokemon.PokemonStats.HP, hp);
@@ -134,13 +174,13 @@ public class PokemonController(
         var pokemon = await PokemonService.GetPokemonById(pokemonId);
         if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
         {
-            throw new PtaUnauthorizedException(Constants.PtaExceptionParts.UnauthorizedPokemonUseMessage);
+            throw new PtaUnauthorizedException(PtaExceptionParts.UnauthorizedPokemonUseMessage);
         }
 
         form = form.Replace('_', '/');
         if (!pokemon.AlternateForms.Contains(form))
         {
-            throw new Exceptions.PtaException($"Invalid form for {pokemon.SpeciesName}", "Invalid Form", HttpStatusCode.BadRequest);
+            throw new PtaException($"Invalid form for {pokemon.SpeciesName}", "Invalid Form", HttpStatusCode.BadRequest);
         }
 
         var result = await GetDifferentForm(pokemon, form);
@@ -300,9 +340,9 @@ public class PokemonController(
     {
         return await DexService.GetNewPokemon(
             pokemon.SpeciesName,
-            Enum.Parse<Nature>(pokemon.Nature),
-            Enum.Parse<Gender>(pokemon.Gender),
-            Enum.Parse<Status>(pokemon.PokemonStatus),
+            pokemon.Nature,
+            pokemon.Gender,
+            pokemon.PokemonStatus,
             pokemon.Nickname,
             form);
     }
@@ -320,6 +360,25 @@ public class PokemonController(
             dexNo,
             isSeen,
             isCaught);
+    }
+
+    private async Task<IEnumerable<PokemonModel>> AddNpcPokemon(IEnumerable<NewPokemon> pokemon, Guid npcId, Guid gameId)
+    {
+        var models = await Task.WhenAll(pokemon
+            .Where(data => data != null)
+            .Select(async data =>
+            {
+                var nickname = data.Nickname.Length > 18 ? data.Nickname[..18] : data.Nickname;
+                var pokemonModel = await DexService.GetNewPokemon(data.SpeciesName, nickname, data.Form);
+                pokemonModel.IsOnActiveTeam = data.IsOnActiveTeam;
+                pokemonModel.OriginalTrainerId = npcId;
+                pokemonModel.TrainerId = npcId;
+                pokemonModel.GameId = gameId;
+                await PokemonService.PostPokemon(pokemonModel);
+                return pokemonModel;
+            }));
+
+        return models;
     }
 
     private async Task UpdatePokemonTrainerIds(

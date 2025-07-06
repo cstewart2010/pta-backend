@@ -1,4 +1,6 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Interfaces;
 
 namespace PokemonTabletopAdventures.Models;
@@ -37,7 +39,7 @@ public class NpcModel : IPerson, IDocument
     public NpcModel()
     {
         TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkill { Name = skill.Key, ModifierStat = skill.Value });
-        Gender = "Agender";
+        Gender = Gender.Genderless;
         Description = string.Empty;
         Personality = string.Empty;
         Background = string.Empty;
@@ -100,7 +102,8 @@ public class NpcModel : IPerson, IDocument
     /// <summary>
     /// The trainer's gender
     /// </summary>
-    public string Gender { get; set; } = string.Empty;
+    [BsonRepresentation(BsonType.String)]
+    public Gender Gender { get; set; }
 
     /// <summary>
     /// The trainer's height

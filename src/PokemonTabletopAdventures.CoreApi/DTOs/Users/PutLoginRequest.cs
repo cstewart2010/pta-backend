@@ -4,8 +4,8 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.Users;
 
 public class PutLoginRequest
 {
-    [Required, StringLength(20, MinimumLength = 6)]
+    [Required, MinLength(6), MaxLength(20)]
     public required string Username { get; set; }
-    [Required, StringLength(20, MinimumLength = 6)]
+    [Required, MinLength(6), MaxLength(20)]
     public required string Password { get; init; }
 }

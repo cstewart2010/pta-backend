@@ -629,7 +629,7 @@ public class SettingsController(
             Pokeball.Marsh_Ball => environment.HasFlag(Environments.Marsh) ? -12 : consideredBasic,
             Pokeball.Quick_Ball => consideredBasic,
             Pokeball.Repeat_Ball => (await PokedexService.GetPokedexItem(trainerId, pokemon.GameId, pokemon.DexNo)).IsCaught == true ? -10 : consideredBasic,
-            Pokeball.Dream_Ball => Enum.TryParse<Status>(pokemon.PokemonStatus, true, out var result) && result == Status.Asleep ? -10 : consideredBasic,
+            Pokeball.Dream_Ball => pokemon.PokemonStatus == Status.Asleep ? -10 : consideredBasic,
             Pokeball.Moon_Ball => consideredBasic,
             Pokeball.Dusk_Ball => environment.HasFlag(Environments.NoSunlight) ? -12 : consideredBasic,
             Pokeball.Mold_Ball => types.HasFlag(PokemonTypes.Poison) || types.HasFlag(PokemonTypes.Fighting) ? -15 : consideredBasic,

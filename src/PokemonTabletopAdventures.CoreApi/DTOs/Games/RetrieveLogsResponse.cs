@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace PokemonTabletopAdventures.CoreApi.DTOs.Games;
 
-public class GetLogsResponse
+public class RetrieveLogsResponse
 {
-    public GetLogsResponse() { }
+    public RetrieveLogsResponse() { }
 
-    internal GetLogsResponse(GameModel game, int count)
+    internal RetrieveLogsResponse(GameModel game, int count)
     {
         if (count > game.Logs.Count)
         {
