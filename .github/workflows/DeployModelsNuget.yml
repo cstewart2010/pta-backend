@@ -11,7 +11,6 @@ env:
   MAJOR_VERSION: 1
   MINOR_VERSION: 0
   UPDATE_VERSION: ${{ github.GITHUB_RUN_NUMBER }}
-  PACKAGE_VERSION: ${{ MAJOR_VERSION }}.${{ MINOR_VERSION }}.${{ UPDATE_VERSION }}-test
 jobs:
   build:
     runs-on: windows-latest
@@ -26,7 +25,7 @@ jobs:
     - name: Restore
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
     - name: Pack
-      run: dotnet pack "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore -p:PackageVersion=${{ PACKAGE_VERSION }}
+      run: dotnet pack "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore -p:PackageVersion=${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.UPDATE_VERSION }}-test
     - name: Push
       run: dotnet nuget push "${{ env.WORKING_DIRECTORY }}/*.nupkg" --api-key ${{ secrets.DEPLOY_TOKEN }} --source "github"
     
