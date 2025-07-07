@@ -27,5 +27,5 @@ jobs:
     - name: Pack
       run: dotnet pack "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore -p:PackageVersion=${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.UPDATE_VERSION }}-test
     - name: Push
-      run: dotnet nuget push "${{ env.WORKING_DIRECTORY }}bin/Release/PokemonTabletopAdventures.Models.${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.UPDATE_VERSION }}-test/*.nupkg" --api-key ${{ secrets.DEPLOY_TOKEN }} --source "github"
+      run: dotnet nuget push "${{ env.WORKING_DIRECTORY }}bin/Release/PokemonTabletopAdventures.Models.${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.UPDATE_VERSION }}-test.nupkg" --api-key ${{ secrets.DEPLOY_TOKEN }} --source "github"
     
