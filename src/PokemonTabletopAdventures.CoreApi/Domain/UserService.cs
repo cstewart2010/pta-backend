@@ -7,7 +7,7 @@ using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class UserService(ITrainerService trainerService) : AbstractService<UserDto>(MongoCollection.Users), IUserService
+internal class UserService(ITrainerService trainerService) : AbstractMongoService<UserDto>(MongoCollection.Users), IUserService
 {
     private readonly ITrainerService _trainerService = trainerService;
 

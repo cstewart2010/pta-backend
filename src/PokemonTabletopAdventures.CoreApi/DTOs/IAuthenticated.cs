@@ -1,9 +1,9 @@
-﻿namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB.Interfaces;
+﻿namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 
 /// <summary>
 /// Provides a collection of properties for Authenticated types
 /// </summary>
-public interface IAuthenticated
+internal interface IAuthenticated
 {
     /// <summary>
     /// An encrypted password

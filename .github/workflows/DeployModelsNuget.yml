@@ -1,0 +1,32 @@
+name: Build and deploy PokemonTabletopAdventures.Models Nuget
+on:
+  push:
+    branches:
+    - develop
+    - refactor
+env:
+  CONFIGURATION: Release
+  DOTNET_CORE_VERSION: 8.0.x
+  WORKING_DIRECTORY: src/PokemonTabletopAdventures.Models
+  MAJOR_VERSION: 1
+  MINOR_VERSION: 0
+  UPDATE_VERSION: ${{ env.GITHUB_RUN_NUMBER }}
+  PACKAGE_VERSION: ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.UPDATE_VERSION }}
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+    - name: Add Source
+      run: dotnet nuget add source --username cstewart2010 --password ${{ secrets.DEPLOY_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/cstewart2010/index.json"
+    - name: Restore
+      run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+    - name: Pack
+      run: dotnet pack "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore -p:PackageVersion=${{ PACKAGE_VERSION }}
+    - name: Push
+      run: dotnet nuget push "${{ env.WORKING_DIRECTORY }}/*.nupkg" --api-key ${{ secrets.DEPLOY_TOKEN }} --source "github"
+    

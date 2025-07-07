@@ -2,6 +2,6 @@
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-public class InvalidShopException(string message) : PtaException(message, PtaExceptionParts.InvalidShopTitle, System.Net.HttpStatusCode.BadRequest)
+internal class InvalidShopException(string message) : PtaException(message, PtaExceptionParts.InvalidShopTitle, System.Net.HttpStatusCode.BadRequest)
 {
 }

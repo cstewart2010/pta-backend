@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
-using System;
 
 namespace PokemonTabletopAdventures.CoreApi.Infrastructure;
 
-public class PtaProblemDetailsFactory : ProblemDetailsFactory
+internal class PtaProblemDetailsFactory : ProblemDetailsFactory
 {
     public override ProblemDetails CreateProblemDetails(
         HttpContext httpContext,

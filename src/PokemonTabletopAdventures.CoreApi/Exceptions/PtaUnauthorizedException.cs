@@ -2,6 +2,6 @@
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-public class PtaUnauthorizedException(string message) : PtaException(message, PtaExceptionParts.AuthenticationErrorTitle, System.Net.HttpStatusCode.Unauthorized)
+internal class PtaUnauthorizedException(string message) : PtaException(message, PtaExceptionParts.AuthenticationErrorTitle, System.Net.HttpStatusCode.Unauthorized)
 {
 }

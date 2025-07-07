@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-public abstract class AbstractService<T>(string collectionName)
+internal abstract class AbstractMongoService<T>(string collectionName)
 {
     private static readonly ReplaceOptions UpsertOptions = new ReplaceOptions { IsUpsert = true };
 

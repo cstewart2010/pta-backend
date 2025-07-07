@@ -3,6 +3,6 @@ using System.Net;
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-public class DeletionException(string message) : PtaException(message, PtaExceptionParts.DeletionErrorTitle, HttpStatusCode.BadRequest)
+internal class DeletionException(string message) : PtaException(message, PtaExceptionParts.DeletionErrorTitle, HttpStatusCode.BadRequest)
 {
 }

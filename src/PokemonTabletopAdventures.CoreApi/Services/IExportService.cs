@@ -1,5 +1,4 @@
-﻿using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Games;
+﻿using PokemonTabletopAdventures.Models.Games;
 
 namespace PokemonTabletopAdventures.CoreApi.Services;
 

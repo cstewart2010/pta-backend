@@ -8,7 +8,7 @@ using PokemonTabletopAdventures.Models.Shops;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class ShopService : AbstractService<ShopDto>, IShopService
+internal class ShopService : AbstractMongoService<ShopDto>, IShopService
 {
     public ShopService() : base(MongoCollection.Shops) { }
 

@@ -6,8 +6,9 @@ namespace PokemonTabletopAdventures.Models.Games
     {
         [Required]
         public required string User { get; set; }
+        [Required]
         public required string Action { get; set; }
-
+        [Required]
         public required DateTimeOffset LogTimestamp { get; set; }
     }
 }

@@ -13,7 +13,7 @@ using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class DexService : AbstractService<BasePokemonDto>, IDexService
+internal class DexService : AbstractMongoService<BasePokemonDto>, IDexService
 {
     public DexService() : base(MongoCollection.BasePokemon) { }
 

@@ -2,7 +2,6 @@
 using MongoDB.Bson.Serialization.Attributes;
 using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models.Enums;
-using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB.Interfaces;
 
 namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 

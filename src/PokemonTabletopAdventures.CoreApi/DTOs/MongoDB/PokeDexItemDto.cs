@@ -1,5 +1,4 @@
 ﻿using MongoDB.Bson;
-using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB.Interfaces;
 
 namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 

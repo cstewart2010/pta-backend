@@ -7,7 +7,7 @@ using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class PokemonService(IPokedexService pokedexService) : AbstractService<PokemonDto>(MongoCollection.Pokemon), IPokemonService
+internal class PokemonService(IPokedexService pokedexService) : AbstractMongoService<PokemonDto>(MongoCollection.Pokemon), IPokemonService
 {
     private readonly IPokedexService _pokedexService = pokedexService;
 

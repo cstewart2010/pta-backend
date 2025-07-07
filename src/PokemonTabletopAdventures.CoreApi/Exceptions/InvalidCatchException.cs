@@ -3,6 +3,6 @@ using System.Net;
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-public class InvalidCatchException(string message, HttpStatusCode statusCode) : PtaException(message, PtaExceptionParts.InvalidCatchTitle, statusCode)
+internal class InvalidCatchException(string message, HttpStatusCode statusCode) : PtaException(message, PtaExceptionParts.InvalidCatchTitle, statusCode)
 {
 }

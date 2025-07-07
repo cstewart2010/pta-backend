@@ -1,6 +1,6 @@
 ﻿namespace PokemonTabletopAdventures.CoreApi.Constants;
 
-public static class GameLogMessages
+internal static class GameLogMessages
 {
     public const string PartyUser = "The party";
     public const string ImportTool = "Import Tool";

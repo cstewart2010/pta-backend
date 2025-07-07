@@ -1,6 +1,6 @@
 ﻿namespace PokemonTabletopAdventures.CoreApi.Constants;
 
-public static class EnvironmentVariableNames
+internal static class EnvironmentVariableNames
 {
     public const string Database = "Database";
 #if DEBUG

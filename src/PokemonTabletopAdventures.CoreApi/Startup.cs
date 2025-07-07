@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace PokemonTabletopAdventures.CoreApi;
 
-public class Startup(IConfiguration configuration)
+internal class Startup(IConfiguration configuration)
 {
     private const string PolicyName = "MyPolicy";
 

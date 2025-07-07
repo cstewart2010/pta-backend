@@ -1,11 +1,11 @@
 ﻿using MongoDB.Bson;
 
-namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB.Interfaces;
+namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 
 /// <summary>
 /// Provides a collection of properties for MongoDB documents
 /// </summary>
-public interface IDocument
+internal interface IDocument
 {
     /// <summary>
     /// MongoDB id

@@ -4,11 +4,10 @@ using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Users;
-using System.Threading;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class UserMessageThreadService : AbstractService<UserMessageThreadDto>, IUserMessageThreadService
+internal class UserMessageThreadService : AbstractMongoService<UserMessageThreadDto>, IUserMessageThreadService
 {
     public UserMessageThreadService() : base(MongoCollection.UserMessageThreads) { }
 

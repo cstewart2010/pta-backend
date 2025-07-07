@@ -13,7 +13,7 @@ internal class TrainerService(
     IPokemonService pokemonService,
     IPokedexService pokedexService,
     ISettingService settingService,
-    IEncryptionService encryptionService) : AbstractService<TrainerDto>(MongoCollection.Trainers), ITrainerService
+    IEncryptionService encryptionService) : AbstractMongoService<TrainerDto>(MongoCollection.Trainers), ITrainerService
 {
     private readonly IPokemonService _pokemonService = pokemonService;
     private readonly IPokedexService _pokedexService = pokedexService;

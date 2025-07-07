@@ -8,7 +8,7 @@ using PokemonTabletopAdventures.Models.Npcs;
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 internal class NpcService(
-    IPokemonService pokemonService) : AbstractService<NpcDto>(MongoCollection.NPCs), INpcService
+    IPokemonService pokemonService) : AbstractMongoService<NpcDto>(MongoCollection.NPCs), INpcService
 {
     private readonly IPokemonService _pokemonService = pokemonService;
 

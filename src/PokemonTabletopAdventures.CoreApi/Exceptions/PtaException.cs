@@ -1,9 +1,8 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-public class PtaException(string message, string title, HttpStatusCode statusCode) : Exception(message)
+internal class PtaException(string message, string title, HttpStatusCode statusCode) : Exception(message)
 {
     public string Title { get; } = title;
 

@@ -6,7 +6,7 @@ using PokemonTabletopAdventures.Models.Games;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class SpriteService : AbstractService<SpriteDto>, ISpriteService
+internal class SpriteService : AbstractMongoService<SpriteDto>, ISpriteService
 {
     public SpriteService() : base(MongoCollection.Sprites) { }
 

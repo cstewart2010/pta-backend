@@ -1,6 +1,6 @@
 ﻿namespace PokemonTabletopAdventures.CoreApi.Constants;
 
-public static class PropertyNames
+internal static class PropertyNames
 {
     public const string GameId = "GameId";
     public const string Nickname = "Nickname";

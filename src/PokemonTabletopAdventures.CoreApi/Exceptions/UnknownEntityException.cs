@@ -3,6 +3,6 @@ using PokemonTabletopAdventures.CoreApi.Constants;
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-public class UnknownEntityException<T>(string entityName, object? entityValue) : PtaException($"Could not find a {typeof(T).Name} using {entityName}={entityValue}", PtaExceptionParts.UnknownEntityTitle, HttpStatusCode.NotFound)
+internal class UnknownEntityException<T>(string entityName, object? entityValue) : PtaException($"Could not find a {typeof(T).Name} using {entityName}={entityValue}", PtaExceptionParts.UnknownEntityTitle, HttpStatusCode.NotFound)
 {
 }

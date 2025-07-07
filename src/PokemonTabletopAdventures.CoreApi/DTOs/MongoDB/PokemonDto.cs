@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB.Interfaces;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Pokemons;

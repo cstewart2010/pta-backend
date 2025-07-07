@@ -11,7 +11,7 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 internal class GameService(
     ITrainerService trainerService,
     INpcService npcService,
-    ISettingService settingService) : AbstractService<GameDto>(MongoCollection.Games), IGameService
+    ISettingService settingService) : AbstractMongoService<GameDto>(MongoCollection.Games), IGameService
 {
     private readonly ITrainerService _trainerService = trainerService;
     private readonly INpcService _npcService = npcService;

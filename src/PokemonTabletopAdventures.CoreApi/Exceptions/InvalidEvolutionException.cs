@@ -3,6 +3,6 @@ using System.Net;
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-public class InvalidEvolutionException(string message) : PtaException(message, PtaExceptionParts.EvolutionErrorTitle, HttpStatusCode.BadRequest)
+internal class InvalidEvolutionException(string message) : PtaException(message, PtaExceptionParts.EvolutionErrorTitle, HttpStatusCode.BadRequest)
 {
 }

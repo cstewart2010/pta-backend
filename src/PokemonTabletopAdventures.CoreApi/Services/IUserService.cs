@@ -1,8 +1,4 @@
-﻿using PokemonTabletopAdventures.Models;
-using PokemonTabletopAdventures.Models.Users;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Services;
 

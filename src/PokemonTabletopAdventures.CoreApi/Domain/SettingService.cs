@@ -7,7 +7,7 @@ using PokemonTabletopAdventures.Models.Settings;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class SettingService(IShopService shopService) : AbstractService<SettingDto>(MongoCollection.Settings), ISettingService
+internal class SettingService(IShopService shopService) : AbstractMongoService<SettingDto>(MongoCollection.Settings), ISettingService
 {
     private readonly IShopService _shopService = shopService;
 

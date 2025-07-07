@@ -1,5 +1,4 @@
 ﻿using MongoDB.Bson;
-using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB.Interfaces;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Interfaces;
 
