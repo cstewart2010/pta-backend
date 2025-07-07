@@ -1,7 +1,4 @@
-﻿using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using PokemonTabletopAdventures.Models.Pokedex;
 
 namespace PokemonTabletopAdventures.CoreApi.Services;
 
@@ -11,7 +8,7 @@ public interface IPokedexService
     /// Compiles all pokedex entries for a specific trainer into one collection
     /// </summary>
     /// <param name="trainerId">The trainer's id to search with</param>
-    public Task<IEnumerable<PokeDexItemModel>> GetTrainerPokeDex(Guid trainerId, Guid gameId);
+    public Task<IEnumerable<PokedexItem>> GetTrainerPokeDex(Guid trainerId, Guid gameId);
 
     /// <summary>
     /// Searches the database for a pokedex entry
@@ -19,7 +16,7 @@ public interface IPokedexService
     /// <param name="trainerId">The trainer's id to search with</param>
     /// <param name="gameId">The game session id</param>
     /// <param name="dexNo">The dex number for the pokemon</param>
-    public Task<PokeDexItemModel> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo);
+    public Task<PokedexItem> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo);
 
     /// <summary>
     /// Attempts to add a dexItem using the provided document
@@ -42,7 +39,7 @@ public interface IPokedexService
     /// <param name="trainerId">The trainer's id to search with</param>
     /// <param name="gameId">The game session id</param>
     /// <param name="dexNo">The dex number for the pokemon</param>
-    public Task<PokeDexItemModel> UpdateDexItemIsSeen(Guid trainerId, Guid gameId, int dexNo);
+    public Task<PokedexItem> UpdateDexItemIsSeen(Guid trainerId, Guid gameId, int dexNo);
 
     /// <summary>
     /// Updates the pokedex entry for a caught pokemon
@@ -50,7 +47,7 @@ public interface IPokedexService
     /// <param name="trainerId">The trainer's id to search with</param>
     /// <param name="gameId">The game session id</param>
     /// <param name="dexNo">The dex number for the pokemon</param>
-    public Task<PokeDexItemModel> UpdateDexItemIsCaught(Guid trainerId, Guid gameId, int dexNo);
+    public Task<PokedexItem> UpdateDexItemIsCaught(Guid trainerId, Guid gameId, int dexNo);
 
     public Task DeleteDexItemForTrainer(Guid trainerId, Guid gameId);
 }

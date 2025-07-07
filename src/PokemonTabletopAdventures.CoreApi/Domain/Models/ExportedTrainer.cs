@@ -1,7 +1,6 @@
-﻿using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
+using PokemonTabletopAdventures.CoreApi.Services;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain.Models;
 
@@ -10,19 +9,20 @@ internal class ExportedTrainer
     public ExportedTrainer() { }
 
     public static async Task<ExportedTrainer> ParseFromModel(
-        TrainerModel trainer,
+        TrainerDto trainer,
         ITrainerService trainerService,
         IPokemonService pokemonService)
     {
         trainer.IsOnline = false;
         await trainerService.UpdateTrainerOnlineStatus(trainer.TrainerId, trainer.GameId, false);
+        var pokemon = await pokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId);
         return new ExportedTrainer
         {
             Trainer = trainer,
-            Pokemon = await pokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId)
+            Pokemon = [.. pokemon.Select(DtoHandler.ParseFromModel)],
         };
     }
 
-    public required TrainerModel Trainer { get; set; }
-    public required IEnumerable<PokemonModel> Pokemon { get; set; }
+    public required TrainerDto Trainer { get; set; }
+    public required IEnumerable<PokemonDto> Pokemon { get; set; }
 }

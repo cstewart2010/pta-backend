@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Indicies;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Indicies;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -25,15 +22,15 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<BasePokemonModel>(Type, offset, limit);
+        return await GetItems<BasePokemonDto>(Type, offset, limit);
     }
 
     [HttpGet("{name}", Name = nameof(GetPokemonByName))]
-    [ProducesResponseType(typeof(IndexResponse<BasePokemonModel>), 200)]
+    [ProducesResponseType(typeof(IndexResponse<BasePokemonDto>), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemonByName(string name)
     {
-        return await GetItem<BasePokemonModel>(Type, name);
+        return await GetItem<BasePokemonDto>(Type, name);
     }
 
     [HttpGet("form/{form}", Name = nameof(GetPokemonByForm))]
@@ -41,7 +38,7 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemonByForm(string form)
     {
-        var entries = await _basePokemonService.GetDexEntries<BasePokemonModel>(Type);
+        var entries = await _basePokemonService.GetDexEntries<BasePokemonDto>(Type);
         var formData = entries.Where(pokemon => pokemon.Form.Contains(form))
             .Select(pokemon => new FormData
             {

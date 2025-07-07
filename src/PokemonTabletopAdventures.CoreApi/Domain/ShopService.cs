@@ -1,15 +1,14 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Settings;
+using PokemonTabletopAdventures.Models.Shops;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class ShopService : AbstractService<ShopModel>, IShopService
+internal class ShopService : AbstractService<ShopDto>, IShopService
 {
     public ShopService() : base(MongoCollection.Shops) { }
 
@@ -29,41 +28,50 @@ internal class ShopService : AbstractService<ShopModel>, IShopService
             PropertyNames.GameId);
     }
 
-    public async Task<IEnumerable<ShopModel>> GetShopsByGameId(Guid gameId)
+    public async Task<IEnumerable<Shop>> GetShopsByGameId(Guid gameId)
     {
-        return await ThrowIfNull(
+        var dtos = await ThrowIfNull(
             gameId,
             id => Collection.Find(shop => shop.GameId == id).ToEnumerable(),
             PropertyNames.GameId);
+
+        return dtos.Select(DtoHandler.ParseFromDto);
     }
 
-    public async Task<ShopModel> GetShopById(Guid id, Guid gameId)
+    public async Task<Shop> GetShopById(Guid id, Guid gameId)
     {
-        return await ThrowIfNull(
+        var dto = await ThrowIfNull(
             id,
             id => Collection.Find(shop => shop.GameId == gameId && shop.ShopId == id).SingleOrDefault(),
             PropertyNames.ShopId);
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task<IEnumerable<ShopModel>> GetShopsBySetting(SettingModel setting)
+    public async Task<IEnumerable<Shop>> GetShopsBySetting(Setting setting)
     {
-        return await ThrowIfNull(
+        var shopIds = setting.Shops.Select(s => s.ShopId);
+        var dtos = await ThrowIfNull(
             setting,
-            id => Collection.Find(shop => setting.Shops.Contains(shop.ShopId) && setting.GameId == shop.GameId).ToEnumerable(),
+            id => Collection.Find(shop => shopIds.Contains(shop.ShopId) && setting.GameId == shop.GameId).ToEnumerable(),
             PropertyNames.SettingShops);
+
+        return dtos.Select(DtoHandler.ParseFromDto);
     }
 
-    public async Task PostShop(ShopModel shop)
+    public async Task PostShop(Shop shop)
     {
-        await PostDocument(shop);
+        var dto = DtoHandler.ParseFromModel(shop);
+        await PostDocument(dto);
     }
 
-    public async Task<ShopModel> UpdateShop(ShopModel updatedShop)
+    public async Task<Shop> UpdateShop(Shop updatedShop)
     {
+        var dto = DtoHandler.ParseFromModel(updatedShop);
         await UpsertDocument(
-            Builders<ShopModel>.Filter.Eq(shop => shop.ShopId, updatedShop.ShopId),
-            updatedShop);
+            Builders<ShopDto>.Filter.Eq(shop => shop.ShopId, updatedShop.ShopId),
+            dto);
 
-        return updatedShop;
+        return await GetShopById(dto.ShopId, dto.GameId);
     }
 }

@@ -1,7 +1,4 @@
-﻿using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Services;
 
@@ -11,32 +8,32 @@ public interface IPokemonService
     /// Returns a Pokemon matching the Pokemon id
     /// </summary>
     /// <param name="id">The Pokemon id</param>
-    public Task<PokemonModel> GetPokemonById(Guid id);
+    public Task<Pokemon> GetPokemonById(Guid id);
 
     /// <summary>
     /// Returns all Pokemon matching the trainer id
     /// </summary>
     /// <param name="trainerId">The trainer id</param>
-    public Task<IEnumerable<PokemonModel>> GetPokemonByTrainerId(Guid trainerId);
+    public Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId);
 
     /// <summary>
     /// Returns all Pokemon matching the trainer id for a certain game session
     /// </summary>
     /// <param name="trainerId">The trainer id</param>
     /// <param name="gameId">The game session id</param>
-    public Task<IEnumerable<PokemonModel>> GetPokemonByTrainerId(Guid trainerId, Guid gameId);
+    public Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId, Guid gameId);
 
     /// <summary>
     /// Attempts to add a Pokemon using the provided document
     /// </summary>
     /// <param name="pokemon">The document to add</param>
-    public Task PostPokemon(PokemonModel pokemon);
+    public Task PostPokemon(Pokemon pokemon);
 
     /// <summary>
     /// Attempts to replace the previous pokemon with the new data
     /// </summary>
     /// <param name="updatePokemon">The updated pokemon data</param>
-    public Task<PokemonModel> UpdatePokemon(PokemonModel updatePokemon);
+    public Task<Pokemon> UpdatePokemon(Pokemon updatePokemon);
 
     /// <summary>
     /// Searches for a pokemon, then updates its trainer id
@@ -44,7 +41,7 @@ public interface IPokemonService
     /// <param name="pokemonId">The pokemon id</param>
     /// <param name="trainerId">The trainer id</param>
     /// <exception cref="ArgumentNullException" />
-    public Task<PokemonModel> UpdatePokemonTrainerId(
+    public Task<Pokemon> UpdatePokemonTrainerId(
         Guid pokemonId,
         Guid trainerId);
 
@@ -53,7 +50,7 @@ public interface IPokemonService
     /// </summary>
     /// <param name="pokemonId">The pokemon's id</param>
     /// <param name="hp">The pokemon's new hp</param>
-    public Task<PokemonModel> UpdatePokemonHP(Guid pokemonId, int hp);
+    public Task<Pokemon> UpdatePokemonHP(Guid pokemonId, int hp);
 
     /// <summary>
     /// Searches for a pokemon, then updates its evolvability
@@ -61,7 +58,7 @@ public interface IPokemonService
     /// <param name="pokemonId">The pokemon id</param>
     /// <param name="isEvolvable">Whether the pokemon is evolvable</param>
     /// <exception cref="ArgumentNullException" />
-    public Task<PokemonModel> UpdatePokemonEvolvability(
+    public Task<Pokemon> UpdatePokemonEvolvability(
         Guid pokemonId,
         bool isEvolvable);
 
@@ -71,7 +68,7 @@ public interface IPokemonService
     /// <param name="pokemonId">The pokemon id</param>
     /// <param name="isOnActiveTeam">Whether the pokemon is on the active team</param>
     /// <exception cref="ArgumentNullException" />
-    public Task<PokemonModel> UpdatePokemonLocation(
+    public Task<Pokemon> UpdatePokemonLocation(
         Guid pokemonId,
         bool isOnActiveTeam);
 

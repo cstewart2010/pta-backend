@@ -1,23 +1,32 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Games;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class SpriteService : AbstractService<SpriteModel>, ISpriteService
+internal class SpriteService : AbstractService<SpriteDto>, ISpriteService
 {
     public SpriteService() : base(MongoCollection.Sprites) { }
 
-    public async Task<IEnumerable<SpriteModel>> GetAllSprites()
+    public async Task<IEnumerable<Sprite>> GetAllSprites()
     {
-        return await Task.FromResult(Collection.Find(sprite => true).ToEnumerable());
+        var dtos = await Task.FromResult(Collection.Find(sprite => true).ToEnumerable());
+        return dtos.Select(dto => new Sprite
+        {
+            FriendlyText = dto.FriendlyText,
+            Value = dto.Value,
+        });
     }
 
-    public async Task PostSprite(SpriteModel sprite)
+    public async Task PostSprite(Sprite sprite)
     {
-        await PostDocument(sprite);
+        var dto = new SpriteDto
+        {
+            FriendlyText = sprite.FriendlyText,
+            Value = sprite.Value
+        };
+        await PostDocument(dto);
     }
 }

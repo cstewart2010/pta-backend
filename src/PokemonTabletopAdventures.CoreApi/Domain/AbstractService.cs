@@ -1,17 +1,13 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 public abstract class AbstractService<T>(string collectionName)
 {
-    private static readonly ReplaceOptions ReplaceOptions = new ReplaceOptions { IsUpsert = true };
+    private static readonly ReplaceOptions UpsertOptions = new ReplaceOptions { IsUpsert = true };
 
     public IMongoCollection<T> Collection { get; } = MongoCollectionHelper.GetMongoCollection<T>(collectionName);
 
@@ -50,7 +46,7 @@ public abstract class AbstractService<T>(string collectionName)
     {
         var result = Collection.ReplaceOne(
             func,
-            options: ReplaceOptions,
+            options: UpsertOptions,
             replacement: entity);
         if (!result.IsAcknowledged)
         {

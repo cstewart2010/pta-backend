@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Indicies;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Indicies;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -22,14 +20,14 @@ public class FeatureController(IDexService dexService, ILogger<FeatureController
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<FeatureModel>(Type, offset, limit);
+        return await GetItems<FeatureDto>(Type, offset, limit);
     }
 
     [HttpGet("{name}", Name = nameof(GetFeature))]
-    [ProducesResponseType(typeof(IndexResponse<FeatureModel>), 200)]
+    [ProducesResponseType(typeof(IndexResponse<FeatureDto>), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetFeature(string name)
     {
-        return await GetItem<FeatureModel>(Type, name);
+        return await GetItem<FeatureDto>(Type, name);
     }
 }

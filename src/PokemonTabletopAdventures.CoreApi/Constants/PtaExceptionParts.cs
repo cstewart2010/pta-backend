@@ -13,10 +13,17 @@ public static class PtaExceptionParts
     public const string ExpiredTokenMessage = "Expired token";
     public const string InvalidSecretMessage = "Invalid secret";
     public const string SelfTradeMessage = "Cannot trade with oneself";
+    public const string NullDataMessage = "EvolvePokemonData property was null";
+    public const string TooManyParticipantsMessage = "Request should contain exactly one participant";
+    public const string TooManyShopsMessage = "Request should contain exactly one shop";
+    public const string TooManyShopsTrainers = "Request should contain exactly one trainers";
+    public const string UnauthorizedTrainerCompletionMessage = "User is not authorized for this action";
+    public const string NoUserFoundMessage = "No username found with provided";
 
     public const string InvalidCatchTitle = "Invalid Catch Attempt";
     public const string InvalidSettingTitle = "Invalid Setting Request";
     public const string InvalidShopTitle = "Invalid Shop Request";
+    public const string InvalidTrainerTitle = "Invalid Trainer Request";
     public const string InvalidPokemonTitle = "Invalid Pokemon Retrieval";
     public const string DeletionErrorTitle = "Deletion Fail";
     public const string UpdateErrorTitle = "Failure At Update";
@@ -30,4 +37,5 @@ public static class PtaExceptionParts
     public const string AuthenticationErrorTitle = "Authentication Failed";
     public const string UnknownEntityTitle = "Unknown Entity";
     public const string UserNotFoundTitle = "User was not found";
+    public const string InvalidFormTitle = "Invalid Form";
 }

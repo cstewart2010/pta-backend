@@ -1,18 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Games;
-using PokemonTabletopAdventures.CoreApi.DTOs.Npcs;
-using PokemonTabletopAdventures.CoreApi.DTOs.Settings;
-using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Extensions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Games;
+using PokemonTabletopAdventures.Models.Trainers;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -29,8 +22,6 @@ public class GameController(
     IPokedexService pokedexService,
     IExportService exportService,
     IEncryptionService encryptionService,
-    ISettingService settingService,
-    IShopService shopService,
     ILogger<GameController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService)
 {
     private readonly ILogger<GameController> _logger = logger;
@@ -38,8 +29,6 @@ public class GameController(
     private readonly IExportService _exportService = exportService;
     private readonly IEncryptionService _encryptionService = encryptionService;
     private readonly INpcService _npcService = npcService;
-    private readonly ISettingService _settingService = settingService;
-    private readonly IShopService _shopService = shopService;
 
     [HttpGet("retrieve", Name = nameof(GetAllGames))]
     [ProducesResponseType(typeof(IEnumerable<RetrieveGameResponse>), 200)]
@@ -52,7 +41,7 @@ public class GameController(
     {
         await VerifyIdentity(accessToken, sessionAuth, userId);
         var user = await UserService.GetUserById(userId);
-        IEnumerable<GameModel> gameModels;
+        IEnumerable<Game> gameModels;
         if (!string.IsNullOrWhiteSpace(nickname))
         {
             gameModels = await GameService.GetAllGames(nickname);
@@ -62,13 +51,7 @@ public class GameController(
             gameModels = await GameService.GetMostRecent20Games(user);
         }
 
-        var games = await ParseFromModel(
-            gameModels,
-            false,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new RetrieveGameResponse { Games = games });
+        return Ok(new RetrieveGameResponse { Games = [.. gameModels] });
     }
 
     [HttpGet("user/{userId}/retrieve", Name = nameof(GetAllUserGames))]
@@ -82,17 +65,11 @@ public class GameController(
         await VerifyIdentity(accessToken, sessionAuth, userId);
         var user = await UserService.GetUserById(userId);
         var gameModels = await GameService.GetAllGamesWithUser(user);
-        var games = await ParseFromModel(
-            gameModels,
-            false,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new RetrieveGameResponse { Games = games });
+        return Ok(new RetrieveGameResponse { Games = [.. gameModels] });
     }
 
     [HttpGet("sprites/retrieve", Name = nameof(GetAllSprites))]
-    [ProducesResponseType(typeof(IEnumerable<SpriteModel>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<SpriteDto>), 200)]
     public async Task<IActionResult> GetAllSprites()
     {
         var sprites = await _spriteService.GetAllSprites();
@@ -104,14 +81,8 @@ public class GameController(
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetGame(Guid gameId)
     {
-        var game = await GameService.GetGame(gameId);
-        var games = await ParseFromModel(
-            [game],
-            false,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new RetrieveGameResponse { Games = games });
+        var game = await GameService.GetGame(gameId, false);
+        return Ok(new RetrieveGameResponse { Games = [game] });
     }
 
     [HttpGet("{gameId}/logs/retrieve", Name = nameof(GetLogs))]
@@ -121,8 +92,26 @@ public class GameController(
         [FromQuery] int count,
         Guid gameId)
     {
-        var game = await GameService.GetGame(gameId);
+        var game = await GameService.GetGame(gameId, false);
         return Ok(CreateRetrieveLogsResponse(game, count));
+    }
+
+    [HttpGet("refresh")]
+    [ProducesResponseType(typeof(RetrieveGameResponse), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 401)]
+    public async Task<IActionResult> RefreshInGame(
+        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
+        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
+        Guid userId,
+        Guid gameId,
+        [FromQuery] bool isGM)
+    {
+        if (isGM)
+        {
+            return await GetUpdatedGM(accessToken, sessionAuth, userId, gameId);
+        }
+
+        return await GetUpdatedTrainer(accessToken, sessionAuth, userId, gameId);
     }
 
     [HttpPost("import")]
@@ -136,13 +125,7 @@ public class GameController(
             throw new ImportFailedException(Constants.PtaExceptionParts.EmptyImportJsonMessage);
         }
         var game = await _exportService.ParseImport(json);
-        var games = await ParseFromModel(
-            [game],
-            true,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new CreateGameResponse { Games = games });
+        return Ok(new CreateGameResponse { Games = [game] });
     }
 
     [HttpPost("create")]
@@ -151,26 +134,22 @@ public class GameController(
     public async Task<IActionResult> CreateNewGame(
         [FromBody] CreateGameRequest request)
     {
-        var game = await BuildGame(request.GameNickname, request.GameSessionPassword);
-        await GameService.PostGame(game);
+        var game = BuildGame(request.GameNickname);
+        var passwordHash = await _encryptionService.HashSecret(request.GameSessionPassword);
+        await GameService.PostGame(game, passwordHash);
 
         var gm = await BuildGM(game.GameId, request.UserId, request.Username);
 
         await TrainerService.PostTrainer(gm);
-        var gameCreationLog = new LogModel
-        (
-            user: gm.TrainerName,
-            action: GameLogMessages.GameCreationLog
-        );
-        await GameService.UpdateGameLogs(game, gameCreationLog);
+        var gameCreationLog = new Log
+        {
+            User = gm.TrainerName,
+            Action = GameLogMessages.GameCreationLog,
+            LogTimestamp = DateTimeOffset.Now
+        };
+        var updatedGame = await GameService.UpdateGameLogs(game, true, gameCreationLog);
         await RefreshToken(request.UserId);
-        var games = await ParseFromModel(
-            [game],
-            true,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new CreateGameResponse { Games = games });
+        return Ok(new CreateGameResponse { Games = [updatedGame] });
     }
 
     [HttpPatch("{gameId}/logs/add")]
@@ -183,18 +162,12 @@ public class GameController(
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
-        var game = await GameService.GetGame(gameId);
+        var isGm = await VerifyIdentity(accessToken, sessionAuth, request.UserId, gameId);
+        var game = await GameService.GetGame(gameId, isGm);
         var logs = request.Game.Logs.Select(ParseBackToModel);
-        await GameService.UpdateGameLogs(game, [.. logs]);
+        await GameService.UpdateGameLogs(game, isGm, [.. request.Game.Logs]);
         await RefreshToken(request.UserId);
-        var games = await ParseFromModel(
-            [game],
-            false,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new UpdateGameResponse { Games = games });
+        return Ok(new UpdateGameResponse { Games = [game] });
     }
 
     [HttpPatch("{gameId}/start")]
@@ -209,17 +182,11 @@ public class GameController(
     {
         await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
         var trainer = await TrainerService.GetTrainerById(request.GameMasterId, gameId);
-        var game = await GameService.GetGame(gameId);
+        var game = await GameService.GetGame(gameId, true);
         await IsGameAuthenticated(request.GameSessionPassword!, game);
         await GameService.UpdateGameOnlineStatus(gameId, true);
         await AssignAuthAndToken(trainer.TrainerId);
-        var games = await ParseFromModel(
-            [game],
-            true,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new UpdateGameResponse { Games = games });
+        return Ok(new UpdateGameResponse { Games = [game] });
     }
 
     [HttpPatch("{gameId}/end")]
@@ -234,14 +201,8 @@ public class GameController(
     {
         await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
         await SetEndGameStatuses(gameId);
-        var game = await GameService.GetGame(gameId);
-        var games = await ParseFromModel(
-            [game],
-            true,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new UpdateGameResponse { Games = games });
+        var game = await GameService.GetGame(gameId, true);
+        return Ok(new UpdateGameResponse { Games = [game] });
     }
 
     [HttpPatch("{gameId}/npcs/add")]
@@ -254,20 +215,14 @@ public class GameController(
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
         await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
+        var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
         var foundNpcIds = await GetNpcs(npcIds);
-        var game = await GameService.GetGame(gameId);
-        var newNpcList = game.NPCs.Union(foundNpcIds);
+        var game = await GameService.GetGame(gameId, true);
+        var newNpcList = game.Npcs.Select(x => x.NpcId).Union(foundNpcIds);
         await RefreshToken(request.GameMasterId);
         var updatedGame = await GameService.UpdateGameNpcList(gameId, newNpcList);
-        var games = await ParseFromModel(
-            [updatedGame],
-            true,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new UpdateGameResponse { Games = games });
+        return Ok(new UpdateGameResponse { Games = [updatedGame] });
     }
 
     [HttpPatch("{gameId}/npcs/remove")]
@@ -283,17 +238,11 @@ public class GameController(
         var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
         await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
         var foundNpcIds = await GetNpcs(npcIds);
-        var game = await GameService.GetGame(gameId);
-        var newNpcList = game.NPCs.Except(foundNpcIds);
+        var game = await GameService.GetGame(gameId, true);
+        var newNpcList = game.Npcs.Select(x => x.NpcId).Except(foundNpcIds);
         await RefreshToken(request.GameMasterId);
         var updatedGame = await GameService.UpdateGameNpcList(gameId, newNpcList);
-        var games = await ParseFromModel(
-            [updatedGame],
-            true,
-            _npcService,
-            _settingService,
-            _shopService);
-        return Ok(new UpdateGameResponse { Games = games });
+        return Ok(new UpdateGameResponse { Games = [updatedGame] });
     }
 
     [HttpDelete("{gameId}/delete")]
@@ -308,7 +257,7 @@ public class GameController(
         [FromQuery] string gameSessionPassword)
     {
         await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var game = await GameService.GetGame(gameId);
+        var game = await GameService.GetGame(gameId, true);
         await IsGameAuthenticated(gameSessionPassword, game);
         await MassDeletePokemon(gameId);
         await TrainerService.DeleteTrainersByGameId(gameId);
@@ -330,14 +279,16 @@ public class GameController(
     {
         await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
         var gameMaster = await TrainerService.GetTrainerById(gameMasterId, gameId);
-        var game = await GameService.GetGame(gameId);
-        await _encryptionService.VerifySecret(gameSessionPassword, game.PasswordHash);
-
-        var exportLog = new LogModel(
-            user: gameMaster.TrainerName,
-            action: GameLogMessages.ExportGameLog);
+        var game = await GameService.GetGame(gameId, true);
+        await _encryptionService.VerifySecret(gameSessionPassword, game.GameId);
+        var exportLog = new Log
+        {
+            User = gameMaster.TrainerName,
+            Action = GameLogMessages.GameCreationLog,
+            LogTimestamp = DateTimeOffset.Now,
+        };
         await GameService.UpdateGameOnlineStatus(gameId, false);
-        await GameService.UpdateGameLogs(game, exportLog);
+        await GameService.UpdateGameLogs(game, true, exportLog);
         var exportStream = await _exportService.GetExportStream(game);
 
         await DeleteGame(accessToken, sessionAuth, gameId, gameMasterId, gameSessionPassword);
@@ -347,23 +298,24 @@ public class GameController(
             $"{game.Nickname}.json");
     }
     
-    private async Task<GameModel> BuildGame(string nickname, string gameSessionPassword)
+    private static Game BuildGame(string nickname)
     {
         var guid = Guid.NewGuid();
-        return new GameModel
+        return new Game
         {
             GameId = guid,
             Nickname = string.IsNullOrEmpty(nickname)
                 ? guid.ToString().Split('-')[0]
                 : nickname,
             IsOnline = true,
-            PasswordHash = await _encryptionService.HashSecret(gameSessionPassword),
-            NPCs = [],
-            Logs = []
+            Npcs = [],
+            Logs = [],
+            Settings = [],
+            Trainers = [],
         };
     }
 
-    private async Task<TrainerModel> BuildGM(
+    private async Task<Trainer> BuildGM(
         Guid gameId,
         Guid userId,
         string username)
@@ -379,10 +331,34 @@ public class GameController(
         return gm;
     }
 
+    private async Task<OkObjectResult> GetUpdatedTrainer(
+        string accessToken,
+        string sessionAuth,
+        Guid userId,
+        Guid gameId)
+    {
+        await VerifyIdentity(accessToken, sessionAuth, userId);
+        await RefreshToken(userId);
+        var game = await GameService.GetGame(gameId, false);
+        return Ok(new RetrieveGameResponse { Games = [game] });
+    }
+
+    private async Task<OkObjectResult> GetUpdatedGM(
+        string accessToken,
+        string sessionAuth,
+        Guid userId,
+        Guid gameId)
+    {
+        await IsUserGM(userId, gameId, accessToken, sessionAuth);
+        await RefreshToken(userId);
+        var game = await GameService.GetGame(gameId, true);
+        return Ok(new RetrieveGameResponse { Games = [game] });
+    }
+
     private async Task<IEnumerable<Guid>> GetNpcs(IEnumerable<Guid> npcIds)
     {
         var npcs = await Task.WhenAll(npcIds.Select(_npcService.GetNpc));
-        var foundNpcs = npcs.Select(x => x.NPCId);
+        var foundNpcs = npcs.Select(x => x.NpcId);
         return foundNpcs;
     }
 

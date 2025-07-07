@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using PokemonTabletopAdventures.Models;
+﻿using PokemonTabletopAdventures.Models;
+using PokemonTabletopAdventures.Models.Shops;
+using PokemonTabletopAdventures.Models.Trainers;
 
 namespace PokemonTabletopAdventures.CoreApi.Services;
 
@@ -11,33 +10,33 @@ public interface ITrainerService
     /// Search for the trainer and returns them if the trainer has not completed the new user flow
     /// </summary>
     /// <param name="id">The id of the trainer to search for</param>
-    public Task<TrainerModel> GetIncompleteTrainerById(Guid id, Guid gameId);
+    public Task<Trainer> GetIncompleteTrainerById(Guid id, Guid gameId);
 
     /// <summary>
     /// Returns a trainer matching the trainer id
     /// </summary>
     /// <param name="id">The trainer id</param>
     /// <param name="gameId">The game session id</param>
-    public Task<TrainerModel> GetTrainerById(Guid id, Guid gameId);
+    public Task<Trainer> GetTrainerById(Guid id, Guid gameId);
 
     /// <summary>
     /// Returns all trainers matching the user Id
     /// </summary>
     /// <param name="gameId">The game session id</param>
-    public Task<IEnumerable<TrainerModel>> GetAllUserTrainers(Guid userId);
+    public Task<IEnumerable<Trainer>> GetAllUserTrainers(Guid userId);
 
     /// <summary>
     /// Returns all trainers matching the game session id
     /// </summary>
     /// <param name="gameId">The game session id</param>
-    public Task<IEnumerable<TrainerModel>> GetTrainersByGameId(Guid gameId);
+    public Task<IEnumerable<Trainer>> GetTrainersByGameId(Guid gameId);
 
     /// <summary>
     /// Returns a trainer matching the trainer name and game session id
     /// </summary>
     /// <param name="username">The trainer name</param>
     /// <param name="gameId">The game session id</param>
-    public Task<TrainerModel> GetTrainerByUsername(
+    public Task<Trainer> GetTrainerByUsername(
         string username,
         Guid gameId);
 
@@ -45,7 +44,7 @@ public interface ITrainerService
     /// Attempts to add a trainer using the provided document
     /// </summary>
     /// <param name="trainer">The document to add</param>
-    public Task PostTrainer(TrainerModel trainer);
+    public Task PostTrainer(Trainer trainer);
 
     /// <summary>
     /// Attempts to update the trainer with their appropriate starting stats
@@ -56,25 +55,25 @@ public interface ITrainerService
     /// <param name="feats">The trainer's starting feats</param>
     /// <param name="stats">The trainer's starting stats</param>
     /// <returns>True if successful</returns>
-    public Task<TrainerModel> CompleteTrainer(
+    public Task<Trainer> CompleteTrainer(
         Guid trainerId,
         string origin,
         string trainerClass,
         IEnumerable<string> feats,
-        StatsModel stats);
+        Stats stats);
 
     /// <summary>
     /// Attempts to replace the previous trainer with the new data
     /// </summary>
     /// <param name="updatedTrainer">The updated trainer data</param>
-    public Task<TrainerModel> UpdateTrainer(TrainerModel updatedTrainer);
+    public Task<Trainer> UpdateTrainer(Trainer updatedTrainer);
 
     /// <summary>
     /// Searches for a trainer, then updates their honors
     /// </summary>
     /// <param name="trainerId">The trainer id</param>
     /// <param name="honors">The trainer's honors</param>
-    public Task<TrainerModel> UpdateTrainerHonors(
+    public Task<Trainer> UpdateTrainerHonors(
         Guid trainerId,
         Guid gameId,
         IEnumerable<string> honors);
@@ -86,11 +85,10 @@ public interface ITrainerService
     /// <param name="gameId">The game session id</param>
     /// <param name="itemList">The updated item list</param>
     /// <exception cref="ArgumentNullException" />
-    /// <exception cref="MongoCommandException" />
-    public Task<TrainerModel> UpdateTrainerItemList(
+    public Task<Trainer> UpdateTrainerItemList(
         Guid trainerId,
         Guid gameId,
-        IEnumerable<ItemModel> itemList);
+        IEnumerable<Item> itemList);
 
     /// <summary>
     /// Searches for a trainer, then updates their online status
@@ -98,7 +96,7 @@ public interface ITrainerService
     /// <param name="trainerId">The trainer id</param>
     /// <param name="isOnline">The updated online status</param>
     /// <exception cref="ArgumentNullException" />
-    public Task<TrainerModel> UpdateTrainerOnlineStatus(
+    public Task<Trainer> UpdateTrainerOnlineStatus(
         Guid trainerId,
         Guid gameId,
         bool isOnline);
@@ -109,7 +107,7 @@ public interface ITrainerService
     /// <param name="trainerId">The trainer id</param>
     /// <param name="password">The updated password</param>
     /// <exception cref="ArgumentNullException" />
-    public Task<TrainerModel> UpdateTrainerPassword(
+    public Task<Trainer> UpdateTrainerPassword(
         Guid trainerId,
         Guid gameId,
         string password);

@@ -2,7 +2,6 @@
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models.Enums;
-using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 

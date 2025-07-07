@@ -1,15 +1,13 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class UserService(ITrainerService trainerService) : AbstractService<UserModel>(MongoCollection.Users), IUserService
+internal class UserService(ITrainerService trainerService) : AbstractService<UserDto>(MongoCollection.Users), IUserService
 {
     private readonly ITrainerService _trainerService = trainerService;
 
@@ -28,71 +26,88 @@ internal class UserService(ITrainerService trainerService) : AbstractService<Use
         }
     }
 
-    public async Task<UserModel> GetUserById(Guid id)
+    public async Task<User> GetUserById(Guid id)
     {
-        return await ThrowIfNull(
+        var dto = await ThrowIfNull(
             id,
             id => Collection.Find(user => user.UserId == id).SingleOrDefault(),
             PropertyNames.UserId);
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task<UserModel> GetUserByUsername(string username)
+    public async Task<User> GetUserByUsername(string username)
     {
-        return await ThrowIfNull(
+        var dto = await ThrowIfNull(
             username,
             username => Collection.Find(user => user.Username == username).SingleOrDefault(),
             PropertyNames.Username);
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task<IEnumerable<UserModel>> GetUsers()
+    public async Task<IEnumerable<User>> GetUsers()
     {
-        return await Task.FromResult(Collection.Find(user => true).ToEnumerable());
+        var dtos = await Task.FromResult(Collection.Find(user => true).ToEnumerable());
+        return dtos.Select(DtoHandler.ParseFromDto);
     }
 
-    public async Task<IEnumerable<UserModel>> GetUsers(int offset, int limit)
+    public async Task<IEnumerable<User>> GetUsers(int offset, int limit)
     {
-        return await Task.FromResult(Collection.Find(user => true).Skip(offset).Limit(limit).ToEnumerable());
+        var dtos = await Task.FromResult(Collection.Find(user => true).Skip(offset).Limit(limit).ToEnumerable());
+        return dtos.Select(DtoHandler.ParseFromDto);
     }
 
-    public async Task PostUser(UserModel user)
+    public async Task PostUser(User user, string passwordHash)
     {
-        await PostDocument(user);
+        var dto = DtoHandler.ParseFromModel(user);
+        dto.PasswordHash = passwordHash;
+        dto.IsOnline = true;
+        await PostDocument(dto);
     }
 
-    public async Task<UserModel> UpdateUser(UserModel updatedUser)
+    public async Task<User> UpdateUser(User updatedUser)
     {
+        var currentUser = Collection.Find(user => user.UserId == updatedUser.UserId).SingleOrDefault();
+        var dto = DtoHandler.ParseFromModel(updatedUser);
+        dto.PasswordHash = currentUser.PasswordHash;
+        dto.IsOnline = currentUser.IsOnline;
         await UpsertDocument(
-            Builders<UserModel>.Filter.Eq(user => user.UserId, updatedUser.UserId),
-            updatedUser);
+            Builders<UserDto>.Filter.Eq(user => user.UserId, updatedUser.UserId),
+            dto);
 
-        return updatedUser;
+        return await GetUserById(dto.UserId);
     }
 
-    public async Task<UserModel> UpdateUserActivityToken(Guid userId, string token)
+    public async Task<User> UpdateUserActivityToken(Guid userId, string token)
     {
-        return await UpdateDocument(
+        var dto = await UpdateDocument(
             userId,
             user => user.UserId == userId,
-            Builders<UserModel>.Update.Set(PropertyNames.ActivityToken, token));
+            Builders<UserDto>.Update.Set(PropertyNames.ActivityToken, token));
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task<UserModel> UpdateUserOnlineStatus(Guid userId, bool isOnline)
+    public async Task<User> UpdateUserOnlineStatus(Guid userId, bool isOnline)
     {
-        return await UpdateDocument(
+        var dto = await UpdateDocument(
             userId,
             user => user.UserId == userId,
             UserStatusUpdate(isOnline));
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    private static UpdateDefinition<UserModel> UserStatusUpdate(bool isOnline)
+    private static UpdateDefinition<UserDto> UserStatusUpdate(bool isOnline)
     {
         if (isOnline)
         {
-            return Builders<UserModel>.Update.Set(PropertyNames.IsOnline, isOnline);
+            return Builders<UserDto>.Update.Set(PropertyNames.IsOnline, isOnline);
         }
 
-        return Builders<UserModel>.Update.Combine(
-            Builders<UserModel>.Update.Set(PropertyNames.IsOnline, isOnline),
-            Builders<UserModel>.Update.Set(PropertyNames.ActivityToken, string.Empty));
+        return Builders<UserDto>.Update.Combine(
+            Builders<UserDto>.Update.Set(PropertyNames.IsOnline, isOnline),
+            Builders<UserDto>.Update.Set(PropertyNames.ActivityToken, string.Empty));
     }
 }

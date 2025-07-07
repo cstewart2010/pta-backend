@@ -1,20 +1,18 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Npcs;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Npcs;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class NpcService(IGameService gameService) : AbstractService<NpcModel>(MongoCollection.NPCs), INpcService
+internal class NpcService(
+    IPokemonService pokemonService) : AbstractService<NpcDto>(MongoCollection.NPCs), INpcService
 {
-    private readonly IGameService _gameService = gameService;
+    private readonly IPokemonService _pokemonService = pokemonService;
 
-    public async Task DeleteNpc(Guid id)
+    public async Task DeleteNpc(Guid id, IGameService gameService)
     {
         var npc = await GetNpc(id);
         await ThrowIfNull(
@@ -22,59 +20,67 @@ internal class NpcService(IGameService gameService) : AbstractService<NpcModel>(
             npcId => Collection.FindOneAndDelete(npc => npc.NPCId == npcId),
             PropertyNames.NpcId);
 
-        var game = await _gameService.GetGame(npc.GameId);
-        game.NPCs.Remove(id);
-        await _gameService.UpdateGameNpcList(npc.GameId, game.NPCs);
+        var game = await gameService.GetGame(npc.GameId, true);
+        var npcList = game.Npcs.Select(npc => npc.NpcId).Where(npcId => id != npcId);
+        await gameService.UpdateGameNpcList(npc.GameId, npcList);
     }
 
-    public async Task DeleteNpcByGameId(Guid gameId)
+    public async Task DeleteNpcByGameId(Guid gameId, IGameService gameService)
     {
-        var game = await _gameService.GetGame(gameId);
-        foreach (var npcId in game.NPCs)
+        var game = await gameService.GetGame(gameId, true);
+        foreach (var npcModel in game.Npcs)
         {
             await ThrowIfNull(
                 gameId,
-                gameId => Collection.FindOneAndDelete(npc => npc.NPCId == npcId),
+                gameId => Collection.FindOneAndDelete(npc => npc.NPCId == npcModel.NpcId),
                 PropertyNames.GameId);
         }
-        await _gameService.UpdateGameNpcList(gameId, []);
+        await gameService.UpdateGameNpcList(gameId, []);
     }
 
-    public async Task<NpcModel> GetNpc(Guid id)
+    public async Task<Npc> GetNpc(Guid id)
     {
-        return await ThrowIfNull(
+        var dto = await ThrowIfNull(
             id,
             id => Collection.Find(npc => npc.NPCId == id).SingleOrDefault(),
             PropertyNames.NpcId);
+
+        return await DtoHandler.ParseFromDto(dto, _pokemonService);
     }
 
-    public async Task<IEnumerable<NpcModel>> GetNpcs(IEnumerable<Guid> npcIds)
+    public async Task<IEnumerable<Npc>> GetNpcs(IEnumerable<Guid> npcIds)
     {
-        return await ThrowIfNull(
+        var dtos = await ThrowIfNull(
             npcIds,
             id => Collection.Find(npc => npcIds.Contains(npc.NPCId)).ToEnumerable(),
             PropertyNames.NpcId);
+
+        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService)));
     }
 
-    public async Task<IEnumerable<NpcModel>> GetNpcsByGameId(Guid gameId)
+    public async Task<IEnumerable<Npc>> GetNpcsByGameId(Guid gameId)
     {
-        return await ThrowIfNull(
+        var dtos = await ThrowIfNull(
             gameId,
             id => Collection.Find(npc => npc.GameId == id).ToEnumerable(),
             PropertyNames.GameId);
+
+        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService)));
     }
 
-    public async Task PostNpc(NpcModel npc)
+    public async Task PostNpc(Npc npc)
     {
-        await PostDocument(npc);
+        var dto = DtoHandler.ParseFromModel(npc);
+        await PostDocument(dto);
     }
 
-    public async Task<NpcModel> UpdateNpc(NpcModel updatedNpc)
+    public async Task<Npc> UpdateNpc(Npc updatedNpc)
     {
+        var dto = DtoHandler.ParseFromModel(updatedNpc);
         await UpsertDocument(
-            Builders<NpcModel>.Filter.Eq(npc => npc.NPCId, updatedNpc.NPCId),
-            updatedNpc);
+            Builders<NpcDto>.Filter.Eq(npc => npc.NPCId, updatedNpc.NpcId),
+            dto);
 
-        return updatedNpc;
+        return await GetNpc(dto.NPCId);
     }
 }

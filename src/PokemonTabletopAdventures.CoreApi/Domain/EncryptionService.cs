@@ -1,8 +1,9 @@
-﻿using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using MongoDB.Driver;
+using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using System;
-using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain
 {
@@ -42,9 +43,23 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
             await Task.CompletedTask;
         }
 
-        public async Task VerifySecret(string secret, string hashedSecret)
+        public async Task VerifySecret(string secret, Guid gameId)
         {
-            if (!BCrypt.Net.BCrypt.Verify(secret, hashedSecret))
+            var collection = MongoCollectionHelper.GetMongoCollection<GameDto>(MongoCollection.Games);
+            var game = collection.Find(x => x.GameId == gameId).Single();
+            if (!BCrypt.Net.BCrypt.Verify(secret, game.PasswordHash))
+            {
+                throw new PtaUnauthorizedException(PtaExceptionParts.InvalidSecretMessage);
+            }
+
+            await Task.CompletedTask;
+        }
+
+        public async Task VerifySecret(string secret, string username)
+        {
+            var collection = MongoCollectionHelper.GetMongoCollection<UserDto>(MongoCollection.Users);
+            var user = collection.Find(x => x.Username ==  username).FirstOrDefault() ?? throw new PtaUnauthorizedException(PtaExceptionParts.NoUserFoundMessage);
+            if (!BCrypt.Net.BCrypt.Verify(secret, user.PasswordHash))
             {
                 throw new PtaUnauthorizedException(PtaExceptionParts.InvalidSecretMessage);
             }

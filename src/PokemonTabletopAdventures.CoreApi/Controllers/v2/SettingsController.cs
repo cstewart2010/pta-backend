@@ -1,20 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Enums;
-using PokemonTabletopAdventures.CoreApi.DTOs.Settings;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using PokemonTabletopAdventures.Models.Games;
+using PokemonTabletopAdventures.Models.Pokemons;
+using PokemonTabletopAdventures.Models.Settings;
+using PokemonTabletopAdventures.Models.Shops;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
+using Environments = PokemonTabletopAdventures.Models.Enums.Environments;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -46,7 +44,7 @@ public class SettingsController(
     }
 
     [HttpGet("{gameId}")]
-    [ProducesResponseType(typeof(SettingModel), 200)]
+    [ProducesResponseType(typeof(SettingDto), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetActiveSetting(Guid gameId)
@@ -59,88 +57,83 @@ public class SettingsController(
         return BadRequest();
     }
 
-    [HttpGet("{gameId}/{gameMasterId}/all")]
-    [ProducesResponseType(typeof(IEnumerable<SettingModel>), 200)]
+    [HttpPost("all")]
+    [ProducesResponseType(typeof(RetrieveSettingResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetAllSettings(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] RetrieveSettingRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var settings = await _settingService.GetAllSettings(gameId);
-        return Ok(settings);
+        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        var settings = await _settingService.GetAllSettings(request.GameId);
+        return Ok(new RetrieveSettingResponse { Settings = [..settings] });
     }
 
-    [HttpPost("{gameId}/{gameMasterId}")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPost("create")]
+    [ProducesResponseType(typeof(CreateSettingResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CreateSetting(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] PostSettingRequest request,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] CreateSettingRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var encounter = new SettingModel
+        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        var setting = new Setting
         {
             SettingId = Guid.NewGuid(),
-            GameId = gameId,
+            GameId = request.GameId,
             Name = request.Name,
             Type = request.Type,
-            ActiveParticipants = [],
+            Participants = [],
             Environment = [],
-            Shops = []
+            Shops = [],
+            IsActive = false,
         };
 
-        await _settingService.PostSetting(encounter);
-        return Ok();
+        await _settingService.PostSetting(setting);
+        return Ok(new CreateSettingResponse { Setting = setting });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/environment")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("environment")]
+    [ProducesResponseType(typeof(UpdateSettingResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<ActionResult> SetEnvironment(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        [FromQuery] string[] environments)
+        [FromBody] UpdateSettingRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var setting = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        setting.Environment = environments;
-        await _settingService.UpdateSetting(setting);
+        await IsUserGM(request.TrainerId, request.GameId, accessToken, sessionAuth);
+        var setting = await _settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        setting.Environment = request.Setting.Environment;
+        await _settingService.UpdateSetting(setting, true);
         return Ok();
     }
 
-    [HttpPut("{gameId}/{trainerId}")]
+    [HttpPut("participant/add")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddToActiveSettingAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] SettingParticipantModel request,
-        Guid gameId,
-        Guid trainerId)
+        [FromBody] UpdateSettingRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        if (encounter.ActiveParticipants.Any(activeParticipant => activeParticipant.ParticipantId == request.ParticipantId))
+        await IsUserGM(request.TrainerId, request.GameId, accessToken, sessionAuth);
+        var setting = await _settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var participant = GetSingleParticipant(request);
+        if (setting.Participants.Any(activeParticipant => activeParticipant.ParticipantId == participant.ParticipantId))
         {
             return Conflict();
         }
-        if (encounter.ActiveParticipants.Any(activeParticipant =>
+        if (setting.Participants.Any(activeParticipant =>
         {
-            if (activeParticipant.Position.X == request.Position.X)
+            if (activeParticipant.Position.X == participant.Position.X)
             {
-                if (activeParticipant.Position.Y == request.Position.Y)
+                if (activeParticipant.Position.Y == participant.Position.Y)
                 {
                     return true;
                 }
@@ -151,66 +144,63 @@ public class SettingsController(
         {
             return Conflict();
         }
-        encounter.ActiveParticipants = encounter.ActiveParticipants.Append(request);
-        await _settingService.UpdateSetting(encounter);
+        setting.Participants.Add(participant);
+        await _settingService.UpdateSetting(setting, true);
         return Ok();
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/{participantId}/remove")]
+    [HttpPut("participant/remove")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> RemoveFromActiveSetting(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid participantId)
+        [FromBody] UpdateSettingRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        return await RemoveFromParticipants(gameId, participantId);
+        await IsUserGM(request.TrainerId, request.GameId, accessToken, sessionAuth);
+        var participant = GetSingleParticipant(request);
+        return await RemoveFromParticipants(request.GameId, participant.ParticipantId, true);
     }
 
 
-    [HttpPut("{gameId}/{trainerId}/{pokemonId}/return")]
+    [HttpPut("{pokemonId}/return")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ReturnToPokeball(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid trainerId,
+        [FromBody] UpdateSettingRequest request,
         Guid pokemonId)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
-        return await RemoveFromParticipants(gameId, pokemonId);
+        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
+        return await RemoveFromParticipants(request.GameId, pokemonId, true);
     }
 
-    [HttpPut("{gameId}/{trainerId}/{pokemonId}/catch")]
+    [HttpPut("{pokemonId}/catch")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CatchPokemon(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid trainerId,
+        [FromBody] UpdateSettingRequest request,
         Guid pokemonId,
         [FromQuery] int catchRate,
         [FromQuery] string pokeball,
         [FromQuery] string nickname)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
+        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
         var pokemon = await PokemonService.GetPokemonById(pokemonId);
-        var game = await GameService.GetGame(gameId);
+        var game = await GameService.GetGame(request.GameId, false);
         if (pokemon.TrainerId != Guid.Empty)
         {
             throw new InvalidCatchException(PtaExceptionParts.AlreadyCaughtPokemonMessage, HttpStatusCode.BadRequest);
         }
 
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
+        var setting = await _settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         if (trainer?.IsOnline != true)
         {
             throw new InvalidCatchException(PtaExceptionParts.PlayNotOnlineMessage, HttpStatusCode.NotFound);
@@ -222,7 +212,7 @@ public class SettingsController(
         }
         var items = new[]
         {
-            new ItemModel
+            new Item
             {
                 Name = pokebalEnum.ToString().Replace("_", " "),
                 Amount = 1
@@ -230,23 +220,24 @@ public class SettingsController(
         };
         await RemoveItemsFromTrainer(trainer, items);
 
-        var pokeballModifier = await GetPokeballModifier(pokemon, trainerId, pokebalEnum, encounter.Environment);
+        var pokeballModifier = await GetPokeballModifier(pokemon, request.TrainerId, pokebalEnum, setting.Environment);
         var random = new Random();
         var check = random.Next(1, 101) + pokeballModifier;
-        var log = new LogModel
-        (
-            user: trainer.TrainerName,
-            action: $"failed to catch {pokemon.Nickname}"
-        );
+        var log = new Log
+        {
+            User = trainer.TrainerName,
+            Action = $"failed to catch {pokemon.Nickname}",
+            LogTimestamp = DateTimeOffset.Now
+        };
 
         if (check < catchRate)
         {
-            encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != pokemonId);
-            await _settingService.UpdateSetting(encounter);
+            setting.Participants = [..setting.Participants.Where(participant => participant.ParticipantId != pokemonId)];
+            await _settingService.UpdateSetting(setting, false);
             pokemon.Pokeball = pokeball.ToString().Replace("_", " ");
-            pokemon.OriginalTrainerId = trainerId;
-            pokemon.TrainerId = trainerId;
-            var allMons = (await PokemonService.GetPokemonByTrainerId(trainerId, gameId)).Where(pokemon => pokemon.IsOnActiveTeam).Count();
+            pokemon.OriginalTrainerId = request.TrainerId;
+            pokemon.TrainerId = request.TrainerId;
+            var allMons = (await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId)).Where(pokemon => pokemon.IsOnActiveTeam).Count();
             pokemon.IsOnActiveTeam = allMons < 6;
             if (!string.IsNullOrWhiteSpace(nickname))
             {
@@ -256,29 +247,27 @@ public class SettingsController(
             log.Action = $"successfully caught a {pokemon.SpeciesName} named '{pokemon.Nickname}' at {DateTime.UtcNow}";
         }
 
-        await GameService.UpdateGameLogs(game, log);
+        await GameService.UpdateGameLogs(game, false, log);
         return Ok();
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/{participantId}/position")]
+    [HttpPut("position/gm")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> UpdatePositionAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] MapPositionModel request,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid participantId)
+        [FromBody] UpdateSettingRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        if (encounter.ActiveParticipants.Any(activeParticipant =>
+        await IsUserGM(request.TrainerId, request.GameId, accessToken, sessionAuth);
+        var setting = await _settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var participant = GetSingleParticipant(request);
+        if (setting.Participants.Any(activeParticipant =>
         {
-            if (activeParticipant.Position.X == request.X)
+            if (activeParticipant.Position.X == participant.Position.X)
             {
-                if (activeParticipant.Position.Y == request.Y)
+                if (activeParticipant.Position.Y == participant.Position.Y)
                 {
                     return true;
                 }
@@ -289,45 +278,43 @@ public class SettingsController(
         {
             return Conflict();
         }
-        var participant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == participantId);
-        encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
+        setting.Participants = [..setting.Participants.Select(x =>
         {
-            if (participant.ParticipantId == participantId)
+            if (x.ParticipantId == participant.ParticipantId)
             {
-                participant.Position = request;
+                x.Position = participant.Position;
             }
 
-            return participant;
-        });
+            return x;
+        })];
 
-        await _settingService.UpdateSetting(encounter);
-        await SendRepositionLog(gameId, participant.Name, request);
+        await _settingService.UpdateSetting(setting, true);
+        await SendRepositionLog(request.GameId, participant.Name, participant.Position);
         return Ok();
     }
 
-    [HttpPut("{gameId}/{trainerId}/trainer_position")]
+    [HttpPut("position")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> UpdateTrainerPositionAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] MapPositionModel request,
-        Guid gameId,
-        Guid trainerId)
+        [FromBody] UpdateSettingRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        var participant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == trainerId);
-        if (GetDistance(request, participant.Position) > participant.Speed)
+        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
+        var setting = await _settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var currentParticipant = GetSingleParticipant(request);
+        var participant = setting.Participants.First(participant => participant.ParticipantId == request.TrainerId);
+        if (GetDistance(currentParticipant.Position, participant.Position) > participant.Speed)
         {
             return StatusCode(411);
         }
-        if (encounter.ActiveParticipants.Any(activeParticipant =>
+        if (setting.Participants.Any(activeParticipant =>
         {
-            if (activeParticipant.Position.X == request.X)
+            if (activeParticipant.Position.X == currentParticipant.Position.X)
             {
-                if (activeParticipant.Position.Y == request.Y)
+                if (activeParticipant.Position.Y == currentParticipant.Position.Y)
                 {
                     return true;
                 }
@@ -338,52 +325,51 @@ public class SettingsController(
         {
             return Conflict();
         }
-        encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
+        setting.Participants = [..setting.Participants.Select(participant =>
         {
-            if (participant.ParticipantId == trainerId)
+            if (participant.ParticipantId == request.TrainerId)
             {
-                participant.Position = request;
+                participant.Position = currentParticipant.Position;
             }
 
             return participant;
-        });
+        })];
 
-        await _settingService.UpdateSetting(encounter);
-        await SendRepositionLog(gameId, participant.Name, request);
+        await _settingService.UpdateSetting(setting, false);
+        await SendRepositionLog(request.GameId, currentParticipant.Name, currentParticipant.Position);
         return Ok();
     }
 
-    [HttpPut("{gameId}/{trainerId}/{pokemonId}/pokemon_position")]
+    [HttpPut("{pokemonId}/position")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> UpdateTrainerPokemonPositionAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] MapPositionModel result,
-        Guid gameId,
-        Guid trainerId,
+        [FromBody] UpdateSettingRequest request,
         Guid pokemonId)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
+        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
+        var setting = await _settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var pokemon = await PokemonService.GetPokemonById(pokemonId);
-        if (pokemon.TrainerId != trainerId)
+        if (pokemon.TrainerId != request.TrainerId)
         {
-            return Conflict();
+            throw new InvalidPokemonException($"{request.TrainerId} cannot move this pokemon");
         }
 
-        var participant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == pokemonId);
-        if (GetDistance(result, participant.Position) > participant.Speed)
+        var currentParticipant = GetSingleParticipant(request);
+        var participant = setting.Participants.First(participant => participant.ParticipantId == pokemonId);
+        if (GetDistance(currentParticipant.Position, participant.Position) > participant.Speed)
         {
             return StatusCode(411);
         }
-        if (encounter.ActiveParticipants.Any(activeParticipant =>
+        if (setting.Participants.Any(activeParticipant =>
         {
-            if (activeParticipant.Position.X == result.X)
+            if (activeParticipant.Position.X == currentParticipant.Position.X)
             {
-                if (activeParticipant.Position.Y == result.Y)
+                if (activeParticipant.Position.Y == currentParticipant.Position.Y)
                 {
                     return true;
                 }
@@ -394,90 +380,81 @@ public class SettingsController(
         {
             return Conflict();
         }
-        encounter.ActiveParticipants = encounter.ActiveParticipants.Select(participant =>
+        setting.Participants = [..setting.Participants.Select(participant =>
         {
             if (participant.ParticipantId == pokemonId)
             {
-                participant.Position = result;
+                participant.Position = currentParticipant.Position;
             }
 
             return participant;
-        });
+        })];
 
-        await _settingService.UpdateSetting(encounter);
-        await SendRepositionLog(trainer.GameId, participant.Name, result);
+        await _settingService.UpdateSetting(setting, false);
+        await SendRepositionLog(trainer.GameId, participant.Name, currentParticipant.Position);
         return Ok();
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/{encounterId}/active")]
+    [HttpPut("activate")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> SetSettingToActive(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid encounterId)
+        [FromBody] UpdateSettingRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var game = await GameService.GetGame(gameId);
-        if (await _settingService.GetActiveSetting(gameId) != null)
+        await IsUserGM(request.TrainerId, request.GameId, accessToken, sessionAuth);
+        var game = await GameService.GetGame(request.GameId, true);
+        if (await _settingService.GetActiveSetting(request.GameId, true) != null)
         {
             return Conflict();
         }
 
-        var encounter = await _settingService.GetSetting(encounterId);
-        if (encounter == null)
-        {
-            return NotFound(encounterId);
-        }
+        var setting = await _settingService.GetSetting(request.Setting.SettingId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.SettingId, request.Setting.SettingId);
+        setting.IsActive = true;
+        await _settingService.UpdateSetting(setting, true);
 
-        encounter.IsActive = true;
-        await _settingService.UpdateSetting(encounter);
-
-        var gm = await TrainerService.GetTrainerById(gameMasterId, gameId);
-        var newSettingLog = new LogModel(user: gm.TrainerName, action: $"activated a new encounter ({encounter.Name})");
-        await GameService.UpdateGameLogs(game, newSettingLog);
+        var gm = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
+        var newSettingLog = new LogDto(user: gm.TrainerName, action: $"activated a new encounter ({setting.Name})");
+        await GameService.UpdateGameLogs(game, true, DtoHandler.ParseFromDto(newSettingLog));
         return Ok();
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/inactive")]
+    [HttpPut("deactivate")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> SetSettingToInactive(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] UpdateSettingRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        encounter.IsActive = false;
-        await _settingService.UpdateSetting(encounter);
+        await IsUserGM(request.TrainerId, request.GameId, accessToken, sessionAuth);
+        var setting = await _settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        setting.IsActive = false;
+        await _settingService.UpdateSetting(setting, true);
         return Ok();
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/hp")]
+    [HttpPut("hp")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> UpdateParticipantsHp(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] UpdateSettingRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        var participants = await Task.WhenAll(encounter.ActiveParticipants.Select(async participant => await GetWithUpdatedHP(participant, gameId)));
-        encounter.ActiveParticipants = participants;
-        await _settingService.UpdateSetting(encounter);
-        return Ok();
+        await IsUserGM(request.TrainerId, request.GameId, accessToken, sessionAuth);
+        var setting = await _settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var participants = await Task.WhenAll(setting.Participants.Select(async participant => await GetWithUpdatedHP(participant, request.GameId)));
+        setting.Participants = participants;
+        var updatedSetting = await _settingService.UpdateSetting(setting, true);
+        return Ok(new UpdateSettingResponse { Setting = updatedSetting});
     }
 
-    [HttpDelete("{gameId}/{gameMasterId}/{encounterId}")]
+    [HttpDelete("delete")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
@@ -493,7 +470,7 @@ public class SettingsController(
         return Ok();
     }
 
-    [HttpDelete("{gameId}/{gameMasterId}")]
+    [HttpDelete("delete/all")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
@@ -529,17 +506,17 @@ public class SettingsController(
             CancellationToken.None);
     }
 
-    private async Task<IActionResult> RemoveFromParticipants(Guid gameId, Guid participantId)
+    private async Task<IActionResult> RemoveFromParticipants(Guid gameId, Guid participantId, bool isGm)
     {
-        var game = await GameService.GetGame(gameId);
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        var removedParticipant = encounter.ActiveParticipants.First(participant => participant.ParticipantId == participantId);
-        encounter.ActiveParticipants = encounter.ActiveParticipants.Where(participant => participant.ParticipantId != participantId);
-        await _settingService.UpdateSetting(encounter);
-        var removalLog = new LogModel(
+        var game = await GameService.GetGame(gameId, isGm);
+        var setting = await _settingService.GetActiveSetting(gameId, isGm) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, gameId);
+        var removedParticipant = setting.Participants.First(participant => participant.ParticipantId == participantId);
+        setting.Participants = [..setting.Participants.Where(participant => participant.ParticipantId != participantId)];
+        await _settingService.UpdateSetting(setting, isGm);
+        var removalLog = new LogDto(
             user: removedParticipant.Name,
-            action: $"has been removed from {encounter.Name}");
-        await GameService.UpdateGameLogs(game, removalLog);
+            action: $"has been removed from {setting.Name}");
+        await GameService.UpdateGameLogs(game, isGm, DtoHandler.ParseFromDto(removalLog));
         return Ok();
     }
 
@@ -554,8 +531,8 @@ public class SettingsController(
         WebSocketMessageType messageType,
         bool endOfMessage)
     {
-        var encounter = await _settingService.GetActiveSetting(gameId) ?? throw new UnknownEntityException<SettingModel>(PropertyNames.GameId, gameId);
-        var message = JsonSerializer.Serialize(encounter);
+        var setting = await _settingService.GetActiveSetting(gameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, gameId);
+        var message = JsonSerializer.Serialize(setting);
         var messageAsBytes = System.Text.Encoding.ASCII.GetBytes(message);
         await webSocket.SendAsync
         (
@@ -566,7 +543,7 @@ public class SettingsController(
         );
     }
 
-    private async Task<int> GetPokeballModifier(PokemonModel pokemon, Guid trainerId, Pokeball pokeball, string[] environments)
+    private async Task<int> GetPokeballModifier(Pokemon pokemon, Guid trainerId, Pokeball pokeball, string[] environments)
     {
         if (pokemon.CurrentHP < 1 && pokeball != Pokeball.Save_Ball)
         {
@@ -641,32 +618,40 @@ public class SettingsController(
         };
     }
 
-    private async Task<SettingParticipantModel> GetWithUpdatedHP(SettingParticipantModel participant, Guid gameId)
+    private async Task<SettingParticipant> GetWithUpdatedHP(SettingParticipant participant, Guid gameId)
     {
-        return participant.Type switch
+        var dto =  participant.Type switch
         {
-            SettingParticipantType.Trainer => SettingParticipantModel.FromTrainer(await TrainerService.GetTrainerById(participant.ParticipantId, gameId), participant.Position),
-            SettingParticipantType.Pokemon => SettingParticipantModel.FromPokemon(await PokemonService.GetPokemonById(participant.ParticipantId), participant.Position, participant.Type),
-            SettingParticipantType.EnemyNpc => SettingParticipantModel.FromNpc(await _npcService.GetNpc(participant.ParticipantId), participant.Position, participant.Type),
-            SettingParticipantType.EnemyPokemon => SettingParticipantModel.FromPokemon(await PokemonService.GetPokemonById(participant.ParticipantId), participant.Position, participant.Type),
-            SettingParticipantType.NeutralNpc => SettingParticipantModel.FromNpc(await _npcService.GetNpc(participant.ParticipantId), participant.Position, participant.Type),
-            SettingParticipantType.NeutralPokemon => SettingParticipantModel.FromPokemon(await PokemonService.GetPokemonById(participant.ParticipantId), participant.Position, participant.Type),
+            SettingParticipantType.Trainer => SettingParticipantModel.FromTrainer(DtoHandler.ParseFromModel(await TrainerService.GetTrainerById(participant.ParticipantId, gameId)), participant.Position),
+            SettingParticipantType.Pokemon => SettingParticipantModel.FromPokemon(DtoHandler.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
+            SettingParticipantType.EnemyNpc => SettingParticipantModel.FromNpc(DtoHandler.ParseFromModel(await _npcService.GetNpc(participant.ParticipantId)), participant.Position, participant.Type),
+            SettingParticipantType.EnemyPokemon => SettingParticipantModel.FromPokemon(DtoHandler.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
+            SettingParticipantType.NeutralNpc => SettingParticipantModel.FromNpc(DtoHandler.ParseFromModel(await _npcService.GetNpc(participant.ParticipantId)), participant.Position, participant.Type),
+            SettingParticipantType.NeutralPokemon => SettingParticipantModel.FromPokemon(DtoHandler.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
             _ => throw new ArgumentOutOfRangeException(nameof(participant.Type)),
         };
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    private async Task SendRepositionLog(Guid gameId, string participantName, MapPositionModel position)
+    private async Task SendRepositionLog(Guid gameId, string participantName, MapPosition position)
     {
-        var game = await GameService.GetGame(gameId);
-        var repositionLog = new LogModel
-        (
-            user: participantName,
-            action: $"moved to point ({position.X}, {position.Y})"
-        );
-        await GameService.UpdateGameLogs(game, repositionLog);
+        var game = await GameService.GetGame(gameId, false);
+        var repositionLog = new Log
+        {
+            User = participantName,
+            Action = $"moved to point ({position.X}, {position.Y})",
+            LogTimestamp = DateTimeOffset.Now
+        };
+        await GameService.UpdateGameLogs(game, false, repositionLog);
     }
 
-    private static double GetDistance(MapPositionModel start, MapPositionModel end)
+    private static SettingParticipant GetSingleParticipant(UpdateSettingRequest request)
+    {
+        return request.Setting.Participants.SingleOrDefault() ?? throw new InvalidSettingException(PtaExceptionParts.TooManyParticipantsMessage);
+    }
+
+    private static double GetDistance(MapPosition start, MapPosition end)
     {
         return Math.Sqrt(Math.Pow(start.X - end.X, 2) + Math.Pow(start.Y - end.Y, 2));
     }

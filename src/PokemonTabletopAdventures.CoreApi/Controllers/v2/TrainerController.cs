@@ -1,18 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs;
-using PokemonTabletopAdventures.CoreApi.DTOs.Enums;
-using PokemonTabletopAdventures.CoreApi.DTOs.Pokemons;
-using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Games;
+using PokemonTabletopAdventures.Models.Pokemons;
+using PokemonTabletopAdventures.Models.Trainers;
+using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -30,446 +26,398 @@ public class TrainerController(
 {
     private readonly ILogger<TrainerController> _logger = logger;
 
-    [HttpGet("{gameId}/trainers")]
-    [ProducesResponseType(typeof(IEnumerable<Trainer>), 200)]
+    [HttpGet("retrieve/all")]
+    [ProducesResponseType(typeof(RetrieveTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
-    public async Task<IActionResult> FindTrainers(Guid gameId)
+    public async Task<IActionResult> FindTrainers(
+        [FromBody] RetrieveTrainerRequest request)
     {
-        var trainer = await GetTrainers(gameId);
-        return Ok(trainer);
+        var trainers = await GetTrainers(request.GameId);
+        return Ok(new RetrieveTrainerResponse { Trainers = trainers});
     }
 
-    [HttpGet("trainers/{trainerName}")]
-    [ProducesResponseType(typeof(FoundTrainerResponse), 200)]
+    [HttpPost("retrieve/name")]
+    [ProducesResponseType(typeof(RetrieveTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
-    public async Task<IActionResult> FindTrainer(string trainerName, [FromQuery] Guid gameId)
+    public async Task<IActionResult> FindTrainer(
+        [FromBody] RetrieveTrainerRequest request)
     {
-        var trainer = await TrainerService.GetTrainerByUsername(trainerName, gameId);
-        var user = await UserService.GetUserById(trainer.TrainerId);
-        return Ok(await FoundTrainerResponse.ParseFromModel(trainer, user, PokemonService, PokedexService, GameService));
+        var trainer = await TrainerService.GetTrainerByUsername(request.TrainerName!, request.GameId);
+        return Ok(new RetrieveTrainerResponse { Trainers = [trainer] });
     }
 
-    [HttpGet("{gameId}/trainer/{trainerId}", Name = nameof(GetTrainerInGame))]
-    [ProducesResponseType(typeof(FoundTrainerResponse), 200)]
-    [ProducesResponseType(typeof(ProblemDetails), 404)]
-    public async Task<IActionResult> GetTrainerInGame(Guid gameId, Guid trainerId)
-    {
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        var user = await UserService.GetUserById(trainer.TrainerId);
-        return Ok(await FoundTrainerResponse.ParseFromModel(trainer, user, PokemonService, PokedexService, GameService));
-    }
-
-    [HttpGet("{gameId}/{trainerId}/{pokemonId}")]
-    [ProducesResponseType(typeof(PokemonModel), 200)]
+    [HttpPost("retrieve/id", Name = nameof(GetTrainerInGame))]
+    [ProducesResponseType(typeof(RetrieveTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
-    [ProducesResponseType(typeof(ProblemDetails), 401)]
-    public async Task<IActionResult> FindTrainerMon(
-        Guid gameId,
-        Guid trainerId,
-        Guid pokemonId)
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
+    public async Task<IActionResult> GetTrainerInGame(
+        [FromBody] RetrieveTrainerRequest request)
     {
-        var pokemon = await PokemonService.GetPokemonById(pokemonId);
-        if (pokemon.TrainerId != trainerId)
-        {
-            throw new InvalidPokemonException($"This pokemon is not associate with trainer {trainerId}");
-        }
-        if (pokemon.GameId != gameId)
-        {
-            throw new InvalidPokemonException($"This pokemon is not associate with game {gameId}");
-        }
-
-        return Ok(pokemon);
+        var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
+        return Ok(new RetrieveTrainerResponse { Trainers = [trainer] });
     }
 
     [HttpPost("create")]
+    [ProducesResponseType(typeof(CreateTrainerResponse), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> PostNewPlayer(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
-        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth)
+        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
+        [FromBody] CreateTrainerRequest request)
     {
-        return await Task.FromResult(NotFound());
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        request.Trainer.GameId = request.GameId;
+        request.Trainer.Level = 1;
+        request.Trainer.Origin = string.Empty;
+        request.Trainer.TrainerClasses = [];
+        request.Trainer.PokeDex = [];
+        request.Trainer.PokemonHome = [];
+        request.Trainer.NewPokemon = [];
+        request.Trainer.PokemonTeam = [];
+        request.Trainer.Items = [];
+        request.Trainer.TrainerSkills = [];
+        request.Trainer.TrainerStats = new();
+        request.Trainer.CurrentHP = request.Trainer.TrainerStats.HP;
+        request.Trainer.IsAllowed = false;
+        request.Trainer.IsComplete = false;
+        request.Trainer.CaughtTotal = 0;
+        request.Trainer.SeenTotal = 0;
+        request.Trainer.Money = 0;
+        request.Trainer.IsGM = false;
+        request.Trainer.TrainerId = request.UserId;
+        await TrainerService.PostTrainer(request.Trainer);
+        var trainer = await TrainerService.GetTrainerById(request.UserId, request.GameId);
+        return Ok(new CreateTrainerResponse { Trainer = trainer });
     }
 
-    [HttpPut("{gameId}/{userId}/newUser")]
-    [ProducesResponseType(typeof(FoundTrainerResponse), 201)]
-    [ProducesResponseType(typeof(ProblemDetails), 400)]
-    public async Task<IActionResult> AddPlayerToGame(
-        Guid gameId,
-        Guid tempId,
-        Guid userId,
-        [FromQuery] string username)
-    {
-        if (!await GameService.HasGM(gameId))
-        {
-            return BadRequest();
-        }
-
-        //var trainer = await BuildTrainer(gameId, userId, username);
-        var trainer = await TrainerService.GetTrainerById(userId, tempId);
-        trainer.GameId = gameId;
-        await TrainerService.UpdateTrainer(trainer);
-        
-        await RefreshToken(userId);
-        var user = await UserService.GetUserById(trainer.TrainerId);
-        return Ok(await FoundTrainerResponse.ParseFromModel(trainer, user, PokemonService, PokedexService, GameService));
-    }
-
-    [HttpPut("{gameId}/{gameMasterId}/{trainerId}/allow")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("allow")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AllowUser(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid trainerId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        var game = await GameService.GetGame(gameId);
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var trainer = await TrainerService.GetTrainerById(request.UserId, request.GameId);
+        var game = await GameService.GetGame(request.GameId, true);
         trainer.IsAllowed = true;
-        await TrainerService.UpdateTrainer(trainer);
-        var log = new LogModel
-        (
-            user: trainer.TrainerName,
-            action: GameLogMessages.JoinedTheGameLog
-        );
-        await GameService.UpdateGameLogs(game, log);
-        await RefreshToken(gameMasterId);
-        return Ok();
+        var updatedTrainer = await TrainerService.UpdateTrainer(trainer);
+        var log = new Log
+        {
+            User = trainer.TrainerName,
+            Action = GameLogMessages.JoinedTheGameLog,
+            LogTimestamp = DateTimeOffset.UtcNow,
+        };
+        await GameService.UpdateGameLogs(game, true, log);
+        await RefreshToken(request.UserId);
+        return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/{trainerId}/disallow")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("disallow")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> DisallowUser(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid trainerId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        var game = await GameService.GetGame(gameId);
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var trainer = await TrainerService.GetTrainerById(request.UserId, request.GameId);
+        var game = await GameService.GetGame(request.GameId, true);
         trainer.IsAllowed = false;
-        await TrainerService.UpdateTrainer(trainer);
-        var log = new LogModel
-        (
-            user: trainer.TrainerName,
-            action: GameLogMessages.RemovedFromGameLog
-        );
-        await GameService.UpdateGameLogs(game, log);
-        await RefreshToken(gameMasterId);
-        return Ok();
+        var updatedTrainer = await TrainerService.UpdateTrainer(trainer);
+        var log = new Log
+        {
+            User = trainer.TrainerName,
+            Action = GameLogMessages.JoinedTheGameLog,
+            LogTimestamp = DateTimeOffset.UtcNow,
+        };
+        await GameService.UpdateGameLogs(game, true, log);
+        await RefreshToken(request.UserId);
+        return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
-    [HttpPut("{gameId}/{trainerId}/addStats")]
-    [ProducesResponseType(typeof(FoundTrainerResponse), 200)]
+    [HttpPut("update/stats")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddTrainerStats(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] Trainer trainerDto,
-        Guid gameId,
-        Guid trainerId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
-        await CompleteTrainer(trainerId, gameId, trainerDto);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        var user = await UserService.GetUserById(trainerId);
-        return Ok(await FoundTrainerResponse.ParseFromModel(trainer, user, PokemonService, PokedexService, GameService));
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        var trainer = request.Trainers.SingleOrDefault() ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
+        var updatedTrainer = await CompleteTrainer(request.UserId, request.GameId, trainer);
+        return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/groupHonor")]
-    [ProducesResponseType(typeof(GenericResponse), 200)]
+    [HttpPut("update/honor/all")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddGroupHonor(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] string honor,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var game = await GameService.GetGame(gameId);
-        if (string.IsNullOrEmpty(honor))
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var game = await GameService.GetGame(request.GameId, true);
+        if (string.IsNullOrEmpty(request.Honor))
         {
-            return BadRequest(nameof(honor));
+            throw new InvalidTrainerException("No honor was listed");
         }
-        var trainers = await TrainerService.GetTrainersByGameId(gameId);
+        var trainers = await TrainerService.GetTrainersByGameId(request.GameId);
         foreach (var trainer in trainers)
         {
-            await TrainerService.UpdateTrainerHonors(trainer.TrainerId, trainer.GameId, trainer.Honors.Append(honor));
+            await TrainerService.UpdateTrainerHonors(trainer.TrainerId, trainer.GameId, trainer.Honors.Append(request.Honor));
         }
 
-        var updatedHonorsLog = new LogModel
-        (
-            user: GameLogMessages.PartyUser,
-            action: $"has earned a new honor: {honor}"
-        );
+        var updatedTrainers = await Task.WhenAll(trainers.Select(async trainer => await TrainerService.UpdateTrainerHonors(trainer.TrainerId, request.GameId, trainer.Honors.Append(request.Honor!))));
+        var updatedHonorsLog = new Log
+        {
+            User = GameLogMessages.PartyUser,
+            Action = $"has earned a new honor: {request.Honor}",
+            LogTimestamp = DateTimeOffset.Now
+        };
 
-        await GameService.UpdateGameLogs(game, updatedHonorsLog);
-        await RefreshToken(gameMasterId);
-        return Ok(new GenericResponse($"Granted the party honor: {honor}"));
+        await GameService.UpdateGameLogs(game, true, updatedHonorsLog);
+        await RefreshToken(request.UserId);
+        return Ok(new UpdateTrainerResponse { Trainers = updatedTrainers });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/honor")]
-    [ProducesResponseType(typeof(GenericResponse), 200)]
+    [HttpPut("update/honor")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddSingleHonor(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        PutSingleHonorRequest request,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var trainer = await TrainerService.GetTrainerById(request.TrainerId, gameId);
-        var gm = await TrainerService.GetTrainerById(gameMasterId, gameId);
-        var game = await GameService.GetGame(gameId);
-        await TrainerService.UpdateTrainerHonors(trainer.TrainerId, trainer.GameId, trainer.Honors.Append(request.Honor));
-        var updatedHonorsLog = new LogModel(
-            user: gm.TrainerName,
-            action: $"has granted {trainer.TrainerName} a new honor");
-        await GameService.UpdateGameLogs(game, updatedHonorsLog);
-        await RefreshToken(gameMasterId);
-        return Ok(new GenericResponse($"Granted {gameMasterId} honor: {request.Honor}"));
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var trainerId = request.Trainers.SingleOrDefault()?.TrainerId ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
+        var trainer = await TrainerService.GetTrainerById(trainerId, request.GameId);
+        var gm = await TrainerService.GetTrainerById(request.UserId, request.GameId);
+        var game = await GameService.GetGame(request.GameId, true);
+        var updatedTrainer = await TrainerService.UpdateTrainerHonors(trainerId, request.GameId, trainer.Honors.Append(request.Honor!));
+        var updatedHonorsLog = new Log
+        {
+            User = gm.TrainerName,
+            Action = $"has granted {trainer.TrainerName} a new honor",
+            LogTimestamp = DateTimeOffset.Now
+        };
+        await GameService.UpdateGameLogs(game, true, updatedHonorsLog);
+        await RefreshToken(request.UserId);
+        return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/{trainerId}/addItems")]
-    [ProducesResponseType(typeof(FoundTrainerResponse), 200)]
+    [HttpPut("add/items")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddItemsToTrainerAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] IEnumerable<ItemModel> items,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid trainerId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        var game = await GameService.GetGame(gameId);
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var trainerId = request.Trainers.SingleOrDefault()?.TrainerId ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
+        var items = request.Trainers.SingleOrDefault()?.Items ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
+        var trainer = await TrainerService.GetTrainerById(trainerId, request.GameId);
+        var game = await GameService.GetGame(request.GameId, true);
         var addedItemsLogs = await AddItemsToTrainer(trainer, items);
-        await GameService.UpdateGameLogs(game, [.. addedItemsLogs]);
-        await RefreshToken(gameMasterId);
-        var user = await UserService.GetUserById(trainerId);
-        return Ok(await FoundTrainerResponse.ParseFromModel(trainer, user, PokemonService, PokedexService, GameService));
+        await GameService.UpdateGameLogs(game, true, [.. addedItemsLogs]);
+        await RefreshToken(request.UserId);
+        var updatedTrainer = await TrainerService.GetTrainerById(trainerId, request.GameId);
+        return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/addItems/all")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("add/items/all")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddItemsToAllTrainersAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] IEnumerable<ItemModel> items,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var trainers = await TrainerService.GetTrainersByGameId(gameId);
-        var game = await GameService.GetGame(gameId);
-        if (trainers.Any())
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var trainers = await TrainerService.GetTrainersByGameId(request.GameId);
+        var game = await GameService.GetGame(request.GameId, true);
+        var items = request.Trainers.SingleOrDefault()?.Items ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
+        foreach (var trainer in trainers)
         {
-            foreach (var trainer in trainers)
-            {
-                var addedItemsLogs = await AddItemsToTrainer(trainer, items);
-                await GameService.UpdateGameLogs(game, [.. addedItemsLogs]);
-            }
+            var addedItemsLogs = await AddItemsToTrainer(trainer, items);
+            await GameService.UpdateGameLogs(game, true, [.. addedItemsLogs]);
         }
 
-        await RefreshToken(gameMasterId);
+        await RefreshToken(request.UserId);
         return Ok();
     }
 
-    [HttpPut("{gameId}/{trainerId}/removeItems")]
-    [ProducesResponseType(typeof(FoundTrainerResponse), 200)]
+    [HttpPut("remove/items")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> RemoveItemsFromTrainerAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] IEnumerable<ItemModel> items,
-        Guid gameId,
-        Guid trainerId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        var game = await GameService.GetGame(gameId);
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        var trainer = await TrainerService.GetTrainerById(request.UserId, request.GameId);
+        var game = await GameService.GetGame(request.GameId, false);
+        var items = request.Trainers.SingleOrDefault()?.Items ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
         var removedItemsLogs = await RemoveItemsFromTrainer(trainer, items);
-        await GameService.UpdateGameLogs(game, [.. removedItemsLogs]);
-        await RefreshToken(trainerId);
-        var user = await UserService.GetUserById(trainerId);
-        return Ok(await FoundTrainerResponse.ParseFromModel(trainer, user, PokemonService, PokedexService, GameService));
+        await GameService.UpdateGameLogs(game, false, [.. removedItemsLogs]);
+        await RefreshToken(request.UserId);
+        var updatedTrainer = await TrainerService.GetTrainerById(request.UserId, request.GameId);
+        return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/{trainerId}/removeItems")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("remove/items/force")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> RemoveItemsFromTrainerGMAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] IEnumerable<ItemModel> items,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid trainerId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var game = await GameService.GetGame(gameId);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var game = await GameService.GetGame(request.GameId, true);
+        var trainer = request.Trainers.SingleOrDefault() ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
+        var items = trainer.Items;
         var removedItemsLogs = await RemoveItemsFromTrainer(trainer, items);
-        await GameService.UpdateGameLogs(game, [.. removedItemsLogs]);
-        await RefreshToken(gameMasterId);
-        var user = await UserService.GetUserById(trainerId);
-        return Ok(await FoundTrainerResponse.ParseFromModel(trainer, user, PokemonService, PokedexService, GameService));
+        await GameService.UpdateGameLogs(game, true, [.. removedItemsLogs]);
+        await RefreshToken(request.UserId);
+        var updatedTrainer = await TrainerService.GetTrainerById(trainer.TrainerId, request.GameId);
+        return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/removeItems/all")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("remove/items/all")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> RemoveItemsFromAllTrainersAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] IEnumerable<ItemModel> items,
-        Guid gameId, 
-        Guid gameMasterId)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var game = await GameService.GetGame(gameId);
-        var trainers = await TrainerService.GetTrainersByGameId(gameId);
-        if (trainers.Any())
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var game = await GameService.GetGame(request.GameId, true);
+        var trainers = await TrainerService.GetTrainersByGameId(request.GameId);
+        var items = request.Trainers.SingleOrDefault()?.Items ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
+        foreach (var trainer in trainers)
         {
-            foreach (var trainer in trainers)
-            {
-                var removedItemsLogs = await RemoveItemsFromTrainer(trainer, items);
-                await GameService.UpdateGameLogs(game, [.. removedItemsLogs]);
-            }
+            var removedItemsLogs = await RemoveItemsFromTrainer(trainer, items);
+            await GameService.UpdateGameLogs(game, true, [.. removedItemsLogs]);
         }
 
-        await RefreshToken(gameMasterId);
-        return Ok();
+        var updateTrainers = await TrainerService.GetTrainersByGameId(request.GameId);
+        await RefreshToken(request.UserId);
+        return Ok(new UpdateTrainerResponse { Trainers = [.. updateTrainers] });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/{trainerId}/money")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("add/money")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> UpdateTrainerMoney(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid trainerId,
-        [FromQuery] int addition)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        trainer.Money += addition;
-        await TrainerService.UpdateTrainer(trainer);
-        return Ok();
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var trainer = request.Trainers.SingleOrDefault() ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
+        var currentTrainer = await TrainerService.GetTrainerById(trainer.TrainerId, request.GameId);
+        currentTrainer.Money += trainer.Money;
+        var updatedTrainer = await TrainerService.UpdateTrainer(currentTrainer);
+        return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/money/all")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("add/money/all")]
+    [ProducesResponseType(typeof(UpdateTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> UpdateAllTrainersMoney(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        [FromQuery] int addition)
+        [FromBody] UpdateTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var trainers = await TrainerService.GetTrainersByGameId(gameId);
-        foreach (var trainer in trainers.Where(trainer => !trainer.IsGM))
-        {
-            trainer.Money += addition;
-            await TrainerService.UpdateTrainer(trainer);
-        }
-
-        return Ok();
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var trainers = await TrainerService.GetTrainersByGameId(request.GameId);
+        var updatedTrainers = await Task.WhenAll(trainers.Where(trainer => !trainer.IsGM).Select(async trainer => await TrainerService.UpdateTrainer(trainer)));
+        return Ok(new UpdateTrainerResponse { Trainers = [.. updatedTrainers] });
     }
 
-    [HttpDelete("{gameId}/{gameMasterId}/{trainerId}")]
+    [HttpDelete("delete")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> DeleteTrainer(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid trainerId,
-        Guid gameMasterId)
+        [FromBody] DeleteTrainerRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var game = await GameService.GetGame(gameId);
-        foreach (var pokemon in await PokemonService.GetPokemonByTrainerId(trainerId))
+        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        var game = await GameService.GetGame(request.GameId, true);
+        foreach (var pokemon in await PokemonService.GetPokemonByTrainerId(request.TrainerId))
         {
             await PokemonService.DeletePokemon(pokemon.PokemonId);
         }
-        await TrainerService.DeleteTrainer(gameId, trainerId);
-        if (await TrainerService.GetTrainerById(trainerId, gameId) == null)
+        await TrainerService.DeleteTrainer(request.GameId, request.TrainerId);
+        if (await TrainerService.GetTrainerById(request.TrainerId, request.GameId) == null)
         {
-            throw new DeletionException($"Failed to delete trainer {trainerId}");
+            throw new DeletionException($"Failed to delete trainer {request.TrainerId}");
         }
 
-        var gm = await TrainerService.GetTrainerById(gameMasterId, gameId);
-        var deleteTrainerLog = new LogModel(
-            user: gm.TrainerName,
-            action: $"removed a trainer and all of their pokemon from the game");
-        await GameService.UpdateGameLogs(game, deleteTrainerLog);
-        await RefreshToken(gameMasterId);
+        var gm = await TrainerService.GetTrainerById(request.GameMasterId, request.GameId);
+        var deleteTrainerLog = new Log
+        {
+            User = gm.TrainerName,
+            Action = GameLogMessages.DeletedPlayerLog,
+            LogTimestamp = DateTimeOffset.Now
+        };
+        await GameService.UpdateGameLogs(game, true, deleteTrainerLog);
+        await RefreshToken(request.GameMasterId);
         return Ok();
     }
 
-    private async Task<TrainerModel> BuildTrainer(
-        Guid gameId,
-        Guid userId,
-        string username)
-    {
-        var trainer = await BuildTrainer(
-            gameId,
-            userId,
-            username,
-            false);
-
-        trainer.Sprite = Sprites.AceTrainer;
-        return trainer;
-    }
-
-    private async Task CompleteTrainer(
+    private async Task<Trainer> CompleteTrainer(
         Guid trainerId,
         Guid gameId,
         Trainer trainerDto)
     {
         var user = await UserService.GetUserById(trainerId);
         var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        if (CheckRequestingTrainer(trainerDto, trainer, user))
+        if (!CheckRequestingTrainer(trainerDto, trainer, user))
         {
-            await AddTrainerPokemon(trainerDto.NewPokemon, trainer);
-            await SetStartingEquipmentWithOrigin(trainer);
-            await TrainerService.UpdateTrainer(trainer);
-            var game = await GameService.GetGame(trainer.GameId);
-            var statsAddedLog = new LogModel(trainer.TrainerName, GameLogMessages.UpdatedStatsLog);
-            await GameService.UpdateGameLogs(game, statsAddedLog);
+            throw new InvalidTrainerException(PtaExceptionParts.UnauthorizedTrainerCompletionMessage);
         }
+        await AddTrainerPokemon(trainerDto.NewPokemon, trainer);
+        await SetStartingEquipmentWithOrigin(trainer);
+        var updatedTrainer = await TrainerService.UpdateTrainer(trainer);
+        var game = await GameService.GetGame(trainer.GameId, false);
+        var statsAddedLog = new Log
+        {
+            User = trainer.TrainerName,
+            Action = GameLogMessages.UpdatedStatsLog,
+            LogTimestamp = DateTimeOffset.Now
+        };
+        await GameService.UpdateGameLogs(game, false, statsAddedLog);
+        return updatedTrainer;
     }
 
     private async Task AddTrainerPokemon(
         IEnumerable<NewPokemon> pokemon,
-        TrainerModel trainer)
+        Trainer trainer)
     {
         foreach (var data in pokemon.Where(data => data != null))
         {
@@ -481,9 +429,14 @@ public class TrainerController(
             pokemonModel.GameId = trainer.GameId;
             pokemonModel.Pokeball = Pokeball.Basic_Ball.ToString().Replace("_", "");
             await PokemonService.PostPokemon(pokemonModel);
-            var game = await GameService.GetGame(trainer.GameId);
-            var caughtPokemonLog = new LogModel(trainer.TrainerName, $"caught a {pokemonModel.SpeciesName} named {pokemonModel.Nickname}");
-            await GameService.UpdateGameLogs(game, caughtPokemonLog);
+            var game = await GameService.GetGame(trainer.GameId, false);
+            var caughtPokemonLog = new Log
+            {
+                User = trainer.TrainerName,
+                Action = $"caught a {pokemonModel.SpeciesName} named {pokemonModel.Nickname}",
+                LogTimestamp = DateTimeOffset.Now
+            };
+            await GameService.UpdateGameLogs(game, false, caughtPokemonLog);
             if (await PokedexService.GetPokedexItem(trainer.TrainerId, trainer.GameId, pokemonModel.DexNo) == null)
             {
                 await PokedexService.PostDexItem(trainer.TrainerId, trainer.GameId, pokemonModel.DexNo, true, true);
@@ -495,32 +448,31 @@ public class TrainerController(
         }
     }
 
-    private async Task SetStartingEquipmentWithOrigin(TrainerModel trainer)
+    private async Task SetStartingEquipmentWithOrigin(Trainer trainer)
     {
-        var origin = await DexService.GetDexEntry<OriginModel>(DexType.Origins, trainer.Origin);
+        var origin = await DexService.GetDexEntry<OriginDto>(DexType.Origins, trainer.Origin);
         var collection = await Task.WhenAll(origin.Data.StartingEquipmentList.Select(ConvertStartingEquipment));
-        trainer.Items = [.. collection];
+        trainer.Items = [.. collection.Select(DtoHandler.ParseFromDto)];
     }
 
-    private async Task<List<Trainer>> GetTrainers(Guid gameId)
+    private async Task<ICollection<Trainer>> GetTrainers(Guid gameId)
     {
         var models = await TrainerService.GetTrainersByGameId(gameId);
-        var trainers = await Task.WhenAll(models.Select(async trainer => await ParseFromModel(trainer)));
-        return [.. trainers];
+        return [.. models];
     }
 
-    private async Task<ItemModel> ConvertStartingEquipment(StartingEquipment s)
+    private async Task<ItemDto> ConvertStartingEquipment(StartingEquipment s)
     {
         var baseItem = s.Type switch
         {
-            StartingEquipmentType.Trainer => await DexService.GetDexEntry<BaseItemModel>(DexType.TrainerEquipment, s.Name),
-            StartingEquipmentType.Pokeball => await DexService.GetDexEntry<BaseItemModel>(DexType.Pokeballs, s.Name),
-            StartingEquipmentType.Medical => await DexService.GetDexEntry<BaseItemModel>(DexType.MedicalItems, s.Name),
-            StartingEquipmentType.Berry => await DexService.GetDexEntry<BaseItemModel>(DexType.Berries, s.Name),
-            StartingEquipmentType.Pokemon => await DexService.GetDexEntry<BaseItemModel>(DexType.PokemonItems, s.Name),
+            StartingEquipmentType.Trainer => await DexService.GetDexEntry<BaseItemDto>(DexType.TrainerEquipment, s.Name),
+            StartingEquipmentType.Pokeball => await DexService.GetDexEntry<BaseItemDto>(DexType.Pokeballs, s.Name),
+            StartingEquipmentType.Medical => await DexService.GetDexEntry<BaseItemDto>(DexType.MedicalItems, s.Name),
+            StartingEquipmentType.Berry => await DexService.GetDexEntry<BaseItemDto>(DexType.Berries, s.Name),
+            StartingEquipmentType.Pokemon => await DexService.GetDexEntry<BaseItemDto>(DexType.PokemonItems, s.Name),
             _ => throw new ArgumentOutOfRangeException(nameof(s.Type)),
         };
-        var item = new ItemModel
+        var item = new ItemDto
         {
             Name = baseItem.Data.Name,
             Effects = baseItem.Data.Effects,
@@ -532,21 +484,21 @@ public class TrainerController(
 
     #region Helper methods
     private static bool CheckRequestingTrainer(
-        Trainer trainerDto,
-        TrainerModel requestingTrainer,
-        UserModel user)
+        Trainer trainer,
+        Trainer requestingTrainer,
+        User user)
     {
         if (user.SiteRole == UserRoleOnSite.SiteAdmin)
         {
             return true;
         }
 
-        if (trainerDto.GameId != requestingTrainer.GameId)
+        if (trainer.GameId != requestingTrainer.GameId)
         {
             return false;
         }
 
-        return trainerDto.TrainerId == requestingTrainer.TrainerId || requestingTrainer.IsGM;
+        return trainer.TrainerId == requestingTrainer.TrainerId || requestingTrainer.IsGM;
     }
     #endregion
 }

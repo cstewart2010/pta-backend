@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
-using System;
-using System.IO;
-using System.Linq;
+using PokemonTabletopAdventures.Models.Trainers;
+using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Extensions;
 
@@ -37,19 +35,21 @@ internal static class RequestExtensions
         IEncryptionService encryptionService,
         string accessToken,
         string sessionAuth,
-        UserModel user,
-        TrainerModel gameMaster)
+        User user,
+        Trainer gameMaster)
     {
         var isAdmin = user.SiteRole == UserRoleOnSite.SiteAdmin;
-        if ((gameMaster?.IsGM) != true && !isAdmin)
+        if ((gameMaster.IsGM) == true || isAdmin)
         {
             request.VerifyIdentity(user, encryptionService, accessToken, sessionAuth);
         }
+
+        throw new PtaUnauthorizedException($"User {gameMaster.TrainerId} is not a GM");
     }
 
     public static void VerifyIdentity(
         this HttpRequest request,
-        UserModel user,
+        User user,
         IEncryptionService encryptionService,
         string accessToken,
         string sessionAuth)
@@ -57,7 +57,7 @@ internal static class RequestExtensions
 #if !DEBUG
         if (user.ActivityToken != accessToken)
         {
-            throw new PtaUnauthorizedException(PtaExceptionParts.ExpiredTokenMessage);
+            throw new Exceptions.PtaUnauthorizedException(PtaExceptionParts.ExpiredTokenMessage);
         }
 
         encryptionService.ValidateToken(accessToken);

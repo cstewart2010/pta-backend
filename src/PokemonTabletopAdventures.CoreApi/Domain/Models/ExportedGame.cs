@@ -1,5 +1,8 @@
-﻿using PokemonTabletopAdventures.CoreApi.Services;
+﻿using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
+using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
+using PokemonTabletopAdventures.Models.Trainers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,12 +14,12 @@ internal class ExportedGame
     public ExportedGame() { }
 
     public static async Task<ExportedGame> ParseFromModel(
-        GameModel game,
+        GameDto game,
         ITrainerService trainerService,
         IPokemonService pokemonService)
     {
         var trainers = await trainerService.GetTrainersByGameId(game.GameId);
-        var gameSession = new GameModel
+        var gameSession = new GameDto
         {
             GameId = game.GameId,
             IsOnline = game.IsOnline,
@@ -25,7 +28,7 @@ internal class ExportedGame
             NPCs = game.NPCs,
             PasswordHash = game.PasswordHash
         };
-        var exportedTrainers = await Task.WhenAll(trainers.Select(async trainer => await ExportedTrainer.ParseFromModel(trainer, trainerService, pokemonService)));
+        var exportedTrainers = await Task.WhenAll(trainers.Select(async trainer => await ExportedTrainer.ParseFromModel(DtoHandler.ParseFromModel(trainer), trainerService, pokemonService)));
 
         return new ExportedGame
         {
@@ -34,6 +37,6 @@ internal class ExportedGame
         };
     }
 
-    public required GameModel GameSession { get; set; }
+    public required GameDto GameSession { get; set; }
     public required IEnumerable<ExportedTrainer> Trainers { get; set; }
 }

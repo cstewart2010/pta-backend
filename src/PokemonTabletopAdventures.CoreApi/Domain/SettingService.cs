@@ -1,16 +1,15 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Settings;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class SettingService : AbstractService<SettingModel>, ISettingService
+internal class SettingService(IShopService shopService) : AbstractService<SettingDto>(MongoCollection.Settings), ISettingService
 {
-    public SettingService() : base(MongoCollection.Settings) { }
+    private readonly IShopService _shopService = shopService;
 
     public async Task DeleteSetting(Guid id)
     {
@@ -28,38 +27,50 @@ internal class SettingService : AbstractService<SettingModel>, ISettingService
             PropertyNames.GameId);
     }
 
-    public async Task<SettingModel?> GetActiveSetting(Guid gameId)
+    public async Task<Setting?> GetActiveSetting(Guid gameId, bool isGM)
     {
-        return await Task.FromResult(Collection.Find(setting => setting.GameId == gameId && setting.IsActive).SingleOrDefault());
+        var dto = await Task.FromResult(Collection.Find(setting => setting.GameId == gameId && setting.IsActive).SingleOrDefault());
+        if (dto == null)
+        {
+            return null;
+        }
+
+        return await DtoHandler.ParseFromDto(dto, isGM, gameId, _shopService);
     }
 
-    public async Task<IEnumerable<SettingModel>> GetAllSettings(Guid gameId)
+    public async Task<IEnumerable<Setting>> GetAllSettings(Guid gameId)
     {
-        return await ThrowIfNull(
+        var dtos = await ThrowIfNull(
             gameId,
             id => Collection.Find(setting => setting.GameId == gameId && setting.IsActive).ToEnumerable(),
             PropertyNames.GameId);
+
+        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, true, gameId, _shopService)));
     }
 
-    public async Task<SettingModel> GetSetting(Guid settingId)
+    public async Task<Setting> GetSetting(Guid settingId, bool isGM)
     {
-        return await ThrowIfNull(
+        var dto = await ThrowIfNull(
             settingId,
             id => Collection.Find(setting => setting.SettingId == settingId && setting.IsActive).SingleOrDefault(),
             PropertyNames.SettingId);
+
+        return await DtoHandler.ParseFromDto(dto, isGM, dto.GameId, _shopService);
     }
 
-    public async Task PostSetting(SettingModel setting)
+    public async Task PostSetting(Setting setting)
     {
-        await PostDocument(setting);
+        var dto = DtoHandler.ParseFromModel(setting);
+        await PostDocument(dto);
     }
 
-    public async Task<SettingModel> UpdateSetting(SettingModel updatedSetting)
+    public async Task<Setting> UpdateSetting(Setting updatedSetting, bool isGM)
     {
+        var dto = DtoHandler.ParseFromModel(updatedSetting);
         await UpsertDocument(
-            Builders<SettingModel>.Filter.Eq(setting => setting.SettingId, updatedSetting.SettingId),
-            updatedSetting);
+            Builders<SettingDto>.Filter.Eq(setting => setting.SettingId, updatedSetting.SettingId),
+            dto);
 
-        return updatedSetting;
+        return await GetSetting(dto.SettingId, isGM);
     }
 }

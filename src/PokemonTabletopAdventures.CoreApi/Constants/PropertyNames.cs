@@ -31,4 +31,5 @@ public static class PropertyNames
     public const string MessageId = "MessageId";
     public const string UserId = "UserId";
     public const string Username = "Username";
+    public const string PasswordHash = "PasswordHash";
 }

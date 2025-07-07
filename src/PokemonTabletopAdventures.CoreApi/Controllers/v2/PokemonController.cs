@@ -1,20 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Games;
-using PokemonTabletopAdventures.CoreApi.DTOs.Pokedex;
-using PokemonTabletopAdventures.CoreApi.DTOs.Pokemons;
-using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using PokemonTabletopAdventures.Models.Games;
+using PokemonTabletopAdventures.Models.Pokedex;
+using PokemonTabletopAdventures.Models.Pokemons;
 using System.Net;
-using System.Reflection;
-using System.Threading.Tasks;
-using static MongoDB.Driver.WriteConcern;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -42,10 +34,19 @@ public class PokemonController(
     {
         await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
-        var pokemon = ParseFromModel(model);
-        return Ok(new RetrievePokemonResponse { Pokemon = [pokemon] });
+        return Ok(new RetrievePokemonResponse { Pokemon = [model] });
     }
 
+    [HttpGet("retrieve/trainer")]
+    [ProducesResponseType(typeof(PokemonDto), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
+    [ProducesResponseType(typeof(ProblemDetails), 401)]
+    public async Task<IActionResult> FindTrainerMon(
+        [FromHeader] RetrievePokemonRequest request)
+    {
+        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId);
+        return Ok(new RetrievePokemonResponse { Pokemon = [.. models] });
+    }
 
     [HttpPost("retrieve/npc")]
     [ProducesResponseType(typeof(RetrievePokemonResponse), 200)]
@@ -58,8 +59,7 @@ public class PokemonController(
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
         var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId);
-        var pokemon = models.Select(ParseFromModel).ToList();
-        return Ok(new RetrievePokemonResponse { Pokemon = pokemon });
+        return Ok(new RetrievePokemonResponse { Pokemon = [..models] });
     }
 
     [HttpPost("evolutions")]
@@ -79,7 +79,7 @@ public class PokemonController(
             throw new PtaUnauthorizedException(PtaExceptionParts.UnauthorizedPokemonUseMessage);
         }
         var models = await DexService.GetPossibleEvolutions(pokemon);
-		return Ok(new RetrievePokemonResponse { Models = models.ToList() });
+		return Ok(new RetrievePokemonResponse { Models = [.. models] });
     }
 
     [HttpPatch("trade")]
@@ -92,16 +92,19 @@ public class PokemonController(
         [FromBody] TradePokemonRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var game = await GameService.GetGame(request.GameId);
+        var game = await GameService.GetGame(request.GameId, true);
         var (leftPokemon, rightPokemon) = await GetTradePokemon(request.LeftPokemonId, request.RightPokemonId);
         await UpdatePokemonTrainerIds(leftPokemon, rightPokemon);
         var leftTrainer = await TrainerService.GetTrainerById(rightPokemon.TrainerId, request.GameId);
         var rightTrainer = await TrainerService.GetTrainerById(leftPokemon.TrainerId, request.GameId);
         var gm = await TrainerService.GetTrainerById(request.GameMasterId, request.GameId);
-        var tradeLog = new LogModel(
-            user: gm.TrainerName,
-            action: $"authorized a trade between {leftTrainer.TrainerName} and {rightTrainer.TrainerName}");
-        await GameService.UpdateGameLogs(game, tradeLog);
+        var tradeLog = new Log
+        {
+            User = gm.TrainerName,
+            Action = $"authorized a trade between {leftTrainer.TrainerName} and {rightTrainer.TrainerName}",
+            LogTimestamp = DateTimeOffset.Now
+        };
+        await GameService.UpdateGameLogs(game, true, tradeLog);
         await RefreshToken(request.GameMasterId);
         return Ok();
     }
@@ -119,8 +122,7 @@ public class PokemonController(
         var model = await BuildPokemon(request.TrainerId, request.GameId, request.Pokemon);
         await PokemonService.PostPokemon(model);
         await RefreshToken(request.GameMasterId);
-        var pokemon = ParseFromModel(model);
-        return Ok(new CapturePokemonResponse { Pokemon = pokemon });
+        return Ok(new CapturePokemonResponse { Pokemon = model });
     }
 
     [HttpPost("create/npc")]
@@ -134,8 +136,7 @@ public class PokemonController(
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
         var models = await AddNpcPokemon(request.Pokemon, request.TrainerId, request.GameId);
-        var pokemon = models.Select(ParseFromModel).ToList();
-        return Ok(new CreatePokemonResponse { Pokemon = pokemon });
+        return Ok(new CreatePokemonResponse { Pokemon = [.. models] });
     }
 
     [HttpPatch("update/hp")]
@@ -157,8 +158,7 @@ public class PokemonController(
 
         OutofRangeException.CheckValue(-model.PokemonStats.HP, model.PokemonStats.HP, request.HP);
         var updatedModel = await PokemonService.UpdatePokemonHP(request.PokemonId, request.HP);
-        var pokemon = ParseFromModel(updatedModel);
-        return Ok(new UpdatePokemonResponse { Pokemon = pokemon });
+        return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
     [HttpPatch("update/form")]
@@ -171,8 +171,8 @@ public class PokemonController(
         [FromBody] UpdatePokemonRequest request)
     {
         var form = request.Form!;
-        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
-        var game = await GameService.GetGame(request.GameId);
+        var isGm = await VerifyIdentity(accessToken, sessionAuth, request.TrainerId, request.GameId);
+        var game = await GameService.GetGame(request.GameId, isGm);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         if (!(trainer.TrainerId == model.TrainerId || trainer.IsGM))
@@ -183,7 +183,7 @@ public class PokemonController(
         form = form.Replace('_', '/');
         if (!model.AlternateForms.Contains(form))
         {
-            throw new PtaException($"Invalid form for {model.SpeciesName}", "Invalid Form", HttpStatusCode.BadRequest);
+            throw new PtaException($"Invalid form for {model.SpeciesName}", PtaExceptionParts.InvalidFormTitle, HttpStatusCode.BadRequest);
         }
 
         var result = await GetDifferentForm(model, form);
@@ -195,13 +195,15 @@ public class PokemonController(
         result.CanEvolve = model.CanEvolve;
         result.Pokeball = model.Pokeball;
         var updatedModel = await PokemonService.UpdatePokemon(result);
-        var pokemon = ParseFromModel(updatedModel);
-        var changedFormLog = new LogModel(
-            user: trainer.TrainerName,
-            action: $"changed their {model.Nickname} to its {form} form");
-        await GameService.UpdateGameLogs(game, changedFormLog);
+        var changedFormLog = new Log
+        {
+            User = trainer.TrainerName,
+            Action = $"changed their {model.Nickname} to its {form} form",
+            LogTimestamp = DateTimeOffset.Now
+        };
+        await GameService.UpdateGameLogs(game, isGm, changedFormLog);
         await RefreshToken(request.TrainerId);
-        return Ok(new UpdatePokemonResponse { Pokemon = pokemon });
+        return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
     [HttpPatch("canEvolve")]
@@ -214,17 +216,19 @@ public class PokemonController(
         [FromBody] UpdatePokemonRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var game = await GameService.GetGame(request.GameId);
+        var game = await GameService.GetGame(request.GameId, true);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         var trainer = await TrainerService.GetTrainerById(model.TrainerId, request.GameId);
         var updatedModel = await PokemonService.UpdatePokemonEvolvability(request.PokemonId, true);
-        var pokemon = ParseFromModel(updatedModel);
-        var evolutionLog = new LogModel(
-            user: trainer.TrainerName,
-            action: $"can now evolve their {model.Nickname}");
-        await GameService.UpdateGameLogs(game, evolutionLog);
+        var evolutionLog = new Log
+        {
+            User = trainer.TrainerName,
+            Action = $"can now evolve their {model.Nickname}",
+            LogTimestamp = DateTimeOffset.Now
+        };
+        await GameService.UpdateGameLogs(game, true, evolutionLog);
         await RefreshToken(request.GameMasterId);
-        return Ok(new UpdatePokemonResponse { Pokemon = pokemon });
+        return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
     [HttpPut("evolve")]
@@ -238,10 +242,10 @@ public class PokemonController(
     {
         if (request.EvolvePokemonData == null)
         {
-            throw new InvalidEvolutionException("EvolvePokemonData property was null");
+            throw new InvalidEvolutionException(PtaExceptionParts.NullDataMessage);
         }
-        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
-        var game = await GameService.GetGame(request.GameId);
+        var isGm = await VerifyIdentity(accessToken, sessionAuth, request.TrainerId, request.GameId);
+        var game = await GameService.GetGame(request.GameId, isGm);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         if (!(trainer.TrainerId == model.TrainerId || trainer.IsGM))
@@ -251,11 +255,13 @@ public class PokemonController(
         var evolvedForm = await GetEvolved(model, request.EvolvePokemonData);
 
         var updatedModel = await PokemonService.UpdatePokemon(evolvedForm);
-        var pokemon = ParseFromModel(updatedModel);
-        var evolutionLog = new LogModel(
-            user: trainer.TrainerName,
-            action: $"evolved their {model.Nickname} to an {evolvedForm.SpeciesName}");
-        await GameService.UpdateGameLogs(game, evolutionLog);
+        var evolutionLog = new Log
+        {
+            User = trainer.TrainerName,
+            Action = "",
+            LogTimestamp = DateTimeOffset.UtcNow
+        };
+        await GameService.UpdateGameLogs(game, isGm, evolutionLog);
         var dexItem = await PokedexService.GetPokedexItem(request.TrainerId, request.GameId, evolvedForm.DexNo);
         if (dexItem != null)
         {
@@ -269,9 +275,10 @@ public class PokemonController(
             await PokedexService.UpdateDexItemIsCaught(request.TrainerId, request.GameId, evolvedForm.DexNo);
         }
         await RefreshToken(request.TrainerId);
-        return Ok(new UpdatePokemonResponse { Pokemon = pokemon });
+        return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
+    // todo: make a pokedex controller
     [HttpPatch("saw")]
     [ProducesResponseType(typeof(UpdatePokedexResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -295,11 +302,9 @@ public class PokemonController(
             await AddDexItem(request.TrainerId, request.GameId, item.DexNo, isSeen: true);
         }
         var pokedexModel = await PokedexService.GetTrainerPokeDex(request.TrainerId, request.GameId);
-        var pokedex = pokedexModel.Select(ParseFromModel).OrderBy(item => item.DexNo);
-        return Ok(new UpdatePokedexResponse { PokedexItems = [.. pokedex] });
+        return Ok(new UpdatePokedexResponse { PokedexItems = [.. pokedexModel] });
     }
 
-    // todo: make a pokedex controller
     [HttpPatch("caught")]
     [ProducesResponseType(typeof(UpdatePokedexResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -323,8 +328,7 @@ public class PokemonController(
             await AddDexItem(request.TrainerId, request.GameId, item.DexNo, isCaught: true);
         }
         var pokedexModel = await PokedexService.GetTrainerPokeDex(request.TrainerId, request.GameId);
-        var pokedex = pokedexModel.Select(ParseFromModel).OrderBy(item => item.DexNo);
-        return Ok(new UpdatePokedexResponse { PokedexItems = [.. pokedex] });
+        return Ok(new UpdatePokedexResponse { PokedexItems = [.. pokedexModel] });
     }
 
     [HttpDelete("delete")]
@@ -343,7 +347,7 @@ public class PokemonController(
         return Ok();
     }
 
-    private async Task<PokemonModel> GetDifferentForm(PokemonModel pokemon, string form)
+    private async Task<Pokemon> GetDifferentForm(Pokemon pokemon, string form)
     {
         return await DexService.GetNewPokemon(
             pokemon.SpeciesName,
@@ -369,7 +373,7 @@ public class PokemonController(
             isCaught);
     }
 
-    private async Task<IEnumerable<PokemonModel>> AddNpcPokemon(IEnumerable<NewPokemon> pokemon, Guid npcId, Guid gameId)
+    private async Task<IEnumerable<Pokemon>> AddNpcPokemon(IEnumerable<NewPokemon> pokemon, Guid npcId, Guid gameId)
     {
         var models = await Task.WhenAll(pokemon
             .Where(data => data != null)
@@ -389,8 +393,8 @@ public class PokemonController(
     }
 
     private async Task UpdatePokemonTrainerIds(
-        PokemonModel leftPokemon,
-        PokemonModel rightPokemon)
+        Pokemon leftPokemon,
+        Pokemon rightPokemon)
     {
 
         await PokemonService.UpdatePokemonTrainerId
@@ -418,7 +422,7 @@ public class PokemonController(
         );
     }
 
-    private async Task<(PokemonModel LeftPokemon, PokemonModel RightPokemon)> GetTradePokemon(
+    private async Task<(Pokemon LeftPokemon, Pokemon RightPokemon)> GetTradePokemon(
         Guid leftPokemonId,
         Guid rightPokemonId)
     {
@@ -432,8 +436,8 @@ public class PokemonController(
         return (leftPokemon, rightPokemon);
     }
 
-    private async Task<PokemonModel> GetEvolved(
-        PokemonModel currentForm,
+    private async Task<Pokemon> GetEvolved(
+        Pokemon currentForm,
         EvolvePokemonData request)
     {
         var total = request.KeptMoves.Count() + request.NewMoves.Count();
@@ -442,7 +446,7 @@ public class PokemonController(
         var moveComparer = currentForm.Moves.Select(move => move.ToLower());
         if (!request.KeptMoves.All(move => moveComparer.Contains(move.ToLower())))
         {
-            throw new Exceptions.PtaException($"{currentForm.Nickname} doesn't contain one of {string.Join(", ", request.KeptMoves)}", "Invalid Request", HttpStatusCode.BadRequest);
+            throw new InvalidEvolutionException($"{currentForm.Nickname} doesn't contain one of {string.Join(", ", request.KeptMoves)}");
         }
 
         var evolvedForm = await DexService.GetEvolved(currentForm, request.KeptMoves, request.NextForm, request.NewMoves);

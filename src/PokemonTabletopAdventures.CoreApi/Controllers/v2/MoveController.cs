@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Indicies;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Indicies;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -22,14 +20,14 @@ public class MoveController(IDexService dexService, ILogger<MoveController> logg
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<MoveModel>(Type, offset, limit);
+        return await GetItems<MoveDto>(Type, offset, limit);
     }
 
     [HttpGet("{name}", Name = nameof(GetMove))]
-    [ProducesResponseType(typeof(MoveModel), 200)]
+    [ProducesResponseType(typeof(MoveDto), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetMove(string name)
     {
-        return await GetItem<MoveModel>(Type, name);
+        return await GetItem<MoveDto>(Type, name);
     }
 }

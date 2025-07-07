@@ -1,15 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Shops;
-using PokemonTabletopAdventures.CoreApi.DTOs.Trainers;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Shops;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -31,159 +24,152 @@ public class ShopController(
 	private readonly IShopService _shopService = shopService;
     private readonly ISettingService _settingService = settingService;
 
-    [HttpGet("{gameId}/{gameMasterId}/{shopId}/gm")]
-    [ProducesResponseType(typeof(ShopModel), 200)]
+    [HttpPost("gm")]
+    [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetShopGM(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid shopId)
+        [FromBody] RetrieveShopRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var shop = await _shopService.GetShopById(shopId, gameId);
-        return Ok(shop);
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var shop = await _shopService.GetShopById(request.ShopId, request.GameId);
+        return Ok(new RetrieveShopResponse { Shops = [shop] });
     }
 
-    [HttpGet("{gameId}/{trainerId}/{shopId}/trainer")]
-    [ProducesResponseType(typeof(ShopModel), 200)]
+    [HttpPost("trainer")]
+    [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetShopTrainer(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid trainerId,
-        Guid shopId)
+        [FromBody] RetrieveShopRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
-        var shop = await _shopService.GetShopById(shopId, gameId);
-        if (shop?.IsActive != true)
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        var shop = await _shopService.GetShopById(request.ShopId, request.GameId);
+        if (shop.IsActive != true)
         {
-            return NotFound(shopId);
+            throw new UnknownEntityException<Shop>(PropertyNames.ShopId, request.ShopId);
         }
 
-        return Ok(shop);
+        return Ok(new RetrieveShopResponse { Shops = [shop] });
     }
 
-    [HttpGet("{gameId}/{gameMasterId}")]
-    [ProducesResponseType(typeof(IEnumerable<ShopModel>), 200)]
+    [HttpPost("all")]
+    [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetShops(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] RetrieveShopRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var shops = await _shopService.GetShopsByGameId(gameId);
-        return Ok(shops);
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var shops = await _shopService.GetShopsByGameId(request.GameId);
+        return Ok(new RetrieveShopResponse { Shops = [..shops]});
     }
 
-    [HttpGet("{gameId}/{gameMasterId}/{settingId}/setting/gm")]
-    [ProducesResponseType(typeof(IEnumerable<ShopModel>), 200)]
+    [HttpPost("setting/gm")]
+    [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetShopsBySettingGM(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid settingId)
+        [FromBody] RetrieveShopRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var setting = await _settingService.GetSetting(settingId);
-        if (setting?.GameId != gameId)
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        var setting = await _settingService.GetSetting(request.SettingId, true);
+        if (setting.GameId != request.GameId)
         {
-            throw new InvalidSettingException($"The request setting {settingId} is associated with game {gameId}");
+            throw new InvalidSettingException($"The request setting {request.SettingId} is associated with game {request.GameId}");
         }
 
         var shops = await _shopService.GetShopsBySetting(setting);
-        return Ok(shops);
+        return Ok(new RetrieveShopResponse { Shops = [.. shops] });
     }
 
-    [HttpGet("{gameId}/{gameMasterId}/{settingId}/setting/trainer")]
+    [HttpPost("setting/trainer")]
+    [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
+    [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetShopsBySettingTrainer(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid settingId)
+        [FromBody] RetrieveShopRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var setting = await _settingService.GetSetting(settingId);
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        var setting = await _settingService.GetSetting(request.SettingId, true);
         var shops = await _shopService.GetShopsBySetting(setting);
-        return Ok(shops.Where(shop => shop.IsActive));
+        return Ok(new RetrieveShopResponse { Shops = [.. shops.Where(shop => shop.IsActive)] });
     }
 
-    [HttpPost("{gameId}/{gameMasterId}")]
-    [ProducesResponseType(typeof(ShopModel), 200)]
+    [HttpPost("create")]
+    [ProducesResponseType(typeof(CreateShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CreateShop(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] ShopModel request,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] CreateShopRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        request.GameId = gameId;
-        request.ShopId = Guid.NewGuid();
-        await _shopService.PostShop(request);
-        return Ok(request);
+        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        foreach (var shop in request.Shops)
+        {
+            shop.GameId = request.GameId;
+            shop.ShopId = Guid.NewGuid();
+            await _shopService.PostShop(shop);
+        }
+        return Ok(new CreateShopResponse { Shops = request.Shops });
     }
 
-    [HttpPut("{gameId}/{gameMasterId}/{shopId}/update")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("update")]
+    [ProducesResponseType(typeof(UpdateShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> UpdateShop(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] ShopModel request,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid shopId)
+        [FromBody] UpdateShopRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var shop = await _shopService.GetShopById(shopId, gameId);
-        shop.Name = request.Name;
-        shop.Inventory = request.Inventory;
-        shop.IsActive = request.IsActive;
-        await _shopService.UpdateShop(shop);
-
-        return Ok();
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        foreach (var requestShop in request.Shops)
+        {
+            var shop = await _shopService.GetShopById(requestShop.ShopId, request.GameId);
+            shop.Name = requestShop.Name ?? shop.Name;
+            shop.Inventory = requestShop.Inventory ?? shop.Inventory;
+            shop.IsActive = requestShop.IsActive;
+            await _shopService.UpdateShop(shop);
+        }
+        var shops = await _shopService.GetShopsByGameId(request.GameId);
+        return Ok(new UpdateShopResponse { Shops = [..shops] });
     }
 
-    [HttpPut("{gameId}/{trainerId}/{shopId}/purchase")]
-    [ProducesResponseType(typeof(PutShopResponse), 200)]
+    [HttpPut("purchase")]
+    [ProducesResponseType(typeof(UpdateShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> PurchaseFromShop(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] ICollection<ItemModel> items,
-        Guid gameId,
-        Guid trainerId,
-        Guid shopId)
+        [FromBody] UpdateShopRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, trainerId);
-        var shop = await _shopService.GetShopById(shopId, gameId);
-        if (shop?.IsActive != true)
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        var requestShop = request.Shops.SingleOrDefault() ?? throw new InvalidSettingException(PtaExceptionParts.TooManyShopsMessage);
+        var shop = await _shopService.GetShopById(requestShop.ShopId, request.GameId);
+        if (shop.IsActive != true)
         {
-            throw new InvalidShopException($"No active shop found with id: {shopId}");
+            throw new InvalidShopException($"No active shop found with id: {requestShop.ShopId}");
         }
-        var game = await GameService.GetGame(gameId);
-        var trainer = await TrainerService.GetTrainerById(trainerId, gameId);
-        var (validWares, cost) = GetValidWares(shop, items);
+        var game = await GameService.GetGame(shop.GameId, false);
+        var trainer = await TrainerService.GetTrainerById(request.UserId, shop.GameId);
+        var (validWares, cost) = GetValidWares(shop, request.Items);
 
         if (cost > trainer.Money)
         {
-            throw new InvalidShopException("Not enough money to purchase all items on list");
+            throw new InvalidShopException(PtaExceptionParts.BrokeNeighborMessage);
         }
         foreach (var ware in validWares.Where(ware => shop.Inventory[ware.Name].Quantity != -1))
         {
@@ -193,46 +179,42 @@ public class ShopController(
 
         trainer.Money -= cost;
         var logs = await AddItemsToTrainer(trainer, validWares);
-        await GameService.UpdateGameLogs(game, [.. logs]);
-        return Ok(new PutShopResponse
+        await GameService.UpdateGameLogs(game, false, [.. logs]);
+        return Ok(new UpdateShopResponse
         {
-            Trainer = await ParseFromModel(trainer),
-            Shop = shop
+            Trainer = trainer
         });
     }
 
-    [HttpDelete("{gameId}/{gameMasterId}/{shopId}")]
+    [HttpDelete("delete")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<ActionResult> DeleteShop(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid shopId)
+        [FromBody] DeleteShopRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        await _shopService.DeleteShop(shopId, gameId);
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        await _shopService.DeleteShop(request.ShopId, request.GameId);
         return Ok();
     }
 
-    [HttpDelete("{gameId}/{gameMasterId}")]
-    [ProducesResponseType(typeof(PutShopResponse), 200)]
+    [HttpDelete("delete/all")]
+    [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<ActionResult> DeleteShopsByGameId(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromBody] DeleteShopRequest request)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        await _shopService.DeleteShopByGameId(gameId);
+        await IsUserGM(request.UserId, request.GameId, accessToken, sessionAuth);
+        await _shopService.DeleteShopByGameId(request.GameId);
         return Ok();
     }
 
-    private static (IEnumerable<ItemModel> ValidWares, int Cost) GetValidWares(ShopModel shop, ICollection<ItemModel> itemList)
+    private static (IEnumerable<Item> ValidWares, int Cost) GetValidWares(Shop shop, ICollection<Item> itemList)
     {
         var validWares = itemList.Where(item => CheckWare(item, shop));
         var cost = validWares.Aggregate(0, (currentCost, nextWare) =>
@@ -243,7 +225,7 @@ public class ShopController(
         return (validWares, cost);
     }
 
-    private static bool CheckWare(ItemModel item, ShopModel shop)
+    private static bool CheckWare(Item item, Shop shop)
     {
         var ware = shop.Inventory.FirstOrDefault(ware => item.Name == ware.Key && item.Type == ware.Value.Type);
         return !(ware.Key == null || item.Amount <= 0 || ware.Value.Quantity != -1 && item.Amount > ware.Value.Quantity);

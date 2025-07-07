@@ -1,15 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs;
-using PokemonTabletopAdventures.CoreApi.DTOs.Users;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -30,266 +23,219 @@ public class UserController(
     private readonly IUserMessageThreadService _userMessageThreadService = userMessageThreadService;
     private readonly IEncryptionService _encryptionService = encryptionService;
 
-    [HttpGet("{userId}")]
+    [HttpPost("retrieve/name")]
     [ProducesResponseType(typeof(string), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
-    public async Task<IActionResult> GetUsername(Guid userId)
+    public async Task<IActionResult> GetUsername([FromBody] RetrieveUserRequest request)
     {
-        var user = await UserService.GetUserById(userId);
-        return Ok(user.Username);
+        var user = await UserService.GetUserById(request.UserId);
+        user.Games.Clear();
+        user.Messages.Clear();
+        return Ok(new RetrieveUserResponse { Users = [user] });
     }
 
-    [HttpGet("{adminId}/admin/allUsers")]
+    [HttpPost("retrieve/users")]
     [ProducesResponseType(typeof(IEnumerable<User>), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetUsers(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid adminId,
-        [FromQuery] int offset,
-        [FromQuery] int limit)
+        [FromBody] RetrieveUserRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, adminId);
-        if (!await IsUserAdmin(adminId))
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        if (!await IsUserAdmin(request.UserId))
         {
             return Unauthorized();
         }
 
-        var users = await UserService.GetUsers(offset, limit);
-        return Ok(users.Select(user => new User(user)));
+        var users = await UserService.GetUsers(request.Offset, request.Limit);
+        return Ok(new RetrieveUserResponse { Users = [.. users] });
     }
 
-    [HttpGet("{adminId}/{messageId}/admin/message")]
-    [ProducesResponseType(typeof(UserMessageThreadModel), 200)]
+    [HttpGet("message/admin")]
+    [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ForceGetMessage(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid adminId,
-        Guid messageId)
+        [FromBody] RetrieveThreadRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, adminId);
-        if (!await IsUserAdmin(adminId))
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        if (!await IsUserAdmin(request.UserId))
         {
             return Unauthorized();
         }
 
-        var message = await _userMessageThreadService.GetMessageById(messageId);
+        var message = await _userMessageThreadService.GetMessageById(request.MessageId);
         return Ok(message);
     }
 
-    [HttpGet("{userId}/{messageId}")]
-    [ProducesResponseType(typeof(UserMessageThreadModel), 200)]
+    [HttpGet("message")]
+    [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetMessage(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid userId,
-        Guid messageId)
+        [FromBody] RetrieveThreadRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
-        var user = await UserService.GetUserById(userId);
-        if (!user.Messages.Contains(messageId))
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        var user = await UserService.GetUserById(request.UserId);
+        if (!user.Messages.Contains(request.MessageId))
         {
             return Conflict();
         }
 
-        var message = await _userMessageThreadService.GetMessageById(messageId);
+        var message = await _userMessageThreadService.GetMessageById(request.MessageId);
         return Ok(message);
     }
 
-    [HttpPost]
-    [ProducesResponseType(typeof(FoundUserResponse), 200)]
+    [HttpPost("user")]
+    [ProducesResponseType(typeof(CreateUserResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CreateNewUser(
-        [FromBody] PutLoginRequest request)
+        [FromBody] CreateuUserRequest request)
     {
         var passHash = await _encryptionService.HashSecret(request.Password);
-        var user = new UserModel
+        var user = new User
         {
             UserId = Guid.NewGuid(),
             Username = request.Username,
             SiteRole = UserRoleOnSite.Active,
-            PasswordHash = passHash,
-            DateCreated = DateTimeOffset.Now
+            DateCreated = DateTimeOffset.Now,
+            Games = [],
+            Messages = []
         };
-        await UserService.PostUser(user);
+        await UserService.PostUser(user, passHash);
         await AssignAuthAndToken(user.UserId);
-        return Ok(new FoundUserResponse(user));
+        return Ok(new CreateUserResponse { User = user});
     }
 
-    [HttpPost("{userId}/{recipientId}/sendMessage")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPost("message")]
+    [ProducesResponseType(typeof(SendMessageResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> SendMessageAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] PutMessageRequest request,
-        Guid userId,
-        Guid recipientId)
+        [FromBody] SendMessageRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
-        var user = await UserService.GetUserById(userId);
-        var recipient = await UserService.GetUserById(recipientId);
-        await AddNewThreadToUsers(user, recipient, request.MessageContent);
-        await RefreshToken(userId);
-        return Ok();
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        var user = await UserService.GetUserById(request.UserId);
+        var recipient = await UserService.GetUserById(request.RecipientId);
+        var threadId = await AddNewThreadToUsers(user, recipient, request.MessageContent);
+        await RefreshToken(request.UserId);
+        var thread = await _userMessageThreadService.GetMessageById(threadId);
+        return Ok(new SendMessageResponse { MessageThread = thread });
     }
 
-    [HttpPut("{userId}/{messageId}/replyMessage")]
-    [ProducesResponseType(typeof(void), 200)]
+    [HttpPut("reply")]
+    [ProducesResponseType(typeof(SendMessageResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ReplyMessageAsync(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        [FromBody] PutMessageRequest request,
-        Guid userId,
-        Guid messageId)
+        [FromBody] SendMessageRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
-        var user = await UserService.GetUserById(userId);
-        var thread = await _userMessageThreadService.GetMessageById(messageId);
-        if (!user.Messages.Contains(messageId))
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        var user = await UserService.GetUserById(request.UserId);
+        if (!user.Messages.Contains(request.MessageId))
         {
             return Conflict();
         }
 
+        var thread = await _userMessageThreadService.GetMessageById(request.MessageId);
         await AddNewReplyToThread(user, thread, request.MessageContent);
-        await RefreshToken(userId);
-        return Ok();
-    }
-
-    [HttpPut("{gameId}/{userId}/refresh")]
-    [ProducesResponseType(typeof(FoundGameResponse), 200)]
-    [ProducesResponseType(typeof(FoundTrainerResponse), 200)]
-    [ProducesResponseType(typeof(ProblemDetails), 401)]
-    public async Task<IActionResult> RefreshInGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
-        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid userId,
-        Guid gameId,
-        [FromQuery] bool isGM)
-    {
-        if (isGM)
-        {
-            return await GetUpdatedGM(accessToken, sessionAuth, userId, gameId);
-        }
-
-        return await GetUpdatedTrainer(accessToken, sessionAuth, userId, gameId);
+        var updatedThread = await _userMessageThreadService.GetMessageById(request.MessageId);
+        await RefreshToken(request.UserId);
+        return Ok(new SendMessageResponse { MessageThread = updatedThread });
     }
 
     [HttpPatch("login")]
-    [ProducesResponseType(typeof(FoundUserResponse), 200)]
+    [ProducesResponseType(typeof(LoginResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> Login(
-        [FromBody] PutLoginRequest request)
+        [FromBody] LoginRequest request)
     {
         await IsUserAuthenticated(request);
         var user = await UserService.GetUserByUsername(request.Username);
         await UserService.UpdateUserOnlineStatus(user.UserId, true);
         await AssignAuthAndToken(user.UserId);
-        return Ok(new FoundUserResponse(user));
+        return Ok(new LoginResponse { User = user });
     }
 
-    [HttpPut("{userId}/logout")]
+    [HttpPut("logout")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> Logout(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid userId)
+        [FromBody] LoginRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
-        await UserService.UpdateUserOnlineStatus(userId, false);
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        await UserService.UpdateUserOnlineStatus(request.UserId, false);
         return Ok();
     }
 
-    [HttpDelete("{userId}")]
+    [HttpDelete("delete")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> DeleteUser(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid userId)
+        [FromBody] DeleteUserRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
-        if (await IsUserAdmin(userId))
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        if (await IsUserAdmin(request.UserId))
         {
             return BadRequest();
         }
 
-        await UserService.DeleteUser(userId);
+        await UserService.DeleteUser(request.UserId);
         return Ok();
     }
 
-    [HttpDelete("{adminId}/{userId}/admin")]
+    [HttpDelete("delete/admin")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ForceDeleteUser(
         [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid adminId,
-        Guid userId)
+        [FromBody] DeleteUserRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, adminId);
-        if (!await IsUserAdmin(adminId))
+        await VerifyIdentity(accessToken, sessionAuth, request.AdminId);
+        if (!await IsUserAdmin(request.AdminId))
         {
             return Unauthorized();
         }
 
-        if (adminId == userId)
+        if (request.AdminId == request.UserId)
         {
             return BadRequest();
         }
-        await UserService.DeleteUser(userId);
-        await RefreshToken(adminId);
+        await UserService.DeleteUser(request.UserId);
+        await RefreshToken(request.AdminId);
         return Ok();
     }
 
-    private async Task<OkObjectResult> GetUpdatedTrainer(
-        string accessToken,
-        string sessionAuth,
-        Guid userId,
-        Guid gameId)
+    private async Task<Guid> AddNewThreadToUsers(User sender, User recipient, string messageContent)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
-        await RefreshToken(userId);
-        var user = await UserService.GetUserById(userId);
-        var trainer = await TrainerService.GetTrainerById(userId, gameId);
-        return Ok(await FoundTrainerResponse.ParseFromModel(trainer, user, PokemonService, PokedexService, GameService));
-    }
-
-    private async Task<OkObjectResult> GetUpdatedGM(
-        string accessToken,
-        string sessionAuth,
-        Guid userId,
-        Guid gameId)
-    {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
-        await RefreshToken(userId);
-        var user = await UserService.GetUserById(userId);
-        return Ok(await GameMasterResponse.ParseFromModel(user, gameId, TrainerService, PokemonService, PokedexService));
-    }
-
-    private async Task AddNewThreadToUsers(UserModel sender, UserModel recipient, string messageContent)
-    {
-        var message = new UserMessageModel(sender.UserId, messageContent);
-        var thread = new UserMessageThreadModel
+        var message = new UserMessage { Message = messageContent, User = sender.UserId, Timestamp = DateTimeOffset.Now};
+        var thread = new UserMessageThread
         {
             MessageId = Guid.NewGuid(),
             Messages = [message]
         };
         await _userMessageThreadService.PostThread(thread);
-        sender.Messages = sender.Messages.Append(thread.MessageId);
-        recipient.Messages = recipient.Messages.Append(thread.MessageId);
+        sender.Messages.Add(thread.MessageId);
+        recipient.Messages.Add(thread.MessageId);
         await UserService.UpdateUser(sender);
         await UserService.UpdateUser(recipient);
+        return thread.MessageId;
     }
 
-    private async Task AddNewReplyToThread(UserModel sender, UserMessageThreadModel thread, string messageContent)
+    private async Task AddNewReplyToThread(User sender, UserMessageThread thread, string messageContent)
     {
-        var message = new UserMessageModel(sender.UserId, messageContent);
-        thread.Messages = thread.Messages.Append(message);
+        var message = new UserMessage { Message = messageContent, User = sender.UserId, Timestamp = DateTimeOffset.Now };
+        thread.Messages.Add(message);
         await _userMessageThreadService.UpdateThread(thread);
     }
 

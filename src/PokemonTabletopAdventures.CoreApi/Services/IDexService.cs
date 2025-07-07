@@ -1,9 +1,7 @@
-﻿using PokemonTabletopAdventures.CoreApi.DTOs.Indicies;
-using PokemonTabletopAdventures.Models.Interfaces;
-using PokemonTabletopAdventures.Models;
+﻿using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models.Enums;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Indicies;
+using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Services;
 
@@ -40,8 +38,8 @@ public interface IDexService
     /// <param name="keptMoves">The moves you wish to keep</param>
     /// <param name="evolvedName">The name of the evolved form</param>
     /// <param name="newMoves">The moves you wish to add</param>
-    public Task<PokemonModel> GetEvolved(
-        PokemonModel pokemon,
+    public Task<Pokemon> GetEvolved(
+        Pokemon pokemon,
         IEnumerable<string> keptMoves,
         string evolvedName,
         IEnumerable<string> newMoves);
@@ -55,18 +53,18 @@ public interface IDexService
     /// Returns a collection of possible evolutions
     /// </summary>
     /// <param name="pokemon"></param>
-    public Task<IEnumerable<BasePokemonModel>> GetPossibleEvolutions(PokemonModel pokemon);
+    public Task<IEnumerable<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon);
 
     /// <summary>
-    /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
+    /// Builds a <see cref="Pokemon"/> using information from the <see cref="PokemonForm"/>
     /// </summary>
     /// <param name="name">The pokemon's species name</param>
     /// <param name="nickname">The pokemon's nickname, if applicable</param>
     /// <param name="form">The pokemon's form</param>
-    public Task<PokemonModel> GetNewPokemon(string name, string nickname, string form);
+    public Task<Pokemon> GetNewPokemon(string name, string nickname, string form);
 
     /// <summary>
-    /// Builds a <see cref="PokemonModel"/> using information from the <see cref="BasePokemonModel"/>
+    /// Builds a <see cref="Pokemon"/> using information from the <see cref="PokemonForm"/>
     /// </summary>
     /// <param name="name">The pokemon's species name</param>
     /// <param name="nature">The nature to give the pokemon</param>
@@ -74,7 +72,7 @@ public interface IDexService
     /// <param name="status">The pokemon's status</param>
     /// <param name="nickname">The pokemon's nickname, if applicable</param>
     /// <param name="form">The pokemon's form</param>
-    public Task<PokemonModel> GetNewPokemon(
+    public Task<Pokemon> GetNewPokemon(
         string name,
         Nature nature,
         Gender gender,
@@ -95,5 +93,5 @@ public interface IDexService
     /// Adds a collection of dex entry to a specific dex collection
     /// </summary>
     /// <param name="documents">The documents to add to collection</param>
-    public Task PostPokedexEntries(IEnumerable<BasePokemonModel> documents);
+    public Task PostPokedexEntries(IEnumerable<PokemonForm> documents);
 }

@@ -1,6 +1,4 @@
-﻿using PokemonTabletopAdventures.Models;
-
-namespace PokemonTabletopAdventures.Models.Interfaces;
+﻿namespace PokemonTabletopAdventures.Models.Interfaces;
 
 /// <summary>
 /// Provides a collection of properties used for Person types
@@ -20,7 +18,7 @@ public interface IPerson
     /// <summary>
     /// The trainers player stats
     /// </summary>
-    public StatsModel TrainerStats { get; set; }
+    public Stats TrainerStats { get; set; }
 
     /// <summary>
     /// Collection of Trainer Feats

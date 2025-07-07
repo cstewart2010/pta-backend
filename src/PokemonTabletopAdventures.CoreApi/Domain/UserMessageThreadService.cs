@@ -1,35 +1,40 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Users;
+using System.Threading;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class UserMessageThreadService : AbstractService<UserMessageThreadModel>, IUserMessageThreadService
+internal class UserMessageThreadService : AbstractService<UserMessageThreadDto>, IUserMessageThreadService
 {
     public UserMessageThreadService() : base(MongoCollection.UserMessageThreads) { }
 
-    public async Task<UserMessageThreadModel> GetMessageById(Guid id)
+    public async Task<UserMessageThread> GetMessageById(Guid id)
     {
-        return await ThrowIfNull(
+        var dto = await ThrowIfNull(
             id,
             id => Collection.Find(message => message.MessageId == id).SingleOrDefault(),
             PropertyNames.MessageId);
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task PostThread(UserMessageThreadModel thread)
+    public async Task PostThread(UserMessageThread thread)
     {
-        await PostDocument(thread);
+        var dto = DtoHandler.ParseFromModel(thread);
+        await PostDocument(dto);
     }
 
-    public async Task<UserMessageThreadModel> UpdateThread(UserMessageThreadModel updatedThread)
+    public async Task<UserMessageThread> UpdateThread(UserMessageThread updatedThread)
     {
+        var dto = DtoHandler.ParseFromModel(updatedThread);
         await UpsertDocument(
-            Builders<UserMessageThreadModel>.Filter.Eq(thread => thread.MessageId, updatedThread.MessageId),
-            updatedThread);
+            Builders<UserMessageThreadDto>.Filter.Eq(thread => thread.MessageId, updatedThread.MessageId),
+            dto);
 
-        return updatedThread;
+        return await GetMessageById(updatedThread.MessageId);
     }
 }

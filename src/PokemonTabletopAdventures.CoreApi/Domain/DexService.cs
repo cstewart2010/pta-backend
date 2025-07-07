@@ -1,21 +1,19 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
-using PokemonTabletopAdventures.CoreApi.DTOs.Indicies;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Indicies;
+using PokemonTabletopAdventures.Models.Interfaces;
+using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class DexService : AbstractService<BasePokemonModel>, IDexService
+internal class DexService : AbstractService<BasePokemonDto>, IDexService
 {
     public DexService() : base(MongoCollection.BasePokemon) { }
 
@@ -32,7 +30,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
         return item == null ? throw new ItemNotFoundException(name) : await Task.FromResult(new IndexResponse<TDocument> { Data = item });
     }
 
-    public async Task<PokemonModel> GetNewPokemon(string name, string nickname, string form)
+    public async Task<Pokemon> GetNewPokemon(string name, string nickname, string form)
     {
         var random = new Random();
         var nature = (Nature)random.Next(1, 21);
@@ -41,7 +39,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
         return await GetNewPokemon(name, nature, gender, status, nickname, form);
     }
 
-    public async Task<PokemonModel> GetNewPokemon(string name, Nature nature, Gender gender, Status status, string? nickname, string form)
+    public async Task<Pokemon> GetNewPokemon(string name, Nature nature, Gender gender, Status status, string? nickname, string form)
     {
         var entry = await GetPokedexEntry(name, form);
         return await Task.FromResult(GetPokemonFromBase(entry.Pokemon, nature, gender, status, nickname, entry.AlternateForms));
@@ -55,15 +53,16 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
             .Select(document => document.Form);
         return await Task.FromResult(new PokemonAndForms
         {
-            Pokemon = model,
+            Pokemon = DtoHandler.ParseFromDto(model),
             AlternateForms = [.. alternateForms]
         });
     }
 
-    public async Task<IEnumerable<BasePokemonModel>> GetPossibleEvolutions(PokemonModel pokemon)
+    public async Task<IEnumerable<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon)
     {
         var allEvolutions = Collection.Find(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable();
-        return await Task.FromResult(allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)));
+        var forms = allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(DtoHandler.ParseFromDto);
+        return await Task.FromResult(forms);
     }
 
     public async Task<IndexCollectionResponse> GetIndexCollectionResponse<TDocument>(
@@ -76,9 +75,11 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
         var count = documents.Count();
         var results = documents.Select(x => x.Name);
 
-        return await Task.FromResult(new IndexCollectionResponse(
-            count,
-            results));
+        return await Task.FromResult(new IndexCollectionResponse
+        {
+            Count = count,
+            Results = results
+        });
     }
 
     public async Task PostDexEntries<TDocument>(string collectionName, IEnumerable<TDocument> documents) where TDocument : IDexDocument
@@ -97,7 +98,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
         await Task.CompletedTask;
     }
 
-    public async Task PostPokedexEntries(IEnumerable<BasePokemonModel> documents)
+    public async Task PostPokedexEntries(IEnumerable<PokemonForm> documents)
     {
         foreach (var document in documents)
         {
@@ -106,13 +107,18 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
                 continue;
             }
 
-            AddDexEntry(() => Collection.InsertOne(document));
+            var dto = DtoHandler.ParseFromModel(document);
+            AddDexEntry(() => Collection.InsertOne(dto));
         }
 
         await Task.CompletedTask;
     }
 
-    public async Task<PokemonModel> GetEvolved(PokemonModel pokemon, IEnumerable<string> keptMoves, string evolvedName, IEnumerable<string> newMoves)
+    public async Task<Pokemon> GetEvolved(
+        Pokemon pokemon,
+        IEnumerable<string> keptMoves,
+        string evolvedName,
+        IEnumerable<string> newMoves)
     {
         var forms = await GetPokedexEntry(evolvedName, pokemon.Form);
         var basePokemon = forms.Pokemon;
@@ -128,7 +134,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
             throw new InvalidEvolutionException($"{basePokemon.Name} cannot learn {string.Join(", ", invalidMoves)}");
         }
 
-        return await Task.FromResult(new PokemonModel
+        return await Task.FromResult(new Pokemon
         {
             PokemonId = pokemon.PokemonId,
             DexNo = basePokemon.DexNo,
@@ -161,12 +167,16 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
             ShinyPortrait = basePokemon.ShinyPortrait,
             TrainerId = pokemon.TrainerId,
             OriginalTrainerId = pokemon.OriginalTrainerId,
-            Form = pokemon.Form
+            Form = pokemon.Form,
+            CanEvolve = false,
+            CurrentHP = pokemon.CurrentHP,
+            GameId = pokemon.GameId,
+            Pokeball = pokemon.Pokeball
         });
     }
 
-    private static PokemonModel GetPokemonFromBase(
-        BasePokemonModel basePokemon,
+    private static Pokemon GetPokemonFromBase(
+        PokemonForm basePokemon,
         Nature nature,
         Gender gender,
         Status status,
@@ -178,7 +188,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
             : nickname;
 
         var modifier = nature.GetNatureModifier();
-        var stats = new StatsModel
+        var stats = new Stats
         {
             HP = basePokemon.PokemonStats.HP,
             Attack = basePokemon.PokemonStats.Attack + modifier.AttackModifier,
@@ -188,7 +198,7 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
             Speed = basePokemon.PokemonStats.Speed + modifier.SpeedModifier,
         };
 
-        return new PokemonModel
+        return new Pokemon
         {
             PokemonId = Guid.NewGuid(),
             DexNo = basePokemon.DexNo,
@@ -219,11 +229,17 @@ internal class DexService : AbstractService<BasePokemonModel>, IDexService
             Form = basePokemon.Form,
             AlternateForms = altForms,
             NormalPortrait = basePokemon.NormalPortrait,
-            ShinyPortrait = basePokemon.ShinyPortrait
+            ShinyPortrait = basePokemon.ShinyPortrait,
+            IsOnActiveTeam = false,
+            CanEvolve = false,
+            GameId = Guid.Empty,
+            OriginalTrainerId = Guid.Empty,
+            Pokeball = Pokeball.Basic_Ball.ToString(),
+            TrainerId = Guid.Empty,
         };
     }
 
-    private static int GetCatchRate(BasePokemonModel basePokemon)
+    private static int GetCatchRate(PokemonForm basePokemon)
     {
         Enum.TryParse(basePokemon.Rarity, true, out Rarity rarity);
         return rarity switch

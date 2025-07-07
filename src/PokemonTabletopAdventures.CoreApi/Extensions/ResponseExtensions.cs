@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
-using System;
-using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.Extensions;
 

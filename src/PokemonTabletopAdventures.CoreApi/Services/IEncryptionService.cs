@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace PokemonTabletopAdventures.CoreApi.Services;
+﻿namespace PokemonTabletopAdventures.CoreApi.Services;
 
 public interface IEncryptionService
 {
@@ -28,5 +26,9 @@ public interface IEncryptionService
     /// <param name="hashedSecret">The hashed form of the correct secret</param>
     public Task VerifySecret(
         string secret,
-        string hashedSecret);
+        Guid gameId);
+
+    public Task VerifySecret(
+        string secret,
+        string username);
 }

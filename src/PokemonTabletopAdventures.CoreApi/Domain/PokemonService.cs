@@ -1,14 +1,13 @@
 ﻿using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class PokemonService(IPokedexService pokedexService) : AbstractService<PokemonModel>(MongoCollection.Pokemon), IPokemonService
+internal class PokemonService(IPokedexService pokedexService) : AbstractService<PokemonDto>(MongoCollection.Pokemon), IPokemonService
 {
     private readonly IPokedexService _pokedexService = pokedexService;
 
@@ -19,74 +18,90 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractService<
         await Task.CompletedTask;
     }
 
-    public async Task<PokemonModel> GetPokemonById(Guid id)
+    public async Task<Pokemon> GetPokemonById(Guid id)
     {
-        return await ThrowIfNull(
+        var dto = await ThrowIfNull(
             id,
             id => Collection.Find(pokemon => pokemon.PokemonId == id).SingleOrDefault(),
             PropertyNames.PokemonId);
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task<IEnumerable<PokemonModel>> GetPokemonByTrainerId(Guid trainerId)
+    public async Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId)
     {
-        return await ThrowIfNull(
+        var dtos = await ThrowIfNull(
             trainerId,
             id => Collection.Find(pokemon => pokemon.TrainerId == id).ToEnumerable(),
             PropertyNames.TrainerId);
+
+        return dtos.Select(DtoHandler.ParseFromDto);
     }
 
-    public async Task<IEnumerable<PokemonModel>> GetPokemonByTrainerId(Guid trainerId, Guid gameId)
+    public async Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId, Guid gameId)
     {
-        return await ThrowIfNull(
+        var dtos = await ThrowIfNull(
             gameId,
             id => Collection.Find(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == id).ToEnumerable(),
             PropertyNames.GameId);
+
+        return dtos.Select(DtoHandler.ParseFromDto);
     }
 
-    public async Task PostPokemon(PokemonModel pokemon)
+    public async Task PostPokemon(Pokemon pokemon)
     {
-        await PostDocument(pokemon);
+        var dto = DtoHandler.ParseFromModel(pokemon);
+        await PostDocument(dto);
     }
 
-    public async Task<PokemonModel> UpdatePokemon(PokemonModel updatePokemon)
+    public async Task<Pokemon> UpdatePokemon(Pokemon updatePokemon)
     {
+        var dto = DtoHandler.ParseFromModel(updatePokemon);
         await UpsertDocument(
-            Builders<PokemonModel>.Filter.Eq(pokemon => pokemon.PokemonId, updatePokemon.PokemonId),
-            updatePokemon);
+            Builders<PokemonDto>.Filter.Eq(pokemon => pokemon.PokemonId, updatePokemon.PokemonId),
+            dto);
 
-        return updatePokemon;
+        return await GetPokemonById(updatePokemon.PokemonId);
     }
 
-    public async Task<PokemonModel> UpdatePokemonEvolvability(Guid pokemonId, bool isEvolvable)
+    public async Task<Pokemon> UpdatePokemonEvolvability(Guid pokemonId, bool isEvolvable)
     {
-        return await UpdateDocument(
+        var dto = await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonModel>.Update.Set(PropertyNames.CanEvolve, isEvolvable));
+            Builders<PokemonDto>.Update.Set(PropertyNames.CanEvolve, isEvolvable));
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task<PokemonModel> UpdatePokemonHP(Guid pokemonId, int hp)
+    public async Task<Pokemon> UpdatePokemonHP(Guid pokemonId, int hp)
     {
-        return await UpdateDocument(
+        var dto = await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonModel>.Update.Set(PropertyNames.CurrentHP, hp));
+            Builders<PokemonDto>.Update.Set(PropertyNames.CurrentHP, hp));
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task<PokemonModel> UpdatePokemonLocation(Guid pokemonId, bool isOnActiveTeam)
+    public async Task<Pokemon> UpdatePokemonLocation(Guid pokemonId, bool isOnActiveTeam)
     {
-        return await UpdateDocument(
+        var dto = await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonModel>.Update.Set(PropertyNames.IsOnActiveTeam, isOnActiveTeam));
+            Builders<PokemonDto>.Update.Set(PropertyNames.IsOnActiveTeam, isOnActiveTeam));
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
-    public async Task<PokemonModel> UpdatePokemonTrainerId(Guid pokemonId, Guid trainerId)
+    public async Task<Pokemon> UpdatePokemonTrainerId(Guid pokemonId, Guid trainerId)
     {
-        return await UpdateDocument(
+        var dto = await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonModel>.Update.Set(PropertyNames.TrainerId, trainerId));
+            Builders<PokemonDto>.Update.Set(PropertyNames.TrainerId, trainerId));
+
+        return DtoHandler.ParseFromDto(dto);
     }
 
     public async Task DeletePokemon(Guid id)

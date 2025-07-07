@@ -1,9 +1,4 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain;
 using PokemonTabletopAdventures.CoreApi.Infrastructure;
@@ -47,13 +42,12 @@ public class Startup(IConfiguration configuration)
         services.AddSingleton<IPokemonService, PokemonService>();
         services.AddSingleton<ISettingService, SettingService>();
         services.AddSingleton<ITrainerService, TrainerService>();
+        services.AddSingleton<INpcService, NpcService>();
         services.AddSingleton<IGameService, GameService>();
 
-        services.AddSingleton<IExportService, ExportService>();
-
-        services.AddSingleton<INpcService, NpcService>();
-
         services.AddSingleton<IShopService, ShopService>();
+
+        services.AddSingleton<IExportService, ExportService>();
 
         services.AddSingleton<ISpriteService, SpriteService>();
 

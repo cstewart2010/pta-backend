@@ -1,14 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.Domain.Models;
+using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using PokemonTabletopAdventures.Models.Games;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -17,18 +15,30 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
     /// <summary>
     /// Provides a collection of methods to handle import/exports of game sessions
     /// </summary>
-    public class ExportService(IPokemonService pokemonService, ITrainerService trainerService, IGameService gameService) : IExportService
+    public class ExportService(
+        IPokemonService pokemonService,
+        ITrainerService trainerService,
+        IGameService gameService,
+        INpcService npcService,
+        ISettingService settingService,
+        IShopService shopService,
+        IPokedexService pokedexService) : IExportService
     {
         private readonly IPokemonService _pokemonService = pokemonService;
         private readonly ITrainerService _trainerService = trainerService;
         private readonly IGameService _gameService = gameService;
+        private readonly INpcService _npcService = npcService;
+        private readonly ISettingService _settingService = settingService;
+        private readonly IShopService _shopService = shopService;
+        private readonly IPokedexService _pokedexService = pokedexService;
 
         /// <summary>
         /// Returns a file stream for the a json file of the game session
         /// </summary>
         /// <param name="game">The game session to export</param>
-        public async Task<FileStream> GetExportStream(GameModel game)
+        public async Task<FileStream> GetExportStream(Game model)
         {
+            var game = DtoHandler.ParseFromModel(model);
             var (path, json) = await GetStreamParts(game);
             using var writer = new StreamWriter(path);
             writer.Write(json);
@@ -42,25 +52,25 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
         /// <param name="json">The stringified json object to parse</param>
         /// <param name="errors">The errors found while attempting to import the game session</param>
         /// <returns></returns>
-        public async Task<GameModel> ParseImport(string json)
+        public async Task<Game> ParseImport(string json)
         {
             var import = GetParsedImportFromExport(json);
             return await CleanyAddGame(import!);
         }
 
-        private async Task<GameModel> CleanyAddGame(ExportedGame import)
+        private async Task<Game> CleanyAddGame(ExportedGame import)
         {
-            AddGame(import);
+            await AddGame(import);
             var gameId = import.GameSession.GameId;
             foreach (var trainer in import.Trainers)
             {
-                CleanlyAddTrainer(trainer, gameId);
+                await CleanlyAddTrainer(trainer, gameId);
             }
 
-            return await _gameService.GetGame(gameId);
+            return await _gameService.GetGame(gameId, true);
         }
 
-        private List<string> AddGame(ExportedGame import)
+        private async Task<List<string>> AddGame(ExportedGame import)
         {
             var game = import.GameSession;
             var errors = new List<string>();
@@ -69,20 +79,21 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
                 errors.Add($"Exactly one gm should be listed for game {game.GameId}");
             }
 
-            if (_gameService.GetGame(game.GameId) != null)
+            if (_gameService.GetGame(game.GameId, true) != null)
             {
                 errors.Add($"Found extant game session found with id {game.GameId}");
             }
 
             game.Logs ??= [];
-            game.Logs.Add(new LogModel(
+            game.Logs.Add(new LogDto(
                 user: GameLogMessages.ImportTool,
                 action: $"Recreated game {game.GameId}"));
-            _gameService.PostGame(game);
+            var model = await  DtoHandler.ParseFromDto(game, true, _npcService, _settingService, _trainerService);
+            await _gameService.PostGame(model, "");
             return errors;
         }
 
-        private void CleanlyAddTrainer(
+        private async Task CleanlyAddTrainer(
             ExportedTrainer import,
             Guid gameId)
         {
@@ -93,7 +104,8 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
                 errors.Add($"Failed to import trainer {trainer.TrainerId}");
             }
 
-            _trainerService.PostTrainer(trainer);
+            var model = await DtoHandler.ParseFromDto(import.Trainer, _pokemonService, _pokedexService);
+            await _trainerService.PostTrainer(model);
             errors = [.. import.Pokemon
                 .Select(pokemon => AddPokemon(pokemon, trainer.TrainerId))
                 .Where(error => !string.IsNullOrEmpty(error))];
@@ -105,19 +117,20 @@ namespace PokemonTabletopAdventures.CoreApi.Domain
         }
 
         private string AddPokemon(
-            PokemonModel pokemon,
+            PokemonDto pokemon,
             Guid trainerId)
         {
             if (pokemon.TrainerId == trainerId)
             {
-                _pokemonService.PostPokemon(pokemon);
-                return $"Failed to import pokemon {pokemon.PokemonId}";
+                var model = DtoHandler.ParseFromDto(pokemon);
+                _pokemonService.PostPokemon(model);
+                return $"Import pokemon {pokemon.PokemonId}";
             }
 
             return $"Invalid trainer id from pokemon {pokemon.PokemonId}. Skipping...";
         }
 
-        private async Task<(string Path, string Json)> GetStreamParts(GameModel game)
+        private async Task<(string Path, string Json)> GetStreamParts(GameDto game)
         {
             game.IsOnline = false;
             var exportedGame = await ExportedGame.ParseFromModel(game, _trainerService, _pokemonService);

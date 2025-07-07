@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using PokemonTabletopAdventures.Models;
+﻿using PokemonTabletopAdventures.Models.Games;
 
 namespace PokemonTabletopAdventures.CoreApi.Services;
 
@@ -9,11 +7,11 @@ public interface ISpriteService
     /// <summary>
     /// Returns all sprites
     /// </summary>
-    public Task<IEnumerable<SpriteModel>> GetAllSprites();
+    public Task<IEnumerable<Sprite>> GetAllSprites();
 
     /// <summary>
     /// Attempts to add a sprite using the provided document
     /// </summary>
     /// <param name="sprite">The document to add</param>
-    public Task PostSprite(SpriteModel sprite);
+    public Task PostSprite(Sprite sprite);
 }

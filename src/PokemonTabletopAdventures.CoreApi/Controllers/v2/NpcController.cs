@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.Npcs;
 using PokemonTabletopAdventures.CoreApi.Services;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using PokemonTabletopAdventures.Models.Npcs;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
@@ -42,8 +38,7 @@ public class NpcController(
             return Conflict();
         }
 
-        var npc = await ParseFromModel(model);
-        return Ok(new RetrieveNpcResponse { Npcs = [npc] });
+        return Ok(new RetrieveNpcResponse { Npcs = [model] });
     }
 
     [HttpPost("retrieve/all")]
@@ -57,8 +52,7 @@ public class NpcController(
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
         var models = await _npcService.GetNpcsByGameId(request.GameId);
-        var npcs = await Task.WhenAll(models.Select(async npc => await ParseFromModel(npc)));
-        return Ok(new RetrieveNpcResponse { Npcs = npcs});
+        return Ok(new RetrieveNpcResponse { Npcs = [..models] });
     }
 
     [HttpPost("register")]
@@ -71,18 +65,12 @@ public class NpcController(
         [FromBody] CreateNpcRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var models = await Task.WhenAll(request.Npcs.Select(async npc =>
+        foreach (var npc in request.Npcs)
         {
-            var model = await ParseBackToModel(npc, request.GameId, _npcService);
-            model.NPCId = Guid.NewGuid();
-            return model;
-        }));
-        foreach (var model in models)
-        {
-            await _npcService.PostNpc(model);
+            npc.NpcId = Guid.NewGuid();
+            await _npcService.PostNpc(npc);
         }
-        var npcs = await Task.WhenAll(models.Select(async model => await ParseFromModel(model)));
-        return Ok(new CreateNpcResponse { Npcs = npcs });
+        return Ok(new CreateNpcResponse { Npcs = request.Npcs });
     }
 
 
@@ -96,18 +84,8 @@ public class NpcController(
         [FromBody] UpdateNpcRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var models = await Task.WhenAll(request.Npcs.Select(async npc =>
-        {
-            var model = await ParseBackToModel(npc, request.GameId, _npcService);
-            model.NPCId = Guid.NewGuid();
-            return model;
-        }));
-        foreach (var model in models)
-        {
-            await _npcService.UpdateNpc(model);
-        }
-        var npcs = await Task.WhenAll(models.Select(async model => await ParseFromModel(model)));
-        return Ok(new UpdateNpcResponse { Npcs = npcs });
+        var updatedList = await Task.WhenAll(request.Npcs.Select(async model => await _npcService.UpdateNpc(model)));
+        return Ok(new UpdateNpcResponse { Npcs = updatedList });
     }
 
     [HttpDelete("delete")]
@@ -126,7 +104,7 @@ public class NpcController(
             return Conflict();
         }
 
-        await _npcService.DeleteNpc(request.NpcId);
+        await _npcService.DeleteNpc(request.NpcId, GameService);
         return Ok();
     }
 
@@ -137,7 +115,7 @@ public class NpcController(
         [FromBody] DeleteNpcRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        await _npcService.DeleteNpcByGameId(request.GameId);
+        await _npcService.DeleteNpcByGameId(request.GameId, GameService);
         return Ok();
     }
 }
