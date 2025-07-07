@@ -10,8 +10,8 @@ env:
   WORKING_DIRECTORY: src/PokemonTabletopAdventures.Models
   MAJOR_VERSION: 1
   MINOR_VERSION: 0
-  UPDATE_VERSION: ${{ env.GITHUB_RUN_NUMBER }}
-  PACKAGE_VERSION: ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.UPDATE_VERSION }}
+  UPDATE_VERSION: ${{ GITHUB_RUN_NUMBER }}
+  PACKAGE_VERSION: ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.UPDATE_VERSION }}-test
 jobs:
   build:
     runs-on: windows-latest
