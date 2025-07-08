@@ -7,7 +7,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a User in Pokemon Tabletop Adventures 
 /// </summary>
-internal class UserDto : IAuthenticated, IDocument
+public class UserDto : IAuthenticated, IDocument
 {
     /// <inheritdoc />
     public ObjectId _id { get; set; }

@@ -6,7 +6,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a message in Pokemon Tabletop Adventures 
 /// </summary>
-internal class UserMessageDto
+public class UserMessageDto
 {
     public UserMessageDto() { }
 

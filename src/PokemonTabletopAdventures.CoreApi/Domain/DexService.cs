@@ -13,9 +13,9 @@ using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class DexService : AbstractMongoService<BasePokemonDto>, IDexService
+public class DexService(ILogger<DexService> logger) : AbstractMongoService<BasePokemonDto>(MongoCollection.BasePokemon), IDexService
 {
-    public DexService() : base(MongoCollection.BasePokemon) { }
+    private readonly ILogger<DexService> _logger = logger;
 
     public async Task<IEnumerable<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
     {

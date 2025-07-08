@@ -7,7 +7,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents an item sold at a shop
 /// </summary>
-internal class WareDto
+public class WareDto
 {
     /// <summary>
     /// The item's cost

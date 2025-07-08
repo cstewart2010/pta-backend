@@ -8,7 +8,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a Trainer in Pokemon Tabletop Adventures
 /// </summary>
-internal class TrainerDto : IPerson, IDocument
+public class TrainerDto : IPerson, IDocument
 {
     private static readonly IReadOnlyDictionary<string, string> TrainerSkillNames = new Dictionary<string,string>
     {

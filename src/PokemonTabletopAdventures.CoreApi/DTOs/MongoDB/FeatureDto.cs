@@ -6,7 +6,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents an feature in the FeatureDex
 /// </summary>
-internal class FeatureDto : IDocument, IDexDocument
+public class FeatureDto : IDocument, IDexDocument
 {
     /// <inheritdoc/>
     public ObjectId _id { get; set; }

@@ -5,7 +5,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a sprite in the Pokemon Tabletop adventures app
 /// </summary>
-internal class SpriteDto
+public class SpriteDto
 {
     /// <summary>
     /// MongoDB id

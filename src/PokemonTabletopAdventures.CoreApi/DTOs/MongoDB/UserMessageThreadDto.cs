@@ -5,7 +5,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a message thread in Pokemon Tabletop Adventures 
 /// </summary>
-internal class UserMessageThreadDto : IDocument
+public class UserMessageThreadDto : IDocument
 {
     /// <inheritdoc />
     public ObjectId _id { get; set; }

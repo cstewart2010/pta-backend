@@ -8,7 +8,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a participant to an encounter during a PTA session
 /// </summary>
-internal class SettingParticipantModel
+public class SettingParticipantModel
 {
     public SettingParticipantModel() { }
     /// <summary>

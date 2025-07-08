@@ -9,7 +9,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <remarks>
 /// Initializes a new instance of <see cref="LogDto"/>
 /// </remarks>
-internal class LogDto(string user, string action)
+public class LogDto(string user, string action)
 {
     /// <summary>
     /// The user that the log comes from

@@ -6,7 +6,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents an encounter during a PTA session
 /// </summary>
-internal class SettingDto : IDocument
+public class SettingDto : IDocument
 {
     /// <inheritdoc/>
     public ObjectId _id { get; set; }

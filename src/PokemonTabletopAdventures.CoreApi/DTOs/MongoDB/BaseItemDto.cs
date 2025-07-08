@@ -6,7 +6,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents an item in the ItemDex
 /// </summary>
-internal class BaseItemDto : IDocument, IDexDocument
+public class BaseItemDto : IDocument, IDexDocument
 {
     /// <inheritdoc/>
     public ObjectId _id { get; set; }

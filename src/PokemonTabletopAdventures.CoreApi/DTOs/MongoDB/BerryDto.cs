@@ -8,7 +8,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents an berry in the BerryDex
 /// </summary>
-internal class BerryDto : IDocument, IDexDocument
+public class BerryDto : IDocument, IDexDocument
 {
     /// <inheritdoc/>
     public ObjectId _id { get; set; }

@@ -7,7 +7,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents an trainer class in the TrainerClassDex
 /// </summary>
-internal class TrainerClassDto :  IDocument, IDexDocument
+public class TrainerClassDto :  IDocument, IDexDocument
 {
     /// <inheritdoc/>
     public ObjectId _id { get; set; }

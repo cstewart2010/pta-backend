@@ -9,7 +9,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a Pokemon in Pokemon Tabletop Adventures
 /// </summary>
-internal class PokemonDto: IDocument
+public class PokemonDto: IDocument
 {
     /// <inheritdoc />
     public ObjectId _id { get; set; }

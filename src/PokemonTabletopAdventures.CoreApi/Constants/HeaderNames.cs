@@ -1,6 +1,6 @@
 ﻿namespace PokemonTabletopAdventures.CoreApi.Constants;
 
-internal static class HeaderNames
+public static class HeaderNames
 {
     public const string AccessToken = "pta-activity-token";
     public const string SessionAuth = "pta-session-auth";

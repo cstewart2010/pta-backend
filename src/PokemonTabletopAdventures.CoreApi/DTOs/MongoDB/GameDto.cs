@@ -5,7 +5,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a Pokemon Tabletop Adventures game session
 /// </summary>
-internal class GameDto : IAuthenticated, IDocument
+public class GameDto : IAuthenticated, IDocument
 {
     /// <inheritdoc />
     public ObjectId _id { get; set; }

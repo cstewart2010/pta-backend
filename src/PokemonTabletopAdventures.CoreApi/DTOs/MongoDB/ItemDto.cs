@@ -7,7 +7,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a Pokemon Tabletop Adventures item
 /// </summary>
-internal class ItemDto
+public class ItemDto
 {
     /// <summary>
     /// The name of the item

@@ -8,7 +8,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents an move in the MoveDex
 /// </summary>
-internal class MoveDto : IDocument, IDexDocument
+public class MoveDto : IDocument, IDexDocument
 {
     /// <inheritdoc/>
     public ObjectId _id { get; set; }

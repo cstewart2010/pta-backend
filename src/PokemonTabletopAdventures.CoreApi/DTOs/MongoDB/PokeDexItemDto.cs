@@ -5,7 +5,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents a container for all pokedex entries
 /// </summary>
-internal class PokeDexItemDto : IDocument
+public class PokeDexItemDto : IDocument
 {
     /// <inheritdoc/>
     public ObjectId _id { get; set; }

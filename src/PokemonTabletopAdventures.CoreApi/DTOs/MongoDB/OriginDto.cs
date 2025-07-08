@@ -7,7 +7,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <summary>
 /// Represents an origin in the OriginDex
 /// </summary>
-internal class OriginDto : IDocument, IDexDocument
+public class OriginDto : IDocument, IDexDocument
 {
     /// <inheritdoc/>
     public ObjectId _id { get; set; }
