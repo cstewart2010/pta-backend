@@ -468,6 +468,7 @@ namespace PokemonTabletopAdventures.CoreApi.Domain.Handlers
                 UserId = model.UserId,
                 Username = model.Username,
                 SiteRole = model.SiteRole,
+                ActivityToken = model.ActivityToken
             };
         }
 

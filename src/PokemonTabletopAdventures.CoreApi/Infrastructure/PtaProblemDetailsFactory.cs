@@ -22,7 +22,7 @@ internal class PtaProblemDetailsFactory : ProblemDetailsFactory
             return new ProblemDetails
             {
                 Title = exception.Title,
-                Detail = exception.ToString(),
+                Detail = exception.Message,
                 Status = (int)exception.StatusCode
             };
         }

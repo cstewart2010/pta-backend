@@ -103,7 +103,8 @@ public class UserController(
             SiteRole = UserRoleOnSite.Active,
             DateCreated = DateTimeOffset.Now,
             Games = [],
-            Messages = []
+            Messages = [],
+            ActivityToken = ""
         };
         await UserService.PostUser(user, passHash);
         await AssignAuthAndToken(user.UserId);
