@@ -362,9 +362,9 @@ public class DexServiceTests
     }
 
     [Test]
-    [TestCase("Venusaur1", "Base")]
-    [TestCase("Venusaur2", "Gigantamax")]
-    [TestCase("Venusaur3", "Mega")]
+    [TestCase("Venusaur", "Base1")]
+    [TestCase("Venusaur", "Gigantamax1")]
+    [TestCase("Venusaur", "Mega1")]
     public void GetPokedexEntry_InvalidForm_ReturnPokemonForm(string name, string selectedForm)
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
