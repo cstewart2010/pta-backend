@@ -1,11 +1,8 @@
 name: Run Unit Tests
 on:
-  pull_request:
+  push:
     branches:
     - feature/*
-  # push:
-  #   branches:
-  #   - feature/*
 env:
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
@@ -36,7 +33,6 @@ jobs:
         output: 'both'
     - name: Add Coverage PR Comment
       uses: marocchino/sticky-pull-request-comment@v2
-      if: github.event_name == 'pull_request'
       with:
         recreate: true
         path: code-coverage-results.md
