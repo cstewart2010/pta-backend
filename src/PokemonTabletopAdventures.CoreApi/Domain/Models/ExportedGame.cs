@@ -1,5 +1,4 @@
-﻿using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
-using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
+﻿using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain.Models;
@@ -11,7 +10,8 @@ internal class ExportedGame
     public static async Task<ExportedGame> ParseFromModel(
         GameDto game,
         ITrainerService trainerService,
-        IPokemonService pokemonService)
+        IPokemonService pokemonService,
+        IModelToDtoMapper modelToDtoMapper)
     {
         var trainers = await trainerService.GetTrainersByGameId(game.GameId);
         var gameSession = new GameDto
@@ -23,7 +23,7 @@ internal class ExportedGame
             NPCs = game.NPCs,
             PasswordHash = game.PasswordHash
         };
-        var exportedTrainers = await Task.WhenAll(trainers.Select(async trainer => await ExportedTrainer.ParseFromModel(DtoHandler.ParseFromModel(trainer), trainerService, pokemonService)));
+        var exportedTrainers = await Task.WhenAll(trainers.Select(async trainer => await ExportedTrainer.ParseFromModel(await modelToDtoMapper.ParseFromModel(trainer), trainerService, pokemonService, modelToDtoMapper)));
 
         return new ExportedGame
         {

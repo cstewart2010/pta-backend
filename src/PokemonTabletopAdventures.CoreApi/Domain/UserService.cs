@@ -1,5 +1,4 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -9,9 +8,13 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 public class UserService(
     IRepositoryService repositoryService,
-    ITrainerService trainerService) : AbstractMongoService<UserDto>(repositoryService, MongoCollection.Users), IUserService
+    ITrainerService trainerService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<UserDto>(repositoryService, MongoCollection.Users), IUserService
 {
     private readonly ITrainerService _trainerService = trainerService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task DeleteUser(Guid userId)
     {
@@ -35,7 +38,7 @@ public class UserService(
             id => Collection.GetOneAsync(user => user.UserId == id),
             PropertyNames.UserId);
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<User> GetUserByUsername(string username)
@@ -45,24 +48,24 @@ public class UserService(
             username => Collection.GetOneAsync(user => user.Username == username),
             PropertyNames.Username);
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<IEnumerable<User>> GetUsers()
     {
         var dtos = await Collection.GetManyAsync(user => true);
-        return dtos.Select(DtoHandler.ParseFromDto);
+        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
     }
 
     public async Task<IEnumerable<User>> GetUsers(int offset, int limit)
     {
         var dtos = await Collection.GetManyAsync(user => true, offset, limit);
-        return dtos.Select(DtoHandler.ParseFromDto);
+        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
     }
 
     public async Task PostUser(User user, string passwordHash)
     {
-        var dto = DtoHandler.ParseFromModel(user);
+        var dto = await _modelToDtoMapper.ParseFromModel(user);
         dto.PasswordHash = passwordHash;
         dto.IsOnline = true;
         await PostDocument(dto);
@@ -74,7 +77,7 @@ public class UserService(
             updatedUser.UserId,
             userId => Collection.GetOneAsync(user => user.UserId == updatedUser.UserId),
             PropertyNames.UserId);
-        var dto = DtoHandler.ParseFromModel(updatedUser);
+        var dto = await _modelToDtoMapper.ParseFromModel(updatedUser);
         dto.PasswordHash = currentUser.PasswordHash;
         dto.IsOnline = currentUser.IsOnline;
         await UpsertDocument(
@@ -92,7 +95,7 @@ public class UserService(
             user => user.UserId == userId,
             new Models.UpdateData(PropertyNames.ActivityToken, token));
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<User> UpdateUserOnlineStatus(Guid userId, bool isOnline)
@@ -102,7 +105,7 @@ public class UserService(
             user => user.UserId == userId,
             UserStatusUpdate(isOnline));
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     private static UpdateData[] UserStatusUpdate(bool isOnline)

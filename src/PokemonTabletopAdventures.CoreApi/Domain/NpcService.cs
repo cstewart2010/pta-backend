@@ -1,5 +1,4 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Npcs;
@@ -8,9 +7,13 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 public class NpcService(
     IRepositoryService repositoryService,
-    IPokemonService pokemonService) : AbstractMongoService<NpcDto>(repositoryService, MongoCollection.NPCs), INpcService
+    IPokemonService pokemonService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<NpcDto>(repositoryService, MongoCollection.NPCs), INpcService
 {
     private readonly IPokemonService _pokemonService = pokemonService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task DeleteNpc(Guid id, IGameService gameService)
     {
@@ -45,7 +48,7 @@ public class NpcService(
             id => Collection.GetOneAsync(npc => npc.NPCId == id),
             PropertyNames.NpcId);
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService);
     }
 
     public async Task<IEnumerable<Npc>> GetNpcs(IEnumerable<Guid> npcIds)
@@ -55,7 +58,7 @@ public class NpcService(
             id => Collection.GetManyAsync(npc => npcIds.Contains(npc.NPCId)),
             PropertyNames.NpcId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService)));
+        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, _pokemonService)));
     }
 
     public async Task<IEnumerable<Npc>> GetNpcsByGameId(Guid gameId)
@@ -65,18 +68,18 @@ public class NpcService(
             id => Collection.GetManyAsync(npc => npc.GameId == id),
             PropertyNames.GameId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService)));
+        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, _pokemonService)));
     }
 
     public async Task PostNpc(Npc npc)
     {
-        var dto = DtoHandler.ParseFromModel(npc);
+        var dto = await _modelToDtoMapper.ParseFromModel(npc);
         await PostDocument(dto);
     }
 
     public async Task<Npc> UpdateNpc(Npc updatedNpc)
     {
-        var dto = DtoHandler.ParseFromModel(updatedNpc);
+        var dto = await _modelToDtoMapper.ParseFromModel(updatedNpc);
         await UpsertDocument(
             npc => npc.NPCId,
             updatedNpc.NpcId,

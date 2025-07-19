@@ -22,7 +22,9 @@ public class GameController(
     IPokedexService pokedexService,
     IExportService exportService,
     IEncryptionService encryptionService,
-    ILogger<GameController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService)
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<GameController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
     private readonly ILogger<GameController> _logger = logger;
     private readonly ISpriteService _spriteService = spriteService;

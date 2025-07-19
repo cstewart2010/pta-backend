@@ -1,5 +1,4 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -14,13 +13,17 @@ public class TrainerService(
     IPokemonService pokemonService,
     IPokedexService pokedexService,
     ISettingService settingService,
-    IEncryptionService encryptionService) : AbstractMongoService<TrainerDto>(repositoryService, MongoCollection.Trainers), ITrainerService
+    IEncryptionService encryptionService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<TrainerDto>(repositoryService, MongoCollection.Trainers), ITrainerService
 {
     private readonly IRepositoryService _repositoryService = repositoryService;
     private readonly IPokemonService _pokemonService = pokemonService;
     private readonly IPokedexService _pokedexService = pokedexService;
     private readonly ISettingService _settingService = settingService;
     private readonly IEncryptionService _encryptionService = encryptionService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task<Trainer> CompleteTrainer(
         Guid trainerId,
@@ -38,7 +41,7 @@ public class TrainerService(
             new UpdateData(PropertyNames.TrainerStats, stats),
             new UpdateData(PropertyNames.IsComplete, true));
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
     public async Task DeleteTrainer(Guid gameId, Guid userId)
@@ -95,7 +98,7 @@ public class TrainerService(
             x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId && !trainer.IsComplete),
             PropertyNames.IsComplete);
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
     public async Task<Trainer> GetTrainerById(Guid id, Guid gameId)
@@ -105,7 +108,7 @@ public class TrainerService(
             x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId),
             PropertyNames.TrainerId);
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
     public async Task<Trainer> GetTrainerByUsername(string username, Guid gameId)
@@ -115,7 +118,7 @@ public class TrainerService(
             x => Collection.GetOneAsync(trainer => trainer.TrainerName.Equals(x.username, StringComparison.CurrentCultureIgnoreCase) && trainer.GameId == x.gameId),
             PropertyNames.TrainerId);
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
     public async Task<IEnumerable<Trainer>> GetTrainersByGameId(Guid gameId)
@@ -125,18 +128,18 @@ public class TrainerService(
             id => Collection.GetManyAsync(trainer => trainer.GameId == id),
             PropertyNames.GameId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService)));
+        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService)));
     }
 
     public async Task PostTrainer(Trainer trainer)
     {
-        var dto = DtoHandler.ParseFromModel(trainer);
+        var dto = await _modelToDtoMapper.ParseFromModel(trainer);
         await PostDocument(dto);
     }
 
     public async Task<Trainer> UpdateTrainer(Trainer updatedTrainer)
     {
-        var dto = DtoHandler.ParseFromModel(updatedTrainer);
+        var dto = await _modelToDtoMapper.ParseFromModel(updatedTrainer);
         await UpsertDocument(
             trainer => trainer.TrainerId,
             updatedTrainer.TrainerId,
@@ -155,7 +158,7 @@ public class TrainerService(
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
             new UpdateData(PropertyNames.Honors, honors));
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
     public async Task<Trainer> UpdateTrainerItemList(
@@ -168,7 +171,7 @@ public class TrainerService(
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
             new UpdateData(PropertyNames.Items, itemList));
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
     public async Task<Trainer> UpdateTrainerOnlineStatus(
@@ -181,7 +184,7 @@ public class TrainerService(
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
             TrainerStatusUpdate(isOnline));
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
     public async Task<Trainer> UpdateTrainerPassword(
@@ -196,7 +199,7 @@ public class TrainerService(
             new UpdateData(PropertyNames.PasswordHash, passwordHash),
             new UpdateData(PropertyNames.IsOnline, true));
 
-        return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
+        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
     public async Task<IEnumerable<Trainer>> GetAllUserTrainers(Guid userId)
@@ -206,7 +209,7 @@ public class TrainerService(
             id => Collection.GetManyAsync(trainer => trainer.TrainerId == id),
             PropertyNames.TrainerId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService)));
+        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService)));
     }
 
     private async Task UpdateUserAfterTrainerDeletion(Guid gameId, Guid userId)

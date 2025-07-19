@@ -17,7 +17,9 @@ public class UserController(
     IPokedexService pokedexService,
     IUserMessageThreadService userMessageThreadService,
     IEncryptionService encryptionService,
-    ILogger<UserController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService)
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<UserController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
     private readonly ILogger<UserController> _logger = logger;
     private readonly IUserMessageThreadService _userMessageThreadService = userMessageThreadService;
