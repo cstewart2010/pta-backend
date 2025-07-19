@@ -1,6 +1,6 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models;
@@ -9,12 +9,14 @@ using PokemonTabletopAdventures.Models.Trainers;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class TrainerService(
+public class TrainerService(
+    IRepositoryService repositoryService,
     IPokemonService pokemonService,
     IPokedexService pokedexService,
     ISettingService settingService,
-    IEncryptionService encryptionService) : AbstractMongoService<TrainerDto>(MongoCollection.Trainers), ITrainerService
+    IEncryptionService encryptionService) : AbstractMongoService<TrainerDto>(repositoryService, MongoCollection.Trainers), ITrainerService
 {
+    private readonly IRepositoryService _repositoryService = repositoryService;
     private readonly IPokemonService _pokemonService = pokemonService;
     private readonly IPokedexService _pokedexService = pokedexService;
     private readonly ISettingService _settingService = settingService;
@@ -30,11 +32,11 @@ internal class TrainerService(
         var dto = await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId,
-            Builders<TrainerDto>.Update.Set(PropertyNames.Origin, origin),
-            Builders<TrainerDto>.Update.Set(PropertyNames.TrainerClasses, new[] { trainerClass }),
-            Builders<TrainerDto>.Update.Set(PropertyNames.Feats, feats),
-            Builders<TrainerDto>.Update.Set(PropertyNames.TrainerStats, stats),
-            Builders<TrainerDto>.Update.Set(PropertyNames.IsComplete, true));
+            new UpdateData(PropertyNames.Origin, origin),
+            new UpdateData(PropertyNames.TrainerClasses, new[] { trainerClass }),
+            new UpdateData(PropertyNames.Feats, feats),
+            new UpdateData(PropertyNames.TrainerStats, stats),
+            new UpdateData(PropertyNames.IsComplete, true));
 
         return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
@@ -43,25 +45,25 @@ internal class TrainerService(
     {
         var trainer = await ThrowIfNull(
             userId,
-            id => Collection.FindOneAndDelete(x => x.TrainerId == id && x.GameId == gameId),
+            id => Collection.DeleteAsync(x => x.TrainerId == id && x.GameId == gameId),
             PropertyNames.TrainerId);
 
         if (trainer.IsGM)
         {
-            var gameCollection = MongoCollectionHelper.GetMongoCollection<GameDto>(MongoCollection.Games);
-            gameCollection.FindOneAndDelete(x => x.GameId == trainer.GameId);
-            var pokemonCollection = MongoCollectionHelper.GetMongoCollection<PokemonDto>(MongoCollection.Pokemon);
-            pokemonCollection.DeleteMany(x => x.GameId == trainer.GameId);
-            var trainerCollection = MongoCollectionHelper.GetMongoCollection<TrainerDto>(MongoCollection.Trainers);
-            trainerCollection.DeleteMany(x => x.GameId == trainer.GameId);
-            var settingCollection = MongoCollectionHelper.GetMongoCollection<SettingDto>(MongoCollection.Settings);
-            settingCollection.DeleteMany(x => x.GameId == trainer.GameId);
-            var shopCollection = MongoCollectionHelper.GetMongoCollection<ShopDto>(MongoCollection.Shops);
-            shopCollection.DeleteMany(x => x.GameId == trainer.GameId);
-            var npcCollection = MongoCollectionHelper.GetMongoCollection<NpcDto>(MongoCollection.NPCs);
-            npcCollection.DeleteMany(x => x.GameId == trainer.GameId);
-            var pokedexCollection = MongoCollectionHelper.GetMongoCollection<NpcDto>(MongoCollection.Pokedex);
-            pokedexCollection.DeleteMany(x => x.GameId == trainer.GameId);
+            var gameCollection = _repositoryService.GetCollection<GameDto>(MongoCollection.Games);
+            await gameCollection.DeleteAsync(x => x.GameId == trainer.GameId);
+            var pokemonCollection = _repositoryService.GetCollection<PokemonDto>(MongoCollection.Pokemon);
+            await pokemonCollection.DeleteAsync(x => x.GameId == trainer.GameId);
+            var trainerCollection = _repositoryService.GetCollection<TrainerDto>(MongoCollection.Trainers);
+            await trainerCollection.DeleteAsync(x => x.GameId == trainer.GameId);
+            var settingCollection = _repositoryService.GetCollection<SettingDto>(MongoCollection.Settings);
+            await settingCollection.DeleteAsync(x => x.GameId == trainer.GameId);
+            var shopCollection = _repositoryService.GetCollection<ShopDto>(MongoCollection.Shops);
+            await shopCollection.DeleteAsync(x => x.GameId == trainer.GameId);
+            var npcCollection = _repositoryService.GetCollection<NpcDto>(MongoCollection.NPCs);
+            await npcCollection.DeleteAsync(x => x.GameId == trainer.GameId);
+            var pokedexCollection = _repositoryService.GetCollection<NpcDto>(MongoCollection.Pokedex);
+            await pokedexCollection.DeleteAsync(x => x.GameId == trainer.GameId);
         }
         else
         {
@@ -75,7 +77,7 @@ internal class TrainerService(
             }
         }
 
-        UpdateUserAfterTrainerDeletion(gameId, userId);
+        await UpdateUserAfterTrainerDeletion(gameId, userId);
     }
 
     public async Task DeleteTrainersByGameId(Guid gameId)
@@ -90,7 +92,7 @@ internal class TrainerService(
     {
         var dto = await ThrowIfNull(
             (id, gameId),
-            x => Collection.Find(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId && !trainer.IsComplete).SingleOrDefault(),
+            x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId && !trainer.IsComplete),
             PropertyNames.IsComplete);
 
         return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
@@ -100,7 +102,7 @@ internal class TrainerService(
     {
         var dto = await ThrowIfNull(
             (id, gameId),
-            x => Collection.Find(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId).SingleOrDefault(),
+            x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId),
             PropertyNames.TrainerId);
 
         return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
@@ -110,7 +112,7 @@ internal class TrainerService(
     {
         var dto = await ThrowIfNull(
             (username, gameId),
-            x => Collection.Find(trainer => trainer.TrainerName.Equals(x.username, StringComparison.CurrentCultureIgnoreCase) && trainer.GameId == x.gameId).SingleOrDefault(),
+            x => Collection.GetOneAsync(trainer => trainer.TrainerName.Equals(x.username, StringComparison.CurrentCultureIgnoreCase) && trainer.GameId == x.gameId),
             PropertyNames.TrainerId);
 
         return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
@@ -120,7 +122,7 @@ internal class TrainerService(
     {
         var dtos = await ThrowIfNull(
             gameId,
-            id => Collection.Find(trainer => trainer.GameId == id).ToEnumerable(),
+            id => Collection.GetManyAsync(trainer => trainer.GameId == id),
             PropertyNames.GameId);
 
         return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService)));
@@ -136,7 +138,8 @@ internal class TrainerService(
     {
         var dto = DtoHandler.ParseFromModel(updatedTrainer);
         await UpsertDocument(
-            Builders<TrainerDto>.Filter.Eq(trainer => trainer.TrainerId, updatedTrainer.TrainerId),
+            trainer => trainer.TrainerId,
+            updatedTrainer.TrainerId,
             dto);
 
         return updatedTrainer;
@@ -150,7 +153,7 @@ internal class TrainerService(
         var dto = await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
-            Builders<TrainerDto>.Update.Set(PropertyNames.Honors, honors));
+            new UpdateData(PropertyNames.Honors, honors));
 
         return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
@@ -163,7 +166,7 @@ internal class TrainerService(
         var dto = await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
-            Builders<TrainerDto>.Update.Set(PropertyNames.Items, itemList));
+            new UpdateData(PropertyNames.Items, itemList));
 
         return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
@@ -190,8 +193,8 @@ internal class TrainerService(
         var dto = await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
-            Builders<TrainerDto>.Update.Set(PropertyNames.PasswordHash, passwordHash),
-            Builders<TrainerDto>.Update.Set(PropertyNames.IsOnline, true));
+            new UpdateData(PropertyNames.PasswordHash, passwordHash),
+            new UpdateData(PropertyNames.IsOnline, true));
 
         return await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
@@ -200,28 +203,34 @@ internal class TrainerService(
     {
         var dtos = await  ThrowIfNull(
             userId,
-            id => Collection.Find(trainer => trainer.TrainerId == id).ToEnumerable(),
+            id => Collection.GetManyAsync(trainer => trainer.TrainerId == id),
             PropertyNames.TrainerId);
 
         return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService, _pokedexService)));
     }
 
-    private static void UpdateUserAfterTrainerDeletion(Guid gameId, Guid userId)
+    private async Task UpdateUserAfterTrainerDeletion(Guid gameId, Guid userId)
     {
-        var userCollection = MongoCollectionHelper.GetMongoCollection<UserDto>(MongoCollection.Users);
-        var user = userCollection.Find(x => x.UserId == userId).First();
+        var userCollection = _repositoryService.GetCollection<UserDto>(MongoCollection.Users);
+        var user = await userCollection.GetOneAsync(x => x.UserId == userId);
         user.Games.Remove(gameId);
-        userCollection.ReplaceOne(x => x.UserId == userId, options: new ReplaceOptions { IsUpsert = true }, replacement: user);
+        
+        await userCollection.PutAsync(
+            user => user.UserId,
+            user.UserId,
+            user);
     }
 
-    private static UpdateDefinition<TrainerDto> TrainerStatusUpdate(bool isOnline)
+    private static UpdateData[] TrainerStatusUpdate(bool isOnline)
     {
         if (isOnline)
         {
-            return Builders<TrainerDto>.Update.Set(PropertyNames.IsOnline, isOnline);
+            return [new UpdateData(PropertyNames.IsOnline, isOnline)];
         }
 
-        return Builders<TrainerDto>.Update.Combine(
-            Builders<TrainerDto>.Update.Set(PropertyNames.IsOnline, isOnline),
-            Builders<TrainerDto>.Update.Set(PropertyNames.ActivityToken, string.Empty));
+        return
+        [
+            new UpdateData(PropertyNames.IsOnline, isOnline),
+            new UpdateData(PropertyNames.ActivityToken, string.Empty)
+        ];
     }}

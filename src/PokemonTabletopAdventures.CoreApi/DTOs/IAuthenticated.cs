@@ -1,4 +1,4 @@
-﻿namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
+﻿namespace PokemonTabletopAdventures.CoreApi.DTOs;
 
 /// <summary>
 /// Provides a collection of properties for Authenticated types

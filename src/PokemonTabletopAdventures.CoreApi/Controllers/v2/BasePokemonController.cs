@@ -16,21 +16,21 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
     private readonly IDexService _basePokemonService = basePokemonService;
     private readonly ILogger<BasePokemonController> _logger = logger;
 
-    [HttpGet(Name = nameof(GetPokemon))]
+    [HttpGet(Name = nameof(GetAllPokemon))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
-    public async Task<IActionResult> GetPokemon(
-        [FromQuery] int offset,
-        [FromQuery] int limit)
+    public async Task<IActionResult> GetAllPokemon()
     {
-        return await GetItems<BasePokemonDto>(Type, offset, limit);
+        var response = await DexService.GetOrderedIndexCollectionResponse();
+        return Ok(response);
     }
 
     [HttpGet("{name}", Name = nameof(GetPokemonByName))]
-    [ProducesResponseType(typeof(IndexResponse<BasePokemonDto>), 200)]
+    [ProducesResponseType(typeof(PokemonAndForms), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemonByName(string name)
     {
-        return await GetItem<BasePokemonDto>(Type, name);
+        var entries = await _basePokemonService.GetPokedexEntry(name, "Base");
+        return Ok(entries);
     }
 
     [HttpGet("form/{form}", Name = nameof(GetPokemonByForm))]
@@ -51,5 +51,14 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
         }
 
         throw new ItemNotFoundException(form);
+    }
+
+    [HttpGet("{name}form/{form}", Name = nameof(GetPokemonByNameAndForm))]
+    [ProducesResponseType(typeof(PokemonAndForms), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
+    public async Task<IActionResult> GetPokemonByNameAndForm(string name, string form)
+    {
+        var entries = await _basePokemonService.GetPokedexEntry(name, form);
+        return Ok(entries);
     }
 }

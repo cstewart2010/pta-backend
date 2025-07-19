@@ -2,7 +2,7 @@
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-internal class PtaException(string message, string title, HttpStatusCode statusCode) : Exception(message)
+public class PtaException(string message, string title, HttpStatusCode statusCode) : Exception(message)
 {
     public string Title { get; } = title;
 

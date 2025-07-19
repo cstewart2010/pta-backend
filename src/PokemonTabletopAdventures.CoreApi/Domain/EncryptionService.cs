@@ -1,14 +1,13 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class EncryptionService : IEncryptionService
+public class EncryptionService(IRepositoryService repositoryService) : IEncryptionService
 {
+    private readonly IRepositoryService _repositoryService = repositoryService;
     public async Task<string> GenerateToken()
     {
         byte[] time = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
@@ -45,25 +44,21 @@ internal class EncryptionService : IEncryptionService
 
     public async Task VerifySecret(string secret, Guid gameId)
     {
-        var collection = MongoCollectionHelper.GetMongoCollection<GameDto>(MongoCollection.Games);
-        var game = collection.Find(x => x.GameId == gameId).Single();
+        var collection = _repositoryService.GetCollection<GameDto>(MongoCollection.Games);
+        var game = await collection.GetOneAsync(x => x.GameId == gameId) ?? throw new UnknownEntityException<GameDto>(PropertyNames.GameId, gameId);
         if (!BCrypt.Net.BCrypt.Verify(secret, game.PasswordHash))
         {
             throw new PtaUnauthorizedException(PtaExceptionParts.InvalidSecretMessage);
         }
-
-        await Task.CompletedTask;
     }
 
     public async Task VerifySecret(string secret, string username)
     {
-        var collection = MongoCollectionHelper.GetMongoCollection<UserDto>(MongoCollection.Users);
-        var user = collection.Find(x => x.Username ==  username).FirstOrDefault() ?? throw new PtaUnauthorizedException(PtaExceptionParts.NoUserFoundMessage);
+        var collection = _repositoryService.GetCollection<UserDto>(MongoCollection.Users);
+        var user = await collection.GetOneAsync(x => x.Username ==  username) ?? throw new PtaUnauthorizedException(PtaExceptionParts.NoUserFoundMessage);
         if (!BCrypt.Net.BCrypt.Verify(secret, user.PasswordHash))
         {
             throw new PtaUnauthorizedException(PtaExceptionParts.InvalidSecretMessage);
         }
-
-        await Task.CompletedTask;
     }
 }

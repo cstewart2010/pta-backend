@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using Newtonsoft.Json;
 
-namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
+namespace PokemonTabletopAdventures.CoreApi.DTOs;
 
 /// <summary>
 /// Provides a collection of properties for MongoDB documents

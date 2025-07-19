@@ -1,5 +1,4 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -7,8 +6,9 @@ using PokemonTabletopAdventures.Models.Npcs;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class NpcService(
-    IPokemonService pokemonService) : AbstractMongoService<NpcDto>(MongoCollection.NPCs), INpcService
+public class NpcService(
+    IRepositoryService repositoryService,
+    IPokemonService pokemonService) : AbstractMongoService<NpcDto>(repositoryService, MongoCollection.NPCs), INpcService
 {
     private readonly IPokemonService _pokemonService = pokemonService;
 
@@ -17,7 +17,7 @@ internal class NpcService(
         var npc = await GetNpc(id);
         await ThrowIfNull(
             id,
-            npcId => Collection.FindOneAndDelete(npc => npc.NPCId == npcId),
+            npcId => Collection.DeleteAsync(npc => npc.NPCId == npcId),
             PropertyNames.NpcId);
 
         var game = await gameService.GetGame(npc.GameId, true);
@@ -32,7 +32,7 @@ internal class NpcService(
         {
             await ThrowIfNull(
                 gameId,
-                gameId => Collection.FindOneAndDelete(npc => npc.NPCId == npcModel.NpcId),
+                gameId => Collection.DeleteAsync(npc => npc.NPCId == npcModel.NpcId),
                 PropertyNames.GameId);
         }
         await gameService.UpdateGameNpcList(gameId, []);
@@ -42,7 +42,7 @@ internal class NpcService(
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.Find(npc => npc.NPCId == id).SingleOrDefault(),
+            id => Collection.GetOneAsync(npc => npc.NPCId == id),
             PropertyNames.NpcId);
 
         return await DtoHandler.ParseFromDto(dto, _pokemonService);
@@ -52,7 +52,7 @@ internal class NpcService(
     {
         var dtos = await ThrowIfNull(
             npcIds,
-            id => Collection.Find(npc => npcIds.Contains(npc.NPCId)).ToEnumerable(),
+            id => Collection.GetManyAsync(npc => npcIds.Contains(npc.NPCId)),
             PropertyNames.NpcId);
 
         return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService)));
@@ -62,7 +62,7 @@ internal class NpcService(
     {
         var dtos = await ThrowIfNull(
             gameId,
-            id => Collection.Find(npc => npc.GameId == id).ToEnumerable(),
+            id => Collection.GetManyAsync(npc => npc.GameId == id),
             PropertyNames.GameId);
 
         return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, _pokemonService)));
@@ -78,7 +78,8 @@ internal class NpcService(
     {
         var dto = DtoHandler.ParseFromModel(updatedNpc);
         await UpsertDocument(
-            Builders<NpcDto>.Filter.Eq(npc => npc.NPCId, updatedNpc.NpcId),
+            npc => npc.NPCId,
+            updatedNpc.NpcId,
             dto);
 
         return await GetNpc(dto.NPCId);

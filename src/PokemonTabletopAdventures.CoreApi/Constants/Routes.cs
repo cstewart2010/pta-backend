@@ -1,6 +1,6 @@
 ﻿namespace PokemonTabletopAdventures.CoreApi.Constants;
 
-internal static class Routes
+public static class Routes
 {
     public const string PokedexRoute = "api/v2/pokedex";
     public const string BerrydexRoute = "api/v2/berrydex";

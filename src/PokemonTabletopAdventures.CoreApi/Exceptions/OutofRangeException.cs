@@ -2,7 +2,7 @@
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-internal class OutofRangeException : PtaException
+public class OutofRangeException : PtaException
 {
     public OutofRangeException(double left, double right) : base($"Value must be bounded between {left} and {right}", PtaExceptionParts.OutOfRangeTitle, System.Net.HttpStatusCode.BadRequest) { }
 
