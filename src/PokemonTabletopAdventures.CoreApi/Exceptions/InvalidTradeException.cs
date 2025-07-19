@@ -3,6 +3,6 @@ using PokemonTabletopAdventures.CoreApi.Constants;
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-internal class InvalidTradeException() : PtaException(PtaExceptionParts.SelfTradeMessage, PtaExceptionParts.InvalidTradeTitle, HttpStatusCode.BadRequest)
+public class InvalidTradeException() : PtaException(PtaExceptionParts.SelfTradeMessage, PtaExceptionParts.InvalidTradeTitle, HttpStatusCode.BadRequest)
 {
 }

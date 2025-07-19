@@ -34,6 +34,8 @@ internal class Startup(IConfiguration configuration)
                       builder.WithExposedHeaders(HeaderNames.AccessToken, HeaderNames.SessionAuth);
                   });
         });
+        services.AddSingleton<IRepositoryService, RepositoryService>();
+
         services.AddSingleton<IDexService, DexService>();
         
         services.AddSingleton<IEncryptionService, EncryptionService>();

@@ -1,6 +1,6 @@
 ﻿namespace PokemonTabletopAdventures.CoreApi.Constants;
 
-internal static class PtaExceptionParts
+public static class PtaExceptionParts
 {
     public const string EmptyImportJsonMessage = "Import json was empty";
     public const string UnauthorizedPokemonUseMessage = "This pokemon can only be accessed by it's trainer or the game master";

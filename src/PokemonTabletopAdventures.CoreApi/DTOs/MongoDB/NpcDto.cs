@@ -48,7 +48,7 @@ public class NpcDto : IPerson, IDocument
         Species = string.Empty;
     }
     /// <inheritdoc />
-    public ObjectId _id { get; set; }
+    public ObjectId Id { get; set; }
 
     /// <summary>
     /// The NPC's unique id

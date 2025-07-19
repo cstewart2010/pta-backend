@@ -1,13 +1,15 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class UserService(ITrainerService trainerService) : AbstractMongoService<UserDto>(MongoCollection.Users), IUserService
+public class UserService(
+    IRepositoryService repositoryService,
+    ITrainerService trainerService) : AbstractMongoService<UserDto>(repositoryService, MongoCollection.Users), IUserService
 {
     private readonly ITrainerService _trainerService = trainerService;
 
@@ -15,7 +17,7 @@ internal class UserService(ITrainerService trainerService) : AbstractMongoServic
     {
         await ThrowIfNull(
             userId,
-            id => Collection.FindOneAndDelete(user => user.UserId == id),
+            id => Collection.DeleteAsync(user => user.UserId == id),
             PropertyNames.UserId);
         
         var trainers = await _trainerService.GetAllUserTrainers(userId);
@@ -30,7 +32,7 @@ internal class UserService(ITrainerService trainerService) : AbstractMongoServic
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.Find(user => user.UserId == id).SingleOrDefault(),
+            id => Collection.GetOneAsync(user => user.UserId == id),
             PropertyNames.UserId);
 
         return DtoHandler.ParseFromDto(dto);
@@ -40,7 +42,7 @@ internal class UserService(ITrainerService trainerService) : AbstractMongoServic
     {
         var dto = await ThrowIfNull(
             username,
-            username => Collection.Find(user => user.Username == username).SingleOrDefault(),
+            username => Collection.GetOneAsync(user => user.Username == username),
             PropertyNames.Username);
 
         return DtoHandler.ParseFromDto(dto);
@@ -48,13 +50,13 @@ internal class UserService(ITrainerService trainerService) : AbstractMongoServic
 
     public async Task<IEnumerable<User>> GetUsers()
     {
-        var dtos = await Task.FromResult(Collection.Find(user => true).ToEnumerable());
+        var dtos = await Collection.GetManyAsync(user => true);
         return dtos.Select(DtoHandler.ParseFromDto);
     }
 
     public async Task<IEnumerable<User>> GetUsers(int offset, int limit)
     {
-        var dtos = await Task.FromResult(Collection.Find(user => true).Skip(offset).Limit(limit).ToEnumerable());
+        var dtos = await Collection.GetManyAsync(user => true, offset, limit);
         return dtos.Select(DtoHandler.ParseFromDto);
     }
 
@@ -68,12 +70,16 @@ internal class UserService(ITrainerService trainerService) : AbstractMongoServic
 
     public async Task<User> UpdateUser(User updatedUser)
     {
-        var currentUser = Collection.Find(user => user.UserId == updatedUser.UserId).SingleOrDefault();
+        var currentUser = await ThrowIfNull(
+            updatedUser.UserId,
+            userId => Collection.GetOneAsync(user => user.UserId == updatedUser.UserId),
+            PropertyNames.UserId);
         var dto = DtoHandler.ParseFromModel(updatedUser);
         dto.PasswordHash = currentUser.PasswordHash;
         dto.IsOnline = currentUser.IsOnline;
         await UpsertDocument(
-            Builders<UserDto>.Filter.Eq(user => user.UserId, updatedUser.UserId),
+            user => user.UserId,
+            updatedUser.UserId,
             dto);
 
         return await GetUserById(dto.UserId);
@@ -84,7 +90,7 @@ internal class UserService(ITrainerService trainerService) : AbstractMongoServic
         var dto = await UpdateDocument(
             userId,
             user => user.UserId == userId,
-            Builders<UserDto>.Update.Set(PropertyNames.ActivityToken, token));
+            new Models.UpdateData(PropertyNames.ActivityToken, token));
 
         return DtoHandler.ParseFromDto(dto);
     }
@@ -99,15 +105,17 @@ internal class UserService(ITrainerService trainerService) : AbstractMongoServic
         return DtoHandler.ParseFromDto(dto);
     }
 
-    private static UpdateDefinition<UserDto> UserStatusUpdate(bool isOnline)
+    private static UpdateData[] UserStatusUpdate(bool isOnline)
     {
         if (isOnline)
         {
-            return Builders<UserDto>.Update.Set(PropertyNames.IsOnline, isOnline);
+            return [new UpdateData(PropertyNames.IsOnline, isOnline)];
         }
 
-        return Builders<UserDto>.Update.Combine(
-            Builders<UserDto>.Update.Set(PropertyNames.IsOnline, isOnline),
-            Builders<UserDto>.Update.Set(PropertyNames.ActivityToken, string.Empty));
+        return
+        [
+            new UpdateData(PropertyNames.IsOnline, isOnline),
+            new UpdateData(PropertyNames.ActivityToken, string.Empty)
+        ];
     }
 }

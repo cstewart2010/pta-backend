@@ -1,5 +1,4 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -8,15 +7,13 @@ using PokemonTabletopAdventures.Models.Shops;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class ShopService : AbstractMongoService<ShopDto>, IShopService
+public class ShopService(IRepositoryService repositoryService) : AbstractMongoService<ShopDto>(repositoryService, MongoCollection.Shops), IShopService
 {
-    public ShopService() : base(MongoCollection.Shops) { }
-
     public async Task DeleteShop(Guid id, Guid gameId)
     {
         await ThrowIfNull(
             id,
-            shopId => Collection.FindOneAndDelete(shop => shop.ShopId == shopId && shop.GameId == gameId),
+            shopId => Collection.DeleteAsync(shop => shop.ShopId == shopId && shop.GameId == gameId),
             PropertyNames.ShopId);
     }
 
@@ -24,7 +21,7 @@ internal class ShopService : AbstractMongoService<ShopDto>, IShopService
     {
         await ThrowIfNull(
             gameId,
-            id => Collection.FindOneAndDelete(shop => shop.GameId == id),
+            id => Collection.DeleteAsync(shop => shop.GameId == id),
             PropertyNames.GameId);
     }
 
@@ -32,7 +29,7 @@ internal class ShopService : AbstractMongoService<ShopDto>, IShopService
     {
         var dtos = await ThrowIfNull(
             gameId,
-            id => Collection.Find(shop => shop.GameId == id).ToEnumerable(),
+            id => Collection.GetManyAsync(shop => shop.GameId == id),
             PropertyNames.GameId);
 
         return dtos.Select(DtoHandler.ParseFromDto);
@@ -42,7 +39,7 @@ internal class ShopService : AbstractMongoService<ShopDto>, IShopService
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.Find(shop => shop.GameId == gameId && shop.ShopId == id).SingleOrDefault(),
+            id => Collection.GetOneAsync(shop => shop.GameId == gameId && shop.ShopId == id),
             PropertyNames.ShopId);
 
         return DtoHandler.ParseFromDto(dto);
@@ -53,7 +50,7 @@ internal class ShopService : AbstractMongoService<ShopDto>, IShopService
         var shopIds = setting.Shops.Select(s => s.ShopId);
         var dtos = await ThrowIfNull(
             setting,
-            id => Collection.Find(shop => shopIds.Contains(shop.ShopId) && setting.GameId == shop.GameId).ToEnumerable(),
+            id => Collection.GetManyAsync(shop => shopIds.Contains(shop.ShopId) && setting.GameId == shop.GameId),
             PropertyNames.SettingShops);
 
         return dtos.Select(DtoHandler.ParseFromDto);
@@ -69,7 +66,8 @@ internal class ShopService : AbstractMongoService<ShopDto>, IShopService
     {
         var dto = DtoHandler.ParseFromModel(updatedShop);
         await UpsertDocument(
-            Builders<ShopDto>.Filter.Eq(shop => shop.ShopId, updatedShop.ShopId),
+            shop => shop.ShopId,
+            updatedShop.ShopId,
             dto);
 
         return await GetShopById(dto.ShopId, dto.GameId);

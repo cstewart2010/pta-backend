@@ -1,5 +1,4 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -7,13 +6,15 @@ using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class PokemonService(IPokedexService pokedexService) : AbstractMongoService<PokemonDto>(MongoCollection.Pokemon), IPokemonService
+public class PokemonService(
+    IRepositoryService repositoryService,
+    IPokedexService pokedexService) : AbstractMongoService<PokemonDto>(repositoryService, MongoCollection.Pokemon), IPokemonService
 {
     private readonly IPokedexService _pokedexService = pokedexService;
 
     public async Task DeletePokemonByTrainerId(Guid gameId, Guid trainerId)
     {
-        var result = Collection.DeleteMany(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
+        var result = Collection.DeleteManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
         await _pokedexService.DeleteDexItemForTrainer(trainerId, gameId);
         await Task.CompletedTask;
     }
@@ -22,7 +23,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.Find(pokemon => pokemon.PokemonId == id).SingleOrDefault(),
+            id => Collection.GetOneAsync(pokemon => pokemon.PokemonId == id),
             PropertyNames.PokemonId);
 
         return DtoHandler.ParseFromDto(dto);
@@ -32,7 +33,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
     {
         var dtos = await ThrowIfNull(
             trainerId,
-            id => Collection.Find(pokemon => pokemon.TrainerId == id).ToEnumerable(),
+            id => Collection.GetManyAsync(pokemon => pokemon.TrainerId == id),
             PropertyNames.TrainerId);
 
         return dtos.Select(DtoHandler.ParseFromDto);
@@ -42,7 +43,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
     {
         var dtos = await ThrowIfNull(
             gameId,
-            id => Collection.Find(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == id).ToEnumerable(),
+            id => Collection.GetManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == id),
             PropertyNames.GameId);
 
         return dtos.Select(DtoHandler.ParseFromDto);
@@ -58,7 +59,8 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
     {
         var dto = DtoHandler.ParseFromModel(updatePokemon);
         await UpsertDocument(
-            Builders<PokemonDto>.Filter.Eq(pokemon => pokemon.PokemonId, updatePokemon.PokemonId),
+            pokemon => pokemon.PokemonId,
+            updatePokemon.PokemonId,
             dto);
 
         return await GetPokemonById(updatePokemon.PokemonId);
@@ -69,7 +71,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
         var dto = await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonDto>.Update.Set(PropertyNames.CanEvolve, isEvolvable));
+            new Models.UpdateData(PropertyNames.CanEvolve, isEvolvable));
 
         return DtoHandler.ParseFromDto(dto);
     }
@@ -79,7 +81,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
         var dto = await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonDto>.Update.Set(PropertyNames.CurrentHP, hp));
+            new Models.UpdateData(PropertyNames.CurrentHP, hp));
 
         return DtoHandler.ParseFromDto(dto);
     }
@@ -89,7 +91,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
         var dto = await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonDto>.Update.Set(PropertyNames.IsOnActiveTeam, isOnActiveTeam));
+            new Models.UpdateData(PropertyNames.IsOnActiveTeam, isOnActiveTeam));
 
         return DtoHandler.ParseFromDto(dto);
     }
@@ -99,7 +101,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
         var dto = await UpdateDocument(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
-            Builders<PokemonDto>.Update.Set(PropertyNames.TrainerId, trainerId));
+            new Models.UpdateData(PropertyNames.TrainerId, trainerId));
 
         return DtoHandler.ParseFromDto(dto);
     }
@@ -108,7 +110,7 @@ internal class PokemonService(IPokedexService pokedexService) : AbstractMongoSer
     {
         await ThrowIfNull(
             id,
-            pokemonId => Collection.FindOneAndDelete(pokemon => pokemon.PokemonId == pokemonId),
+            pokemonId => Collection.DeleteAsync(pokemon => pokemon.PokemonId == pokemonId),
             PropertyNames.PokemonId);
     }
 }

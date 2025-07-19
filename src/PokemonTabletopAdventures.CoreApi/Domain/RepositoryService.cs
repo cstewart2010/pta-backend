@@ -2,13 +2,16 @@
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using System;
+using PokemonTabletopAdventures.CoreApi.DTOs;
+using PokemonTabletopAdventures.CoreApi.Services;
+using System.Diagnostics.CodeAnalysis;
 
-namespace PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal static class MongoCollectionHelper
+[ExcludeFromCodeCoverage]
+internal class RepositoryService : IRepositoryService
 {
-    static MongoCollectionHelper()
+    public RepositoryService()
     {
         BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.GuidRepresentation.Standard));
         var settings = GetMongoClientSettings();
@@ -20,9 +23,17 @@ internal static class MongoCollectionHelper
     /// <summary>
     /// Represents the BasePokemon Collection
     /// </summary>
-    private static IMongoDatabase Database { get; }
+    private IMongoDatabase Database { get; }
 
-    public static IMongoCollection<T> GetMongoCollection<T>(string collectionName)
+    public ICollectionService<T> GetCollection<T>(string collectionName)
+    {
+        return new CollectionService<T>()
+        {
+            Collection = GetMongoCollection<T>(collectionName)
+        };
+    }
+
+    public IMongoCollection<T> GetMongoCollection<T>(string collectionName)
     {
         return Database.GetCollection<T>(collectionName);
     }

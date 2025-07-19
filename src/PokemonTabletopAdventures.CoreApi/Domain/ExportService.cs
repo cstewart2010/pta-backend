@@ -8,14 +8,13 @@ using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Games;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 /// <summary>
 /// Provides a collection of methods to handle import/exports of game sessions
 /// </summary>
-internal class ExportService(
+public class ExportService(
     IPokemonService pokemonService,
     ITrainerService trainerService,
     IGameService gameService,

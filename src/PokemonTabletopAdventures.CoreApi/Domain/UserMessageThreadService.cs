@@ -1,5 +1,4 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -7,15 +6,13 @@ using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class UserMessageThreadService : AbstractMongoService<UserMessageThreadDto>, IUserMessageThreadService
+public class UserMessageThreadService(IRepositoryService repositoryService) : AbstractMongoService<UserMessageThreadDto>(repositoryService, MongoCollection.UserMessageThreads), IUserMessageThreadService
 {
-    public UserMessageThreadService() : base(MongoCollection.UserMessageThreads) { }
-
     public async Task<UserMessageThread> GetMessageById(Guid id)
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.Find(message => message.MessageId == id).SingleOrDefault(),
+            id => Collection.GetOneAsync(message => message.MessageId == id),
             PropertyNames.MessageId);
 
         return DtoHandler.ParseFromDto(dto);
@@ -31,7 +28,8 @@ internal class UserMessageThreadService : AbstractMongoService<UserMessageThread
     {
         var dto = DtoHandler.ParseFromModel(updatedThread);
         await UpsertDocument(
-            Builders<UserMessageThreadDto>.Filter.Eq(thread => thread.MessageId, updatedThread.MessageId),
+            thread => thread.MessageId,
+            updatedThread.MessageId,
             dto);
 
         return await GetMessageById(updatedThread.MessageId);

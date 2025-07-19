@@ -1,69 +1,63 @@
 ﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
+using PokemonTabletopAdventures.CoreApi.Services;
 using System.Linq.Expressions;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-public abstract class AbstractMongoService<T>(string collectionName)
+public abstract class AbstractMongoService<T>(
+    IRepositoryService repositoryService,
+    string collectionName)
 {
-    private static readonly ReplaceOptions UpsertOptions = new ReplaceOptions { IsUpsert = true };
+    public ICollectionService<T> Collection { get; } = repositoryService.GetCollection<T>(collectionName);
 
-    public IMongoCollection<T> Collection { get; } = MongoCollectionHelper.GetMongoCollection<T>(collectionName);
-
-    public async Task<T> ThrowIfNull<T2>(T2 entityValue, Func<T2, T> func, string entityName)
+    public async Task<T> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<T?>> func, string entityName)
     {
-        var item =  func(entityValue) ?? throw new UnknownEntityException<T>(entityName, entityValue);
-        return await Task.FromResult(item);
+        var item =  await func(entityValue) ?? throw new UnknownEntityException<T>(entityName, entityValue);
+        return item;
     }
 
-    public async Task<IEnumerable<T>> ThrowIfNull<T2>(T2 entityValue, Func<T2, IEnumerable<T>> func, string entityName)
+    public async Task<IEnumerable<T>> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<IEnumerable<T>>> func, string entityName)
     {
-        var result = func(entityValue);
+        var result = await func(entityValue);
         if (result?.Any() != true)
         {
             throw new UnknownEntityException<T>(entityName, entityValue);
         }
 
-        return await Task.FromResult(result);
+        return result;
     }
 
     public async Task PostDocument (T entity)
     {
+        await PostDocument(Collection, entity);
+    }
+
+    public async Task PostDocument<TCollection>(ICollectionService<TCollection> collection, TCollection entity)
+    {
         try
         {
-            Collection.InsertOne(entity);
+            await collection.PostAsync(entity);
         }
         catch (MongoWriteException exception)
         {
             throw new PtaMongoException(exception);
         }
-
-        await Task.CompletedTask;
     }
 
-    public async Task UpsertDocument(FilterDefinition<T> func, T entity)
+    public async Task UpsertDocument(Expression<Func<T, Guid>> filter, Guid id, T entity)
     {
-        var result = Collection.ReplaceOne(
-            func,
-            options: UpsertOptions,
-            replacement: entity);
-        if (!result.IsAcknowledged)
-        {
-            throw new UpdateException($"Failed to upsert at {typeof(T).Name}");
-        }
-
-        await Task.CompletedTask;
+        await Collection.PutAsync(filter, id, entity);
     }
 
     public async Task<T> UpdateDocument<T2>(
         T2 id,
         Expression<Func<T, bool>> filter,
-        params UpdateDefinition<T>[] updates)
+        params UpdateData[] updates)
     {
-        var update = Builders<T>.Update.Combine(updates);
-        var item = Collection.FindOneAndUpdate(filter, update)
+        var item = await Collection.PatchAsync(filter, updates)
             ?? throw new UpdateException($"Failed to update {typeof(T).Name} {id}");
-        return await Task.FromResult(item);
+        return item;
     }
 }
