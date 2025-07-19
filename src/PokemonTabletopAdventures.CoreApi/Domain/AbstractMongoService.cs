@@ -31,9 +31,14 @@ public abstract class AbstractMongoService<T>(
 
     public async Task PostDocument (T entity)
     {
+        await PostDocument(Collection, entity);
+    }
+
+    public async Task PostDocument<TCollection>(ICollectionService<TCollection> collection, TCollection entity)
+    {
         try
         {
-            await Collection.PostAsync(entity);
+            await collection.PostAsync(entity);
         }
         catch (MongoWriteException exception)
         {

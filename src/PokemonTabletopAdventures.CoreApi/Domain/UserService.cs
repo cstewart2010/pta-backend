@@ -70,7 +70,10 @@ public class UserService(
 
     public async Task<User> UpdateUser(User updatedUser)
     {
-        var currentUser = await Collection.GetOneAsync(user => user.UserId == updatedUser.UserId);
+        var currentUser = await ThrowIfNull(
+            updatedUser.UserId,
+            userId => Collection.GetOneAsync(user => user.UserId == updatedUser.UserId),
+            PropertyNames.UserId);
         var dto = DtoHandler.ParseFromModel(updatedUser);
         dto.PasswordHash = currentUser.PasswordHash;
         dto.IsOnline = currentUser.IsOnline;

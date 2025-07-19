@@ -1,5 +1,4 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
@@ -112,14 +111,7 @@ public class DexService(
                 continue;
             }
 
-            try
-            {
-                await collection.PostAsync(document);
-            }
-            catch (MongoWriteException exception)
-            {
-                throw new PtaMongoException(exception);
-            }
+            await PostDocument(collection, document);
         }
     }
 
@@ -134,14 +126,7 @@ public class DexService(
             }
 
             var dto = DtoHandler.ParseFromModel(document);
-            try
-            {
-                await Collection.PostAsync(dto);
-            }
-            catch (MongoWriteException exception)
-            {
-                throw new PtaMongoException(exception);
-            }
+            await PostDocument(dto);
         }
     }
 

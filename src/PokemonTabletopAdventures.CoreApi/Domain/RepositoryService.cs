@@ -2,6 +2,7 @@
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Diagnostics.CodeAnalysis;
 

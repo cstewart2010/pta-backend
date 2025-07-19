@@ -153,7 +153,7 @@ public class DexServiceTests
         var exception = aggregateException.InnerException as InvalidEvolutionException;
         Assert.Multiple(() =>
         {
-            Assert.That(exception.Title, Is.EqualTo(PtaExceptionParts.EvolutionErrorTitle));
+            Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.EvolutionErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"{pokemon.SpeciesName} does not know {string.Join(", ", moves)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
@@ -182,7 +182,7 @@ public class DexServiceTests
         var exception = aggregateException.InnerException as InvalidEvolutionException;
         Assert.Multiple(() =>
         {
-            Assert.That(exception.Title, Is.EqualTo(PtaExceptionParts.EvolutionErrorTitle));
+            Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.EvolutionErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"Venusaur cannot learn {string.Join(", ", moves)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
@@ -340,10 +340,10 @@ public class DexServiceTests
     }
 
     [Test]
-    [TestCase("Venusaur1", "Base", "Gigantamax", "Mega")]
-    [TestCase("Venusaur2", "Gigantamax", "Base", "Mega")]
-    [TestCase("Venusaur3", "Mega", "Base", "Gigantamax")]
-    public void GetPokedexEntry_InvalidName_ReturnPokemonForm(string name, string selectedForm, string altForm1, string altForm2)
+    [TestCase("Venusaur1", "Base")]
+    [TestCase("Venusaur2", "Gigantamax")]
+    [TestCase("Venusaur3", "Mega")]
+    public void GetPokedexEntry_InvalidName_ReturnPokemonForm(string name, string selectedForm)
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
@@ -362,10 +362,10 @@ public class DexServiceTests
     }
 
     [Test]
-    [TestCase("Venusaur", "Base1", "Gigantamax", "Mega")]
-    [TestCase("Venusaur", "Gigantamax1", "Base", "Mega")]
-    [TestCase("Venusaur", "Mega1", "Base", "Gigantamax")]
-    public void GetPokedexEntry_InvalidForm_ReturnPokemonForm(string name, string selectedForm, string altForm1, string altForm2)
+    [TestCase("Venusaur1", "Base")]
+    [TestCase("Venusaur2", "Gigantamax")]
+    [TestCase("Venusaur3", "Mega")]
+    public void GetPokedexEntry_InvalidForm_ReturnPokemonForm(string name, string selectedForm)
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {

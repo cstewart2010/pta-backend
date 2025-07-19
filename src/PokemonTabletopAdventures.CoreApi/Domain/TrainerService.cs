@@ -213,7 +213,7 @@ public class TrainerService(
     {
         var userCollection = _repositoryService.GetCollection<UserDto>(MongoCollection.Users);
         var user = await userCollection.GetOneAsync(x => x.UserId == userId);
-        user.Games.Remove(gameId);
+        user!.Games.Remove(gameId);
         
         await userCollection.PutAsync(
             user => user.UserId,

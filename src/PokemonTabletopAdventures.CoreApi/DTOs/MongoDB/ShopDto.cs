@@ -8,7 +8,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 public class ShopDto : IDocument
 {
     /// <inheritdoc/>
-    public ObjectId _id { get; set; }
+    public ObjectId Id { get; set; }
 
     /// <summary>
     /// The shop's id

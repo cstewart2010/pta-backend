@@ -9,7 +9,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 public class SettingDto : IDocument
 {
     /// <inheritdoc/>
-    public ObjectId _id { get; set; }
+    public ObjectId Id { get; set; }
 
     /// <summary>
     /// The encounter's id

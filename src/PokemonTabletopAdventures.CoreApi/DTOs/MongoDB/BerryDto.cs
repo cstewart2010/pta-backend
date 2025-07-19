@@ -11,7 +11,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 public class BerryDto : IDocument, IDexDocument
 {
     /// <inheritdoc/>
-    public ObjectId _id { get; set; }
+    public ObjectId Id { get; set; }
 
     /// <inheritdoc/>
     public string Name { get; set; } = string.Empty;
