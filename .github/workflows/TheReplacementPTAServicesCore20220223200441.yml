@@ -19,6 +19,8 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+    - name: Add Source
+      run: dotnet nuget add source --username cstewart2010 --password ${{ secrets.DEPLOY_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/cstewart2010/index.json"
     - name: Restore
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
     - name: Build
