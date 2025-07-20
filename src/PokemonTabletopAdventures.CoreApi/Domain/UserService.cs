@@ -45,7 +45,7 @@ public class UserService(
     {
         var dto = await ThrowIfNull(
             username,
-            username => Collection.GetOneAsync(user => user.Username == username),
+            username => Collection.GetOneAsync(user => user.Username.Equals(username, StringComparison.CurrentCultureIgnoreCase)),
             PropertyNames.Username);
 
         return await _dtoToModelMapper.ParseFromDto(dto);
@@ -73,13 +73,12 @@ public class UserService(
 
     public async Task<User> UpdateUser(User updatedUser)
     {
-        var currentUser = await ThrowIfNull(
-            updatedUser.UserId,
-            userId => Collection.GetOneAsync(user => user.UserId == updatedUser.UserId),
-            PropertyNames.UserId);
-        var dto = await _modelToDtoMapper.ParseFromModel(updatedUser);
-        dto.PasswordHash = currentUser.PasswordHash;
-        dto.IsOnline = currentUser.IsOnline;
+        var dto = await Collection.GetOneAsync(user => user.UserId == updatedUser.UserId);
+        dto.ActivityToken = updatedUser.ActivityToken;
+        dto.Games = updatedUser.Games;
+        dto.Messages = updatedUser.Messages;
+        dto.SiteRole = updatedUser.SiteRole;
+        dto.Username = updatedUser.Username;
         await UpsertDocument(
             user => user.UserId,
             updatedUser.UserId,
