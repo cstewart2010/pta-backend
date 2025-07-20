@@ -36,7 +36,7 @@ public class DexServiceTests
     [TestCase("Venusaur", "Base", 3)]
     public async Task GetDexEntry_Valid_ReturnIndexResponse(string name, string form, int dexNo)
     {
-        var response = await sut.GetDexEntry<BasePokemonDto>(Models.Enums.DexType.BasePokemon, name);
+        var response = await sut.GetDexEntry<BasePokemonDto>(DexType.BasePokemon, name);
         Assert.That(response, Is.Not.Null);
         Assert.That(response.Data, Is.Not.Null);
         Assert.Multiple(() =>

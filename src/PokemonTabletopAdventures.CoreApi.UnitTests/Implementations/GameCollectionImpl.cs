@@ -7,21 +7,23 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class GameCollectionImpl : ICollectionService<GameDto>
 {
-    private static readonly Guid[] Ids = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];
-
-    internal IEnumerable<GameDto> Games { get; set; } = [.. Ids.Select(x => new GameDto
+    internal IEnumerable<GameDto> Games { get; set; } = [..Enumerable.Range(0, 3).Select(x =>
     {
-        GameId = x,
-        IsOnline = true,
-        Logs = [],
-        Nickname = x.ToString(),
-        NPCs = [],
-        PasswordHash = ""
+        var id = Guid.NewGuid();
+        return new GameDto
+        {
+            GameId = id,
+            IsOnline = true,
+            Logs = [],
+            Nickname = id.ToString(),
+            NPCs = [],
+            PasswordHash = ""
+        }; 
     })];
 
     public Task<GameDto?> DeleteAsync(Expression<Func<GameDto, bool>> filter)
     {
-        return Task.FromResult(Games.FirstOrDefault(x => filter.Compile().Invoke(x)));
+        return Task.FromResult(Games.SingleOrDefault(x => filter.Compile().Invoke(x)));
     }
 
     public Task DeleteManyAsync(Expression<Func<GameDto, bool>> filter)
@@ -42,12 +44,23 @@ internal class GameCollectionImpl : ICollectionService<GameDto>
 
     public Task<GameDto?> GetOneAsync(Expression<Func<GameDto, bool>> filter)
     {
-        return Task.FromResult(Games.FirstOrDefault(x => filter.Compile().Invoke(x)));
+        return Task.FromResult(Games.SingleOrDefault(x => filter.Compile().Invoke(x)));
     }
 
     public Task<GameDto?> PatchAsync(Expression<Func<GameDto, bool>> filter, params UpdateData[] data)
     {
-        return Task.FromResult(Games.FirstOrDefault(x => filter.Compile().Invoke(x)));
+        var item = Games.SingleOrDefault(x => filter.Compile().Invoke(x));
+        if (item == null)
+        {
+            return Task.FromResult(item);
+        }
+        var properties = item.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        foreach (var part in data)
+        {
+            var property = properties.SingleOrDefault(x => x.Name.Equals(part.Field, StringComparison.OrdinalIgnoreCase));
+            property?.SetValue(item, part.Value);
+        }
+        return Task.FromResult(item)!;
     }
 
     public Task PostAsync(GameDto entity)
@@ -58,7 +71,7 @@ internal class GameCollectionImpl : ICollectionService<GameDto>
 
     public Task PutAsync(Expression<Func<GameDto, Guid>> filter, Guid id, GameDto entity)
     {
-        var game = Games.FirstOrDefault(x => filter.Compile().Invoke(x) == id)!;
+        var game = Games.SingleOrDefault(x => filter.Compile().Invoke(x) == id)!;
         game.Nickname = entity.Nickname;
         game.NPCs = entity.NPCs;
         game.Logs = entity.Logs;

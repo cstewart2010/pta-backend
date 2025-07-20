@@ -8,23 +8,26 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class UserCollectionImpl : ICollectionService<UserDto>
 {
-    private static readonly Guid[] Ids = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];
-    internal IEnumerable<UserDto> Users { get; set; } = [.. Ids.Select(x => new UserDto
+    internal IEnumerable<UserDto> Users { get; set; } = [..Enumerable.Range(0, 3).Select(x =>
     {
-        UserId = x,
-        IsOnline = true,
-        SiteRole = Models.Enums.UserRoleOnSite.Active,
-        Messages = [],
-        DateCreated = DateTime.Now,
-        Username = x.ToString(),
-        Games = [],
-        ActivityToken = "",
-        PasswordHash = ""
+        var id = Guid.NewGuid();
+        return new UserDto
+        {
+            UserId = id,
+            IsOnline = true,
+            SiteRole = Models.Enums.UserRoleOnSite.Active,
+            Messages = [],
+            DateCreated = DateTime.Now,
+            Username = id.ToString(),
+            Games = [],
+            ActivityToken = "",
+            PasswordHash = ""
+        };
     })];
 
     public Task<UserDto?> DeleteAsync(Expression<Func<UserDto, bool>> filter)
     {
-        return Task.FromResult(Users.FirstOrDefault(x => filter.Compile().Invoke(x)));
+        return Task.FromResult(Users.SingleOrDefault(x => filter.Compile().Invoke(x)));
     }
 
     public Task DeleteManyAsync(Expression<Func<UserDto, bool>> filter)
@@ -45,12 +48,23 @@ internal class UserCollectionImpl : ICollectionService<UserDto>
 
     public Task<UserDto?> GetOneAsync(Expression<Func<UserDto, bool>> filter)
     {
-        return Task.FromResult(Users.FirstOrDefault(x => filter.Compile().Invoke(x)));
+        return Task.FromResult(Users.SingleOrDefault(x => filter.Compile().Invoke(x)));
     }
 
     public Task<UserDto?> PatchAsync(Expression<Func<UserDto, bool>> filter, params UpdateData[] data)
     {
-        return Task.FromResult(Users.FirstOrDefault(x => filter.Compile().Invoke(x)));
+        var item = Users.SingleOrDefault(x => filter.Compile().Invoke(x));
+        if (item == null)
+        {
+            return Task.FromResult(item);
+        }
+        var properties = item.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        foreach (var part in data)
+        {
+            var property = properties.FirstOrDefault(x => x.Name.Equals(part.Field, StringComparison.OrdinalIgnoreCase));
+            property?.SetValue(item, part.Value);
+        }
+        return Task.FromResult(item)!;
     }
 
     public Task PostAsync(UserDto entity)
@@ -61,7 +75,7 @@ internal class UserCollectionImpl : ICollectionService<UserDto>
 
     public Task PutAsync(Expression<Func<UserDto, Guid>> filter, Guid id, UserDto entity)
     {
-        var user = Users.FirstOrDefault(x => filter.Compile().Invoke(x) == id)!;
+        var user = Users.SingleOrDefault(x => filter.Compile().Invoke(x) == id)!;
         user.SiteRole = entity.SiteRole;
         user.Messages = entity.Messages;
         user.Games = user.Games;

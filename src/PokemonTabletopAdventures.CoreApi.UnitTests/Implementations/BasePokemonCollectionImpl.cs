@@ -46,7 +46,18 @@ internal class BasePokemonCollectionImpl : ICollectionService<BasePokemonDto>
 
     public Task<BasePokemonDto?> PatchAsync(Expression<Func<BasePokemonDto, bool>> filter, params UpdateData[] data)
     {
-        return Task.FromResult(Pokemon.FirstOrDefault(x => filter.Compile().Invoke(x)));
+        var item = Pokemon.FirstOrDefault(x => filter.Compile().Invoke(x));
+        if (item == null)
+        {
+            return Task.FromResult(item);
+        }
+        var properties = item.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        foreach (var part in data)
+        {
+            var property = properties.FirstOrDefault(x => x.Name.Equals(part.Field, StringComparison.OrdinalIgnoreCase));
+            property?.SetValue(item, part.Value);
+        }
+        return Task.FromResult(item)!;
     }
 
     public Task PostAsync(BasePokemonDto entity)
