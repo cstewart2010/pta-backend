@@ -9,11 +9,13 @@ public class PokemonService(
     IRepositoryService repositoryService,
     IPokedexService pokedexService,
     IDtoToModelMapper dtoToModelMapper,
-    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<PokemonDto>(repositoryService, MongoCollection.Pokemon), IPokemonService
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<PokemonService> logger) : AbstractMongoService<PokemonDto>(repositoryService, MongoCollection.Pokemon), IPokemonService
 {
     private readonly IPokedexService _pokedexService = pokedexService;
     private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
     private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
+    private readonly ILogger<PokemonService> _logger = logger;
 
     public async Task DeletePokemonByTrainerId(Guid gameId, Guid trainerId)
     {

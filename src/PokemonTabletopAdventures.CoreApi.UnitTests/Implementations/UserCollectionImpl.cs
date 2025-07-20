@@ -1,13 +1,10 @@
-﻿using PokemonTabletopAdventures.CoreApi.Domain.Models;
-using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
-using PokemonTabletopAdventures.CoreApi.Services;
-using System.Linq.Expressions;
+﻿using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
-internal class UserCollectionImpl : ICollectionService<UserDto>
+internal class UserCollectionImpl : BaseCollectionImpl<UserDto>
 {
-    internal ICollection<UserDto> Users { get; set; } = [..Shared.UserIds.Select(x =>
+    public override ICollection<UserDto> Collection { get; set; } = [..Shared.UserIds.Select(x =>
     {
         return new UserDto
         {
@@ -22,62 +19,4 @@ internal class UserCollectionImpl : ICollectionService<UserDto>
             PasswordHash = ""
         };
     })];
-
-    public Task<UserDto?> DeleteAsync(Expression<Func<UserDto, bool>> filter)
-    {
-        return Task.FromResult(Users.SingleOrDefault(x => filter.Compile().Invoke(x)));
-    }
-
-    public Task DeleteManyAsync(Expression<Func<UserDto, bool>> filter)
-    {
-        Users = [.. Users.Where(x => !filter.Compile().Invoke(x))];
-        return Task.CompletedTask;
-    }
-
-    public Task<IEnumerable<UserDto>> GetManyAsync(Expression<Func<UserDto, bool>> filter)
-    {
-        return Task.FromResult(Users.Where(x => filter.Compile().Invoke(x)));
-    }
-
-    public Task<IEnumerable<UserDto>> GetManyAsync(Expression<Func<UserDto, bool>> filter, int offset, int limit)
-    {
-        return Task.FromResult(Users.Where(x => filter.Compile().Invoke(x)).Skip(offset).Take(limit));
-    }
-
-    public Task<UserDto?> GetOneAsync(Expression<Func<UserDto, bool>> filter)
-    {
-        return Task.FromResult(Users.SingleOrDefault(x => filter.Compile().Invoke(x)));
-    }
-
-    public Task<UserDto?> PatchAsync(Expression<Func<UserDto, bool>> filter, params UpdateData[] data)
-    {
-        var item = Users.SingleOrDefault(x => filter.Compile().Invoke(x));
-        if (item == null)
-        {
-            return Task.FromResult(item);
-        }
-        var properties = item.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-        foreach (var part in data)
-        {
-            var property = properties.FirstOrDefault(x => x.Name.Equals(part.Field, StringComparison.OrdinalIgnoreCase));
-            property?.SetValue(item, part.Value);
-        }
-        return Task.FromResult(item)!;
-    }
-
-    public Task PostAsync(UserDto entity)
-    {
-        Users.Add(entity);
-        return Task.CompletedTask;
-    }
-
-    public Task PutAsync(Expression<Func<UserDto, Guid>> filter, Guid id, UserDto entity)
-    {
-        var user = Users.SingleOrDefault(x => filter.Compile().Invoke(x) == id)!;
-        user.SiteRole = entity.SiteRole;
-        user.Messages = entity.Messages;
-        user.Games = user.Games;
-        user.IsOnline = entity.IsOnline;
-        return Task.CompletedTask;
-    }
 }

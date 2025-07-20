@@ -28,7 +28,7 @@ internal class PokedexServiceTests
     [Test]
     public async Task GetPokedexItem_Valid_ReturnsItem()
     {
-        foreach (var expectedItem in pokedexCollection.PokedexItems)
+        foreach (var expectedItem in pokedexCollection.Collection)
         {
             var actualItem = await sut.GetPokedexItem(expectedItem.TrainerId, expectedItem.GameId, expectedItem.DexNo);
             Assert.That(actualItem, Is.Not.Null);
@@ -47,7 +47,7 @@ internal class PokedexServiceTests
     [TestCaseSource(nameof(GetSearchItems), new object[] { 3 })]
     public void GetPokedexItem_Invalid_Throws(SearchItem item)
     {
-        var expectItem = pokedexCollection.PokedexItems.First();
+        var expectItem = pokedexCollection.Collection.First();
         var trainerId = item.TrainerId ?? expectItem.TrainerId;
         var gameId = item.GameId ?? expectItem.GameId;
         var dexNo = item.DexNo ?? expectItem.DexNo;
@@ -72,7 +72,7 @@ internal class PokedexServiceTests
     [Test]
     public async Task GetTrainerDex_Valid_ReturnsItems()
     {
-        var expectItem = pokedexCollection.PokedexItems.First();
+        var expectItem = pokedexCollection.Collection.First();
         var actualItem = await sut.GetTrainerPokeDex(expectItem.TrainerId, expectItem.GameId);
         Assert.That(actualItem, Is.Not.Null.Or.Empty);
         Assert.That(actualItem.Count(), Is.EqualTo(3));
@@ -90,7 +90,7 @@ internal class PokedexServiceTests
     [TestCaseSource(nameof(GetSearchItems), new object[] { 2 })]
     public void GetTrainerDex_Invalid_Throws(SearchItem item)
     {
-        var expectItem = pokedexCollection.PokedexItems.First();
+        var expectItem = pokedexCollection.Collection.First();
         var trainerId = item.TrainerId ?? expectItem.TrainerId;
         var gameId = item.GameId ?? expectItem.GameId;
         var aggregateException = Assert.Throws<AggregateException>(() =>
@@ -114,7 +114,7 @@ internal class PokedexServiceTests
     [Test]
     public async Task PostDexItem_Valid_UpdatesCollection()
     {
-        var count = pokedexCollection.PokedexItems.Count;
+        var count = pokedexCollection.Collection.Count;
         var trainerId = Guid.NewGuid();
         var gameId = Guid.NewGuid();
         var dexNo = Random.Shared.Next(0, 901);
@@ -130,15 +130,15 @@ internal class PokedexServiceTests
             Assert.That(actualItem.DexNo, Is.EqualTo(dexNo));
             Assert.That(actualItem.GameId, Is.EqualTo(gameId));
             Assert.That(actualItem.TrainerId, Is.EqualTo(trainerId));
-            Assert.That(pokedexCollection.PokedexItems, Has.Count.EqualTo(count + 1));
+            Assert.That(pokedexCollection.Collection, Has.Count.EqualTo(count + 1));
         });
     }
 
     [Test]
     public void PostDexItem_Duplicate_Throws()
     {
-        var count = pokedexCollection.PokedexItems.Count;
-        var item = pokedexCollection.PokedexItems.First();
+        var count = pokedexCollection.Collection.Count;
+        var item = pokedexCollection.Collection.First();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
             var task = sut.PostDexItem(item.TrainerId, item.GameId, item.DexNo, true, true);
@@ -152,7 +152,7 @@ internal class PokedexServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.DuplicateEntryTitle));
             Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {typeof(PokeDexItemDto).Name}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(pokedexCollection.PokedexItems, Has.Count.EqualTo(count));
+            Assert.That(pokedexCollection.Collection, Has.Count.EqualTo(count));
         });
     }
 
@@ -241,8 +241,8 @@ internal class PokedexServiceTests
     [Test]
     public async Task DeleteDexItemForTrainer_Valid_RemoveItems()
     {
-        var count = pokedexCollection.PokedexItems.Count;
-        var item = pokedexCollection.PokedexItems.First();
+        var count = pokedexCollection.Collection.Count;
+        var item = pokedexCollection.Collection.First();
         var trainerId = Guid.NewGuid();
         for (int i =0; i< 3; i++)
         {
@@ -250,19 +250,19 @@ internal class PokedexServiceTests
         }
 
         await sut.DeleteDexItemForTrainer(trainerId, item.GameId);
-        Assert.That(pokedexCollection.PokedexItems, Has.Count.EqualTo(count));
+        Assert.That(pokedexCollection.Collection, Has.Count.EqualTo(count));
     }
 
     [Test]
     [TestCaseSource(nameof(GetSearchItems), new object[] { 2 })]
     public async Task DeleteDexItemForTrainer_Invalid_DoesNotUpdateCollection(SearchItem item)
     {
-        var count = pokedexCollection.PokedexItems.Count;
-        var pokedexItem = pokedexCollection.PokedexItems.First();
+        var count = pokedexCollection.Collection.Count;
+        var pokedexItem = pokedexCollection.Collection.First();
         var trainerId = item.TrainerId ?? pokedexItem.TrainerId;
         var gameId = item.GameId ?? pokedexItem.GameId;
         await sut.DeleteDexItemForTrainer(trainerId, gameId);
-        Assert.That(pokedexCollection.PokedexItems, Has.Count.EqualTo(count));
+        Assert.That(pokedexCollection.Collection, Has.Count.EqualTo(count));
     }
 
     private static SearchItem[] GetSearchItems(int count)
