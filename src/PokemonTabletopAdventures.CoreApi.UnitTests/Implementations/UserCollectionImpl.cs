@@ -2,23 +2,21 @@
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class UserCollectionImpl : ICollectionService<UserDto>
 {
-    internal IEnumerable<UserDto> Users { get; set; } = [..Enumerable.Range(0, 3).Select(x =>
+    internal ICollection<UserDto> Users { get; set; } = [..Shared.UserIds.Select(x =>
     {
-        var id = Guid.NewGuid();
         return new UserDto
         {
-            UserId = id,
+            UserId = x,
             IsOnline = true,
             SiteRole = Models.Enums.UserRoleOnSite.Active,
             Messages = [],
             DateCreated = DateTime.Now,
-            Username = id.ToString(),
+            Username = x.ToString(),
             Games = [],
             ActivityToken = "",
             PasswordHash = ""
@@ -32,7 +30,7 @@ internal class UserCollectionImpl : ICollectionService<UserDto>
 
     public Task DeleteManyAsync(Expression<Func<UserDto, bool>> filter)
     {
-        Users = Users.Where(x => !filter.Compile().Invoke(x));
+        Users = [.. Users.Where(x => !filter.Compile().Invoke(x))];
         return Task.CompletedTask;
     }
 
@@ -69,7 +67,7 @@ internal class UserCollectionImpl : ICollectionService<UserDto>
 
     public Task PostAsync(UserDto entity)
     {
-        Users = Users.Append(entity);
+        Users.Add(entity);
         return Task.CompletedTask;
     }
 

@@ -7,23 +7,26 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class PokedexCollectionImpl : ICollectionService<PokeDexItemDto>
 {
-    private static readonly IEnumerable<Guid> GameIds = [Guid.NewGuid(), Guid.NewGuid()];
-
-    internal IEnumerable<PokeDexItemDto> PokedexItems { get; set; } = GameIds.Aggregate(new List<PokeDexItemDto>(), (current, next) =>
+    internal ICollection<PokeDexItemDto> PokedexItems { get; set; } = Shared.GameIds.Aggregate(new List<PokeDexItemDto>(), (current, next) =>
     {
-        var items = Enumerable.Range(0, 3).Select(x =>
+        var trainerItems = Shared.UserIds.Aggregate(new List<PokeDexItemDto>(), (innerCurrent, innerNext) =>
         {
-            var id = Guid.NewGuid();
-            return new PokeDexItemDto
+            var items = Enumerable.Range(0, 3).Select(x =>
             {
-                GameId = next,
-                TrainerId = id,
-                DexNo = x,
-                IsSeen = true,
-                IsCaught = Random.Shared.Next(2) == 0,
-            };
+                var id = Guid.NewGuid();
+                return new PokeDexItemDto
+                {
+                    GameId = next,
+                    TrainerId = innerNext,
+                    DexNo = x,
+                    IsSeen = true,
+                    IsCaught = Random.Shared.Next(2) == 0,
+                };
+            });
+            innerCurrent.AddRange(items);
+            return innerCurrent;
         });
-        current.AddRange(items);
+        current.AddRange(trainerItems);
         return current;
     });
 
@@ -34,7 +37,7 @@ internal class PokedexCollectionImpl : ICollectionService<PokeDexItemDto>
 
     public Task DeleteManyAsync(Expression<Func<PokeDexItemDto, bool>> filter)
     {
-        PokedexItems = PokedexItems.Where(x => !filter.Compile().Invoke(x));
+        PokedexItems = [.. PokedexItems.Where(x => !filter.Compile().Invoke(x))];
         return Task.CompletedTask;
     }
 
@@ -71,7 +74,7 @@ internal class PokedexCollectionImpl : ICollectionService<PokeDexItemDto>
 
     public Task PostAsync(PokeDexItemDto entity)
     {
-        PokedexItems = PokedexItems.Append(entity);
+        PokedexItems.Add(entity);
         return Task.CompletedTask;
     }
 

@@ -10,15 +10,15 @@ public abstract class AbstractMongoService<T>(
     IRepositoryService repositoryService,
     string collectionName)
 {
-    public ICollectionService<T> Collection { get; } = repositoryService.GetCollection<T>(collectionName);
+    protected ICollectionService<T> Collection { get; } = repositoryService.GetCollection<T>(collectionName);
 
-    public async Task<T> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<T?>> func, string entityName)
+    protected async Task<T> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<T?>> func, string entityName)
     {
         var item =  await func(entityValue) ?? throw new UnknownEntityException<T>(entityName, entityValue);
         return item;
     }
 
-    public async Task<IEnumerable<T>> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<IEnumerable<T>>> func, string entityName)
+    protected async Task<IEnumerable<T>> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<IEnumerable<T>>> func, string entityName)
     {
         var result = await func(entityValue);
         if (result?.Any() != true)
@@ -29,12 +29,22 @@ public abstract class AbstractMongoService<T>(
         return result;
     }
 
-    public async Task PostDocument (T entity)
+    protected async Task PostDocument (T entity)
     {
         await PostDocument(Collection, entity);
     }
 
-    public async Task PostDocument<TCollection>(ICollectionService<TCollection> collection, TCollection entity)
+    protected async Task PostUniqueDocument(T entity, Expression<Func<T, bool>> filter)
+    {
+        var check = await Collection.GetOneAsync(filter);
+        if (check != null)
+        {
+            throw new DuplicateEntryException(typeof(T));
+        }
+        await PostDocument(Collection, entity);
+    }
+
+    protected async Task PostDocument<TCollection>(ICollectionService<TCollection> collection, TCollection entity)
     {
         try
         {
@@ -46,12 +56,12 @@ public abstract class AbstractMongoService<T>(
         }
     }
 
-    public async Task UpsertDocument(Expression<Func<T, Guid>> filter, Guid id, T entity)
+    protected async Task UpsertDocument(Expression<Func<T, Guid>> filter, Guid id, T entity)
     {
         await Collection.PutAsync(filter, id, entity);
     }
 
-    public async Task<T> UpdateDocument<T2>(
+    protected async Task<T> UpdateDocument<T2>(
         T2 id,
         Expression<Func<T, bool>> filter,
         params UpdateData[] updates)

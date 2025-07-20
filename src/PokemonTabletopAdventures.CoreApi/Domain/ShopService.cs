@@ -1,6 +1,7 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
+using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Settings;
 using PokemonTabletopAdventures.Models.Shops;
 
@@ -64,7 +65,7 @@ public class ShopService(
     public async Task PostShop(Shop shop)
     {
         var dto = await _modelToDtoMapper.ParseFromModel(shop);
-        await PostDocument(dto);
+        await PostUniqueDocument(dto, x => x.GameId == shop.GameId && x.ShopId == shop.ShopId);
     }
 
     public async Task<Shop> UpdateShop(Shop updatedShop)

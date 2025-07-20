@@ -74,7 +74,7 @@ public class NpcService(
     public async Task PostNpc(Npc npc)
     {
         var dto = await _modelToDtoMapper.ParseFromModel(npc);
-        await PostDocument(dto);
+        await PostUniqueDocument(dto, x => x.GameId == npc.GameId && x.NPCId == npc.NpcId);
     }
 
     public async Task<Npc> UpdateNpc(Npc updatedNpc)

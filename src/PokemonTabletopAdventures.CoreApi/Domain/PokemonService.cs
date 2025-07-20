@@ -55,7 +55,7 @@ public class PokemonService(
     public async Task PostPokemon(Pokemon pokemon)
     {
         var dto = await _modelToDtoMapper.ParseFromModel(pokemon);
-        await PostDocument(dto);
+        await PostUniqueDocument(dto, x => x.PokemonId == pokemon.PokemonId);
     }
 
     public async Task<Pokemon> UpdatePokemon(Pokemon updatePokemon)

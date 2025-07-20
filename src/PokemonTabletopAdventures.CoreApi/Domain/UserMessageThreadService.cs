@@ -26,7 +26,7 @@ public class UserMessageThreadService(
     public async Task PostThread(UserMessageThread thread)
     {
         var dto = await _modelToDtoMapper.ParseFromModel(thread);
-        await PostDocument(dto);
+        await PostUniqueDocument(dto, x => x.MessageId == thread.MessageId);
     }
 
     public async Task<UserMessageThread> UpdateThread(UserMessageThread updatedThread)

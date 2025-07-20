@@ -134,7 +134,7 @@ public class TrainerService(
     public async Task PostTrainer(Trainer trainer)
     {
         var dto = await _modelToDtoMapper.ParseFromModel(trainer);
-        await PostDocument(dto);
+        await PostUniqueDocument(dto, x => trainer.TrainerId == x.TrainerId && trainer.GameId == x.GameId);
     }
 
     public async Task<Trainer> UpdateTrainer(Trainer updatedTrainer)

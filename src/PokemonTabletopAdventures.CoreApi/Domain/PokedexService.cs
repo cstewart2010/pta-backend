@@ -16,16 +16,15 @@ public class PokedexService(
 
     public async Task DeleteDexItemForTrainer(Guid trainerId, Guid gameId)
     {
-        await ThrowIfNull(
-            (trainerId, gameId),
-            x => Collection.DeleteAsync(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId),
-            PropertyNames.TrainerId);
+        await Collection.DeleteManyAsync(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId);
     }
 
     public async Task<PokedexItem> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo)
     {
-        var dto = await Collection.GetOneAsync(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo)
-             ?? throw new UnknownEntityException<PokedexItem>(PropertyNames.DexNo, dexNo);
+        var dto = await ThrowIfNull(
+            (trainerId, gameId, dexNo),
+            x => Collection.GetOneAsync(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId && dexItem.DexNo == x.dexNo),
+            $"{PropertyNames.TrainerId} {PropertyNames.GameId} {PropertyNames.DexNo}");
 
         return await _dtoToModelMapper.ParseFromDto(dto);
     }
@@ -51,15 +50,16 @@ public class PokedexService(
             DexNo = dexNo
         };
 
-        await PostDocument(dexItem);
+        await PostUniqueDocument(dexItem, x => x.GameId == gameId && x.TrainerId == trainerId && x.DexNo == dexNo);
     }
 
     public async Task<PokedexItem> UpdateDexItemIsCaught(Guid trainerId, Guid gameId, int dexNo)
     {
         var dto = await UpdateDocument(
-            dexNo,
+            (trainerId, gameId),
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
-            new Models.UpdateData(PropertyNames.IsSeen, true));
+            new Models.UpdateData(PropertyNames.IsSeen, true),
+            new Models.UpdateData(PropertyNames.IsCaught, true));
 
         return await _dtoToModelMapper.ParseFromDto(dto);
     }
@@ -67,10 +67,9 @@ public class PokedexService(
     public async Task<PokedexItem> UpdateDexItemIsSeen(Guid trainerId, Guid gameId, int dexNo)
     {
         var dto = await UpdateDocument(
-            dexNo,
+            (trainerId, gameId),
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
-            new Models.UpdateData(PropertyNames.IsSeen, true),
-            new Models.UpdateData(PropertyNames.IsCaught, true));
+            new Models.UpdateData(PropertyNames.IsSeen, true));
 
         return await _dtoToModelMapper.ParseFromDto(dto);
     }

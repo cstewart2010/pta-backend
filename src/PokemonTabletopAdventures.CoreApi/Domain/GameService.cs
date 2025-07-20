@@ -85,7 +85,7 @@ public class GameService(
     {
         var dto = await _modelToDtoMapper.ParseFromModel(game);
         dto.PasswordHash = passwordHash;
-        await PostDocument(dto);
+        await PostUniqueDocument(dto, x => x.GameId == game.GameId);
     }
 
     public async Task<Game> UpdateGameLogs(Game theGame, bool isGM, params Log[] logs)

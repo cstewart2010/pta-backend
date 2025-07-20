@@ -7,15 +7,14 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class GameCollectionImpl : ICollectionService<GameDto>
 {
-    internal IEnumerable<GameDto> Games { get; set; } = [..Enumerable.Range(0, 3).Select(x =>
+    internal ICollection<GameDto> Games { get; set; } = [..Shared.GameIds.Select(x =>
     {
-        var id = Guid.NewGuid();
         return new GameDto
         {
-            GameId = id,
+            GameId = x,
             IsOnline = true,
             Logs = [],
-            Nickname = id.ToString(),
+            Nickname = x.ToString(),
             NPCs = [],
             PasswordHash = ""
         }; 
@@ -28,7 +27,7 @@ internal class GameCollectionImpl : ICollectionService<GameDto>
 
     public Task DeleteManyAsync(Expression<Func<GameDto, bool>> filter)
     {
-        Games = Games.Where(x => !filter.Compile().Invoke(x));
+        Games = [.. Games.Where(x => !filter.Compile().Invoke(x))];
         return Task.CompletedTask;
     }
 
@@ -65,7 +64,7 @@ internal class GameCollectionImpl : ICollectionService<GameDto>
 
     public Task PostAsync(GameDto entity)
     {
-        Games = Games.Append(entity);
+        Games.Add(entity);
         return Task.CompletedTask;
     }
 

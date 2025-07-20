@@ -68,12 +68,12 @@ public class UserService(
         var dto = await _modelToDtoMapper.ParseFromModel(user);
         dto.PasswordHash = passwordHash;
         dto.IsOnline = true;
-        await PostDocument(dto);
+        await PostUniqueDocument(dto, x => x.UserId == user.UserId);
     }
 
     public async Task<User> UpdateUser(User updatedUser)
     {
-        var dto = await Collection.GetOneAsync(user => user.UserId == updatedUser.UserId);
+        var dto = (await Collection.GetOneAsync(user => user.UserId == updatedUser.UserId))!;
         dto.ActivityToken = updatedUser.ActivityToken;
         dto.Games = updatedUser.Games;
         dto.Messages = updatedUser.Messages;
