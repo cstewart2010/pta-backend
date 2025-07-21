@@ -194,16 +194,21 @@ public class DexServiceTests
     }
 
     [Test]
+    [TestCase("Bulbasaur", "Base", "NewGuy")]
+    [TestCase("Ivysaur", "Base", "NewGuy")]
     [TestCase("Venusaur", "Base", "NewGuy")]
     [TestCase("Venusaur", "Gigantamax", "NewGuy")]
     [TestCase("Venusaur", "Mega", "NewGuy")]
-    public async Task GetNewPokemon_Valid_ReturnNewPokemon(string name, string form, string nickname)
+    [TestCase("Venusaur", "Base", null)]
+    [TestCase("Venusaur", "Gigantamax", null)]
+    [TestCase("Venusaur", "Mega", null)]
+    public async Task GetNewPokemon_Valid_ReturnNewPokemon(string name, string form, string? nickname)
     {
         var newPokemon = await sut.GetNewPokemon(name, nickname, form);
         Assert.Multiple(() =>
         {
             Assert.That(newPokemon.SpeciesName, Is.EqualTo(name));
-            Assert.That(newPokemon.Nickname, Is.EqualTo(nickname));
+            Assert.That(newPokemon.Nickname, Is.EqualTo(nickname ?? name));
             Assert.That(newPokemon.Form, Is.EqualTo(form));
             Assert.That(newPokemon.AlternateForms, Does.Not.Contain(form));
         });

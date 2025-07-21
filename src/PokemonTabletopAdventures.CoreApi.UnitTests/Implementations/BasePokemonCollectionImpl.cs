@@ -10,6 +10,7 @@ internal class BasePokemonCollectionImpl : BaseCollectionImpl<BasePokemonDto>
             Form = Shared.Pokemon[x].Form,
             Name = Shared.Pokemon[x].Name,
             EvolvesFrom = Shared.Pokemon[x].EvolvesFrom,
-            Moves = [Shared.PokemonMoves[x]]
+            Moves = [Shared.PokemonMoves[x]],
+            Rarity = Shared.Pokemon[x].Rarity
         })];
 }
