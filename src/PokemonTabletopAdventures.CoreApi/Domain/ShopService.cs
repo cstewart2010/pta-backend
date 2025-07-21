@@ -1,7 +1,6 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Settings;
 using PokemonTabletopAdventures.Models.Shops;
 

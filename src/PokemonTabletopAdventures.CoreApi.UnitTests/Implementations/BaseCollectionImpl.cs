@@ -1,5 +1,6 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.Services;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
@@ -10,7 +11,12 @@ internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto>
 
     public Task<TDto?> DeleteAsync(Expression<Func<TDto, bool>> filter)
     {
-        return Task.FromResult(Collection.FirstOrDefault(x => filter.Compile().Invoke(x)));
+        var item = Collection.FirstOrDefault(x => filter.Compile().Invoke(x));
+        if (item != null)
+        {
+            Collection.Remove(item);
+        }
+        return Task.FromResult(item);
     }
 
     public Task DeleteManyAsync(Expression<Func<TDto, bool>> filter)

@@ -54,8 +54,15 @@ internal class CollectionService<TDto>() : ICollectionService<TDto>
 
     public async Task PostAsync(TDto entity)
     {
-        Collection.InsertOne(entity);
-        await Task.CompletedTask;
+        try
+        {
+            Collection.InsertOne(entity);
+            await Task.CompletedTask;
+        }
+        catch (MongoWriteException exception)
+        {
+            throw new PtaMongoException(exception);
+        }
     }
 
     public async Task PutAsync(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity)

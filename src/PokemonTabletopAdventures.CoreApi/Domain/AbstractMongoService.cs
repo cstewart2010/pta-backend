@@ -46,14 +46,7 @@ public abstract class AbstractMongoService<T>(
 
     protected async Task PostDocument<TCollection>(ICollectionService<TCollection> collection, TCollection entity)
     {
-        try
-        {
-            await collection.PostAsync(entity);
-        }
-        catch (MongoWriteException exception)
-        {
-            throw new PtaMongoException(exception);
-        }
+        await collection.PostAsync(entity);
     }
 
     protected async Task UpsertDocument(Expression<Func<T, Guid>> filter, Guid id, T entity)

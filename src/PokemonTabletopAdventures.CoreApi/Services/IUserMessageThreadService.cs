@@ -21,4 +21,11 @@ public interface IUserMessageThreadService
     /// </summary>
     /// <param name="updatedThread">The updated thread data</param>
     public Task<UserMessageThread> UpdateThread(UserMessageThread updatedThread);
+
+
+    /// <summary>
+    /// Attempts to delete a message thread matching the id
+    /// </summary>
+    /// <param name="id">The message id</param>
+    public Task DeleteThread(Guid id);
 }

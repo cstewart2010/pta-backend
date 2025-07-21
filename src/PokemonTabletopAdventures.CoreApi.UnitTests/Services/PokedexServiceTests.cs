@@ -276,11 +276,4 @@ internal class PokedexServiceTests
 
         return [.. items.Take(count)];
     }
-
-    public class SearchItem
-    {
-        public Guid? TrainerId { get; set; }
-        public Guid? GameId { get; set; }
-        public int? DexNo { get; set; }
-    }
 }
