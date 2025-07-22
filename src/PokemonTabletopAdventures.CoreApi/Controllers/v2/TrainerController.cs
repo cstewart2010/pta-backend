@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -22,7 +21,9 @@ public class TrainerController(
     IDexService dexUtility,
     IPokedexService pokedexService,
     IEncryptionService encryptionService,
-    ILogger<TrainerController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService)
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<TrainerController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
     private readonly ILogger<TrainerController> _logger = logger;
 
@@ -452,7 +453,7 @@ public class TrainerController(
     {
         var origin = await DexService.GetDexEntry<OriginDto>(DexType.Origins, trainer.Origin);
         var collection = await Task.WhenAll(origin.Data.StartingEquipmentList.Select(ConvertStartingEquipment));
-        trainer.Items = [.. collection.Select(DtoHandler.ParseFromDto)];
+        trainer.Items = await Task.WhenAll(collection.Select(DtoToModelMapper.ParseFromDto));
     }
 
     private async Task<ICollection<Trainer>> GetTrainers(Guid gameId)
@@ -470,7 +471,7 @@ public class TrainerController(
             StartingEquipmentType.Medical => await DexService.GetDexEntry<BaseItemDto>(DexType.MedicalItems, s.Name),
             StartingEquipmentType.Berry => await DexService.GetDexEntry<BaseItemDto>(DexType.Berries, s.Name),
             StartingEquipmentType.Pokemon => await DexService.GetDexEntry<BaseItemDto>(DexType.PokemonItems, s.Name),
-            _ => throw new ArgumentOutOfRangeException(nameof(s.Type)),
+            _ => throw new UnknownEntityException<SettingParticipantType>(nameof(s.Type), s.Type),
         };
         var item = new ItemDto
         {

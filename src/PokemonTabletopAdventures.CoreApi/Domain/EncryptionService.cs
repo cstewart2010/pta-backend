@@ -5,12 +5,16 @@ using PokemonTabletopAdventures.CoreApi.Services;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-public class EncryptionService(IRepositoryService repositoryService) : IEncryptionService
+public class EncryptionService(
+    IRepositoryService repositoryService,
+    ILogger<EncryptionService> logger) : IEncryptionService
 {
     private readonly IRepositoryService _repositoryService = repositoryService;
-    public async Task<string> GenerateToken()
+    private readonly ILogger<EncryptionService> _logger = logger;
+
+    public async Task<string> GenerateToken(DateTime generationTime)
     {
-        byte[] time = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
+        byte[] time = BitConverter.GetBytes(generationTime.ToBinary());
         return await Task.FromResult(Convert.ToBase64String(time));
     }
 
@@ -19,22 +23,25 @@ public class EncryptionService(IRepositoryService repositoryService) : IEncrypti
         return await Task.FromResult(BCrypt.Net.BCrypt.HashPassword(secret));
     }
 
-    public async Task ValidateToken(string token)
+    public async Task ValidateToken(string token, DateTime checkTime)
     {
         if (string.IsNullOrEmpty(token))
         {
             throw new PtaUnauthorizedException(PtaExceptionParts.EmptyTokenMessage);
         }
 
-        byte[] data = Convert.FromBase64String(token);
-        if (data.Length != 8)
+        byte[] data;
+        try
         {
-            throw new PtaUnauthorizedException(PtaExceptionParts.ImproperTokenMessage);
+            data = Convert.FromBase64String(token);
+        }
+        catch (Exception ex)
+        {
+            throw new PtaUnauthorizedException(ex.Message);
         }
 
         DateTime tokenTime = DateTime.FromBinary(BitConverter.ToInt64(data));
-        var now = DateTime.UtcNow;
-        if (tokenTime >= now.AddHours(-1) && tokenTime <= now)
+        if (tokenTime.AddHours(1) <= checkTime || tokenTime >= checkTime)
         {
             throw new PtaUnauthorizedException(PtaExceptionParts.ExpiredTokenMessage);
         }

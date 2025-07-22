@@ -20,7 +20,9 @@ public class PokemonController(
     IGameService gameService,
     IDexService dexUtility,
     IEncryptionService encryptionService,
-    ILogger<PokemonController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService)
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<PokemonController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
     private readonly ILogger<PokemonController> _logger = logger;
 

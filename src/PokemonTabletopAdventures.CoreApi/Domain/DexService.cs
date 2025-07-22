@@ -1,5 +1,4 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -14,10 +13,14 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 public class DexService(
     IRepositoryService repositoryService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
     ILogger<DexService> logger) : AbstractMongoService<BasePokemonDto>(repositoryService, MongoCollection.BasePokemon), IDexService
 {
     private readonly ILogger<DexService> _logger = logger;
     private readonly IRepositoryService _repositoryService = repositoryService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task<IEnumerable<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
     {
@@ -59,7 +62,7 @@ public class DexService(
             .Select(document => document.Form);
         return new PokemonAndForms
         {
-            Pokemon = DtoHandler.ParseFromDto(model),
+            Pokemon = await _dtoToModelMapper.ParseFromDto(model),
             AlternateForms = [.. alternateForms]
         };
     }
@@ -67,7 +70,7 @@ public class DexService(
     public async Task<IEnumerable<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon)
     {
         var allEvolutions = await Collection.GetManyAsync(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase));
-        var forms = allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(DtoHandler.ParseFromDto);
+        var forms = await Task.WhenAll(allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(_dtoToModelMapper.ParseFromDto));
         return forms;
     }
 
@@ -125,7 +128,7 @@ public class DexService(
                 continue;
             }
 
-            var dto = DtoHandler.ParseFromModel(document);
+            var dto = await _modelToDtoMapper.ParseFromModel(document);
             await PostDocument(dto);
         }
     }
@@ -155,7 +158,7 @@ public class DexService(
             throw new InvalidEvolutionException($"{basePokemon.Name} cannot learn {string.Join(", ", invalidMoves)}");
         }
 
-        return await Task.FromResult(new Pokemon
+        return new Pokemon
         {
             PokemonId = pokemon.PokemonId,
             DexNo = basePokemon.DexNo,
@@ -193,7 +196,7 @@ public class DexService(
             CurrentHP = pokemon.CurrentHP,
             GameId = pokemon.GameId,
             Pokeball = pokemon.Pokeball
-        });
+        };
     }
 
     private static Pokemon GetPokemonFromBase(

@@ -60,7 +60,7 @@ internal static class RequestExtensions
             throw new Exceptions.PtaUnauthorizedException(PtaExceptionParts.ExpiredTokenMessage);
         }
 
-        encryptionService.ValidateToken(accessToken);
+        encryptionService.ValidateToken(accessToken, DateTime.UtcNow);
         encryptionService.VerifySecret(AuthKey, sessionAuth);
 #endif
     }

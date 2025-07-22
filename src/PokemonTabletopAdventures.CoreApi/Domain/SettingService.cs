@@ -1,5 +1,4 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Settings;
@@ -8,9 +7,13 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 public class SettingService(
     IRepositoryService repositoryService,
-    IShopService shopService) : AbstractMongoService<SettingDto>(repositoryService, MongoCollection.Settings), ISettingService
+    IShopService shopService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<SettingDto>(repositoryService, MongoCollection.Settings), ISettingService
 {
     private readonly IShopService _shopService = shopService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task DeleteSetting(Guid id)
     {
@@ -36,7 +39,7 @@ public class SettingService(
             return null;
         }
 
-        return await DtoHandler.ParseFromDto(dto, isGM, gameId, _shopService);
+        return await _dtoToModelMapper.ParseFromDto(dto, isGM, gameId, _shopService);
     }
 
     public async Task<IEnumerable<Setting>> GetAllSettings(Guid gameId)
@@ -46,7 +49,7 @@ public class SettingService(
             id => Collection.GetManyAsync(setting => setting.GameId == gameId && setting.IsActive),
             PropertyNames.GameId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, true, gameId, _shopService)));
+        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, true, gameId, _shopService)));
     }
 
     public async Task<Setting> GetSetting(Guid settingId, bool isGM)
@@ -56,18 +59,18 @@ public class SettingService(
             id => Collection.GetOneAsync(setting => setting.SettingId == settingId && setting.IsActive),
             PropertyNames.SettingId);
 
-        return await DtoHandler.ParseFromDto(dto, isGM, dto.GameId, _shopService);
+        return await _dtoToModelMapper.ParseFromDto(dto, isGM, dto.GameId, _shopService);
     }
 
     public async Task PostSetting(Setting setting)
     {
-        var dto = DtoHandler.ParseFromModel(setting);
+        var dto = await _modelToDtoMapper.ParseFromModel(setting);
         await PostDocument(dto);
     }
 
     public async Task<Setting> UpdateSetting(Setting updatedSetting, bool isGM)
     {
-        var dto = DtoHandler.ParseFromModel(updatedSetting);
+        var dto = await _modelToDtoMapper.ParseFromModel(updatedSetting);
         await UpsertDocument(
             setting => setting.SettingId,
             updatedSetting.SettingId,

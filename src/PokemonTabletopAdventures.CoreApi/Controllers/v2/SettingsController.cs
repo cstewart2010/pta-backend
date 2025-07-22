@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -28,7 +27,9 @@ public class SettingsController(
     IEncryptionService encryptionService,
     INpcService npcService,
     IPokedexService pokedexService,
-    ILogger<SettingsController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService)
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<SettingsController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
     private readonly ILogger<SettingsController> _logger = logger;
     private readonly ISettingService _settingService = settingService;
@@ -417,7 +418,7 @@ public class SettingsController(
 
         var gm = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var newSettingLog = new LogDto(user: gm.TrainerName, action: $"activated a new encounter ({setting.Name})");
-        await GameService.UpdateGameLogs(game, true, DtoHandler.ParseFromDto(newSettingLog));
+        await GameService.UpdateGameLogs(game, true, await DtoToModelMapper.ParseFromDto(newSettingLog));
         return Ok();
     }
 
@@ -516,7 +517,7 @@ public class SettingsController(
         var removalLog = new LogDto(
             user: removedParticipant.Name,
             action: $"has been removed from {setting.Name}");
-        await GameService.UpdateGameLogs(game, isGm, DtoHandler.ParseFromDto(removalLog));
+        await GameService.UpdateGameLogs(game, isGm, await DtoToModelMapper.ParseFromDto(removalLog));
         return Ok();
     }
 
@@ -622,16 +623,16 @@ public class SettingsController(
     {
         var dto =  participant.Type switch
         {
-            SettingParticipantType.Trainer => SettingParticipantModel.FromTrainer(DtoHandler.ParseFromModel(await TrainerService.GetTrainerById(participant.ParticipantId, gameId)), participant.Position),
-            SettingParticipantType.Pokemon => SettingParticipantModel.FromPokemon(DtoHandler.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
-            SettingParticipantType.EnemyNpc => SettingParticipantModel.FromNpc(DtoHandler.ParseFromModel(await _npcService.GetNpc(participant.ParticipantId)), participant.Position, participant.Type),
-            SettingParticipantType.EnemyPokemon => SettingParticipantModel.FromPokemon(DtoHandler.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
-            SettingParticipantType.NeutralNpc => SettingParticipantModel.FromNpc(DtoHandler.ParseFromModel(await _npcService.GetNpc(participant.ParticipantId)), participant.Position, participant.Type),
-            SettingParticipantType.NeutralPokemon => SettingParticipantModel.FromPokemon(DtoHandler.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
-            _ => throw new ArgumentOutOfRangeException(nameof(participant.Type)),
+            SettingParticipantType.Trainer => SettingParticipantModel.FromTrainer(await ModelToDtoMapper.ParseFromModel(await TrainerService.GetTrainerById(participant.ParticipantId, gameId)), participant.Position),
+            SettingParticipantType.Pokemon => SettingParticipantModel.FromPokemon(await ModelToDtoMapper.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
+            SettingParticipantType.EnemyNpc => SettingParticipantModel.FromNpc(await ModelToDtoMapper.ParseFromModel(await _npcService.GetNpc(participant.ParticipantId)), participant.Position, participant.Type),
+            SettingParticipantType.EnemyPokemon => SettingParticipantModel.FromPokemon(await ModelToDtoMapper.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
+            SettingParticipantType.NeutralNpc => SettingParticipantModel.FromNpc(await ModelToDtoMapper.ParseFromModel(await _npcService.GetNpc(participant.ParticipantId)), participant.Position, participant.Type),
+            SettingParticipantType.NeutralPokemon => SettingParticipantModel.FromPokemon(await ModelToDtoMapper.ParseFromModel(await PokemonService.GetPokemonById(participant.ParticipantId)), participant.Position, participant.Type),
+            _ => throw new UnknownEntityException<SettingParticipantType>(nameof(participant.Type), participant.Type),
         };
 
-        return DtoHandler.ParseFromDto(dto);
+        return await DtoToModelMapper.ParseFromDto(dto);
     }
 
     private async Task SendRepositionLog(Guid gameId, string participantName, MapPosition position)

@@ -4,13 +4,13 @@ using Newtonsoft.Json;
 using NSubstitute;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain;
-using PokemonTabletopAdventures.CoreApi.Domain.Models;
+using PokemonTabletopAdventures.CoreApi.Domain.Mappers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
+using PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Pokemons;
-using System.Linq.Expressions;
 using System.Net;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Services;
@@ -25,9 +25,9 @@ public class DexServiceTests
     public void SetUp()
     {
         var mockRepository = Substitute.For<IRepositoryService>();
-        mockRepository.GetCollection<BasePokemonDto>(MongoCollection.BasePokemon).Returns(new CollectionServiceImpl());
+        mockRepository.GetCollection<BasePokemonDto>(MongoCollection.BasePokemon).Returns(new BasePokemonCollectionImpl());
         var mockLogger = Substitute.For<ILogger<DexService>>();
-        sut = new DexService(mockRepository, mockLogger);
+        sut = new DexService(mockRepository, new DtoToModelMapper(), new ModelToDtoMapper(), mockLogger);
         pokemon = JsonConvert.DeserializeObject<Pokemon>("{\r\n    \"speciesName\": \"Ivysaur\",\r\n    \"dexNo\": 2,\r\n    \"form\": \"Base\",\r\n    \"normalPortrait\": \"ivysaur\",\r\n    \"shinyPortrait\": \"ivysaur\",\r\n    \"pokemonStats\": {\r\n      \"hp\": 36,\r\n      \"attack\": 6,\r\n      \"defense\": 6,\r\n      \"specialAttack\": 8,\r\n      \"specialDefense\": 8,\r\n      \"speed\": 6\r\n    },\r\n    \"type\": \"Grass/Poison\",\r\n    \"size\": \"Medium\",\r\n    \"weight\": \"Medium\",\r\n    \"moves\": [\r\n      \"Poison Powder\",\r\n      \"Sleep Powder\",\r\n      \"Razor Leaf\"\r\n    ],\r\n    \"skills\": [\r\n      \"Sprouter\",\r\n      \"Threaded\"\r\n    ],\r\n    \"passives\": [\r\n      \"Growth\",\r\n      \"Growl\",\r\n      \"Overgrow\"\r\n    ],\r\n    \"proficiencies\": [\r\n      \"Grass\",\r\n      \"Poison\",\r\n      \"Floral\",\r\n      \"Vine Whip\"\r\n    ],\r\n    \"eggGroups\": [\r\n      \"Monster\",\r\n      \"Grass\"\r\n    ],\r\n    \"eggHatchRate\": \"10 Days\",\r\n    \"habitats\": [\r\n      \"Forest\",\r\n      \"Jungle\"\r\n    ],\r\n    \"diet\": \"Phototroph\",\r\n    \"rarity\": \"Rare\",\r\n    \"stage\": 2,\r\n    \"specialFormName\": \"\",\r\n    \"baseFormName\": \"\",\r\n    \"gMaxMove\": \"\",\r\n    \"evolvesFrom\": \"Bulbasaur\",\r\n    \"legendaryStats\": {\r\n      \"hp\": 0,\r\n      \"moves\": [],\r\n      \"legendaryMoves\": [],\r\n      \"passives\": [],\r\n      \"features\": []\r\n    }\r\n  }")!;
         pokemon2 = JsonConvert.DeserializeObject<Pokemon>("{\r\n    \"speciesName\": \"Ivysaur1\",\r\n    \"dexNo\": 2,\r\n    \"form\": \"Base\",\r\n    \"normalPortrait\": \"ivysaur\",\r\n    \"shinyPortrait\": \"ivysaur\",\r\n    \"pokemonStats\": {\r\n      \"hp\": 36,\r\n      \"attack\": 6,\r\n      \"defense\": 6,\r\n      \"specialAttack\": 8,\r\n      \"specialDefense\": 8,\r\n      \"speed\": 6\r\n    },\r\n    \"type\": \"Grass/Poison\",\r\n    \"size\": \"Medium\",\r\n    \"weight\": \"Medium\",\r\n    \"moves\": [\r\n      \"Poison Powder\",\r\n      \"Sleep Powder\",\r\n      \"Razor Leaf\"\r\n    ],\r\n    \"skills\": [\r\n      \"Sprouter\",\r\n      \"Threaded\"\r\n    ],\r\n    \"passives\": [\r\n      \"Growth\",\r\n      \"Growl\",\r\n      \"Overgrow\"\r\n    ],\r\n    \"proficiencies\": [\r\n      \"Grass\",\r\n      \"Poison\",\r\n      \"Floral\",\r\n      \"Vine Whip\"\r\n    ],\r\n    \"eggGroups\": [\r\n      \"Monster\",\r\n      \"Grass\"\r\n    ],\r\n    \"eggHatchRate\": \"10 Days\",\r\n    \"habitats\": [\r\n      \"Forest\",\r\n      \"Jungle\"\r\n    ],\r\n    \"diet\": \"Phototroph\",\r\n    \"rarity\": \"Rare\",\r\n    \"stage\": 2,\r\n    \"specialFormName\": \"\",\r\n    \"baseFormName\": \"\",\r\n    \"gMaxMove\": \"\",\r\n    \"evolvesFrom\": \"Bulbasaur\",\r\n    \"legendaryStats\": {\r\n      \"hp\": 0,\r\n      \"moves\": [],\r\n      \"legendaryMoves\": [],\r\n      \"passives\": [],\r\n      \"features\": []\r\n    }\r\n  }")!;
     }
@@ -54,7 +54,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetDexEntry<BasePokemonDto>(Models.Enums.DexType.BasePokemon, itemName);
+            var task = sut.GetDexEntry<BasePokemonDto>(DexType.BasePokemon, itemName);
             task.Wait();
         });
 
@@ -434,64 +434,5 @@ public class DexServiceTests
             [[], ["Super Cool Move"]],
             [["Poison Powder"], ["Super Cool Move"]],
         ];
-    }
-
-    private class CollectionServiceImpl : ICollectionService<BasePokemonDto>
-    {
-        private static readonly string[] Forms = ["Base", "Gigantamax", "Mega"];
-        private static IEnumerable<BasePokemonDto> Pokemon = [.. Forms.Select(x => new BasePokemonDto
-        {
-            DexNo = 3,
-            Form = x,
-            Name = "Venusaur",
-            EvolvesFrom = "Ivysaur",
-            Moves = ["Super Cool Move"]
-        })];
-
-        public Task<BasePokemonDto?> DeleteAsync(Expression<Func<BasePokemonDto, bool>> filter)
-        {
-            return Task.FromResult(Pokemon.FirstOrDefault(x => filter.Compile().Invoke(x)));
-        }
-
-        public Task DeleteManyAsync(Expression<Func<BasePokemonDto, bool>> filter)
-        {
-            Pokemon = Pokemon.Where(x => !filter.Compile().Invoke(x));
-            return Task.CompletedTask;
-        }
-
-        public Task<IEnumerable<BasePokemonDto>> GetManyAsync(Expression<Func<BasePokemonDto, bool>> filter)
-        {
-            return Task.FromResult(Pokemon.Where(x => filter.Compile().Invoke(x)));
-        }
-
-        public Task<IEnumerable<BasePokemonDto>> GetManyAsync(Expression<Func<BasePokemonDto, bool>> filter, int offset, int limit)
-        {
-            return Task.FromResult(Pokemon.Where(x => filter.Compile().Invoke(x)).Skip(offset).Take(limit));
-        }
-
-        public Task<BasePokemonDto?> GetOneAsync(Expression<Func<BasePokemonDto, bool>> filter)
-        {
-            return Task.FromResult(Pokemon.FirstOrDefault(x => filter.Compile().Invoke(x)));
-        }
-
-        public Task<BasePokemonDto?> PatchAsync(Expression<Func<BasePokemonDto, bool>> filter, params UpdateData[] data)
-        {
-            return Task.FromResult(Pokemon.FirstOrDefault(x => filter.Compile().Invoke(x)));
-        }
-
-        public Task PostAsync(BasePokemonDto entity)
-        {
-            Pokemon = Pokemon.Append(entity);
-            return Task.CompletedTask;
-        }
-
-        public Task PutAsync(Expression<Func<BasePokemonDto, Guid>> filter, Guid id, BasePokemonDto entity)
-        {
-            var pokemon = Pokemon.FirstOrDefault(x => filter.Compile().Invoke(x) == id)!;
-            pokemon.Name = entity.Name;
-            pokemon.Form = entity.Form;
-            pokemon.DexNo = entity.DexNo;
-            return Task.CompletedTask;
-        }
     }
 }

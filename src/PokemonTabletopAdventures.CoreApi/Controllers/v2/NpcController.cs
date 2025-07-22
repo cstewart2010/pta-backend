@@ -16,7 +16,9 @@ public class NpcController(
     IDexService dexUtility,
     IPokedexService pokedexService,
     IEncryptionService encryptionService,
-    ILogger<NpcController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService)
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<NpcController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
     private readonly INpcService _npcService = npcService;
     private readonly ILogger<NpcController> _logger = logger;

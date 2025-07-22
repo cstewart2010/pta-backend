@@ -1,5 +1,4 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Pokemons;
@@ -8,9 +7,13 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 public class PokemonService(
     IRepositoryService repositoryService,
-    IPokedexService pokedexService) : AbstractMongoService<PokemonDto>(repositoryService, MongoCollection.Pokemon), IPokemonService
+    IPokedexService pokedexService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<PokemonDto>(repositoryService, MongoCollection.Pokemon), IPokemonService
 {
     private readonly IPokedexService _pokedexService = pokedexService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task DeletePokemonByTrainerId(Guid gameId, Guid trainerId)
     {
@@ -26,7 +29,7 @@ public class PokemonService(
             id => Collection.GetOneAsync(pokemon => pokemon.PokemonId == id),
             PropertyNames.PokemonId);
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId)
@@ -36,7 +39,7 @@ public class PokemonService(
             id => Collection.GetManyAsync(pokemon => pokemon.TrainerId == id),
             PropertyNames.TrainerId);
 
-        return dtos.Select(DtoHandler.ParseFromDto);
+        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
     }
 
     public async Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId, Guid gameId)
@@ -46,18 +49,18 @@ public class PokemonService(
             id => Collection.GetManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == id),
             PropertyNames.GameId);
 
-        return dtos.Select(DtoHandler.ParseFromDto);
+        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
     }
 
     public async Task PostPokemon(Pokemon pokemon)
     {
-        var dto = DtoHandler.ParseFromModel(pokemon);
+        var dto = await _modelToDtoMapper.ParseFromModel(pokemon);
         await PostDocument(dto);
     }
 
     public async Task<Pokemon> UpdatePokemon(Pokemon updatePokemon)
     {
-        var dto = DtoHandler.ParseFromModel(updatePokemon);
+        var dto = await _modelToDtoMapper.ParseFromModel(updatePokemon);
         await UpsertDocument(
             pokemon => pokemon.PokemonId,
             updatePokemon.PokemonId,
@@ -73,7 +76,7 @@ public class PokemonService(
             pokemon => pokemon.PokemonId == pokemonId,
             new Models.UpdateData(PropertyNames.CanEvolve, isEvolvable));
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<Pokemon> UpdatePokemonHP(Guid pokemonId, int hp)
@@ -83,7 +86,7 @@ public class PokemonService(
             pokemon => pokemon.PokemonId == pokemonId,
             new Models.UpdateData(PropertyNames.CurrentHP, hp));
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<Pokemon> UpdatePokemonLocation(Guid pokemonId, bool isOnActiveTeam)
@@ -93,7 +96,7 @@ public class PokemonService(
             pokemon => pokemon.PokemonId == pokemonId,
             new Models.UpdateData(PropertyNames.IsOnActiveTeam, isOnActiveTeam));
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<Pokemon> UpdatePokemonTrainerId(Guid pokemonId, Guid trainerId)
@@ -103,7 +106,7 @@ public class PokemonService(
             pokemon => pokemon.PokemonId == pokemonId,
             new Models.UpdateData(PropertyNames.TrainerId, trainerId));
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task DeletePokemon(Guid id)

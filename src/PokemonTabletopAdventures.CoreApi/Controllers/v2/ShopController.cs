@@ -18,7 +18,9 @@ public class ShopController(
     ISettingService settingService,
     IPokedexService pokedexService,
     IEncryptionService encryptionService,
-    ILogger<ShopController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexService, pokedexService, encryptionService)
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<ShopController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexService, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
 	private readonly ILogger<ShopController> _logger = logger;
 	private readonly IShopService _shopService = shopService;

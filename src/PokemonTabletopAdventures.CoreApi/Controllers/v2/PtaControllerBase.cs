@@ -21,7 +21,9 @@ public abstract class PtaControllerBase(
     IGameService gameService,
     IDexService dexService,
     IPokedexService pokedexService,
-    IEncryptionService encryptionService) : ControllerBase
+    IEncryptionService encryptionService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : ControllerBase
 {
     private readonly IEncryptionService _encryptionService = encryptionService;
     public IUserService UserService { get; } = userService;
@@ -30,6 +32,8 @@ public abstract class PtaControllerBase(
     public IGameService GameService { get; } = gameService;
     public IDexService DexService { get; } = dexService;
     public IPokedexService PokedexService { get; } = pokedexService;
+    public IDtoToModelMapper DtoToModelMapper { get; } = dtoToModelMapper;
+    public IModelToDtoMapper ModelToDtoMapper { get; } = modelToDtoMapper;
 
     protected async Task<Pokemon> BuildPokemon(
         Guid trainerId,
