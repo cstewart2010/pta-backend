@@ -5,7 +5,7 @@ public interface IEncryptionService
     /// <summary>
     /// Generates a time-based access token for checking against idle users
     /// </summary>
-    public Task<string> GenerateToken();
+    public Task<string> GenerateToken(DateTime generationTime);
 
     /// <summary>
     /// Encrypts a password for storage
@@ -17,7 +17,7 @@ public interface IEncryptionService
     /// Returns true if the token falls withing the time span
     /// </summary>
     /// <param name="token"></param>
-    public Task ValidateToken(string token);
+    public Task ValidateToken(string token, DateTime checkTime);
 
     /// <summary>
     /// Verifys that the secret matches the encryption

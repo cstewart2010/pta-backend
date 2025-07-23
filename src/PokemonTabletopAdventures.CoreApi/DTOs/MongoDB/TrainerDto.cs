@@ -47,7 +47,7 @@ public class TrainerDto : IPerson, IDocument
     }
 
     /// <inheritdoc />
-    public ObjectId _id { get; set; }
+    public ObjectId Id { get; set; }
 
     /// <summary>
     /// The PTA game session id

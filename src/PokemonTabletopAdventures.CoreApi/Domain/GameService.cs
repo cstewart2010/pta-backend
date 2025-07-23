@@ -1,6 +1,4 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Games;
@@ -8,20 +6,25 @@ using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class GameService(
+public class GameService(
+    IRepositoryService repositoryService,
     ITrainerService trainerService,
     INpcService npcService,
-    ISettingService settingService) : AbstractMongoService<GameDto>(MongoCollection.Games), IGameService
+    ISettingService settingService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<GameDto>(repositoryService, MongoCollection.Games), IGameService
 {
     private readonly ITrainerService _trainerService = trainerService;
     private readonly INpcService _npcService = npcService;
     private readonly ISettingService _settingService = settingService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task DeleteGame(Guid id)
     {
         await ThrowIfNull(
             id,
-            gameId => Collection.FindOneAndDelete(game => game.GameId == gameId),
+            gameId => Collection.DeleteAsync(game => game.GameId == gameId),
             PropertyNames.GameId);
     }
 
@@ -29,30 +32,30 @@ internal class GameService(
     {
         var dtos = await ThrowIfNull(
             nickname,
-            name => Collection.Find(game => game.Nickname.Contains(name, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable(),
+            name => Collection.GetManyAsync(game => game.Nickname.Contains(name, StringComparison.CurrentCultureIgnoreCase)),
             PropertyNames.Nickname);
 
-        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, false, _npcService, _settingService, _trainerService)));
+        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, false, _npcService, _settingService, _trainerService)));
     }
 
     public async Task<IEnumerable<Game>> GetAllGamesWithUser(User user)
     {
         var dtos = await ThrowIfNull(
             user.Games,
-            games => Collection.Find(game => games.Contains(game.GameId)).ToEnumerable(),
+            games => Collection.GetManyAsync(game => games.Contains(game.GameId)),
             PropertyNames.UserGames);
 
-        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, false, _npcService, _settingService, _trainerService)));
+        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, false, _npcService, _settingService, _trainerService)));
     }
 
     public async Task<Game> GetGame(Guid id, bool isGM)
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.Find(game => game.GameId == id).SingleOrDefault(),
+            id => Collection.GetOneAsync(game => game.GameId == id),
             PropertyNames.GameId);
 
-        return await DtoHandler.ParseFromDto(dto, isGM, _npcService, _settingService, _trainerService);
+        return await _dtoToModelMapper.ParseFromDto(dto, isGM, _npcService, _settingService, _trainerService);
     }
 
     public async Task<string> GetGameNickname(Guid gameId)
@@ -65,10 +68,10 @@ internal class GameService(
     {
         var dtos = await ThrowIfNull(
             user.Games,
-            games => Collection.Find(x => !games.Contains(x.GameId)).Limit(20).ToEnumerable(),
+            games => Collection.GetManyAsync(x => !games.Contains(x.GameId), 0, 20),
             PropertyNames.GameId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await DtoHandler.ParseFromDto(dto, false, _npcService, _settingService, _trainerService)));
+        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, false, _npcService, _settingService, _trainerService)));
     }
 
     public async Task<bool> HasGM(Guid gameId)
@@ -80,7 +83,7 @@ internal class GameService(
 
     public async Task PostGame(Game game, string passwordHash)
     {
-        var dto = DtoHandler.ParseFromModel(game);
+        var dto = await _modelToDtoMapper.ParseFromModel(game);
         dto.PasswordHash = passwordHash;
         await PostDocument(dto);
     }
@@ -90,9 +93,9 @@ internal class GameService(
         var dto = await UpdateDocument(
             theGame.GameId,
             game => game.GameId == theGame.GameId,
-            Builders<GameDto>.Update.Set(PropertyNames.Logs, theGame.Logs?.Union(logs) ?? logs));
+            new Models.UpdateData(PropertyNames.Logs, theGame.Logs?.Union(logs) ?? logs));
 
-        return await DtoHandler.ParseFromDto(dto, isGM, _npcService, _settingService, _trainerService);
+        return await _dtoToModelMapper.ParseFromDto(dto, isGM, _npcService, _settingService, _trainerService);
     }
 
     public async Task<Game> UpdateGameNpcList(Guid gameId, IEnumerable<Guid> npcIds)
@@ -100,9 +103,9 @@ internal class GameService(
         var dto = await UpdateDocument(
             gameId,
             game => game.GameId == gameId,
-            Builders<GameDto>.Update.Set(PropertyNames.Npcs, npcIds));
+            new Models.UpdateData(PropertyNames.Npcs, npcIds));
 
-        return await DtoHandler.ParseFromDto(dto, true, _npcService, _settingService, _trainerService);
+        return await _dtoToModelMapper.ParseFromDto(dto, true, _npcService, _settingService, _trainerService);
     }
 
     public async Task<Game> UpdateGameOnlineStatus(Guid gameId, bool isOnline)
@@ -110,8 +113,8 @@ internal class GameService(
         var dto = await UpdateDocument(
             gameId,
             game => game.GameId == gameId,
-            Builders<GameDto>.Update.Set(PropertyNames.IsOnline, isOnline));
+            new Models.UpdateData(PropertyNames.IsOnline, isOnline));
 
-        return await DtoHandler.ParseFromDto(dto, true, _npcService, _settingService, _trainerService);
+        return await _dtoToModelMapper.ParseFromDto(dto, true, _npcService, _settingService, _trainerService);
     }
 }

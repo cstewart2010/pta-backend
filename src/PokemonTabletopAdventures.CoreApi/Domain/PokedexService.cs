@@ -1,43 +1,40 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Pokedex;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class PokedexService : AbstractMongoService<PokeDexItemDto>, IPokedexService
+public class PokedexService(
+    IRepositoryService repositoryService,
+    IDtoToModelMapper dtoToModelMapper) : AbstractMongoService<PokeDexItemDto>(repositoryService, MongoCollection.Pokedex), IPokedexService
 {
-    public PokedexService() : base(MongoCollection.Pokedex) { }
-
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
     public async Task DeleteDexItemForTrainer(Guid trainerId, Guid gameId)
     {
         await ThrowIfNull(
             (trainerId, gameId),
-            x => Collection.FindOneAndDelete(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId),
+            x => Collection.DeleteAsync(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId),
             PropertyNames.TrainerId);
     }
 
     public async Task<PokedexItem> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo)
     {
-        var dto = await Task.FromResult(Collection.Find(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo).SingleOrDefault());
+        var dto = await Collection.GetOneAsync(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo)
+             ?? throw new UnknownEntityException<PokedexItem>(PropertyNames.DexNo, dexNo);
 
-        return DtoHandler.ParseFromDto(dto);
-        //return await ThrowIfNull(
-        //    (trainerId, gameId, dexNo),
-        //    x => Collection.Find(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId && dexItem.DexNo == dexNo).SingleOrDefault(),
-        //    PropertyNames.DexNo);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<IEnumerable<PokedexItem>> GetTrainerPokeDex(Guid trainerId, Guid gameId)
     {
         var dtos = await ThrowIfNull(
             (trainerId, gameId),
-            x => Collection.Find(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId).ToEnumerable(),
+            x => Collection.GetManyAsync(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId),
             $"{PropertyNames.TrainerId} {PropertyNames.GameId}");
 
-        return dtos.Select(DtoHandler.ParseFromDto);
+        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
     }
 
     public async Task PostDexItem(Guid trainerId, Guid gameId, int dexNo, bool isSeen, bool isCaught)
@@ -59,9 +56,9 @@ internal class PokedexService : AbstractMongoService<PokeDexItemDto>, IPokedexSe
         var dto = await UpdateDocument(
             dexNo,
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
-            Builders<PokeDexItemDto>.Update.Set(PropertyNames.IsSeen, true));
+            new Models.UpdateData(PropertyNames.IsSeen, true));
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<PokedexItem> UpdateDexItemIsSeen(Guid trainerId, Guid gameId, int dexNo)
@@ -69,9 +66,9 @@ internal class PokedexService : AbstractMongoService<PokeDexItemDto>, IPokedexSe
         var dto = await UpdateDocument(
             dexNo,
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
-            Builders<PokeDexItemDto>.Update.Set(PropertyNames.IsSeen, true),
-            Builders<PokeDexItemDto>.Update.Set(PropertyNames.IsCaught, true));
+            new Models.UpdateData(PropertyNames.IsSeen, true),
+            new Models.UpdateData(PropertyNames.IsCaught, true));
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 }

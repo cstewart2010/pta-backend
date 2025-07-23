@@ -1,37 +1,40 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-internal class UserMessageThreadService : AbstractMongoService<UserMessageThreadDto>, IUserMessageThreadService
+public class UserMessageThreadService(
+    IRepositoryService repositoryService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<UserMessageThreadDto>(repositoryService, MongoCollection.UserMessageThreads), IUserMessageThreadService
 {
-    public UserMessageThreadService() : base(MongoCollection.UserMessageThreads) { }
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task<UserMessageThread> GetMessageById(Guid id)
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.Find(message => message.MessageId == id).SingleOrDefault(),
+            id => Collection.GetOneAsync(message => message.MessageId == id),
             PropertyNames.MessageId);
 
-        return DtoHandler.ParseFromDto(dto);
+        return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task PostThread(UserMessageThread thread)
     {
-        var dto = DtoHandler.ParseFromModel(thread);
+        var dto = await _modelToDtoMapper.ParseFromModel(thread);
         await PostDocument(dto);
     }
 
     public async Task<UserMessageThread> UpdateThread(UserMessageThread updatedThread)
     {
-        var dto = DtoHandler.ParseFromModel(updatedThread);
+        var dto = await _modelToDtoMapper.ParseFromModel(updatedThread);
         await UpsertDocument(
-            Builders<UserMessageThreadDto>.Filter.Eq(thread => thread.MessageId, updatedThread.MessageId),
+            thread => thread.MessageId,
+            updatedThread.MessageId,
             dto);
 
         return await GetMessageById(updatedThread.MessageId);

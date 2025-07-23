@@ -1,6 +1,4 @@
-﻿using MongoDB.Driver;
-using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
+﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -13,21 +11,28 @@ using PokemonTabletopAdventures.Models.Pokemons;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-public class DexService(ILogger<DexService> logger) : AbstractMongoService<BasePokemonDto>(MongoCollection.BasePokemon), IDexService
+public class DexService(
+    IRepositoryService repositoryService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<DexService> logger) : AbstractMongoService<BasePokemonDto>(repositoryService, MongoCollection.BasePokemon), IDexService
 {
     private readonly ILogger<DexService> _logger = logger;
+    private readonly IRepositoryService _repositoryService = repositoryService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task<IEnumerable<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
     {
-        var collection = MongoCollectionHelper.GetMongoCollection<TDocument>(documentType.ToString());
-        return await Task.FromResult(collection.Find(document => true).ToEnumerable());
+        var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
+        return await collection.GetManyAsync(document => true);
     }
 
     public async Task<IndexResponse<TDocument>> GetDexEntry<TDocument>(DexType documentType, string name) where TDocument : IDexDocument
     {
-        var collection = MongoCollectionHelper.GetMongoCollection<TDocument>(documentType.ToString());
-        var item = collection.Find(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
-        return item == null ? throw new ItemNotFoundException(name) : await Task.FromResult(new IndexResponse<TDocument> { Data = item });
+        var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
+        var item = await collection.GetOneAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
+        return item == null ? throw new ItemNotFoundException(name) : new IndexResponse<TDocument> { Data = item };
     }
 
     public async Task<Pokemon> GetNewPokemon(string name, string nickname, string form)
@@ -42,27 +47,31 @@ public class DexService(ILogger<DexService> logger) : AbstractMongoService<BaseP
     public async Task<Pokemon> GetNewPokemon(string name, Nature nature, Gender gender, Status status, string? nickname, string form)
     {
         var entry = await GetPokedexEntry(name, form);
-        return await Task.FromResult(GetPokemonFromBase(entry.Pokemon, nature, gender, status, nickname, entry.AlternateForms));
+        return GetPokemonFromBase(entry.Pokemon, nature, gender, status, nickname, entry.AlternateForms);
     }
 
     public async Task<PokemonAndForms> GetPokedexEntry(string name, string form)
     {
-        var allForms = Collection.Find(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable();
-        var model = allForms.First(document => document.Form.Equals(form, StringComparison.CurrentCultureIgnoreCase));
+        var allForms = await Collection.GetManyAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
+        if (!allForms.Any())
+        {
+            throw new ItemNotFoundException(name);
+        }
+        var model = allForms.FirstOrDefault(document => document.Form.Equals(form, StringComparison.CurrentCultureIgnoreCase)) ?? throw new ItemNotFoundException(form);
         var alternateForms = allForms.Where(document => !document.Form.Equals(form, StringComparison.CurrentCultureIgnoreCase))
             .Select(document => document.Form);
-        return await Task.FromResult(new PokemonAndForms
+        return new PokemonAndForms
         {
-            Pokemon = DtoHandler.ParseFromDto(model),
+            Pokemon = await _dtoToModelMapper.ParseFromDto(model),
             AlternateForms = [.. alternateForms]
-        });
+        };
     }
 
     public async Task<IEnumerable<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon)
     {
-        var allEvolutions = Collection.Find(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable();
-        var forms = allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(DtoHandler.ParseFromDto);
-        return await Task.FromResult(forms);
+        var allEvolutions = await Collection.GetManyAsync(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase));
+        var forms = await Task.WhenAll(allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(_dtoToModelMapper.ParseFromDto));
+        return forms;
     }
 
     public async Task<IndexCollectionResponse> GetIndexCollectionResponse<TDocument>(
@@ -70,48 +79,58 @@ public class DexService(ILogger<DexService> logger) : AbstractMongoService<BaseP
         int offset,
         int limit) where TDocument : IDexDocument
     {
-        var collection = MongoCollectionHelper.GetMongoCollection<TDocument>(documentType.ToString());
-        var documents = collection.Find(document => true).Skip(offset).Limit(limit).ToEnumerable();
+        var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
+        var documents = await collection.GetManyAsync(document => true, offset, limit);
         var count = documents.Count();
         var results = documents.Select(x => x.Name);
 
-        return await Task.FromResult(new IndexCollectionResponse
+        return new IndexCollectionResponse
         {
             Count = count,
             Results = results
-        });
+        };
+    }
+
+    public async Task<IndexCollectionResponse> GetOrderedIndexCollectionResponse()
+    {
+        var documents = await Collection.GetManyAsync(document => true);
+        var results = documents.OrderBy(pokemon => pokemon.DexNo).GroupBy(pokemon => pokemon.Name).Select(x => x.Key).ToArray();
+
+        return new IndexCollectionResponse
+        {
+            Count = results.Length,
+            Results = results
+        };
     }
 
     public async Task PostDexEntries<TDocument>(string collectionName, IEnumerable<TDocument> documents) where TDocument : IDexDocument
     {
-        var collection = MongoCollectionHelper.GetMongoCollection<TDocument>(typeof(TDocument).Name);
+        var collection = _repositoryService.GetCollection<TDocument>(typeof(TDocument).Name);
         foreach (var document in documents)
         {
-            if (collection.Find(currentDocument => document.Name == currentDocument.Name).Any())
+            var items = await collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name);
+            if (items.Any())
             {
                 continue;
             }
 
-            AddDexEntry(() => collection.InsertOne(document));
+            await PostDocument(collection, document);
         }
-
-        await Task.CompletedTask;
     }
 
     public async Task PostPokedexEntries(IEnumerable<PokemonForm> documents)
     {
         foreach (var document in documents)
         {
-            if (Collection.Find(currentDocument => document.Name == currentDocument.Name && document.Form == currentDocument.Form).Any())
+            var items = await Collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name && document.Form == currentDocument.Form);
+            if (items.Any())
             {
                 continue;
             }
 
-            var dto = DtoHandler.ParseFromModel(document);
-            AddDexEntry(() => Collection.InsertOne(dto));
+            var dto = await _modelToDtoMapper.ParseFromModel(document);
+            await PostDocument(dto);
         }
-
-        await Task.CompletedTask;
     }
 
     public async Task<Pokemon> GetEvolved(
@@ -120,6 +139,11 @@ public class DexService(ILogger<DexService> logger) : AbstractMongoService<BaseP
         string evolvedName,
         IEnumerable<string> newMoves)
     {
+        var invalidKeptMoves = keptMoves.Where(x => !pokemon.Moves.Contains(x)).ToArray();
+        if (invalidKeptMoves.Length != 0)
+        {
+            throw new InvalidEvolutionException($"{pokemon.SpeciesName} does not know {string.Join(", ", invalidKeptMoves)}");
+        }
         var forms = await GetPokedexEntry(evolvedName, pokemon.Form);
         var basePokemon = forms.Pokemon;
         if (!string.Equals(basePokemon.EvolvesFrom, pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase))
@@ -134,7 +158,7 @@ public class DexService(ILogger<DexService> logger) : AbstractMongoService<BaseP
             throw new InvalidEvolutionException($"{basePokemon.Name} cannot learn {string.Join(", ", invalidMoves)}");
         }
 
-        return await Task.FromResult(new Pokemon
+        return new Pokemon
         {
             PokemonId = pokemon.PokemonId,
             DexNo = basePokemon.DexNo,
@@ -172,7 +196,7 @@ public class DexService(ILogger<DexService> logger) : AbstractMongoService<BaseP
             CurrentHP = pokemon.CurrentHP,
             GameId = pokemon.GameId,
             Pokeball = pokemon.Pokeball
-        });
+        };
     }
 
     private static Pokemon GetPokemonFromBase(
@@ -248,17 +272,5 @@ public class DexService(ILogger<DexService> logger) : AbstractMongoService<BaseP
             Rarity.Uncommon => 40,
             _ => 30,
         } - (15 * (basePokemon.Stage - 1));
-    }
-
-    private static void AddDexEntry(Action action)
-    {
-        try
-        {
-            action();
-        }
-        catch (MongoWriteException exception)
-        {
-            throw new PtaMongoException(exception);
-        }
     }
 }

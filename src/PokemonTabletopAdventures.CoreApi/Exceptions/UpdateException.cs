@@ -2,6 +2,6 @@
 
 namespace PokemonTabletopAdventures.CoreApi.Exceptions;
 
-internal class UpdateException(string message) : PtaException(message, PtaExceptionParts.UpdateErrorTitle, System.Net.HttpStatusCode.BadRequest)
+public class UpdateException(string message) : PtaException(message, PtaExceptionParts.UpdateErrorTitle, System.Net.HttpStatusCode.BadRequest)
 {
 }

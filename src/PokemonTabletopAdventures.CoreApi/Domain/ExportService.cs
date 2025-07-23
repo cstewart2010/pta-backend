@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.Domain.Handlers;
 using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
@@ -15,22 +14,24 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 /// <summary>
 /// Provides a collection of methods to handle import/exports of game sessions
 /// </summary>
-internal class ExportService(
+public class ExportService(
     IPokemonService pokemonService,
     ITrainerService trainerService,
     IGameService gameService,
     INpcService npcService,
     ISettingService settingService,
-    IShopService shopService,
-    IPokedexService pokedexService) : IExportService
+    IPokedexService pokedexService,
+    IDtoToModelMapper dtoToModelMapper,
+    IModelToDtoMapper modelToDtoMapper) : IExportService
 {
     private readonly IPokemonService _pokemonService = pokemonService;
     private readonly ITrainerService _trainerService = trainerService;
     private readonly IGameService _gameService = gameService;
     private readonly INpcService _npcService = npcService;
     private readonly ISettingService _settingService = settingService;
-    private readonly IShopService _shopService = shopService;
     private readonly IPokedexService _pokedexService = pokedexService;
+    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
+    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     /// <summary>
     /// Returns a file stream for the a json file of the game session
@@ -38,7 +39,7 @@ internal class ExportService(
     /// <param name="game">The game session to export</param>
     public async Task<FileStream> GetExportStream(Game model)
     {
-        var game = DtoHandler.ParseFromModel(model);
+        var game = await _modelToDtoMapper.ParseFromModel(model);
         var (path, json) = await GetStreamParts(game);
         using var writer = new StreamWriter(path);
         writer.Write(json);
@@ -88,7 +89,7 @@ internal class ExportService(
         game.Logs.Add(new LogDto(
             user: GameLogMessages.ImportTool,
             action: $"Recreated game {game.GameId}"));
-        var model = await  DtoHandler.ParseFromDto(game, true, _npcService, _settingService, _trainerService);
+        var model = await _dtoToModelMapper.ParseFromDto(game, true, _npcService, _settingService, _trainerService);
         await _gameService.PostGame(model, "");
         return errors;
     }
@@ -104,10 +105,10 @@ internal class ExportService(
             errors.Add($"Failed to import trainer {trainer.TrainerId}");
         }
 
-        var model = await DtoHandler.ParseFromDto(import.Trainer, _pokemonService, _pokedexService);
+        var model = await _dtoToModelMapper.ParseFromDto(import.Trainer, _pokemonService, _pokedexService);
         await _trainerService.PostTrainer(model);
-        errors = [.. import.Pokemon
-            .Select(pokemon => AddPokemon(pokemon, trainer.TrainerId))
+        errors = [.. (await Task.WhenAll(import.Pokemon
+            .Select(async pokemon => await AddPokemon(pokemon, trainer.TrainerId))))
             .Where(error => !string.IsNullOrEmpty(error))];
 
         if (errors.Count > 0)
@@ -116,14 +117,14 @@ internal class ExportService(
         }
     }
 
-    private string AddPokemon(
+    private async Task<string> AddPokemon(
         PokemonDto pokemon,
         Guid trainerId)
     {
         if (pokemon.TrainerId == trainerId)
         {
-            var model = DtoHandler.ParseFromDto(pokemon);
-            _pokemonService.PostPokemon(model);
+            var model = await _dtoToModelMapper.ParseFromDto(pokemon);
+            await _pokemonService.PostPokemon(model);
             return $"Import pokemon {pokemon.PokemonId}";
         }
 
@@ -133,7 +134,7 @@ internal class ExportService(
     private async Task<(string Path, string Json)> GetStreamParts(GameDto game)
     {
         game.IsOnline = false;
-        var exportedGame = await ExportedGame.ParseFromModel(game, _trainerService, _pokemonService);
+        var exportedGame = await ExportedGame.ParseFromModel(game, _trainerService, _pokemonService, _modelToDtoMapper);
         return (Path.GetTempFileName(), JsonSerializer.Serialize(exportedGame));
     }
 

@@ -49,6 +49,8 @@ public interface IDexService
         int offset,
         int limit) where TDocument : IDexDocument;
 
+    public Task<IndexCollectionResponse> GetOrderedIndexCollectionResponse();
+
     /// <summary>
     /// Returns a collection of possible evolutions
     /// </summary>

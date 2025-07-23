@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain;
+using PokemonTabletopAdventures.CoreApi.Domain.Mappers;
 using PokemonTabletopAdventures.CoreApi.Infrastructure;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Text.Json;
@@ -34,6 +35,8 @@ internal class Startup(IConfiguration configuration)
                       builder.WithExposedHeaders(HeaderNames.AccessToken, HeaderNames.SessionAuth);
                   });
         });
+        services.AddSingleton<IRepositoryService, RepositoryService>();
+
         services.AddSingleton<IDexService, DexService>();
         
         services.AddSingleton<IEncryptionService, EncryptionService>();
@@ -54,6 +57,10 @@ internal class Startup(IConfiguration configuration)
         services.AddSingleton<IUserMessageThreadService, UserMessageThreadService>();
 
         services.AddSingleton<IUserService, UserService>();
+
+        services.AddSingleton<IModelToDtoMapper, ModelToDtoMapper>();
+
+        services.AddSingleton<IDtoToModelMapper, DtoToModelMapper>();
         
         services.AddTransient<ProblemDetailsFactory, PtaProblemDetailsFactory>();
         services.AddProblemDetails();

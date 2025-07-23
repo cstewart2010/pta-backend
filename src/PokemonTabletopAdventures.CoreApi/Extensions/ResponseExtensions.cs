@@ -12,7 +12,7 @@ internal static class ResponseExtensions
         Guid trainerId)
     {
 #if !DEBUG
-        var token = await encryptionService.GenerateToken();
+        var token = await encryptionService.GenerateToken(DateTime.UtcNow);
         await userService.UpdateUserActivityToken(trainerId, token);
         var authHash = await encryptionService.HashSecret(RequestExtensions.AuthKey); ;
         response.Headers.Append(HeaderNames.SessionAuth, authHash);
@@ -29,7 +29,7 @@ internal static class ResponseExtensions
         Guid id)
     {
 #if !DEBUG
-        var updatedToken = await encryptionService.GenerateToken();
+        var updatedToken = await encryptionService.GenerateToken(DateTime.UtcNow);
         await userService.UpdateUserActivityToken(id, updatedToken);
         response.Headers.Append(HeaderNames.AccessToken, updatedToken);
 #else

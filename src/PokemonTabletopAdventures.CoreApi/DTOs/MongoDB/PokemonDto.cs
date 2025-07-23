@@ -12,7 +12,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 public class PokemonDto: IDocument
 {
     /// <inheritdoc />
-    public ObjectId _id { get; set; }
+    public ObjectId Id { get; set; }
 
     /// <summary>
     /// The Pokemon's unique id

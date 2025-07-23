@@ -1,6 +1,6 @@
 ﻿namespace PokemonTabletopAdventures.CoreApi.Constants;
 
-internal static class MongoCollection
+public static class MongoCollection
 {
     public const string Games = "Games";
     public const string BasePokemon = "BasePokemon";
