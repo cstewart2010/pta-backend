@@ -15,7 +15,7 @@ public interface IPokemonService
     /// </summary>
     /// <param name="trainerId">The trainer id</param>
     /// <param name="gameId">The game session id</param>
-    public Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId, Guid gameId);
+    public Task<ICollection<Pokemon>> GetPokemonByTrainerId(Guid trainerId, Guid gameId, bool isNpc);
 
     /// <summary>
     /// Attempts to add a Pokemon using the provided document

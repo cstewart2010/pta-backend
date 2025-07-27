@@ -74,7 +74,7 @@ public class DexServiceTests
     {
         var pokemon = await sut.GetDexEntries<BasePokemonDto>(DexType.BasePokemon);
         Assert.That(pokemon, Is.Not.Null.Or.Empty);
-        Assert.That(pokemon.Count(), Is.EqualTo(5));
+        Assert.That(pokemon, Has.Count.EqualTo(5));
     }
 
     [Test]
@@ -181,7 +181,7 @@ public class DexServiceTests
     public async Task GetPossibleEvolutions_CanEvolve_NotEmpty()
     {
         var evolutions = await sut.GetPossibleEvolutions(pokemon);
-        Assert.That(evolutions.Count(), Is.EqualTo(1));
+        Assert.That(evolutions, Has.Count.EqualTo(1));
         var mon = evolutions.First();
         Assert.That(mon.Name, Is.EqualTo("Venusaur"));
     }

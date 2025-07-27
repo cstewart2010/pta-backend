@@ -25,14 +25,16 @@ internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto>
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter)
+    public Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter)
     {
-        return Task.FromResult(Collection.Where(x => filter.Compile().Invoke(x)));
+        ICollection<TDto> items = [.. Collection.Where(x => filter.Compile().Invoke(x))];
+        return Task.FromResult(items);
     }
 
-    public Task<IEnumerable<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter, int offset, int limit)
+    public Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter, int offset, int limit)
     {
-        return Task.FromResult(Collection.Where(x => filter.Compile().Invoke(x)).Skip(offset).Take(limit));
+        ICollection<TDto> items = [.. Collection.Where(x => filter.Compile().Invoke(x)).Skip(offset).Take(limit)];
+        return Task.FromResult(items);
     }
 
     public Task<TDto?> GetOneAsync(Expression<Func<TDto, bool>> filter)
@@ -64,11 +66,11 @@ internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto>
 
     public Task PutAsync(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity)
     {
-        var pokemon = Collection.FirstOrDefault(x => filter.Compile().Invoke(x) == id)!;
-        var properties = pokemon.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        var item = Collection.FirstOrDefault(x => filter.Compile().Invoke(x) == id)!;
+        var properties = item.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
         foreach (var property in properties)
         {
-            property.SetValue(pokemon, property.GetValue(entity));
+            property.SetValue(item, property.GetValue(entity));
         }
         return Task.CompletedTask;
     }

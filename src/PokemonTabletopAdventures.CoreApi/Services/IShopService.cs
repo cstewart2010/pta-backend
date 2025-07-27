@@ -16,13 +16,13 @@ public interface IShopService
     /// Returns a shop contained in the game
     /// </summary>
     /// <param name="gameId">The game id</param>
-    public Task<IEnumerable<Shop>> GetShopsByGameId(Guid gameId);
+    public Task<ICollection<Shop>> GetShopsByGameId(Guid gameId);
 
     /// <summary>
     /// Returns a shops matches contained in the setting
     /// </summary>
     /// <param name="setting">The setting in the game</param>
-    public Task<IEnumerable<Shop>> GetShopsBySetting(Setting setting);
+    public Task<ICollection<Shop>> GetShopsBySetting(Setting setting);
 
     /// <summary>
     /// Attempts to add an shop using the provided document

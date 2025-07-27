@@ -28,7 +28,7 @@ public class GameService(
             PropertyNames.GameId);
     }
 
-    public async Task<IEnumerable<Game>> GetAllGames(string nickname)
+    public async Task<ICollection<Game>> GetAllGames(string nickname)
     {
         var dtos = await ThrowIfNull(
             nickname,
@@ -38,7 +38,7 @@ public class GameService(
         return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, false, _npcService, _settingService, _trainerService)));
     }
 
-    public async Task<IEnumerable<Game>> GetAllGamesWithUser(User user)
+    public async Task<ICollection<Game>> GetAllGamesWithUser(User user)
     {
         var dtos = await ThrowIfNull(
             user.Games,
@@ -64,7 +64,7 @@ public class GameService(
         return game.Nickname;
     }
 
-    public async Task<IEnumerable<Game>> GetMostRecent20Games(User user)
+    public async Task<ICollection<Game>> GetMostRecent20Games(User user)
     {
         var dtos = await ThrowIfNull(
             user.Games,
@@ -98,7 +98,7 @@ public class GameService(
         return await _dtoToModelMapper.ParseFromDto(dto, isGM, _npcService, _settingService, _trainerService);
     }
 
-    public async Task<Game> UpdateGameNpcList(Guid gameId, IEnumerable<Guid> npcIds)
+    public async Task<Game> UpdateGameNpcList(Guid gameId, ICollection<Guid> npcIds)
     {
         var dto = await UpdateDocument(
             gameId,

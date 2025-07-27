@@ -8,7 +8,7 @@ public interface IPokedexService
     /// Compiles all pokedex entries for a specific trainer into one collection
     /// </summary>
     /// <param name="trainerId">The trainer's id to search with</param>
-    public Task<IEnumerable<PokedexItem>> GetTrainerPokeDex(Guid trainerId, Guid gameId);
+    public Task<ICollection<PokedexItem>> GetTrainerPokeDex(Guid trainerId, Guid gameId);
 
     /// <summary>
     /// Searches the database for a pokedex entry

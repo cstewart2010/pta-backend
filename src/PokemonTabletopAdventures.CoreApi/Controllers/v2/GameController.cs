@@ -223,7 +223,7 @@ public class GameController(
         var game = await GameService.GetGame(gameId, true);
         var newNpcList = game.Npcs.Select(x => x.NpcId).Union(foundNpcIds);
         await RefreshToken(request.GameMasterId);
-        var updatedGame = await GameService.UpdateGameNpcList(gameId, newNpcList);
+        var updatedGame = await GameService.UpdateGameNpcList(gameId, [..newNpcList]);
         return Ok(new UpdateGameResponse { Games = [updatedGame] });
     }
 
@@ -243,7 +243,7 @@ public class GameController(
         var game = await GameService.GetGame(gameId, true);
         var newNpcList = game.Npcs.Select(x => x.NpcId).Except(foundNpcIds);
         await RefreshToken(request.GameMasterId);
-        var updatedGame = await GameService.UpdateGameNpcList(gameId, newNpcList);
+        var updatedGame = await GameService.UpdateGameNpcList(gameId, [.. newNpcList]);
         return Ok(new UpdateGameResponse { Games = [updatedGame] });
     }
 

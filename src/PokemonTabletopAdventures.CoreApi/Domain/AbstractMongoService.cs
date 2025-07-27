@@ -18,10 +18,10 @@ public abstract class AbstractMongoService<T>(
         return item;
     }
 
-    protected async Task<IEnumerable<T>> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<IEnumerable<T>>> func, string entityName)
+    protected async Task<IEnumerable<T>> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<ICollection<T>>> func, string entityName)
     {
         var result = await func(entityValue);
-        if (result?.Any() != true)
+        if (result == null || result.Count == 0)
         {
             throw new UnknownEntityException<T>(entityName, entityValue);
         }

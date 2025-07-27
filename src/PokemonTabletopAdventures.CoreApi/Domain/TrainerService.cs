@@ -65,7 +65,7 @@ public class TrainerService(
             await shopCollection.DeleteAsync(x => x.GameId == trainer.GameId);
             var npcCollection = _repositoryService.GetCollection<NpcDto>(MongoCollection.NPCs);
             await npcCollection.DeleteAsync(x => x.GameId == trainer.GameId);
-            var pokedexCollection = _repositoryService.GetCollection<NpcDto>(MongoCollection.Pokedex);
+            var pokedexCollection = _repositoryService.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex);
             await pokedexCollection.DeleteAsync(x => x.GameId == trainer.GameId);
         }
         else
@@ -121,7 +121,7 @@ public class TrainerService(
         return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
-    public async Task<IEnumerable<Trainer>> GetTrainersByGameId(Guid gameId)
+    public async Task<ICollection<Trainer>> GetTrainersByGameId(Guid gameId)
     {
         var dtos = await ThrowIfNull(
             gameId,
@@ -202,7 +202,7 @@ public class TrainerService(
         return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService, _pokedexService);
     }
 
-    public async Task<IEnumerable<Trainer>> GetAllUserTrainers(Guid userId)
+    public async Task<ICollection<Trainer>> GetAllUserTrainers(Guid userId)
     {
         var dtos = await  ThrowIfNull(
             userId,

@@ -14,13 +14,13 @@ public interface INpcService
     /// Returns all npcs matching the npc ids
     /// </summary>
     /// <param name="npcIds">The npc ids</param>
-    public Task<IEnumerable<Npc>> GetNpcs(IEnumerable<Guid> npcIds);
+    public Task<ICollection<Npc>> GetNpcs(IEnumerable<Guid> npcIds);
 
     /// <summary>
     /// Returns all npcs matching the game id
     /// </summary>
     /// <param name="gameId">The npc ids</param>
-    public Task<IEnumerable<Npc>> GetNpcsByGameId(Guid gameId);
+    public Task<ICollection<Npc>> GetNpcsByGameId(Guid gameId);
 
     /// <summary>
     /// Attempts to add an npc using the provided document
@@ -38,11 +38,5 @@ public interface INpcService
     /// Searches for an npc using its id, then deletes it
     /// </summary>
     /// <param name="id">The npc id</param>
-    public Task DeleteNpc(Guid id, IGameService gameService);
-
-    /// <summary>
-    /// Searches for all Npcs using their game id, then deletes it
-    /// </summary>
-    /// <param name="gameId">The game id</param>
-    public Task DeleteNpcByGameId(Guid gameId, IGameService gameService);
+    public Task DeleteNpc(Guid id);
 }

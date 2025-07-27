@@ -369,7 +369,7 @@ public class TrainerController(
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
         var game = await GameService.GetGame(request.GameId, true);
-        foreach (var pokemon in await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId))
+        foreach (var pokemon in await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId, false))
         {
             await PokemonService.DeletePokemon(pokemon.PokemonId);
         }

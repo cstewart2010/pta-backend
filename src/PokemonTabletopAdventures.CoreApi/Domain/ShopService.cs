@@ -30,7 +30,7 @@ public class ShopService(
             PropertyNames.GameId);
     }
 
-    public async Task<IEnumerable<Shop>> GetShopsByGameId(Guid gameId)
+    public async Task<ICollection<Shop>> GetShopsByGameId(Guid gameId)
     {
         var dtos = await ThrowIfNull(
             gameId,
@@ -50,7 +50,7 @@ public class ShopService(
         return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
-    public async Task<IEnumerable<Shop>> GetShopsBySetting(Setting setting)
+    public async Task<ICollection<Shop>> GetShopsBySetting(Setting setting)
     {
         var shopIds = setting.Shops.Select(s => s.ShopId);
         var dtos = await ThrowIfNull(

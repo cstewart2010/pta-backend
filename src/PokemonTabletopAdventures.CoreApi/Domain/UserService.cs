@@ -51,13 +51,13 @@ public class UserService(
         return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
-    public async Task<IEnumerable<User>> GetUsers()
+    public async Task<ICollection<User>> GetUsers()
     {
         var dtos = await Collection.GetManyAsync(user => true);
         return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
     }
 
-    public async Task<IEnumerable<User>> GetUsers(int offset, int limit)
+    public async Task<ICollection<User>> GetUsers(int offset, int limit)
     {
         var dtos = await Collection.GetManyAsync(user => true, offset, limit);
         return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));

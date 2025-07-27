@@ -3,6 +3,7 @@
 public class SearchItem
 {
     public Guid? TrainerId { get; set; }
+    public Guid? NpcId { get; set; }
     public Guid? GameId { get; set; }
     public int? DexNo { get; set; }
 }

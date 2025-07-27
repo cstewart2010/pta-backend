@@ -42,7 +42,7 @@ public class SettingService(
         return await _dtoToModelMapper.ParseFromDto(dto, isGM, gameId, _shopService);
     }
 
-    public async Task<IEnumerable<Setting>> GetAllSettings(Guid gameId)
+    public async Task<ICollection<Setting>> GetAllSettings(Guid gameId)
     {
         var dtos = await ThrowIfNull(
             gameId,

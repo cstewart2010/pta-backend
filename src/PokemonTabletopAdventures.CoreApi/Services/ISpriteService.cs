@@ -7,7 +7,7 @@ public interface ISpriteService
     /// <summary>
     /// Returns all sprites
     /// </summary>
-    public Task<IEnumerable<Sprite>> GetAllSprites();
+    public Task<ICollection<Sprite>> GetAllSprites();
 
     /// <summary>
     /// Attempts to add a sprite using the provided document

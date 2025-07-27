@@ -238,7 +238,7 @@ public class SettingsController(
             pokemon.Pokeball = pokeball.ToString().Replace("_", " ");
             pokemon.OriginalTrainerId = request.TrainerId;
             pokemon.TrainerId = request.TrainerId;
-            var allMons = (await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId)).Where(pokemon => pokemon.IsOnActiveTeam).Count();
+            var allMons = (await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId, false)).Where(pokemon => pokemon.IsOnActiveTeam).Count();
             pokemon.IsOnActiveTeam = allMons < 6;
             if (!string.IsNullOrWhiteSpace(nickname))
             {

@@ -34,8 +34,13 @@ public class PokemonService(
         return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
-    public async Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId, Guid gameId)
+    public async Task<ICollection<Pokemon>> GetPokemonByTrainerId(Guid trainerId, Guid gameId, bool isNpc)
     {
+        if (isNpc)
+        {
+            var collection = await Collection.GetManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
+            return await Task.WhenAll(collection.Select(_dtoToModelMapper.ParseFromDto));
+        }
         var dtos = await ThrowIfNull(
             (trainerId, gameId),
             x => Collection.GetManyAsync(pokemon => pokemon.TrainerId == x.trainerId && pokemon.GameId == x.gameId),
