@@ -11,12 +11,6 @@ public interface IPokemonService
     public Task<Pokemon> GetPokemonById(Guid id);
 
     /// <summary>
-    /// Returns all Pokemon matching the trainer id
-    /// </summary>
-    /// <param name="trainerId">The trainer id</param>
-    public Task<IEnumerable<Pokemon>> GetPokemonByTrainerId(Guid trainerId);
-
-    /// <summary>
     /// Returns all Pokemon matching the trainer id for a certain game session
     /// </summary>
     /// <param name="trainerId">The trainer id</param>

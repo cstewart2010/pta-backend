@@ -63,7 +63,7 @@ public interface IDexService
     /// <param name="name">The pokemon's species name</param>
     /// <param name="nickname">The pokemon's nickname, if applicable</param>
     /// <param name="form">The pokemon's form</param>
-    public Task<Pokemon> GetNewPokemon(string name, string nickname, string form);
+    public Task<Pokemon> GetNewPokemon(string name, string? nickname, string form);
 
     /// <summary>
     /// Builds a <see cref="Pokemon"/> using information from the <see cref="PokemonForm"/>

@@ -84,7 +84,7 @@ public class DtoToModelMapper : IDtoToModelMapper
 
     public async Task<Npc> ParseFromDto(NpcDto npc, IPokemonService pokemonService)
     {
-        var npcPokemon = await pokemonService.GetPokemonByTrainerId(npc.NPCId);
+        var npcPokemon = await pokemonService.GetPokemonByTrainerId(npc.NPCId, npc.GameId);
         return new Npc
         {
             NpcId = npc.NPCId,

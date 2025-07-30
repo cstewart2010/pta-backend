@@ -35,7 +35,7 @@ public class DexService(
         return item == null ? throw new ItemNotFoundException(name) : new IndexResponse<TDocument> { Data = item };
     }
 
-    public async Task<Pokemon> GetNewPokemon(string name, string nickname, string form)
+    public async Task<Pokemon> GetNewPokemon(string name, string? nickname, string form)
     {
         var random = new Random();
         var nature = (Nature)random.Next(1, 21);

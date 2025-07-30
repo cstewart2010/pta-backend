@@ -25,7 +25,7 @@ public class UserController(
     private readonly IUserMessageThreadService _userMessageThreadService = userMessageThreadService;
     private readonly IEncryptionService _encryptionService = encryptionService;
 
-    [HttpPost("retrieve/name")]
+    [HttpPost("retrieve/user/name")]
     [ProducesResponseType(typeof(string), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetUsername([FromBody] RetrieveUserRequest request)
@@ -54,7 +54,7 @@ public class UserController(
         return Ok(new RetrieveUserResponse { Users = [.. users] });
     }
 
-    [HttpGet("message/admin")]
+    [HttpPost("retrieve/message/admin")]
     [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ForceGetMessage(
@@ -72,7 +72,7 @@ public class UserController(
         return Ok(message);
     }
 
-    [HttpGet("message")]
+    [HttpPost("retrieve/message")]
     [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetMessage(
@@ -91,7 +91,7 @@ public class UserController(
         return Ok(message);
     }
 
-    [HttpPost("user")]
+    [HttpPost("create")]
     [ProducesResponseType(typeof(CreateUserResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CreateNewUser(
@@ -113,7 +113,7 @@ public class UserController(
         return Ok(new CreateUserResponse { User = user});
     }
 
-    [HttpPost("message")]
+    [HttpPost("create/message")]
     [ProducesResponseType(typeof(SendMessageResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> SendMessageAsync(
@@ -178,7 +178,7 @@ public class UserController(
         return Ok();
     }
 
-    [HttpDelete("delete")]
+    [HttpDelete("delete/user")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> DeleteUser(
@@ -196,7 +196,7 @@ public class UserController(
         return Ok();
     }
 
-    [HttpDelete("delete/admin")]
+    [HttpDelete("delete/user/elevated")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ForceDeleteUser(

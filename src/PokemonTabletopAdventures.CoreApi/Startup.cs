@@ -54,9 +54,9 @@ internal class Startup(IConfiguration configuration)
 
         services.AddSingleton<ISpriteService, SpriteService>();
 
-        services.AddSingleton<IUserMessageThreadService, UserMessageThreadService>();
-
         services.AddSingleton<IUserService, UserService>();
+
+        services.AddSingleton<IUserMessageThreadService, UserMessageThreadService>();
 
         services.AddSingleton<IModelToDtoMapper, ModelToDtoMapper>();
 

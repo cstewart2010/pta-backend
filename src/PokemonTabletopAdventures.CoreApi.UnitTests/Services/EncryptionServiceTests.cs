@@ -6,9 +6,7 @@ using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
-using PokemonTabletopAdventures.Models.Games;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Services;
 
@@ -135,7 +133,7 @@ internal class EncryptionServiceTests
     [TestCase("secure_password")]
     public async Task VerifySecret_Game_Valid_DoesNotThrow(string secret)
     {
-        var game = gameCollection.Games.First();
+        var game = gameCollection.Collection.First();
         game.PasswordHash = await sut.HashSecret(secret);
         Assert.DoesNotThrow(() =>
         {
@@ -170,7 +168,7 @@ internal class EncryptionServiceTests
     [TestCase("secure_password", "a")]
     public async Task VerifySecret_Game_Invalid_Throws(string secret, string invalid)
     {
-        var game = gameCollection.Games.First();
+        var game = gameCollection.Collection.First();
         game.PasswordHash = await sut.HashSecret(secret);
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
@@ -194,7 +192,7 @@ internal class EncryptionServiceTests
     [TestCase("secure_password")]
     public async Task VerifySecret_User_Valid_DoesNotThrow(string secret)
     {
-        var user = userCollection.Users.First();
+        var user = userCollection.Collection.First();
         user.PasswordHash = await sut.HashSecret(secret);
         Assert.DoesNotThrow(() =>
         {
@@ -229,7 +227,7 @@ internal class EncryptionServiceTests
     [TestCase("secure_password", "a")]
     public async Task VerifySecret_User_Invalid_Throws(string secret, string invalid)
     {
-        var user = userCollection.Users.First();
+        var user = userCollection.Collection.First();
         user.PasswordHash = await sut.HashSecret(secret);
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {

@@ -46,7 +46,7 @@ public class PokemonController(
     public async Task<IActionResult> FindTrainerMon(
         [FromHeader] RetrievePokemonRequest request)
     {
-        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId);
+        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId);
         return Ok(new RetrievePokemonResponse { Pokemon = [.. models] });
     }
 
@@ -60,7 +60,7 @@ public class PokemonController(
         [FromHeader] RetrievePokemonRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId);
+        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId);
         return Ok(new RetrievePokemonResponse { Pokemon = [..models] });
     }
 
