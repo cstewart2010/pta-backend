@@ -1,6 +1,5 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.Services;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
