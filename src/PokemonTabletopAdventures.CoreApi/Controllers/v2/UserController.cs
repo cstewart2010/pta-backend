@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Users;
@@ -26,7 +28,7 @@ public class UserController(
     private readonly IEncryptionService _encryptionService = encryptionService;
 
     [HttpPost("retrieve/name")]
-    [ProducesResponseType(typeof(string), 200)]
+    [ProducesResponseType(typeof(RetrieveUserResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetUsername([FromBody] RetrieveUserRequest request)
     {
@@ -47,14 +49,15 @@ public class UserController(
         await VerifyIdentity(accessToken, sessionAuth, request.UserId);
         if (!await IsUserAdmin(request.UserId))
         {
-            return Unauthorized();
+            throw new PtaUnauthorizedException($"User {request.UserId} is not listed as an admin");
+           // return Unauthorized();
         }
 
         var users = await UserService.GetUsers(request.Offset, request.Limit);
         return Ok(new RetrieveUserResponse { Users = [.. users] });
     }
 
-    [HttpGet("message/admin")]
+    [HttpPost("message/admin")]
     [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ForceGetMessage(
@@ -65,7 +68,7 @@ public class UserController(
         await VerifyIdentity(accessToken, sessionAuth, request.UserId);
         if (!await IsUserAdmin(request.UserId))
         {
-            return Unauthorized();
+            throw new PtaUnauthorizedException($"User {request.UserId} is not listed as an admin");
         }
 
         var message = await _userMessageThreadService.GetMessageById(request.MessageId);
@@ -113,7 +116,7 @@ public class UserController(
         return Ok(new CreateUserResponse { User = user});
     }
 
-    [HttpPost("message")]
+    [HttpPost("sendMessage")]
     [ProducesResponseType(typeof(SendMessageResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> SendMessageAsync(
@@ -150,6 +153,22 @@ public class UserController(
         var updatedThread = await _userMessageThreadService.GetMessageById(request.MessageId);
         await RefreshToken(request.UserId);
         return Ok(new SendMessageResponse { MessageThread = updatedThread });
+    }
+
+    [HttpDelete("deleteMessage")]
+    [ProducesResponseType(typeof(void), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 401)]
+    public async Task<IActionResult> deleteMessage(
+        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
+        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
+        [FromBody] DeleteMessageRequest request)
+    {
+        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        if (await IsUserAdmin(request.UserId))
+        {
+            return BadRequest();
+        }
+        return Ok();
     }
 
     [HttpPatch("login")]
