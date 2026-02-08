@@ -262,7 +262,7 @@ internal class NpcServiceTests
         var dto = npcCollection.Collection.Last();
         var npc = await sut.GetNpc(dto.NPCId);
         var oldGameId = npc.GameId;
-        var odlAge = npc.Age;
+        var oldAge = npc.Age;
         var oldName = npc.TrainerName;
         npc.GameId = Guid.NewGuid();
         npc.Age = Random.Shared.Next(10, 100);
@@ -270,11 +270,15 @@ internal class NpcServiceTests
 
         var updatedNpc = await sut.UpdateNpc(npc);
 
-        Assert.That(updatedNpc, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(updatedNpc, Is.Not.Null);
+            Assert.That(npcCollection.Collection, Has.Count.EqualTo(count));
+        });
         Assert.Multiple(() =>
         {
             Assert.That(updatedNpc.GameId, Is.Not.EqualTo(oldGameId));
-            Assert.That(updatedNpc.Age, Is.Not.EqualTo(odlAge));
+            Assert.That(updatedNpc.Age, Is.Not.EqualTo(oldAge));
             Assert.That(updatedNpc.TrainerName, Is.Not.EqualTo(oldName));
             Assert.That(updatedNpc.GameId, Is.EqualTo(npc.GameId));
             Assert.That(updatedNpc.Age, Is.EqualTo(npc.Age));
