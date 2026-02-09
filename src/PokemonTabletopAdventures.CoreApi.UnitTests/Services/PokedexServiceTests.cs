@@ -75,7 +75,7 @@ internal class PokedexServiceTests
         var expectItem = pokedexCollection.Collection.First();
         var actualItem = await sut.GetTrainerPokeDex(expectItem.TrainerId, expectItem.GameId);
         Assert.That(actualItem, Is.Not.Null.Or.Empty);
-        Assert.That(actualItem.Count(), Is.EqualTo(3));
+        Assert.That(actualItem, Has.Count.EqualTo(3));
         Assert.Multiple(() =>
         {
             foreach (var item in actualItem)

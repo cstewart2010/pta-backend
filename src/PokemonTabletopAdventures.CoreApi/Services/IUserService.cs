@@ -19,12 +19,12 @@ public interface IUserService
     /// <summary>
     /// Returns all users in the database
     /// </summary>
-    public Task<IEnumerable<User>> GetUsers();
+    public Task<ICollection<User>> GetUsers();
 
     /// <summary>
     /// Returns a colllection of users in the database
     /// </summary>
-    public Task<IEnumerable<User>> GetUsers(int offset, int limit);
+    public Task<ICollection<User>> GetUsers(int offset, int limit);
 
     /// <summary>
     /// Attempts to add a user using the provided document

@@ -84,7 +84,7 @@ public class DtoToModelMapper : IDtoToModelMapper
 
     public async Task<Npc> ParseFromDto(NpcDto npc, IPokemonService pokemonService)
     {
-        var npcPokemon = await pokemonService.GetPokemonByTrainerId(npc.NPCId, npc.GameId);
+        var npcPokemon = await pokemonService.GetPokemonByTrainerId(npc.NPCId, npc.GameId, true);
         return new Npc
         {
             NpcId = npc.NPCId,
@@ -221,7 +221,7 @@ public class DtoToModelMapper : IDtoToModelMapper
 
     public async Task<Trainer> ParseFromDto(TrainerDto trainer, IPokemonService pokemonService, IPokedexService pokedexService)
     {
-        var trainerPokemon = await pokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId);
+        var trainerPokemon = await pokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId, false);
         var pokedex = (await pokedexService.GetTrainerPokeDex(trainer.TrainerId, trainer.GameId)).OrderBy(item => item.DexNo);
         var caught = pokedex.Count(dexItem => dexItem.IsCaught);
         return new Trainer

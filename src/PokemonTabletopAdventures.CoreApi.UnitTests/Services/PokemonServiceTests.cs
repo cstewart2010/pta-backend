@@ -7,12 +7,8 @@ using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 using PokemonTabletopAdventures.Models.Enums;
-using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Pokemons;
-using PokemonTabletopAdventures.Models.Shops;
-using PokemonTabletopAdventures.Models.Trainers;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Services;
 
@@ -80,7 +76,7 @@ internal class PokemonServiceTests
         var trainerId = Shared.UserIds.First();
         var gameId = Shared.GameIds.First();
         var expectedList = pokemonCollection.Collection.Where(x => x.TrainerId == trainerId && x.GameId == gameId).ToList();
-        ICollection<Pokemon> actualList = [.. await sut.GetPokemonByTrainerId(trainerId, gameId)];
+        ICollection<Pokemon> actualList = [.. await sut.GetPokemonByTrainerId(trainerId, gameId, false)];
         Assert.That(actualList, Has.Count.EqualTo(expectedList.Count));
         Assert.Multiple(() =>
         {
@@ -99,7 +95,7 @@ internal class PokemonServiceTests
         var expectItem = pokemonCollection.Collection.First();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetPokemonByTrainerId(trainerId, gameId);
+            var task = sut.GetPokemonByTrainerId(trainerId, gameId, false);
             task.Wait();
         });
 

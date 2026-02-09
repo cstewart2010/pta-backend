@@ -15,7 +15,7 @@ internal class ExportedTrainer
     {
         trainer.IsOnline = false;
         await trainerService.UpdateTrainerOnlineStatus(trainer.TrainerId, trainer.GameId, false);
-        var pokemon = await pokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId);
+        var pokemon = await pokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId, false);
         return new ExportedTrainer
         {
             Trainer = trainer,

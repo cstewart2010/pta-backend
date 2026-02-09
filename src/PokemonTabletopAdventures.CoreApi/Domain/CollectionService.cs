@@ -26,16 +26,16 @@ internal class CollectionService<TDto>() : ICollectionService<TDto>
         await Task.CompletedTask;
     }
 
-    public async Task<IEnumerable<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter)
+    public async Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter)
     {
         var items = Collection.Find(filter).ToEnumerable();
-        return await Task.FromResult(items);
+        return await Task.FromResult(items.ToArray());
     }
 
-    public async Task<IEnumerable<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter, int offset, int limit)
+    public async Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter, int offset, int limit)
     {
         var items = Collection.Find(document => true).Skip(offset).Limit(limit).ToEnumerable();
-        return await Task.FromResult(items);
+        return await Task.FromResult(items.ToArray());
     }
 
     public async Task<TDto?> GetOneAsync(Expression<Func<TDto, bool>> filter)

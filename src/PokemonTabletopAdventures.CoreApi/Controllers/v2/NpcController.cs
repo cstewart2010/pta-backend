@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
+using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Npcs;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
@@ -106,7 +107,10 @@ public class NpcController(
             return Conflict();
         }
 
-        await _npcService.DeleteNpc(request.NpcId, GameService);
+        await _npcService.DeleteNpc(request.NpcId);
+        var game = await GameService.GetGame(npc.GameId, true);
+        var npcList = game.Npcs.Select(npc => npc.NpcId).Where(npcId => request.NpcId != npcId);
+        await GameService.UpdateGameNpcList(npc.GameId, [.. npcList]);
         return Ok();
     }
 
@@ -117,7 +121,12 @@ public class NpcController(
         [FromBody] DeleteNpcRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        await _npcService.DeleteNpcByGameId(request.GameId, GameService);
+        var game = await GameService.GetGame(request.GameId, true);
+        foreach (var npc in game.Npcs)
+        {
+            await _npcService.DeleteNpc(npc.NpcId);
+        }
+        await GameService.UpdateGameNpcList(request.GameId, []);
         return Ok();
     }
 }

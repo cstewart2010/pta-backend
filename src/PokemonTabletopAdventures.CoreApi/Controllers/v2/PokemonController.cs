@@ -46,7 +46,7 @@ public class PokemonController(
     public async Task<IActionResult> FindTrainerMon(
         [FromHeader] RetrievePokemonRequest request)
     {
-        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId);
+        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId, false);
         return Ok(new RetrievePokemonResponse { Pokemon = [.. models] });
     }
 
@@ -60,7 +60,7 @@ public class PokemonController(
         [FromHeader] RetrievePokemonRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId);
+        var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId, false);
         return Ok(new RetrievePokemonResponse { Pokemon = [..models] });
     }
 
@@ -451,7 +451,7 @@ public class PokemonController(
             throw new InvalidEvolutionException($"{currentForm.Nickname} doesn't contain one of {string.Join(", ", request.KeptMoves)}");
         }
 
-        var evolvedForm = await DexService.GetEvolved(currentForm, request.KeptMoves, request.NextForm, request.NewMoves);
+        var evolvedForm = await DexService.GetEvolved(currentForm, [..request.KeptMoves], request.NextForm, [..request.NewMoves]);
         evolvedForm.Pokeball = currentForm.Pokeball;
         return evolvedForm;
     }

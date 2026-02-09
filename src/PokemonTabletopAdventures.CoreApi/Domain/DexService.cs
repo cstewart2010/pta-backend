@@ -22,7 +22,7 @@ public class DexService(
     private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
     private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
-    public async Task<IEnumerable<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
+    public async Task<ICollection<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
     {
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         return await collection.GetManyAsync(document => true);
@@ -53,7 +53,7 @@ public class DexService(
     public async Task<PokemonAndForms> GetPokedexEntry(string name, string form)
     {
         var allForms = await Collection.GetManyAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
-        if (!allForms.Any())
+        if (allForms.Count == 0)
         {
             throw new ItemNotFoundException(name);
         }
@@ -67,7 +67,7 @@ public class DexService(
         };
     }
 
-    public async Task<IEnumerable<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon)
+    public async Task<ICollection<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon)
     {
         var allEvolutions = await Collection.GetManyAsync(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase));
         var forms = await Task.WhenAll(allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(_dtoToModelMapper.ParseFromDto));
@@ -81,7 +81,7 @@ public class DexService(
     {
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         var documents = await collection.GetManyAsync(document => true, offset, limit);
-        var count = documents.Count();
+        var count = documents.Count;
         var results = documents.Select(x => x.Name);
 
         return new IndexCollectionResponse
@@ -103,13 +103,13 @@ public class DexService(
         };
     }
 
-    public async Task PostDexEntries<TDocument>(string collectionName, IEnumerable<TDocument> documents) where TDocument : IDexDocument
+    public async Task PostDexEntries<TDocument>(string collectionName, ICollection<TDocument> documents) where TDocument : IDexDocument
     {
         var collection = _repositoryService.GetCollection<TDocument>(typeof(TDocument).Name);
         foreach (var document in documents)
         {
             var items = await collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name);
-            if (items.Any())
+            if (items.Count != 0)
             {
                 continue;
             }
@@ -118,12 +118,12 @@ public class DexService(
         }
     }
 
-    public async Task PostPokedexEntries(IEnumerable<PokemonForm> documents)
+    public async Task PostPokedexEntries(ICollection<PokemonForm> documents)
     {
         foreach (var document in documents)
         {
             var items = await Collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name && document.Form == currentDocument.Form);
-            if (items.Any())
+            if (items.Count != 0)
             {
                 continue;
             }
@@ -135,9 +135,9 @@ public class DexService(
 
     public async Task<Pokemon> GetEvolved(
         Pokemon pokemon,
-        IEnumerable<string> keptMoves,
+        ICollection<string> keptMoves,
         string evolvedName,
-        IEnumerable<string> newMoves)
+        ICollection<string> newMoves)
     {
         var invalidKeptMoves = keptMoves.Where(x => !pokemon.Moves.Contains(x)).ToArray();
         if (invalidKeptMoves.Length != 0)
@@ -205,7 +205,7 @@ public class DexService(
         Gender gender,
         Status status,
         string? nickname,
-        IEnumerable<string> altForms)
+        ICollection<string> altForms)
     {
         var updatedNickname = string.IsNullOrWhiteSpace(nickname)
             ? basePokemon.Name

@@ -20,7 +20,7 @@ public interface IDexService
     /// Returns all Dex extries for a specific Dex collection
     /// </summary>
     /// <param name="documentType">The dex collection you wish to return data from</param>
-    public Task<IEnumerable<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument;
+    public Task<ICollection<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument;
 
     /// <summary>
     /// Adds a collection of dex entry to a specific dex collection
@@ -29,7 +29,7 @@ public interface IDexService
     /// <param name="documents">The documents to add to collection</param>
     public Task PostDexEntries<TDocument>(
         string collectionName,
-        IEnumerable<TDocument> documents) where TDocument : IDexDocument;
+        ICollection<TDocument> documents) where TDocument : IDexDocument;
 
     /// <summary>
     /// Attempts to evolve a pokemon to its next stage
@@ -40,9 +40,9 @@ public interface IDexService
     /// <param name="newMoves">The moves you wish to add</param>
     public Task<Pokemon> GetEvolved(
         Pokemon pokemon,
-        IEnumerable<string> keptMoves,
+        ICollection<string> keptMoves,
         string evolvedName,
-        IEnumerable<string> newMoves);
+        ICollection<string> newMoves);
 
     public Task<IndexCollectionResponse> GetIndexCollectionResponse<TDocument>(
         DexType documentType,
@@ -55,7 +55,7 @@ public interface IDexService
     /// Returns a collection of possible evolutions
     /// </summary>
     /// <param name="pokemon"></param>
-    public Task<IEnumerable<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon);
+    public Task<ICollection<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon);
 
     /// <summary>
     /// Builds a <see cref="Pokemon"/> using information from the <see cref="PokemonForm"/>
@@ -95,5 +95,5 @@ public interface IDexService
     /// Adds a collection of dex entry to a specific dex collection
     /// </summary>
     /// <param name="documents">The documents to add to collection</param>
-    public Task PostPokedexEntries(IEnumerable<PokemonForm> documents);
+    public Task PostPokedexEntries(ICollection<PokemonForm> documents);
 }

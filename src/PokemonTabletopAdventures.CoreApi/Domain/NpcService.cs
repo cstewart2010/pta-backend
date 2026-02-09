@@ -9,36 +9,20 @@ public class NpcService(
     IRepositoryService repositoryService,
     IPokemonService pokemonService,
     IDtoToModelMapper dtoToModelMapper,
-    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<NpcDto>(repositoryService, MongoCollection.NPCs), INpcService
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<NpcService> logger) : AbstractMongoService<NpcDto>(repositoryService, MongoCollection.NPCs), INpcService
 {
     private readonly IPokemonService _pokemonService = pokemonService;
     private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
     private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
+    private readonly ILogger<NpcService> _logger = logger;
 
-    public async Task DeleteNpc(Guid id, IGameService gameService)
+    public async Task DeleteNpc(Guid id)
     {
-        var npc = await GetNpc(id);
         await ThrowIfNull(
             id,
             npcId => Collection.DeleteAsync(npc => npc.NPCId == npcId),
             PropertyNames.NpcId);
-
-        var game = await gameService.GetGame(npc.GameId, true);
-        var npcList = game.Npcs.Select(npc => npc.NpcId).Where(npcId => id != npcId);
-        await gameService.UpdateGameNpcList(npc.GameId, npcList);
-    }
-
-    public async Task DeleteNpcByGameId(Guid gameId, IGameService gameService)
-    {
-        var game = await gameService.GetGame(gameId, true);
-        foreach (var npcModel in game.Npcs)
-        {
-            await ThrowIfNull(
-                gameId,
-                gameId => Collection.DeleteAsync(npc => npc.NPCId == npcModel.NpcId),
-                PropertyNames.GameId);
-        }
-        await gameService.UpdateGameNpcList(gameId, []);
     }
 
     public async Task<Npc> GetNpc(Guid id)
@@ -51,7 +35,7 @@ public class NpcService(
         return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService);
     }
 
-    public async Task<IEnumerable<Npc>> GetNpcs(IEnumerable<Guid> npcIds)
+    public async Task<ICollection<Npc>> GetNpcs(IEnumerable<Guid> npcIds)
     {
         var dtos = await ThrowIfNull(
             npcIds,
@@ -61,7 +45,7 @@ public class NpcService(
         return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, _pokemonService)));
     }
 
-    public async Task<IEnumerable<Npc>> GetNpcsByGameId(Guid gameId)
+    public async Task<ICollection<Npc>> GetNpcsByGameId(Guid gameId)
     {
         var dtos = await ThrowIfNull(
             gameId,

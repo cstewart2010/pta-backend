@@ -15,18 +15,18 @@ public interface IGameService
     /// Returns all games that contains the supplied nickname as a substring
     /// </summary>
     /// <param name="nickname">The nickname to search with</param>
-    public Task<IEnumerable<Game>> GetAllGames(string nickname);
+    public Task<ICollection<Game>> GetAllGames(string nickname);
 
     /// <summary>
     /// Returns all games that the user is a part of
     /// </summary>
     /// <param name="user">The user to search with</param>
-    public Task<IEnumerable<Game>> GetAllGamesWithUser(User user);
+    public Task<ICollection<Game>> GetAllGamesWithUser(User user);
 
     /// <summary>
     /// Returns all games in db
     /// </summary>
-    public Task<IEnumerable<Game>> GetMostRecent20Games(User user);
+    public Task<ICollection<Game>> GetMostRecent20Games(User user);
 
     /// <summary>
     /// Returns a game's nickname using the game id
@@ -45,7 +45,7 @@ public interface IGameService
     /// </summary>
     /// <param name="gameId">The game session id</param>
     /// <param name="npcIds">The updated npc list</param>
-    public Task<Game> UpdateGameNpcList(Guid gameId, IEnumerable<Guid> npcIds);
+    public Task<Game> UpdateGameNpcList(Guid gameId, ICollection<Guid> npcIds);
 
     /// <summary>
     /// Searches for a game, then updates its online status

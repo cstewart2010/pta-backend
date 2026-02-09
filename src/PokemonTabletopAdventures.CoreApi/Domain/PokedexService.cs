@@ -28,7 +28,7 @@ public class PokedexService(
         return await _dtoToModelMapper.ParseFromDto(dto);
     }
 
-    public async Task<IEnumerable<PokedexItem>> GetTrainerPokeDex(Guid trainerId, Guid gameId)
+    public async Task<ICollection<PokedexItem>> GetTrainerPokeDex(Guid trainerId, Guid gameId)
     {
         var dtos = await ThrowIfNull(
             (trainerId, gameId),

@@ -23,13 +23,13 @@ public interface ITrainerService
     /// Returns all trainers matching the user Id
     /// </summary>
     /// <param name="gameId">The game session id</param>
-    public Task<IEnumerable<Trainer>> GetAllUserTrainers(Guid userId);
+    public Task<ICollection<Trainer>> GetAllUserTrainers(Guid userId);
 
     /// <summary>
     /// Returns all trainers matching the game session id
     /// </summary>
     /// <param name="gameId">The game session id</param>
-    public Task<IEnumerable<Trainer>> GetTrainersByGameId(Guid gameId);
+    public Task<ICollection<Trainer>> GetTrainersByGameId(Guid gameId);
 
     /// <summary>
     /// Returns a trainer matching the trainer name and game session id

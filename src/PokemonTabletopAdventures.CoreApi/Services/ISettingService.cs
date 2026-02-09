@@ -20,7 +20,7 @@ public interface ISettingService
     /// Returns all settings associated with the game session
     /// </summary>
     /// <param name="gameId">The game id</param>
-    public Task<IEnumerable<Setting>> GetAllSettings(Guid gameId);
+    public Task<ICollection<Setting>> GetAllSettings(Guid gameId);
 
     /// <summary>
     /// Attempts to add a encounter using the provided document
