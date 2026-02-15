@@ -9,10 +9,12 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 public class ShopService(
     IRepositoryService repositoryService,
     IDtoToModelMapper dtoToModelMapper,
-    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<ShopDto>(repositoryService, MongoCollection.Shops), IShopService
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<ShopService> logger) : AbstractMongoService<ShopDto>(repositoryService, MongoCollection.Shops), IShopService
 {
     private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
     private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
+    private readonly ILogger<ShopService> _logger = logger;
 
     public async Task DeleteShop(Guid id, Guid gameId)
     {
@@ -24,15 +26,12 @@ public class ShopService(
 
     public async Task DeleteShopByGameId(Guid gameId)
     {
-        await ThrowIfNull(
-            gameId,
-            id => Collection.DeleteAsync(shop => shop.GameId == id),
-            PropertyNames.GameId);
+        await Collection.DeleteManyAsync(shop => shop.GameId == gameId);
     }
 
     public async Task<ICollection<Shop>> GetShopsByGameId(Guid gameId)
     {
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             gameId,
             id => Collection.GetManyAsync(shop => shop.GameId == id),
             PropertyNames.GameId);
@@ -53,11 +52,7 @@ public class ShopService(
     public async Task<ICollection<Shop>> GetShopsBySetting(Setting setting)
     {
         var shopIds = setting.Shops.Select(s => s.ShopId);
-        var dtos = await ThrowIfNull(
-            setting,
-            id => Collection.GetManyAsync(shop => shopIds.Contains(shop.ShopId) && setting.GameId == shop.GameId),
-            PropertyNames.SettingShops);
-
+        var dtos = await Collection.GetManyAsync(shop => shopIds.Contains(shop.ShopId) && setting.GameId == shop.GameId);
         return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
     }
 

@@ -14,37 +14,35 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Services;
 
 internal class NpcServiceTests
 {
-    private NpcService sut;
-    private NpcCollectionImpl npcCollection;
-    private PokedexService pokedexService;
-    private PokedexCollectionImpl pokedexCollection;
-    private PokemonService pokemonService;
-    private PokemonCollectionImpl pokemonCollection;
-    private GameCollectionImpl gameCollection;
+    private NpcService _sut;
+    private NpcCollectionImpl _npcCollection;
+    private PokedexService _pokedexService;
+    private PokedexCollectionImpl _pokedexCollection;
+    private PokemonService _pokemonService;
+    private PokemonCollectionImpl _pokemonCollection;
 
     [OneTimeSetUp]
     public void SetUp()
     {
         var mockRepository = Substitute.For<IRepositoryService>();
-        pokedexCollection = new PokedexCollectionImpl();
-        pokemonCollection = new PokemonCollectionImpl();
-        gameCollection = new GameCollectionImpl();
-        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(pokedexCollection);
-        mockRepository.GetCollection<PokemonDto>(MongoCollection.Pokemon).Returns(pokemonCollection);
-        pokedexService = new PokedexService(mockRepository, Shared.DtoToModelMapper, Substitute.For<ILogger<PokedexService>>());
-        pokemonService = new PokemonService(mockRepository, pokedexService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<PokemonService>>());
-        npcCollection = new NpcCollectionImpl();
-        mockRepository.GetCollection<NpcDto>(MongoCollection.NPCs).Returns(npcCollection);
-        sut = new NpcService(mockRepository, pokemonService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<NpcService>>());
+        _pokedexCollection = new PokedexCollectionImpl();
+        _pokemonCollection = new PokemonCollectionImpl();
+        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(_pokedexCollection);
+        mockRepository.GetCollection<PokemonDto>(MongoCollection.Pokemon).Returns(_pokemonCollection);
+        _pokedexService = new PokedexService(mockRepository, Shared.DtoToModelMapper, Substitute.For<ILogger<PokedexService>>());
+        _pokemonService = new PokemonService(mockRepository, _pokedexService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<PokemonService>>());
+        _npcCollection = new NpcCollectionImpl();
+        mockRepository.GetCollection<NpcDto>(MongoCollection.NPCs).Returns(_npcCollection);
+        _sut = new NpcService(mockRepository, _pokemonService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<NpcService>>());
     }
 
     [Test]
     public async Task GetNpc_Valid_ReturnsItem()
     {
         var id = Shared.NpcIds.First();
-        var expectedNpc = npcCollection.Collection.First(x => x.NPCId == id);
+        var expectedNpc = _npcCollection.Collection.First(x => x.NPCId == id);
 
-        var actualNpc = await sut.GetNpc(id);
+        var actualNpc = await _sut.GetNpc(id);
 
         Assert.That(actualNpc, Is.Not.Null);
         Assert.Multiple(() =>
@@ -62,7 +60,7 @@ internal class NpcServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetNpc(item.NpcId!.Value);
+            var task = _sut.GetNpc(item.NpcId!.Value);
             task.Wait();
         });
 
@@ -73,7 +71,7 @@ internal class NpcServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {typeof(NpcDto).Name} using {PropertyNames.NpcId}={item.NpcId}"));
+                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {PropertyNames.NpcId}={item.NpcId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
@@ -83,13 +81,13 @@ internal class NpcServiceTests
     {
         var ids = Shared.NpcIds;
 
-        var npcs = await sut.GetNpcs(ids);
+        var npcs = await _sut.GetNpcs(ids);
 
         Assert.That(npcs, Is.Not.Null.Or.Empty);
-        Assert.That(npcs, Has.Count.EqualTo(npcCollection.Collection.Count));
+        Assert.That(npcs, Has.Count.EqualTo(_npcCollection.Collection.Count));
         Assert.Multiple(() =>
         {
-            foreach (var npc in npcCollection.Collection)
+            foreach (var npc in _npcCollection.Collection)
             {
                 Assert.That(npcs.SingleOrDefault(x => x.NpcId == npc.NPCId), Is.Not.Null);
             }
@@ -101,7 +99,7 @@ internal class NpcServiceTests
     {
         Guid[] ids = [Shared.NpcIds.First(), Guid.NewGuid()];
 
-        var npcs = await sut.GetNpcs(ids);
+        var npcs = await _sut.GetNpcs(ids);
 
         Assert.That(npcs, Is.Not.Null.Or.Empty);
         Assert.That(npcs, Has.Count.EqualTo(1));
@@ -114,7 +112,7 @@ internal class NpcServiceTests
 
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetNpcs(ids);
+            var task = _sut.GetNpcs(ids);
             task.Wait();
         });
 
@@ -125,7 +123,7 @@ internal class NpcServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Contains.Substring($"Could not find a {typeof(NpcDto).Name} using {PropertyNames.NpcId}"));
+                Contains.Substring($"Could not find a {nameof(NpcDto)} using {PropertyNames.NpcId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
@@ -134,9 +132,9 @@ internal class NpcServiceTests
     public async Task GetNpcsByGameId_Valid_ReturnsCollection()
     {
         var gameId = Shared.GameIds.First();
-        var expectedNpcs = npcCollection.Collection.Where(x => x.GameId == gameId).ToArray();
+        var expectedNpcs = _npcCollection.Collection.Where(x => x.GameId == gameId).ToArray();
 
-        var actualNpcs = await sut.GetNpcsByGameId(gameId);
+        var actualNpcs = await _sut.GetNpcsByGameId(gameId);
 
         Assert.That(actualNpcs, Is.Not.Null.Or.Empty);
         Assert.That(actualNpcs, Has.Count.EqualTo(expectedNpcs.Length));
@@ -156,7 +154,7 @@ internal class NpcServiceTests
 
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetNpcsByGameId(gameId);
+            var task = _sut.GetNpcsByGameId(gameId);
             task.Wait();
         });
 
@@ -167,7 +165,7 @@ internal class NpcServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {typeof(NpcDto).Name} using {PropertyNames.GameId}={gameId}"));
+                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {PropertyNames.GameId}={gameId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
@@ -175,7 +173,7 @@ internal class NpcServiceTests
     [Test]
     public async Task PostNpc_Valid_AddsToCollection()
     {
-        var initialCount = npcCollection.Collection.Count;
+        var initialCount = _npcCollection.Collection.Count;
         var npc = new Npc
         {
             Background = string.Empty,
@@ -198,10 +196,10 @@ internal class NpcServiceTests
             Weight = 7
         };
 
-        await sut.PostNpc(npc);
+        await _sut.PostNpc(npc);
 
-        Assert.That(npcCollection.Collection, Has.Count.EqualTo(initialCount + 1));
-        var newNpc = await sut.GetNpc(npc.NpcId);
+        Assert.That(_npcCollection.Collection, Has.Count.EqualTo(initialCount + 1));
+        var newNpc = await _sut.GetNpc(npc.NpcId);
         Assert.Multiple(() =>
         {
             Assert.That(newNpc.Background, Is.EqualTo(npc.Background));
@@ -213,8 +211,8 @@ internal class NpcServiceTests
     [Test]
     public void PostNpc_DuplicateItem_Items()
     {
-        var initialCount = npcCollection.Collection.Count;
-        var dto = npcCollection.Collection.First();
+        var initialCount = _npcCollection.Collection.Count;
+        var dto = _npcCollection.Collection.First();
         var npc = new Npc
         {
             Background = string.Empty,
@@ -239,7 +237,7 @@ internal class NpcServiceTests
 
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.PostNpc(npc);
+            var task = _sut.PostNpc(npc);
             task.Wait();
         });
 
@@ -248,9 +246,9 @@ internal class NpcServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.DuplicateEntryTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {typeof(NpcDto).Name}"));
+            Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {nameof(NpcDto)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(npcCollection.Collection, Has.Count.EqualTo(initialCount));
+            Assert.That(_npcCollection.Collection, Has.Count.EqualTo(initialCount));
         });
     }
 
@@ -258,9 +256,9 @@ internal class NpcServiceTests
     public async Task UpdateNpc_UpdatesAllProperties()
     {
         await PostNpc_Valid_AddsToCollection();
-        var count = npcCollection.Collection.Count;
-        var dto = npcCollection.Collection.Last();
-        var npc = await sut.GetNpc(dto.NPCId);
+        var count = _npcCollection.Collection.Count;
+        var dto = _npcCollection.Collection.Last();
+        var npc = await _sut.GetNpc(dto.NPCId);
         var oldGameId = npc.GameId;
         var oldAge = npc.Age;
         var oldName = npc.TrainerName;
@@ -268,12 +266,12 @@ internal class NpcServiceTests
         npc.Age = Random.Shared.Next(10, 100);
         npc.TrainerName = nameof(UpdateNpc_UpdatesAllProperties);
 
-        var updatedNpc = await sut.UpdateNpc(npc);
+        var updatedNpc = await _sut.UpdateNpc(npc);
 
         Assert.Multiple(() =>
         {
             Assert.That(updatedNpc, Is.Not.Null);
-            Assert.That(npcCollection.Collection, Has.Count.EqualTo(count));
+            Assert.That(_npcCollection.Collection, Has.Count.EqualTo(count));
         });
         Assert.Multiple(() =>
         {
@@ -289,13 +287,13 @@ internal class NpcServiceTests
     [Test]
     public async Task DeleteNpc_Valid_UpdatesCollection()
     {
-        var count = npcCollection.Collection.Count;
+        var count = _npcCollection.Collection.Count;
         await PostNpc_Valid_AddsToCollection();
-        var dto = npcCollection.Collection.Last();
+        var dto = _npcCollection.Collection.Last();
 
-        await sut.DeleteNpc(dto.NPCId);
+        await _sut.DeleteNpc(dto.NPCId);
 
-        Assert.That(npcCollection.Collection, Has.Count.EqualTo(count));
+        Assert.That(_npcCollection.Collection, Has.Count.EqualTo(count));
         GetNpc_Invalid_Throws(new SearchItem
         {
             NpcId = dto.NPCId
@@ -308,7 +306,7 @@ internal class NpcServiceTests
         var id = Guid.NewGuid();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.DeleteNpc(id);
+            var task = _sut.DeleteNpc(id);
             task.Wait();
         });
 
@@ -319,7 +317,7 @@ internal class NpcServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {typeof(NpcDto).Name} using {PropertyNames.NpcId}={id}"));
+                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {PropertyNames.NpcId}={id}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }

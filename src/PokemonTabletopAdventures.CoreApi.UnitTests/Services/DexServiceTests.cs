@@ -17,27 +17,27 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Services;
 [TestFixture]
 public class DexServiceTests
 {
-    private DexService sut;
-    private Pokemon pokemon;
-    private Pokemon pokemon2;
-    private BasePokemonCollectionImpl basePokemonCollection;
+    private DexService _sut;
+    private Pokemon _pokemon;
+    private Pokemon _pokemon2;
+    private BasePokemonCollectionImpl _basePokemonCollection;
     [OneTimeSetUp]
     public void SetUp()
     {
         var mockRepository = Substitute.For<IRepositoryService>();
-        basePokemonCollection = new BasePokemonCollectionImpl();
-        mockRepository.GetCollection<BasePokemonDto>(MongoCollection.BasePokemon).Returns(basePokemonCollection);
+        _basePokemonCollection = new BasePokemonCollectionImpl();
+        mockRepository.GetCollection<BasePokemonDto>(MongoCollection.BasePokemon).Returns(_basePokemonCollection);
         var mockLogger = Substitute.For<ILogger<DexService>>();
-        sut = new DexService(mockRepository, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, mockLogger);
-        pokemon = JsonConvert.DeserializeObject<Pokemon>("{\r\n    \"speciesName\": \"Ivysaur\",\r\n    \"dexNo\": 2,\r\n    \"form\": \"Base\",\r\n    \"normalPortrait\": \"ivysaur\",\r\n    \"shinyPortrait\": \"ivysaur\",\r\n    \"pokemonStats\": {\r\n      \"hp\": 36,\r\n      \"attack\": 6,\r\n      \"defense\": 6,\r\n      \"specialAttack\": 8,\r\n      \"specialDefense\": 8,\r\n      \"speed\": 6\r\n    },\r\n    \"type\": \"Grass/Poison\",\r\n    \"size\": \"Medium\",\r\n    \"weight\": \"Medium\",\r\n    \"moves\": [\r\n      \"Poison Powder\",\r\n      \"Sleep Powder\",\r\n      \"Razor Leaf\"\r\n    ],\r\n    \"skills\": [\r\n      \"Sprouter\",\r\n      \"Threaded\"\r\n    ],\r\n    \"passives\": [\r\n      \"Growth\",\r\n      \"Growl\",\r\n      \"Overgrow\"\r\n    ],\r\n    \"proficiencies\": [\r\n      \"Grass\",\r\n      \"Poison\",\r\n      \"Floral\",\r\n      \"Vine Whip\"\r\n    ],\r\n    \"eggGroups\": [\r\n      \"Monster\",\r\n      \"Grass\"\r\n    ],\r\n    \"eggHatchRate\": \"10 Days\",\r\n    \"habitats\": [\r\n      \"Forest\",\r\n      \"Jungle\"\r\n    ],\r\n    \"diet\": \"Phototroph\",\r\n    \"rarity\": \"Rare\",\r\n    \"stage\": 2,\r\n    \"specialFormName\": \"\",\r\n    \"baseFormName\": \"\",\r\n    \"gMaxMove\": \"\",\r\n    \"evolvesFrom\": \"Bulbasaur\",\r\n    \"legendaryStats\": {\r\n      \"hp\": 0,\r\n      \"moves\": [],\r\n      \"legendaryMoves\": [],\r\n      \"passives\": [],\r\n      \"features\": []\r\n    }\r\n  }")!;
-        pokemon2 = JsonConvert.DeserializeObject<Pokemon>("{\r\n    \"speciesName\": \"Ivysaur1\",\r\n    \"dexNo\": 2,\r\n    \"form\": \"Base\",\r\n    \"normalPortrait\": \"ivysaur\",\r\n    \"shinyPortrait\": \"ivysaur\",\r\n    \"pokemonStats\": {\r\n      \"hp\": 36,\r\n      \"attack\": 6,\r\n      \"defense\": 6,\r\n      \"specialAttack\": 8,\r\n      \"specialDefense\": 8,\r\n      \"speed\": 6\r\n    },\r\n    \"type\": \"Grass/Poison\",\r\n    \"size\": \"Medium\",\r\n    \"weight\": \"Medium\",\r\n    \"moves\": [\r\n      \"Poison Powder\",\r\n      \"Sleep Powder\",\r\n      \"Razor Leaf\"\r\n    ],\r\n    \"skills\": [\r\n      \"Sprouter\",\r\n      \"Threaded\"\r\n    ],\r\n    \"passives\": [\r\n      \"Growth\",\r\n      \"Growl\",\r\n      \"Overgrow\"\r\n    ],\r\n    \"proficiencies\": [\r\n      \"Grass\",\r\n      \"Poison\",\r\n      \"Floral\",\r\n      \"Vine Whip\"\r\n    ],\r\n    \"eggGroups\": [\r\n      \"Monster\",\r\n      \"Grass\"\r\n    ],\r\n    \"eggHatchRate\": \"10 Days\",\r\n    \"habitats\": [\r\n      \"Forest\",\r\n      \"Jungle\"\r\n    ],\r\n    \"diet\": \"Phototroph\",\r\n    \"rarity\": \"Rare\",\r\n    \"stage\": 2,\r\n    \"specialFormName\": \"\",\r\n    \"baseFormName\": \"\",\r\n    \"gMaxMove\": \"\",\r\n    \"evolvesFrom\": \"Bulbasaur\",\r\n    \"legendaryStats\": {\r\n      \"hp\": 0,\r\n      \"moves\": [],\r\n      \"legendaryMoves\": [],\r\n      \"passives\": [],\r\n      \"features\": []\r\n    }\r\n  }")!;
+        _sut = new DexService(mockRepository, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, mockLogger);
+        _pokemon = JsonConvert.DeserializeObject<Pokemon>("{\r\n    \"speciesName\": \"Ivysaur\",\r\n    \"dexNo\": 2,\r\n    \"form\": \"Base\",\r\n    \"normalPortrait\": \"ivysaur\",\r\n    \"shinyPortrait\": \"ivysaur\",\r\n    \"pokemonStats\": {\r\n      \"hp\": 36,\r\n      \"attack\": 6,\r\n      \"defense\": 6,\r\n      \"specialAttack\": 8,\r\n      \"specialDefense\": 8,\r\n      \"speed\": 6\r\n    },\r\n    \"type\": \"Grass/Poison\",\r\n    \"size\": \"Medium\",\r\n    \"weight\": \"Medium\",\r\n    \"moves\": [\r\n      \"Poison Powder\",\r\n      \"Sleep Powder\",\r\n      \"Razor Leaf\"\r\n    ],\r\n    \"skills\": [\r\n      \"Sprouter\",\r\n      \"Threaded\"\r\n    ],\r\n    \"passives\": [\r\n      \"Growth\",\r\n      \"Growl\",\r\n      \"Overgrow\"\r\n    ],\r\n    \"proficiencies\": [\r\n      \"Grass\",\r\n      \"Poison\",\r\n      \"Floral\",\r\n      \"Vine Whip\"\r\n    ],\r\n    \"eggGroups\": [\r\n      \"Monster\",\r\n      \"Grass\"\r\n    ],\r\n    \"eggHatchRate\": \"10 Days\",\r\n    \"habitats\": [\r\n      \"Forest\",\r\n      \"Jungle\"\r\n    ],\r\n    \"diet\": \"Phototroph\",\r\n    \"rarity\": \"Rare\",\r\n    \"stage\": 2,\r\n    \"specialFormName\": \"\",\r\n    \"baseFormName\": \"\",\r\n    \"gMaxMove\": \"\",\r\n    \"evolvesFrom\": \"Bulbasaur\",\r\n    \"legendaryStats\": {\r\n      \"hp\": 0,\r\n      \"moves\": [],\r\n      \"legendaryMoves\": [],\r\n      \"passives\": [],\r\n      \"features\": []\r\n    }\r\n  }")!;
+        _pokemon2 = JsonConvert.DeserializeObject<Pokemon>("{\r\n    \"speciesName\": \"Ivysaur1\",\r\n    \"dexNo\": 2,\r\n    \"form\": \"Base\",\r\n    \"normalPortrait\": \"ivysaur\",\r\n    \"shinyPortrait\": \"ivysaur\",\r\n    \"pokemonStats\": {\r\n      \"hp\": 36,\r\n      \"attack\": 6,\r\n      \"defense\": 6,\r\n      \"specialAttack\": 8,\r\n      \"specialDefense\": 8,\r\n      \"speed\": 6\r\n    },\r\n    \"type\": \"Grass/Poison\",\r\n    \"size\": \"Medium\",\r\n    \"weight\": \"Medium\",\r\n    \"moves\": [\r\n      \"Poison Powder\",\r\n      \"Sleep Powder\",\r\n      \"Razor Leaf\"\r\n    ],\r\n    \"skills\": [\r\n      \"Sprouter\",\r\n      \"Threaded\"\r\n    ],\r\n    \"passives\": [\r\n      \"Growth\",\r\n      \"Growl\",\r\n      \"Overgrow\"\r\n    ],\r\n    \"proficiencies\": [\r\n      \"Grass\",\r\n      \"Poison\",\r\n      \"Floral\",\r\n      \"Vine Whip\"\r\n    ],\r\n    \"eggGroups\": [\r\n      \"Monster\",\r\n      \"Grass\"\r\n    ],\r\n    \"eggHatchRate\": \"10 Days\",\r\n    \"habitats\": [\r\n      \"Forest\",\r\n      \"Jungle\"\r\n    ],\r\n    \"diet\": \"Phototroph\",\r\n    \"rarity\": \"Rare\",\r\n    \"stage\": 2,\r\n    \"specialFormName\": \"\",\r\n    \"baseFormName\": \"\",\r\n    \"gMaxMove\": \"\",\r\n    \"evolvesFrom\": \"Bulbasaur\",\r\n    \"legendaryStats\": {\r\n      \"hp\": 0,\r\n      \"moves\": [],\r\n      \"legendaryMoves\": [],\r\n      \"passives\": [],\r\n      \"features\": []\r\n    }\r\n  }")!;
     }
 
     [Test]
     [TestCase("Venusaur", "Base", 3)]
     public async Task GetDexEntry_Valid_ReturnIndexResponse(string name, string form, int dexNo)
     {
-        var response = await sut.GetDexEntry<BasePokemonDto>(DexType.BasePokemon, name);
+        var response = await _sut.GetDexEntry<BasePokemonDto>(DexType.BasePokemon, name);
         Assert.That(response, Is.Not.Null);
         Assert.That(response.Data, Is.Not.Null);
         Assert.Multiple(() =>
@@ -55,7 +55,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetDexEntry<BasePokemonDto>(DexType.BasePokemon, itemName);
+            var task = _sut.GetDexEntry<BasePokemonDto>(DexType.BasePokemon, itemName);
             task.Wait();
         });
 
@@ -72,7 +72,7 @@ public class DexServiceTests
     [Test]
     public async Task GetDexEntries_Valid_ReturnIndexResponse()
     {
-        var pokemon = await sut.GetDexEntries<BasePokemonDto>(DexType.BasePokemon);
+        var pokemon = await _sut.GetDexEntries<BasePokemonDto>(DexType.BasePokemon);
         Assert.That(pokemon, Is.Not.Null.Or.Empty);
         Assert.That(pokemon, Has.Count.EqualTo(5));
     }
@@ -81,7 +81,7 @@ public class DexServiceTests
     [TestCaseSource(nameof(GetEvolvedMoves))]
     public async Task GetEvolved_Valid_ReturnsPokemon(string[] keptMoves, string[] newMoves)
     {
-        var evolved = await sut.GetEvolved(pokemon, keptMoves, "Venusaur", newMoves);
+        var evolved = await _sut.GetEvolved(_pokemon, keptMoves, "Venusaur", newMoves);
         string[] updatedMoves = [.. keptMoves, .. newMoves];
         Assert.Multiple(() =>
         {
@@ -101,7 +101,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetEvolved(pokemon, [], evolvedName, []);
+            var task = _sut.GetEvolved(_pokemon, [], evolvedName, []);
             task.Wait();
         });
 
@@ -110,7 +110,7 @@ public class DexServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.EvolutionErrorTitle));
-            Assert.That(exception.Message, Is.EqualTo($"{pokemon.SpeciesName} cannot evolve into {evolvedName}"));
+            Assert.That(exception.Message, Is.EqualTo($"{_pokemon.SpeciesName} cannot evolve into {evolvedName}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
@@ -122,7 +122,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetEvolved(pokemon, moves, "Venusaur", []);
+            var task = _sut.GetEvolved(_pokemon, moves, "Venusaur", []);
             task.Wait();
         });
 
@@ -131,7 +131,7 @@ public class DexServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.EvolutionErrorTitle));
-            Assert.That(exception.Message, Is.EqualTo($"{pokemon.SpeciesName} does not know {string.Join(", ", moves)}"));
+            Assert.That(exception.Message, Is.EqualTo($"{_pokemon.SpeciesName} does not know {string.Join(", ", moves)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
@@ -143,7 +143,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetEvolved(pokemon, [], "Venusaur", moves);
+            var task = _sut.GetEvolved(_pokemon, [], "Venusaur", moves);
             task.Wait();
         });
 
@@ -164,7 +164,7 @@ public class DexServiceTests
     [TestCase(5, 10, 0)]
     public async Task GetIndexCollectionResponse_Valid_ReturnResponse(int offset, int limit, int expectedCount)
     {
-        var response = await sut.GetIndexCollectionResponse<BasePokemonDto>(DexType.BasePokemon, offset, limit);
+        var response = await _sut.GetIndexCollectionResponse<BasePokemonDto>(DexType.BasePokemon, offset, limit);
         Assert.That(response, Is.Not.Null);
         Assert.That(response.Count, Is.LessThanOrEqualTo(expectedCount));
     }
@@ -172,15 +172,15 @@ public class DexServiceTests
     [Test]
     public async Task GetOrderedIndexCollectionResponse_ReturnsResponse()
     {
-        var response = await sut.GetOrderedIndexCollectionResponse();
+        var response = await _sut.GetOrderedIndexCollectionResponse();
         Assert.That(response, Is.Not.Null);
-        Assert.That(response, Has.Count.LessThanOrEqualTo(basePokemonCollection.Collection.Count));
+        Assert.That(response, Has.Count.LessThanOrEqualTo(_basePokemonCollection.Collection.Count));
     }
 
     [Test]
     public async Task GetPossibleEvolutions_CanEvolve_NotEmpty()
     {
-        var evolutions = await sut.GetPossibleEvolutions(pokemon);
+        var evolutions = await _sut.GetPossibleEvolutions(_pokemon);
         Assert.That(evolutions, Has.Count.EqualTo(1));
         var mon = evolutions.First();
         Assert.That(mon.Name, Is.EqualTo("Venusaur"));
@@ -189,7 +189,7 @@ public class DexServiceTests
     [Test]
     public async Task GetPossibleEvolutions_CantEvolve_Empty()
     {
-        var evolutions = await sut.GetPossibleEvolutions(pokemon2);
+        var evolutions = await _sut.GetPossibleEvolutions(_pokemon2);
         Assert.That(evolutions, Is.Empty);
     }
 
@@ -204,7 +204,7 @@ public class DexServiceTests
     [TestCase("Venusaur", "Mega", null)]
     public async Task GetNewPokemon_Valid_ReturnNewPokemon(string name, string form, string? nickname)
     {
-        var newPokemon = await sut.GetNewPokemon(name, nickname, form);
+        var newPokemon = await _sut.GetNewPokemon(name, nickname, form);
         Assert.Multiple(() =>
         {
             Assert.That(newPokemon.SpeciesName, Is.EqualTo(name));
@@ -222,7 +222,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetNewPokemon(name, nickname, form);
+            var task = _sut.GetNewPokemon(name, nickname, form);
             task.Wait();
         });
 
@@ -244,7 +244,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetNewPokemon(name, nickname, form);
+            var task = _sut.GetNewPokemon(name, nickname, form);
             task.Wait();
         });
 
@@ -263,7 +263,7 @@ public class DexServiceTests
     [TestCase("Venusaur", "Mega", "NewGuy", Nature.Timid, Gender.Genderless, Status.Burned)]
     public async Task GetNewPokemon_Valid_ReturnNewPokemon(string name, string form, string nickname, Nature nature, Gender gender, Status status)
     {
-        var newPokemon = await sut.GetNewPokemon(name, nature, gender, status, nickname, form);
+        var newPokemon = await _sut.GetNewPokemon(name, nature, gender, status, nickname, form);
         Assert.Multiple(() =>
         {
             Assert.That(newPokemon.SpeciesName, Is.EqualTo(name));
@@ -282,7 +282,7 @@ public class DexServiceTests
     [TestCase("Venusaur", "Mega", "Base", "Gigantamax")]
     public async Task GetPokedexEntry_Valid_ReturnPokemonForm(string name, string selectedForm, string altForm1, string altForm2)
     {
-        var response = await sut.GetPokedexEntry(name, selectedForm);
+        var response = await _sut.GetPokedexEntry(name, selectedForm);
         Assert.That(response, Is.Not.Null);
         Assert.That(response.Pokemon, Is.Not.Null);
         Assert.Multiple(() =>
@@ -304,7 +304,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetPokedexEntry(name, selectedForm);
+            var task = _sut.GetPokedexEntry(name, selectedForm);
             task.Wait();
         });
 
@@ -326,7 +326,7 @@ public class DexServiceTests
     {
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetPokedexEntry(name, selectedForm);
+            var task = _sut.GetPokedexEntry(name, selectedForm);
             task.Wait();
         });
 
@@ -343,7 +343,7 @@ public class DexServiceTests
     [Test]
     public async Task PostPokedexEntries_New_AddToCollection()
     {
-        var oldCount = basePokemonCollection.Collection.Count;
+        var oldCount = _basePokemonCollection.Collection.Count;
         var test = new PokemonForm
         {
             DexNo = 4,
@@ -351,16 +351,16 @@ public class DexServiceTests
             Name = "Charmander"
         };
 
-        await sut.PostPokedexEntries([test]);
+        await _sut.PostPokedexEntries([test]);
         await GetDexEntry_Valid_ReturnIndexResponse(test.Name, test.Form, test.DexNo);
-        var newCount = basePokemonCollection.Collection.Count;
+        var newCount = _basePokemonCollection.Collection.Count;
         Assert.That(newCount, Is.EqualTo(oldCount + 1));
     }
 
     [Test]
     public async Task PostPokedexEntries_Old_NochangeToCollection()
     {
-        var oldCount = basePokemonCollection.Collection.Count;
+        var oldCount = _basePokemonCollection.Collection.Count;
         var test = new PokemonForm
         {
             DexNo = 2,
@@ -368,8 +368,8 @@ public class DexServiceTests
             Name = "Venusaur"
         };
 
-        await sut.PostPokedexEntries([test]);
-        var newCount = basePokemonCollection.Collection.Count;
+        await _sut.PostPokedexEntries([test]);
+        var newCount = _basePokemonCollection.Collection.Count;
         Assert.That(newCount, Is.EqualTo(oldCount));
     }
 

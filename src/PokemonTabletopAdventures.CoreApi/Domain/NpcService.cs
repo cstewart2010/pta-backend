@@ -37,7 +37,7 @@ public class NpcService(
 
     public async Task<ICollection<Npc>> GetNpcs(IEnumerable<Guid> npcIds)
     {
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             npcIds,
             id => Collection.GetManyAsync(npc => npcIds.Contains(npc.NPCId)),
             PropertyNames.NpcId);
@@ -47,7 +47,7 @@ public class NpcService(
 
     public async Task<ICollection<Npc>> GetNpcsByGameId(Guid gameId)
     {
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             gameId,
             id => Collection.GetManyAsync(npc => npc.GameId == id),
             PropertyNames.GameId);

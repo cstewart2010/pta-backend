@@ -174,7 +174,9 @@ public class ModelToDtoMapper : IModelToDtoMapper
         {
             ShopId = shop.ShopId,
             Name = shop.Name,
-            Inventory = []
+            Inventory = [],
+            GameId = shop.GameId,
+            IsActive = shop.IsActive
         };
 
         foreach (var pair in shop.Inventory)

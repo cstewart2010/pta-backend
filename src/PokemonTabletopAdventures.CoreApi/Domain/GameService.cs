@@ -30,7 +30,7 @@ public class GameService(
 
     public async Task<ICollection<Game>> GetAllGames(string nickname)
     {
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             nickname,
             name => Collection.GetManyAsync(game => game.Nickname.Contains(name, StringComparison.CurrentCultureIgnoreCase)),
             PropertyNames.Nickname);
@@ -40,7 +40,7 @@ public class GameService(
 
     public async Task<ICollection<Game>> GetAllGamesWithUser(User user)
     {
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             user.Games,
             games => Collection.GetManyAsync(game => games.Contains(game.GameId)),
             PropertyNames.UserGames);
@@ -66,7 +66,7 @@ public class GameService(
 
     public async Task<ICollection<Game>> GetMostRecent20Games(User user)
     {
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             user.Games,
             games => Collection.GetManyAsync(x => !games.Contains(x.GameId), 0, 20),
             PropertyNames.GameId);

@@ -44,7 +44,7 @@ public class SettingService(
 
     public async Task<ICollection<Setting>> GetAllSettings(Guid gameId)
     {
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             gameId,
             id => Collection.GetManyAsync(setting => setting.GameId == gameId && setting.IsActive),
             PropertyNames.GameId);

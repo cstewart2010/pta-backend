@@ -123,7 +123,7 @@ public class TrainerService(
 
     public async Task<ICollection<Trainer>> GetTrainersByGameId(Guid gameId)
     {
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             gameId,
             id => Collection.GetManyAsync(trainer => trainer.GameId == id),
             PropertyNames.GameId);
@@ -204,7 +204,7 @@ public class TrainerService(
 
     public async Task<ICollection<Trainer>> GetAllUserTrainers(Guid userId)
     {
-        var dtos = await  ThrowIfNull(
+        var dtos = await  ThrowIfNullOrEmpty(
             userId,
             id => Collection.GetManyAsync(trainer => trainer.TrainerId == id),
             PropertyNames.TrainerId);
