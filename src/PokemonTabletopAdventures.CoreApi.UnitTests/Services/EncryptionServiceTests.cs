@@ -12,20 +12,20 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Services;
 
 internal class EncryptionServiceTests
 {
-    private EncryptionService sut;
-    private GameCollectionImpl gameCollection;
-    private UserCollectionImpl userCollection;
+    private EncryptionService _sut;
+    private GameCollectionImpl _gameCollection;
+    private UserCollectionImpl _userCollection;
 
     [OneTimeSetUp]
     public void SetUp()
     {
         var mockRepository = Substitute.For<IRepositoryService>();
-        gameCollection = new GameCollectionImpl();
-        userCollection = new UserCollectionImpl();
-        mockRepository.GetCollection<GameDto>(MongoCollection.Games).Returns(gameCollection);
-        mockRepository.GetCollection<UserDto>(MongoCollection.Users).Returns(userCollection);
+        _gameCollection = new GameCollectionImpl();
+        _userCollection = new UserCollectionImpl();
+        mockRepository.GetCollection<GameDto>(MongoCollection.Games).Returns(_gameCollection);
+        mockRepository.GetCollection<UserDto>(MongoCollection.Users).Returns(_userCollection);
         var mockLogger = Substitute.For<ILogger<EncryptionService>>();
-        sut = new EncryptionService(mockRepository, mockLogger);
+        _sut = new EncryptionService(mockRepository, mockLogger);
     }
 
     [Test]
@@ -34,7 +34,7 @@ internal class EncryptionServiceTests
     public async Task GenerateToken_ReturnsValid(string date, string expected)
     {
         var dateTime = DateTime.Parse(date);
-        var token = await sut.GenerateToken(dateTime);
+        var token = await _sut.GenerateToken(dateTime);
         Assert.That(token, Is.EqualTo(expected));
     }
 
@@ -43,7 +43,7 @@ internal class EncryptionServiceTests
     [TestCase("unsecure_password")]
     public async Task HashSecret_ReturnsValid(string secret)
     {
-        var hash = await sut.HashSecret(secret);
+        var hash = await _sut.HashSecret(secret);
         Assert.That(hash, Is.Not.Null);
         Assert.That(hash, Has.Length.EqualTo(60));
     }
@@ -56,7 +56,7 @@ internal class EncryptionServiceTests
         var dateTime = DateTime.Parse(date).AddMinutes(30);
         Assert.DoesNotThrow(() =>
         {
-            var task = sut.ValidateToken(token, dateTime);
+            var task = _sut.ValidateToken(token, dateTime);
             task.Wait();
         });
     }
@@ -69,7 +69,7 @@ internal class EncryptionServiceTests
         var dateTime = DateTime.Parse(date).AddMinutes(30);
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.ValidateToken(token!, dateTime);
+            var task = _sut.ValidateToken(token!, dateTime);
             task.Wait();
         });
 
@@ -91,7 +91,7 @@ internal class EncryptionServiceTests
         var dateTime = DateTime.Parse(date).AddMinutes(30);
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.ValidateToken(token!, dateTime);
+            var task = _sut.ValidateToken(token!, dateTime);
             task.Wait();
         });
 
@@ -113,7 +113,7 @@ internal class EncryptionServiceTests
         var dateTime = DateTime.Parse(date).AddMinutes(timeChange);
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.ValidateToken(token!, dateTime);
+            var task = _sut.ValidateToken(token!, dateTime);
             task.Wait();
         });
 
@@ -133,11 +133,11 @@ internal class EncryptionServiceTests
     [TestCase("secure_password")]
     public async Task VerifySecret_Game_Valid_DoesNotThrow(string secret)
     {
-        var game = gameCollection.Collection.First();
-        game.PasswordHash = await sut.HashSecret(secret);
+        var game = _gameCollection.Collection.First();
+        game.PasswordHash = await _sut.HashSecret(secret);
         Assert.DoesNotThrow(() =>
         {
-            var task = sut.VerifySecret(secret, game.GameId);
+            var task = _sut.VerifySecret(secret, game.GameId);
             task.Wait();
         });
     }
@@ -148,7 +148,7 @@ internal class EncryptionServiceTests
         var id = Guid.NewGuid();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.VerifySecret(string.Empty, id);
+            var task = _sut.VerifySecret(string.Empty, id);
             task.Wait();
         });
 
@@ -157,7 +157,7 @@ internal class EncryptionServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Could not find a {typeof(GameDto).Name} using {PropertyNames.GameId}={id}"));
+            Assert.That(exception.Message, Is.EqualTo($"Could not find a {nameof(GameDto)} using {PropertyNames.GameId}={id}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
@@ -168,11 +168,11 @@ internal class EncryptionServiceTests
     [TestCase("secure_password", "a")]
     public async Task VerifySecret_Game_Invalid_Throws(string secret, string invalid)
     {
-        var game = gameCollection.Collection.First();
-        game.PasswordHash = await sut.HashSecret(secret);
+        var game = _gameCollection.Collection.First();
+        game.PasswordHash = await _sut.HashSecret(secret);
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.VerifySecret(invalid, game.GameId);
+            var task = _sut.VerifySecret(invalid, game.GameId);
             task.Wait();
         });
 
@@ -192,11 +192,11 @@ internal class EncryptionServiceTests
     [TestCase("secure_password")]
     public async Task VerifySecret_User_Valid_DoesNotThrow(string secret)
     {
-        var user = userCollection.Collection.First();
-        user.PasswordHash = await sut.HashSecret(secret);
+        var user = _userCollection.Collection.First();
+        user.PasswordHash = await _sut.HashSecret(secret);
         Assert.DoesNotThrow(() =>
         {
-            var task = sut.VerifySecret(secret, user.Username);
+            var task = _sut.VerifySecret(secret, user.Username);
             task.Wait();
         });
     }
@@ -207,7 +207,7 @@ internal class EncryptionServiceTests
         var username = "invalid_user";
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.VerifySecret(string.Empty, username);
+            var task = _sut.VerifySecret(string.Empty, username);
             task.Wait();
         });
 
@@ -227,11 +227,11 @@ internal class EncryptionServiceTests
     [TestCase("secure_password", "a")]
     public async Task VerifySecret_User_Invalid_Throws(string secret, string invalid)
     {
-        var user = userCollection.Collection.First();
-        user.PasswordHash = await sut.HashSecret(secret);
+        var user = _userCollection.Collection.First();
+        user.PasswordHash = await _sut.HashSecret(secret);
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.VerifySecret(invalid, user.Username);
+            var task = _sut.VerifySecret(invalid, user.Username);
             task.Wait();
         });
 

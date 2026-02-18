@@ -14,28 +14,28 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Services;
 
 internal class PokemonServiceTests
 {
-    private PokedexService pokedexService;
-    private PokedexCollectionImpl pokedexCollection;
-    private PokemonService sut;
-    private PokemonCollectionImpl pokemonCollection;
+    private PokedexService _pokedexService;
+    private PokedexCollectionImpl _pokedexCollection;
+    private PokemonService _sut;
+    private PokemonCollectionImpl _pokemonCollection;
 
     [OneTimeSetUp]
     public void SetUp()
     {
         var mockRepository = Substitute.For<IRepositoryService>();
-        pokedexCollection = new PokedexCollectionImpl();
-        pokemonCollection = new PokemonCollectionImpl();
-        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(pokedexCollection);
-        mockRepository.GetCollection<PokemonDto>(MongoCollection.Pokemon).Returns(pokemonCollection);
-        pokedexService = new PokedexService(mockRepository, Shared.DtoToModelMapper, Substitute.For<ILogger<PokedexService>>());
-        sut = new PokemonService(mockRepository, pokedexService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<PokemonService>>());
+        _pokedexCollection = new PokedexCollectionImpl();
+        _pokemonCollection = new PokemonCollectionImpl();
+        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(_pokedexCollection);
+        mockRepository.GetCollection<PokemonDto>(MongoCollection.Pokemon).Returns(_pokemonCollection);
+        _pokedexService = new PokedexService(mockRepository, Shared.DtoToModelMapper, Substitute.For<ILogger<PokedexService>>());
+        _sut = new PokemonService(mockRepository, _pokedexService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<PokemonService>>());
     }
 
     [Test]
     public async Task GetPokemonById_Valid_ReturnsPokemon()
     {
-        var expectedPokemon = pokemonCollection.Collection.First();
-        var actualPokemon = await sut.GetPokemonById(expectedPokemon.PokemonId);
+        var expectedPokemon = _pokemonCollection.Collection.First();
+        var actualPokemon = await _sut.GetPokemonById(expectedPokemon.PokemonId);
         Assert.That(actualPokemon, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -51,10 +51,9 @@ internal class PokemonServiceTests
     public void GetPokemonById_Invalid_Throws()
     {
         var pokemonId = Guid.NewGuid();
-        var expectItem = pokemonCollection.Collection.First();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetPokemonById(pokemonId);
+            var task = _sut.GetPokemonById(pokemonId);
             task.Wait();
         });
 
@@ -65,7 +64,7 @@ internal class PokemonServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {typeof(PokemonDto).Name} using {PropertyNames.PokemonId}={pokemonId}"));
+                Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {PropertyNames.PokemonId}={pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
@@ -75,8 +74,8 @@ internal class PokemonServiceTests
     {
         var trainerId = Shared.UserIds.First();
         var gameId = Shared.GameIds.First();
-        var expectedList = pokemonCollection.Collection.Where(x => x.TrainerId == trainerId && x.GameId == gameId).ToList();
-        ICollection<Pokemon> actualList = [.. await sut.GetPokemonByTrainerId(trainerId, gameId, false)];
+        var expectedList = _pokemonCollection.Collection.Where(x => x.TrainerId == trainerId && x.GameId == gameId).ToList();
+        ICollection<Pokemon> actualList = [.. await _sut.GetPokemonByTrainerId(trainerId, gameId, false)];
         Assert.That(actualList, Has.Count.EqualTo(expectedList.Count));
         Assert.Multiple(() =>
         {
@@ -92,10 +91,10 @@ internal class PokemonServiceTests
     {
         var trainerId = Guid.NewGuid();
         var gameId = Guid.NewGuid();
-        var expectItem = pokemonCollection.Collection.First();
+        var expectItem = _pokemonCollection.Collection.First();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.GetPokemonByTrainerId(trainerId, gameId, false);
+            var task = _sut.GetPokemonByTrainerId(trainerId, gameId, false);
             task.Wait();
         });
 
@@ -106,7 +105,7 @@ internal class PokemonServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {typeof(PokemonDto).Name} using {PropertyNames.TrainerId} {PropertyNames.GameId}={(trainerId, gameId)}"));
+                Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {PropertyNames.TrainerId} {PropertyNames.GameId}={(trainerId, gameId)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
@@ -114,24 +113,24 @@ internal class PokemonServiceTests
     [Test]
     public async Task PostPokemon_Valid_UpdatesCollection()
     {
-        var count = pokemonCollection.Collection.Count;
+        var count = _pokemonCollection.Collection.Count;
         var trainerId = Guid.NewGuid();
         var gameId = Guid.NewGuid();
         var pokemonId = Guid.NewGuid();
-        await sut.PostPokemon(GetPokemon(pokemonId, trainerId, gameId, nameof(PostPokemon_Valid_UpdatesCollection)));
+        await _sut.PostPokemon(GetPokemon(pokemonId, trainerId, gameId, nameof(PostPokemon_Valid_UpdatesCollection)));
 
-        Assert.That(pokemonCollection.Collection, Has.Count.EqualTo(count + 1));
+        Assert.That(_pokemonCollection.Collection, Has.Count.EqualTo(count + 1));
     }
 
     [Test]
     public async Task PostPokemon_Duplicate_Throws()
     {
-        var count = pokemonCollection.Collection.Count;
-        var item = pokemonCollection.Collection.First();
+        var count = _pokemonCollection.Collection.Count;
+        var item = _pokemonCollection.Collection.First();
         var model = await Shared.DtoToModelMapper.ParseFromDto(item);
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.PostPokemon(model);
+            var task = _sut.PostPokemon(model);
             task.Wait();
         });
 
@@ -140,21 +139,21 @@ internal class PokemonServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.DuplicateEntryTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {typeof(PokemonDto).Name}"));
+            Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {nameof(PokemonDto)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(pokemonCollection.Collection, Has.Count.EqualTo(count));
+            Assert.That(_pokemonCollection.Collection, Has.Count.EqualTo(count));
         });
     }
 
     [Test]
     public async Task UpdatePokemon_Valid_UpdatesAllProperties()
     {
-        var testPokemon = await Shared.DtoToModelMapper.ParseFromDto(pokemonCollection.Collection.Last());
+        var testPokemon = await Shared.DtoToModelMapper.ParseFromDto(_pokemonCollection.Collection.Last());
         var originalName = new string(testPokemon.SpeciesName.ToCharArray());
         var updatedPokemon = GetPokemon(testPokemon.PokemonId, testPokemon.TrainerId, testPokemon.GameId, nameof(UpdatePokemon_Valid_UpdatesAllProperties));
-        var actualUpdate = await sut.UpdatePokemon(updatedPokemon);
+        var actualUpdate = await _sut.UpdatePokemon(updatedPokemon);
         Assert.That(actualUpdate, Is.Not.Null);
-        var retrievedUpdate = await sut.GetPokemonById(testPokemon.PokemonId);
+        var retrievedUpdate = await _sut.GetPokemonById(testPokemon.PokemonId);
         Assert.Multiple(() =>
         {
             Assert.That(actualUpdate.PokemonId, Is.EqualTo(testPokemon.PokemonId));
@@ -171,12 +170,12 @@ internal class PokemonServiceTests
     [Test]
     [TestCase(true)]
     [TestCase(false)]
-    public async Task UpdatePokemonEvolvability_Valid_UpdatesItemIncollection(bool isEvolvable)
+    public async Task UpdatePokemonEvolvability_Valid_UpdatesItemInCollection(bool isEvolvable)
     {
-        var testPokemon = pokemonCollection.Collection.First();
-        var updatedPokemon = await sut.UpdatePokemonEvolvability(testPokemon.PokemonId, isEvolvable);
+        var testPokemon = _pokemonCollection.Collection.First();
+        var updatedPokemon = await _sut.UpdatePokemonEvolvability(testPokemon.PokemonId, isEvolvable);
         Assert.That(updatedPokemon, Is.Not.Null);
-        var retrievedPokemon = await sut.GetPokemonById(testPokemon.PokemonId);
+        var retrievedPokemon = await _sut.GetPokemonById(testPokemon.PokemonId);
         Assert.Multiple(() =>
         {
             Assert.That(updatedPokemon.CanEvolve, Is.EqualTo(isEvolvable));
@@ -192,7 +191,7 @@ internal class PokemonServiceTests
         var pokemonId = Guid.NewGuid();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.UpdatePokemonEvolvability(pokemonId, isEvolvable);
+            var task = _sut.UpdatePokemonEvolvability(pokemonId, isEvolvable);
             task.Wait();
         });
 
@@ -201,7 +200,7 @@ internal class PokemonServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Failed to update {typeof(PokemonDto).Name} {pokemonId}"));
+            Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokemonDto)} {pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
@@ -211,10 +210,10 @@ internal class PokemonServiceTests
     [TestCase(100)]
     public async Task UpdatePokemonHP_Valid_UpdatesItemIncollection(int hp)
     {
-        var testPokemon = pokemonCollection.Collection.First();
-        var updatedPokemon = await sut.UpdatePokemonHP(testPokemon.PokemonId, hp);
+        var testPokemon = _pokemonCollection.Collection.First();
+        var updatedPokemon = await _sut.UpdatePokemonHP(testPokemon.PokemonId, hp);
         Assert.That(updatedPokemon, Is.Not.Null);
-        var retrievedPokemon = await sut.GetPokemonById(testPokemon.PokemonId);
+        var retrievedPokemon = await _sut.GetPokemonById(testPokemon.PokemonId);
         Assert.Multiple(() =>
         {
             Assert.That(updatedPokemon.CurrentHP, Is.EqualTo(hp));
@@ -230,7 +229,7 @@ internal class PokemonServiceTests
         var pokemonId = Guid.NewGuid();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.UpdatePokemonHP(pokemonId, hp);
+            var task = _sut.UpdatePokemonHP(pokemonId, hp);
             task.Wait();
         });
 
@@ -239,7 +238,7 @@ internal class PokemonServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Failed to update {typeof(PokemonDto).Name} {pokemonId}"));
+            Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokemonDto)} {pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
@@ -249,10 +248,10 @@ internal class PokemonServiceTests
     [TestCase(false)]
     public async Task UpdatePokemonLocation_Valid_UpdatesItemIncollection(bool isOnActiveTeam)
     {
-        var testPokemon = pokemonCollection.Collection.First();
-        var updatedPokemon = await sut.UpdatePokemonLocation(testPokemon.PokemonId, isOnActiveTeam);
+        var testPokemon = _pokemonCollection.Collection.First();
+        var updatedPokemon = await _sut.UpdatePokemonLocation(testPokemon.PokemonId, isOnActiveTeam);
         Assert.That(updatedPokemon, Is.Not.Null);
-        var retrievedPokemon = await sut.GetPokemonById(testPokemon.PokemonId);
+        var retrievedPokemon = await _sut.GetPokemonById(testPokemon.PokemonId);
         Assert.Multiple(() =>
         {
             Assert.That(updatedPokemon.IsOnActiveTeam, Is.EqualTo(isOnActiveTeam));
@@ -268,7 +267,7 @@ internal class PokemonServiceTests
         var pokemonId = Guid.NewGuid();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.UpdatePokemonLocation(pokemonId, isOnActiveTeam);
+            var task = _sut.UpdatePokemonLocation(pokemonId, isOnActiveTeam);
             task.Wait();
         });
 
@@ -277,7 +276,7 @@ internal class PokemonServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Failed to update {typeof(PokemonDto).Name} {pokemonId}"));
+            Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokemonDto)} {pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
@@ -286,10 +285,10 @@ internal class PokemonServiceTests
     public async Task UpdatePokemonTrainerId_Valid_UpdatesItemIncollection()
     {
         var trainerId = Guid.NewGuid();
-        var testPokemon = pokemonCollection.Collection.First();
-        var updatedPokemon = await sut.UpdatePokemonTrainerId(testPokemon.PokemonId, trainerId);
+        var testPokemon = _pokemonCollection.Collection.First();
+        var updatedPokemon = await _sut.UpdatePokemonTrainerId(testPokemon.PokemonId, trainerId);
         Assert.That(updatedPokemon, Is.Not.Null);
-        var retrievedPokemon = await sut.GetPokemonById(testPokemon.PokemonId);
+        var retrievedPokemon = await _sut.GetPokemonById(testPokemon.PokemonId);
         Assert.Multiple(() =>
         {
             Assert.That(updatedPokemon.TrainerId, Is.EqualTo(trainerId));
@@ -304,7 +303,7 @@ internal class PokemonServiceTests
         var pokemonId = Guid.NewGuid();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.UpdatePokemonTrainerId(pokemonId, trainerId);
+            var task = _sut.UpdatePokemonTrainerId(pokemonId, trainerId);
             task.Wait();
         });
 
@@ -313,7 +312,7 @@ internal class PokemonServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Failed to update {typeof(PokemonDto).Name} {pokemonId}"));
+            Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokemonDto)} {pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
@@ -321,13 +320,13 @@ internal class PokemonServiceTests
     [Test]
     public async Task DeletePokemon_Valid_UpdatesCollection()
     {
-        var count = pokemonCollection.Collection.Count;
+        var count = _pokemonCollection.Collection.Count;
         var trainerId = Guid.NewGuid();
         var gameId = Guid.NewGuid();
         var pokemonId = Guid.NewGuid();
-        await sut.PostPokemon(GetPokemon(pokemonId, trainerId, gameId, nameof(DeletePokemon_Valid_UpdatesCollection)));
-        await sut.DeletePokemon(pokemonId);
-        Assert.That(pokemonCollection.Collection, Has.Count.EqualTo(count));
+        await _sut.PostPokemon(GetPokemon(pokemonId, trainerId, gameId, nameof(DeletePokemon_Valid_UpdatesCollection)));
+        await _sut.DeletePokemon(pokemonId);
+        Assert.That(_pokemonCollection.Collection, Has.Count.EqualTo(count));
     }
 
     [Test]
@@ -336,7 +335,7 @@ internal class PokemonServiceTests
         var pokemonId = Guid.NewGuid();
         var aggregateException = Assert.Throws<AggregateException>(() =>
         {
-            var task = sut.DeletePokemon(pokemonId);
+            var task = _sut.DeletePokemon(pokemonId);
             task.Wait();
         });
 
@@ -347,7 +346,7 @@ internal class PokemonServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {typeof(PokemonDto).Name} using {PropertyNames.PokemonId}={pokemonId}"));
+                Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {PropertyNames.PokemonId}={pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
@@ -355,26 +354,26 @@ internal class PokemonServiceTests
     [Test]
     public async Task DeletePokemonByTrainerId_Valid_UpdatesCollection()
     {
-        var count = pokemonCollection.Collection.Count;
+        var count = _pokemonCollection.Collection.Count;
         var trainerId = Guid.NewGuid();
         var gameId = Guid.NewGuid();
         foreach (var x in Enumerable.Range(0, 5))
         {
             var pokemonId = Guid.NewGuid();
-            await sut.PostPokemon(GetPokemon(pokemonId, trainerId, gameId, nameof(DeletePokemonByTrainerId_Valid_UpdatesCollection)));
+            await _sut.PostPokemon(GetPokemon(pokemonId, trainerId, gameId, nameof(DeletePokemonByTrainerId_Valid_UpdatesCollection)));
         }
-        await sut.DeletePokemonByTrainerId(gameId, trainerId);
-        Assert.That(pokemonCollection.Collection, Has.Count.EqualTo(count));
+        await _sut.DeletePokemonByTrainerId(gameId, trainerId);
+        Assert.That(_pokemonCollection.Collection, Has.Count.EqualTo(count));
     }
 
     [Test]
     [TestCaseSource(nameof(GetSearchItems))]
     public async Task DeletePokemonByTrainerId_NotFound_Throws(SearchItem item)
     {
-        var count = pokemonCollection.Collection.Count;
-        var testPokemon = pokemonCollection.Collection.First();
-        await sut.DeletePokemonByTrainerId(item.GameId ?? testPokemon.GameId, item.TrainerId ?? testPokemon.TrainerId);
-        Assert.That(pokemonCollection.Collection, Has.Count.EqualTo(count));
+        var count = _pokemonCollection.Collection.Count;
+        var testPokemon = _pokemonCollection.Collection.First();
+        await _sut.DeletePokemonByTrainerId(item.GameId ?? testPokemon.GameId, item.TrainerId ?? testPokemon.TrainerId);
+        Assert.That(_pokemonCollection.Collection, Has.Count.EqualTo(count));
     }
 
     private static Pokemon GetPokemon(Guid pokemonId, Guid trainerId, Guid gameId, string name)

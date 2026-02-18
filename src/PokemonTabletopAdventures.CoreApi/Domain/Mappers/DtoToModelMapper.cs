@@ -198,7 +198,9 @@ public class DtoToModelMapper : IDtoToModelMapper
         {
             ShopId = dto.ShopId,
             Name = dto.Name,
-            Inventory = []
+            Inventory = [],
+            GameId = dto.GameId,
+            IsActive = dto.IsActive
         };
         foreach (var pair in dto.Inventory)
         {

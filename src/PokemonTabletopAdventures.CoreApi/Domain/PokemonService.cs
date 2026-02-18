@@ -19,9 +19,8 @@ public class PokemonService(
 
     public async Task DeletePokemonByTrainerId(Guid gameId, Guid trainerId)
     {
-        var result = Collection.DeleteManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
+        await Collection.DeleteManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
         await _pokedexService.DeleteDexItemForTrainer(trainerId, gameId);
-        await Task.CompletedTask;
     }
 
     public async Task<Pokemon> GetPokemonById(Guid id)
@@ -41,7 +40,7 @@ public class PokemonService(
             var collection = await Collection.GetManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
             return await Task.WhenAll(collection.Select(_dtoToModelMapper.ParseFromDto));
         }
-        var dtos = await ThrowIfNull(
+        var dtos = await ThrowIfNullOrEmpty(
             (trainerId, gameId),
             x => Collection.GetManyAsync(pokemon => pokemon.TrainerId == x.trainerId && pokemon.GameId == x.gameId),
             $"{PropertyNames.TrainerId} {PropertyNames.GameId}");

@@ -43,12 +43,11 @@ internal class Startup(IConfiguration configuration)
         
         services.AddSingleton<IPokedexService, PokedexService>();
         services.AddSingleton<IPokemonService, PokemonService>();
+        services.AddSingleton<IShopService, ShopService>();
         services.AddSingleton<ISettingService, SettingService>();
         services.AddSingleton<ITrainerService, TrainerService>();
         services.AddSingleton<INpcService, NpcService>();
         services.AddSingleton<IGameService, GameService>();
-
-        services.AddSingleton<IShopService, ShopService>();
 
         services.AddSingleton<IExportService, ExportService>();
 

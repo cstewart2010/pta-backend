@@ -65,7 +65,11 @@ internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto>
 
     public Task PutAsync(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity)
     {
-        var item = Collection.FirstOrDefault(x => filter.Compile().Invoke(x) == id)!;
+        var item = Collection.FirstOrDefault(x => filter.Compile().Invoke(x) == id);
+        if (item == null)
+        {
+            return Task.FromResult(item);
+        }
         var properties = item.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
         foreach (var property in properties)
         {
