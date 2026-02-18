@@ -4,7 +4,7 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class BasePokemonCollectionImpl : BaseCollectionImpl<BasePokemonDto>
 {
-    public override ICollection<BasePokemonDto> Collection { get; set; } = [.. Enumerable.Range(0,5).Select(x => new BasePokemonDto
+    public override ICollection<BasePokemonDto> Collection { get; protected set; } = [.. Enumerable.Range(0,5).Select(x => new BasePokemonDto
         {
             DexNo = Shared.Pokemon[x].DexNo,
             Form = Shared.Pokemon[x].Form,

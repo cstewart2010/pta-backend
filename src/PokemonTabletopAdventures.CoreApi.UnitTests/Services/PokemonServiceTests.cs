@@ -81,7 +81,7 @@ internal class PokemonServiceTests
         {
             foreach (var item in expectedList)
             {
-                Assert.That(actualList.SingleOrDefault(x => x.PokemonId == item.PokemonId), Is.Not.Null);
+                Assert.That(expectedList.Select(x => x.PokemonId), Is.EquivalentTo(actualList.Select(x => x.PokemonId)));
             }
         });
     }

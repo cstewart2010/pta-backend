@@ -4,22 +4,21 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class PokemonCollectionImpl : BaseCollectionImpl<PokemonDto>
 {
-    public override ICollection<PokemonDto> Collection { get; set; } = Shared.GameIds.Aggregate(new List<PokemonDto>(), (current, next) =>
+    public override ICollection<PokemonDto> Collection { get; protected set; } = Shared.PokemonIds.Zip(Shared.GameIds).Aggregate(new List<PokemonDto>(), (current, next) =>
     {
         var trainerItems = Shared.UserIds.Aggregate(new List<PokemonDto>(), (innerCurrent, innerNext) =>
         {
-            int moveIndex = 0;
-            var items = Shared.Pokemon.Select(x =>
+            var items = Shared.Pokemon.Select((x, moveIndex) =>
             {
-                var id = Guid.NewGuid();
+                var id = next.First;
                 return new PokemonDto
                 {
-                    GameId = next,
+                    GameId = next.Second,
                     TrainerId = innerNext,
                     PokemonId= id,
                     SpeciesName = x.Name,
                     EvolvedFrom = x.EvolvesFrom,
-                    Moves = [Shared.PokemonMoves[moveIndex++]],
+                    Moves = [Shared.PokemonMoves[moveIndex]],
                     Form = x.Form,
                     DexNo = x.DexNo
                 };

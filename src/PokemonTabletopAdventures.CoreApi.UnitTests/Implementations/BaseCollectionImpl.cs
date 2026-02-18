@@ -6,7 +6,7 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto>
 {
-    public abstract ICollection<TDto> Collection { get; set; }
+    public abstract ICollection<TDto> Collection { get; protected set; }
 
     public Task<TDto?> DeleteAsync(Expression<Func<TDto, bool>> filter)
     {

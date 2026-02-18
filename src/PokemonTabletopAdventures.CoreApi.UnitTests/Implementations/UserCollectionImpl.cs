@@ -4,7 +4,7 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class UserCollectionImpl : BaseCollectionImpl<UserDto>
 {
-    public override ICollection<UserDto> Collection { get; set; } = [..Shared.UserIds.Select(x =>
+    public override ICollection<UserDto> Collection { get; protected set; } = [..Shared.UserIds.Select(x =>
     {
         return new UserDto
         {

@@ -9,12 +9,9 @@ public class SettingService(
     IRepositoryService repositoryService,
     IShopService shopService,
     IDtoToModelMapper dtoToModelMapper,
-    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<SettingDto>(repositoryService, MongoCollection.Settings), ISettingService
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<SettingService> logger) : AbstractMongoService<SettingDto>(repositoryService, MongoCollection.Settings), ISettingService
 {
-    private readonly IShopService _shopService = shopService;
-    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
-    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
-
     public async Task DeleteSetting(Guid id)
     {
         await ThrowIfNull(
@@ -25,10 +22,7 @@ public class SettingService(
 
     public async Task DeleteSettingsByGameId(Guid gameId)
     {
-        await ThrowIfNull(
-            gameId,
-            id => Collection.DeleteAsync(setting => setting.GameId == id),
-            PropertyNames.GameId);
+        await Collection.DeleteManyAsync(setting => setting.GameId == gameId);
     }
 
     public async Task<Setting?> GetActiveSetting(Guid gameId, bool isGM)
@@ -39,17 +33,17 @@ public class SettingService(
             return null;
         }
 
-        return await _dtoToModelMapper.ParseFromDto(dto, isGM, gameId, _shopService);
+        return await dtoToModelMapper.ParseFromDto(dto, isGM, gameId, shopService);
     }
 
     public async Task<ICollection<Setting>> GetAllSettings(Guid gameId)
     {
         var dtos = await ThrowIfNullOrEmpty(
             gameId,
-            id => Collection.GetManyAsync(setting => setting.GameId == gameId && setting.IsActive),
+            id => Collection.GetManyAsync(setting => setting.GameId == gameId),
             PropertyNames.GameId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, true, gameId, _shopService)));
+        return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, true, gameId, shopService)));
     }
 
     public async Task<Setting> GetSetting(Guid settingId, bool isGM)
@@ -59,18 +53,18 @@ public class SettingService(
             id => Collection.GetOneAsync(setting => setting.SettingId == settingId && (setting.IsActive || isGM)),
             PropertyNames.SettingId);
 
-        return await _dtoToModelMapper.ParseFromDto(dto, isGM, dto.GameId, _shopService);
+        return await dtoToModelMapper.ParseFromDto(dto, isGM, dto.GameId, shopService);
     }
 
     public async Task PostSetting(Setting setting)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(setting);
+        var dto = await modelToDtoMapper.ParseFromModel(setting);
         await PostUniqueDocument(dto, x => x.SettingId == setting.SettingId);
     }
 
     public async Task<Setting> UpdateSetting(Setting updatedSetting, bool isGM)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(updatedSetting);
+        var dto = await modelToDtoMapper.ParseFromModel(updatedSetting);
         await UpsertDocument(
             setting => setting.SettingId,
             updatedSetting.SettingId,

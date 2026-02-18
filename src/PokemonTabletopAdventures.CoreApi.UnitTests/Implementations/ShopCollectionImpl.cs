@@ -5,14 +5,15 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class ShopCollectionImpl : BaseCollectionImpl<ShopDto>
 {
-    public override ICollection<ShopDto> Collection { get; set; } = [..Shared.ShopIds.Zip(Shared.GameIds).Select(x =>
+    public override ICollection<ShopDto> Collection { get; protected set; } = Shared.GameIds.Select((x, gameIndex) => Shared.ShopIds.Select((
+        y, shopIndex) =>
     {
         return new ShopDto
         {
-            ShopId = x.First,
-            GameId = x.Second,
-            IsActive = false,
-            Name = x.First.ToString(),
+            ShopId = y,
+            GameId = x,
+            IsActive = gameIndex == shopIndex,
+            Name = y.ToString(),
             Inventory = Enumerable.Range(0, 10).ToDictionary(y => y.ToString(), y => new WareDto
             {
                 Quantity = Random.Shared.Next(1, 100),
@@ -21,5 +22,5 @@ internal class ShopCollectionImpl : BaseCollectionImpl<ShopDto>
                 Cost = Random.Shared.Next(1, 100),
             })
         };
-    })];
+    })).SelectMany(x => x).ToList();
 }

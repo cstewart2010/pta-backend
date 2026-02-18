@@ -17,6 +17,7 @@ internal class ShopServiceTests
 {
     private ShopService _sut;
     private ShopCollectionImpl _shopCollection;
+    
     [OneTimeSetUp]
     public void Setup()
     {
