@@ -30,11 +30,7 @@ public class PokedexService(
 
     public async Task<ICollection<PokedexItem>> GetTrainerPokeDex(Guid trainerId, Guid gameId)
     {
-        var dtos = await ThrowIfNullOrEmpty(
-            (trainerId, gameId),
-            x => Collection.GetManyAsync(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId),
-            $"{PropertyNames.TrainerId} {PropertyNames.GameId}");
-
+        var dtos = await Collection.GetManyAsync(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId);
         return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
     }
 
