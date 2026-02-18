@@ -12,42 +12,38 @@ public class PokemonService(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<PokemonService> logger) : AbstractMongoService<PokemonDto>(repositoryService, MongoCollection.Pokemon), IPokemonService
 {
-    private readonly IPokedexService _pokedexService = pokedexService;
-    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
-    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
-    private readonly ILogger<PokemonService> _logger = logger;
-
     public async Task DeletePokemonByTrainerId(Guid gameId, Guid trainerId)
     {
         await Collection.DeleteManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
-        await _pokedexService.DeleteDexItemForTrainer(trainerId, gameId);
+        await pokedexService.DeleteDexItemForTrainer(trainerId, gameId);
     }
 
     public async Task<Pokemon> GetPokemonById(Guid id)
     {
+        logger.LogInformation("Getting pokemon for id {id}", id);
         var dto = await ThrowIfNull(
             id,
             id => Collection.GetOneAsync(pokemon => pokemon.PokemonId == id),
             PropertyNames.PokemonId);
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<ICollection<Pokemon>> GetPokemonByTrainerId(Guid trainerId, Guid gameId)
     {
         var dtos = await Collection.GetManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
-        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
+        return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 
     public async Task PostPokemon(Pokemon pokemon)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(pokemon);
+        var dto = await modelToDtoMapper.ParseFromModel(pokemon);
         await PostUniqueDocument(dto, x => x.PokemonId == pokemon.PokemonId);
     }
 
     public async Task<Pokemon> UpdatePokemon(Pokemon updatePokemon)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(updatePokemon);
+        var dto = await modelToDtoMapper.ParseFromModel(updatePokemon);
         await UpsertDocument(
             pokemon => pokemon.PokemonId,
             updatePokemon.PokemonId,
@@ -63,7 +59,7 @@ public class PokemonService(
             pokemon => pokemon.PokemonId == pokemonId,
             new Models.UpdateData(PropertyNames.CanEvolve, isEvolvable));
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<Pokemon> UpdatePokemonHP(Guid pokemonId, int hp)
@@ -73,7 +69,7 @@ public class PokemonService(
             pokemon => pokemon.PokemonId == pokemonId,
             new Models.UpdateData(PropertyNames.CurrentHP, hp));
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<Pokemon> UpdatePokemonLocation(Guid pokemonId, bool isOnActiveTeam)
@@ -83,7 +79,7 @@ public class PokemonService(
             pokemon => pokemon.PokemonId == pokemonId,
             new Models.UpdateData(PropertyNames.IsOnActiveTeam, isOnActiveTeam));
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<Pokemon> UpdatePokemonTrainerId(Guid pokemonId, Guid trainerId)
@@ -93,7 +89,7 @@ public class PokemonService(
             pokemon => pokemon.PokemonId == pokemonId,
             new Models.UpdateData(PropertyNames.TrainerId, trainerId));
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task DeletePokemon(Guid id)

@@ -14,6 +14,7 @@ public class SettingService(
 {
     public async Task DeleteSetting(Guid id)
     {
+        logger.LogInformation("Deleting setting {id}", id);
         await ThrowIfNull(
             id,
             settingId => Collection.DeleteAsync(setting => setting.SettingId == settingId),

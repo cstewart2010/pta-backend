@@ -16,48 +16,46 @@ internal class CollectionService<TDto>() : ICollectionService<TDto>
 
     public async Task<TDto?> DeleteAsync(Expression<Func<TDto, bool>> filter)
     {
-        var item = Collection.FindOneAndDelete(filter);
-        return await Task.FromResult(item);
+        var item = await Collection.FindOneAndDeleteAsync(filter);
+        return item;
     }
 
     public async Task DeleteManyAsync(Expression<Func<TDto, bool>> filter)
     {
-        Collection.DeleteMany(filter);
-        await Task.CompletedTask;
+        await Collection.DeleteManyAsync(filter);
     }
 
     public async Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter)
     {
-        var items = Collection.Find(filter).ToEnumerable();
-        return await Task.FromResult(items.ToArray());
+        var items = await Collection.Find(filter).ToListAsync();
+        return items;
     }
 
     public async Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter, int offset, int limit)
     {
-        var items = Collection.Find(document => true).Skip(offset).Limit(limit).ToEnumerable();
-        return await Task.FromResult(items.ToArray());
+        var items = await Collection.Find(document => true).Skip(offset).Limit(limit).ToListAsync();
+        return items;
     }
 
     public async Task<TDto?> GetOneAsync(Expression<Func<TDto, bool>> filter)
     {
-        var item = Collection.Find(filter).SingleOrDefault();
-        return await Task.FromResult(item);
+        var item = await Collection.Find(filter).SingleOrDefaultAsync();
+        return item;
     }
 
     public async Task<TDto?> PatchAsync(Expression<Func<TDto, bool>> filter, params UpdateData[] data)
     {
         var updates = data.Select(x => Builders<TDto>.Update.Set(x.Field, x.Value)).ToArray();
         var update = Builders<TDto>.Update.Combine(updates);
-        var item = Collection.FindOneAndUpdate(filter, update);
-        return await Task.FromResult(item);
+        var item = await Collection.FindOneAndUpdateAsync(filter, update);
+        return item;
     }
 
     public async Task PostAsync(TDto entity)
     {
         try
         {
-            Collection.InsertOne(entity);
-            await Task.CompletedTask;
+            await Collection.InsertOneAsync(entity);
         }
         catch (MongoWriteException exception)
         {
@@ -67,7 +65,7 @@ internal class CollectionService<TDto>() : ICollectionService<TDto>
 
     public async Task PutAsync(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity)
     {
-        var result = Collection.ReplaceOne(
+        var result = await Collection.ReplaceOneAsync(
             Builders<TDto>.Filter.Eq(filter, id),
             options: UpsertOptions,
             replacement: entity);
@@ -75,7 +73,5 @@ internal class CollectionService<TDto>() : ICollectionService<TDto>
         {
             throw new UpdateException($"Failed to upsert at {typeof(TDto).Name}");
         }
-
-        await Task.CompletedTask;
     }
 }

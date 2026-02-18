@@ -41,6 +41,7 @@ public class TrainerService(
 
     public async Task DeleteTrainer(Guid gameId, Guid userId)
     {
+        logger.LogInformation("Deleting trainer {id} from game {gameId}", userId, gameId);
         var trainer = await ThrowIfNull(
             userId,
             id => Collection.DeleteAsync(x => x.TrainerId == id && x.GameId == gameId),

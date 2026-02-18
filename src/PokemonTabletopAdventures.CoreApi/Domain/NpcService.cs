@@ -12,13 +12,11 @@ public class NpcService(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<NpcService> logger) : AbstractMongoService<NpcDto>(repositoryService, MongoCollection.NPCs), INpcService
 {
-    private readonly IPokemonService _pokemonService = pokemonService;
-    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
-    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
     private readonly ILogger<NpcService> _logger = logger;
 
     public async Task DeleteNpc(Guid id)
     {
+        logger.LogInformation("Deleting Npc {id}", id);
         await ThrowIfNull(
             id,
             npcId => Collection.DeleteAsync(npc => npc.NPCId == npcId),
@@ -32,7 +30,7 @@ public class NpcService(
             id => Collection.GetOneAsync(npc => npc.NPCId == id),
             PropertyNames.NpcId);
 
-        return await _dtoToModelMapper.ParseFromDto(dto, _pokemonService);
+        return await dtoToModelMapper.ParseFromDto(dto, pokemonService);
     }
 
     public async Task<ICollection<Npc>> GetNpcs(IEnumerable<Guid> npcIds)
@@ -42,7 +40,7 @@ public class NpcService(
             id => Collection.GetManyAsync(npc => npcIds.Contains(npc.NPCId)),
             PropertyNames.NpcId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, _pokemonService)));
+        return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, pokemonService)));
     }
 
     public async Task<ICollection<Npc>> GetNpcsByGameId(Guid gameId)
@@ -52,18 +50,18 @@ public class NpcService(
             id => Collection.GetManyAsync(npc => npc.GameId == id),
             PropertyNames.GameId);
 
-        return await Task.WhenAll(dtos.Select(async dto => await _dtoToModelMapper.ParseFromDto(dto, _pokemonService)));
+        return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, pokemonService)));
     }
 
     public async Task PostNpc(Npc npc)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(npc);
+        var dto = await modelToDtoMapper.ParseFromModel(npc);
         await PostUniqueDocument(dto, x => x.GameId == npc.GameId && x.NPCId == npc.NpcId);
     }
 
     public async Task<Npc> UpdateNpc(Npc updatedNpc)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(updatedNpc);
+        var dto = await modelToDtoMapper.ParseFromModel(updatedNpc);
         await UpsertDocument(
             npc => npc.NPCId,
             updatedNpc.NpcId,
