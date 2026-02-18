@@ -39,7 +39,7 @@ public class NpcDto : IPerson, IDocument
     /// </summary>
     public NpcDto()
     {
-        TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkill { Name = skill.Key, ModifierStat = skill.Value });
+        TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkill { Name = skill.Key, ModifierStat = skill.Value }).ToList();
         Gender = Gender.Genderless;
         Description = string.Empty;
         Personality = string.Empty;
@@ -63,7 +63,7 @@ public class NpcDto : IPerson, IDocument
     /// <summary>
     /// The trainer's classes
     /// </summary>
-    public IEnumerable<string> TrainerClasses { get; set; } = [];
+    public ICollection<string> TrainerClasses { get; set; } = [];
 
     /// <summary>
     /// The trainer's stats
@@ -78,7 +78,7 @@ public class NpcDto : IPerson, IDocument
     /// <summary>
     /// The trainer's Feats
     /// </summary>
-    public IEnumerable<string> Feats { get; set; } = [];
+    public ICollection<string> Feats { get; set; } = [];
 
     /// <summary>
     /// The PTA game session id
@@ -93,7 +93,7 @@ public class NpcDto : IPerson, IDocument
     /// <summary>
     /// The trainer's skills
     /// </summary>
-    public IEnumerable<TrainerSkill> TrainerSkills { get; set; } = [];
+    public ICollection<TrainerSkill> TrainerSkills { get; set; } = [];
 
     /// <summary>
     /// The trainer's age

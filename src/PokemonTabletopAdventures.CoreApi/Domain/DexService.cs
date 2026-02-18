@@ -80,7 +80,7 @@ public class DexService(
         var collection = repositoryService.GetCollection<TDocument>(documentType.ToString());
         var documents = await collection.GetManyAsync(document => true, offset, limit);
         var count = documents.Count;
-        var results = documents.Select(x => x.Name);
+        var results = documents.Select(x => x.Name).ToList();
 
         return new IndexCollectionResponse
         {
@@ -164,7 +164,7 @@ public class DexService(
             Nickname = pokemon.Nickname,
             Gender = pokemon.Gender,
             PokemonStatus = pokemon.PokemonStatus,
-            Moves = keptMoves.Union(newMoves),
+            Moves = keptMoves.Union(newMoves).ToList(),
             Type = basePokemon.Type,
             CatchRate = GetCatchRate(basePokemon),
             Nature = pokemon.Nature,
@@ -175,7 +175,7 @@ public class DexService(
             Skills = basePokemon.Skills,
             Passives = basePokemon.Passives,
             Proficiencies = basePokemon.Proficiencies,
-            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()),
+            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()).ToList(),
             EggHatchRate = basePokemon.EggHatchRate,
             Habitats = basePokemon.Habitats,
             Diet = basePokemon.Diet,
@@ -240,7 +240,7 @@ public class DexService(
             Skills = basePokemon.Skills,
             Passives = basePokemon.Passives,
             Proficiencies = basePokemon.Proficiencies,
-            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()),
+            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()).ToList(),
             EggHatchRate = basePokemon.EggHatchRate,
             Habitats = basePokemon.Habitats,
             Diet = basePokemon.Diet,
@@ -256,7 +256,7 @@ public class DexService(
             CanEvolve = false,
             GameId = Guid.Empty,
             OriginalTrainerId = Guid.Empty,
-            Pokeball = Pokeball.Basic_Ball.ToString(),
+            Pokeball = nameof(Pokeball.Basic_Ball),
             TrainerId = Guid.Empty,
         };
     }

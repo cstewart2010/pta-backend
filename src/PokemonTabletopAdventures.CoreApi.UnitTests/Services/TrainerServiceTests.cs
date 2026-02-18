@@ -7,6 +7,7 @@ using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 using PokemonTabletopAdventures.Models;
 using PokemonTabletopAdventures.Models.Enums;
+using PokemonTabletopAdventures.Models.Shops;
 using PokemonTabletopAdventures.Models.Trainers;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Services;
@@ -48,8 +49,7 @@ public class TrainerServiceTests
         var pokemonService = new PokemonService(mockRepository, pokedexService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<PokemonService>>());
         var shopService = new ShopService(mockRepository, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<ShopService>>());
         var settingService = new SettingService(mockRepository, shopService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<SettingService>>());
-        var encryptionService = new EncryptionService(mockRepository, Substitute.For<ILogger<EncryptionService>>());
-        _sut = new TrainerService(mockRepository, pokemonService, pokedexService, settingService, encryptionService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, mockLogger);
+        _sut = new TrainerService(mockRepository, pokemonService, pokedexService, settingService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, mockLogger);
     }
 
     [Test]
@@ -59,6 +59,7 @@ public class TrainerServiceTests
         
         var actual = await _sut.GetTrainerById(expected.TrainerId, expected.GameId);
         var actualItems = actual.Items.ToList();
+        var expectedItems = expected.Items.ToList();
         var actualTrainerSkills = actual.TrainerSkills.ToList();
         var expectedTrainerSkills = expected.TrainerSkills.ToList();
         
@@ -100,10 +101,10 @@ public class TrainerServiceTests
         {
             for (var i = 0; i < expected.Items.Count; i++)
             {
-                Assert.That(actualItems[i].Name, Is.EqualTo(expected.Items[i].Name));
-                Assert.That(actualItems[i].Type, Is.EqualTo(expected.Items[i].Type));
-                Assert.That(actualItems[i].Amount, Is.EqualTo(expected.Items[i].Amount));
-                Assert.That(actualItems[i].Effects, Is.EqualTo(expected.Items[i].Effects));
+                Assert.That(actualItems[i].Name, Is.EqualTo(expectedItems[i].Name));
+                Assert.That(actualItems[i].Type, Is.EqualTo(expectedItems[i].Type));
+                Assert.That(actualItems[i].Amount, Is.EqualTo(expectedItems[i].Amount));
+                Assert.That(actualItems[i].Effects, Is.EqualTo(expectedItems[i].Effects));
             }
         });
         Assert.Multiple(() =>
@@ -273,14 +274,121 @@ public class TrainerServiceTests
     }
 
     [Test]
-    public async Task UpdateTrainerHonors_Valid_UpdatesItem()
+    public async Task UpdateTrainerHonors_Valid_UpdatesTrainerHonors()
     {
         var trainer = Random.Shared.GetItems(_trainerCollection.Collection.ToArray(), 1).First();
         string[] honors = ["t1", "t2", "t3"];
         
         await _sut.UpdateTrainerHonors(trainer.TrainerId, trainer.GameId, honors);
         
-        var updatedTrainer = _trainerCollection.Collection.First(x => x.TrainerId == trainer.TrainerId && x.GameId == trainer.GameId);
+        var updatedTrainer = await _sut.GetTrainerById(trainer.TrainerId, trainer.GameId);
         Assert.That(updatedTrainer.Honors, Is.EquivalentTo(honors));
+    }
+
+    [Test]
+    public async Task UpdateTrainerItemList_Valid_UpdatesTrainerItemList()
+    {
+        var trainer = Random.Shared.GetItems(_trainerCollection.Collection.ToArray(), 1).First();
+        ICollection<Item> items =
+        [
+            new Item
+            {
+                Amount = 10,
+                Effects = "updated-description",
+                Name = "updated-name",
+                Type = StartingEquipmentType.Pokeball
+            }
+        ];
+        
+        await _sut.UpdateTrainerItemList(trainer.TrainerId, trainer.GameId, items);
+        var updatedTrainer = await _sut.GetTrainerById(trainer.TrainerId, trainer.GameId);
+        var updatedTrainerItems = updatedTrainer.Items.ToList();
+        Assert.That(updatedTrainerItems, Has.Count.EqualTo(items.Count));
+    }
+
+    [Test]
+    public async Task UpdateTrainerOnlineStatus_Valid_UpdatesTrainerOnlineStatus()
+    {
+        var trainer = Random.Shared.GetItems(_trainerCollection.Collection.ToArray(), 1).First();
+        var updatedOnlineStatus = !trainer.IsOnline;
+        await _sut.UpdateTrainerOnlineStatus(trainer.TrainerId, trainer.GameId, updatedOnlineStatus);
+        var updatedTrainer = await _sut.GetTrainerById(trainer.TrainerId, trainer.GameId);
+        Assert.That(updatedOnlineStatus, Is.EqualTo(updatedTrainer.IsOnline));
+        updatedOnlineStatus = !trainer.IsOnline;
+        await _sut.UpdateTrainerOnlineStatus(trainer.TrainerId, trainer.GameId, updatedOnlineStatus);
+        var updatedTrainer2 = await _sut.GetTrainerById(trainer.TrainerId, trainer.GameId);
+        Assert.That(updatedOnlineStatus, Is.EqualTo(updatedTrainer2.IsOnline));
+    }
+
+    [Test]
+    public async Task CompleteTrainer_Valid_UpdatesTrainer()
+    {
+        var trainer = Random.Shared.GetItems(_trainerCollection.Collection.ToArray(), 1).First();
+        const string origin = "updated-origin";
+        string[] trainerClasses = ["t1"];
+        string[] feats = ["f1", "f2", "f3"];
+        var stats = new Stats
+        {
+            HP = 25,
+            Attack = 1,
+            Defense = 2,
+            Speed = 3,
+            SpecialAttack = 4,
+            SpecialDefense = 5
+        };
+        
+        await _sut.CompleteTrainer(trainer.TrainerId,  trainer.GameId, origin, trainerClasses.First(), feats, stats);
+        var updatedTrainer = await _sut.GetTrainerById(trainer.TrainerId, trainer.GameId);
+        Assert.Multiple(() =>
+        {
+            Assert.That(updatedTrainer.Origin, Is.EqualTo(origin));
+            Assert.That(updatedTrainer.TrainerClasses, Is.EquivalentTo(trainerClasses));
+            Assert.That(updatedTrainer.Feats, Is.EquivalentTo(feats));
+            Assert.That(updatedTrainer.TrainerStats.HP, Is.EqualTo(stats.HP));
+            Assert.That(updatedTrainer.TrainerStats.Attack, Is.EqualTo(stats.Attack));
+            Assert.That(updatedTrainer.TrainerStats.Defense, Is.EqualTo(stats.Defense));
+            Assert.That(updatedTrainer.TrainerStats.Speed, Is.EqualTo(stats.Speed));
+            Assert.That(updatedTrainer.TrainerStats.SpecialAttack, Is.EqualTo(stats.SpecialAttack));
+            Assert.That(updatedTrainer.TrainerStats.SpecialDefense, Is.EqualTo(stats.SpecialDefense));
+        });
+    }
+
+    [Test, NonParallelizable]
+    public async Task DeleteTrainer_IsGm_Valid_MassDeletes()
+    {
+        var trainer = _trainerCollection.Collection.First(x => x.IsGM);
+        
+        await _sut.DeleteTrainer(trainer.TrainerId, trainer.GameId);
+        Assert.Multiple(() =>
+        {
+            Assert.That(_gameCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
+            Assert.That(_trainerCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
+            Assert.That(_pokemonCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
+            Assert.That(_settingCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
+            Assert.That(_pokedexCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
+            Assert.That(_shopCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
+            Assert.That(_npcCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
+        });
+    }
+
+    [Test, NonParallelizable]
+    public async Task DeleteTrainer_IsNotGm_Valid_DeletesTrainer()
+    {
+        var trainer = _trainerCollection.Collection.First(x => !x.IsGM);
+        
+        await _sut.DeleteTrainer(trainer.TrainerId, trainer.GameId);
+        Assert.Multiple(() =>
+        {
+            Assert.That(_gameCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
+            Assert.That(_trainerCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
+            Assert.That(_pokemonCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
+            Assert.That(_settingCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
+            Assert.That(_pokedexCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
+            Assert.That(_shopCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
+            Assert.That(_npcCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
+            Assert.That(_trainerCollection.Collection.Any(x => x.TrainerId == trainer.TrainerId && x.GameId == trainer.GameId), Is.False);
+            Assert.That(_pokemonCollection.Collection.Any(x => x.TrainerId == trainer.TrainerId && x.GameId == trainer.GameId), Is.False);
+            Assert.That(_pokedexCollection.Collection.Any(x => x.TrainerId == trainer.TrainerId && x.GameId == trainer.GameId), Is.False);
+        });
     }
 }

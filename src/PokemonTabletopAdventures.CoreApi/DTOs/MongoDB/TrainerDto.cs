@@ -37,7 +37,7 @@ public class TrainerDto : IPerson, IDocument
     /// </summary>
     public TrainerDto()
     {
-        TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkill { Name = skill.Key, ModifierStat = skill.Value });
+        TrainerSkills = TrainerSkillNames.Select(skill => new TrainerSkill { Name = skill.Key, ModifierStat = skill.Value }).ToList();
         Gender = Gender.Genderless;
         Description = string.Empty;
         Personality = string.Empty;
@@ -63,7 +63,7 @@ public class TrainerDto : IPerson, IDocument
     public string TrainerName { get; set; } = string.Empty;
 
     /// <inheritdoc />
-    public IEnumerable<string> TrainerClasses { get; set; } = [];
+    public ICollection<string> TrainerClasses { get; set; } = [];
 
     /// <inheritdoc />
     public Stats TrainerStats { get; set; } = new();
@@ -74,7 +74,7 @@ public class TrainerDto : IPerson, IDocument
     public int CurrentHP { get; set; }
 
     /// <inheritdoc />
-    public IEnumerable<string> Feats { get; set; } = [];
+    public ICollection<string> Feats { get; set; } = [];
 
     /// <summary>
     /// The trainer's money (or debt)
@@ -87,7 +87,7 @@ public class TrainerDto : IPerson, IDocument
     /// <summary>
     /// A collection of the trainer's items
     /// </summary>
-    public List<ItemDto> Items { get; set; } = [];
+    public ICollection<ItemDto> Items { get; set; } = [];
 
     /// <summary>
     /// Whether the trainer is the Game Master of the session
@@ -107,7 +107,7 @@ public class TrainerDto : IPerson, IDocument
     /// <summary>
     /// Trainer's achievements
     /// </summary>
-    public IEnumerable<string> Honors { get; set; } = [];
+    public ICollection<string> Honors { get; set; } = [];
 
     /// <summary>
     /// The trainer's origin
@@ -117,7 +117,7 @@ public class TrainerDto : IPerson, IDocument
     /// <summary>
     /// The trainer's skills
     /// </summary>
-    public IEnumerable<TrainerSkill> TrainerSkills { get; set; }
+    public ICollection<TrainerSkill> TrainerSkills { get; set; }
 
     /// <summary>
     /// The trainer's age

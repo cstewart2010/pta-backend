@@ -261,7 +261,7 @@ public class DexServiceTests
     [Test]
     [TestCase("Venusaur", "Base", "NewGuy", Nature.Sassy, Gender.Male, Status.Normal)]
     [TestCase("Venusaur", "Mega", "NewGuy", Nature.Timid, Gender.Genderless, Status.Burned)]
-    public async Task GetNewPokemon_Valid_ReturnNewPokemon(string name, string form, string nickname, Nature nature, Gender gender, Status status)
+    public async Task GetNewPokemon_Full_Valid_ReturnNewPokemon(string name, string form, string nickname, Nature nature, Gender gender, Status status)
     {
         var newPokemon = await _sut.GetNewPokemon(name, nature, gender, status, nickname, form);
         Assert.Multiple(() =>

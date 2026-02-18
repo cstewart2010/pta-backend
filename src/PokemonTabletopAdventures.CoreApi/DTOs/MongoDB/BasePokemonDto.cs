@@ -63,28 +63,28 @@ public class BasePokemonDto : IDocument, IDexDocument
     /// <summary>
     /// The Pokemon species' move list
     /// </summary>
-    public IEnumerable<string> Moves { get; set; } = [];
+    public ICollection<string> Moves { get; set; } = [];
 
     /// <summary>
     /// The Pokemon species' Skills
     /// </summary>
-    public IEnumerable<string> Skills { get; set; } = [];
+    public ICollection<string> Skills { get; set; } = [];
 
     /// <summary>
     /// The Pokemon species' Passives
     /// </summary>
-    public IEnumerable<string> Passives { get; set; } = [];
+    public ICollection<string> Passives { get; set; } = [];
 
     /// <summary>
     /// The Pokemon species' Proficiencies
     /// </summary>
-    public IEnumerable<string> Proficiencies { get; set; } = [];
+    public ICollection<string> Proficiencies { get; set; } = [];
 
     /// <summary>
     /// The Pokemon species' <see cref="Enums.EggGroups"/>
     /// </summary>
     [BsonRepresentation(BsonType.String)]
-    public IEnumerable<EggGroups> EggGroups { get; set; } = [];
+    public ICollection<EggGroups> EggGroups { get; set; } = [];
 
     /// <summary>
     /// The Pokemon species' hatch rate
@@ -94,7 +94,7 @@ public class BasePokemonDto : IDocument, IDexDocument
     /// <summary>
     /// The Pokemon species' habitats
     /// </summary>
-    public IEnumerable<string> Habitats { get; set; } = [];
+    public ICollection<string> Habitats { get; set; } = [];
 
     /// <summary>
     /// The Pokemon species' diet

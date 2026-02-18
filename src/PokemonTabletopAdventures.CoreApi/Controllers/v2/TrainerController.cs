@@ -373,7 +373,7 @@ public class TrainerController(
         {
             await PokemonService.DeletePokemon(pokemon.PokemonId);
         }
-        await TrainerService.DeleteTrainer(request.GameId, request.TrainerId);
+        await TrainerService.DeleteTrainer(request.TrainerId, request.GameId);
 
         var gm = await TrainerService.GetTrainerById(request.GameMasterId, request.GameId);
         var deleteTrainerLog = new Log

@@ -57,6 +57,7 @@ public interface ITrainerService
     /// <returns>True if successful</returns>
     public Task<Trainer> CompleteTrainer(
         Guid trainerId,
+        Guid gameId,
         string origin,
         string trainerClass,
         IEnumerable<string> feats,
@@ -102,26 +103,9 @@ public interface ITrainerService
         bool isOnline);
 
     /// <summary>
-    /// Searches for a trainer, then updates their password
-    /// </summary>
-    /// <param name="trainerId">The trainer id</param>
-    /// <param name="password">The updated password</param>
-    /// <exception cref="ArgumentNullException" />
-    public Task<Trainer> UpdateTrainerPassword(
-        Guid trainerId,
-        Guid gameId,
-        string password);
-
-    /// <summary>
     /// Searches for a trainer using their id, then deletes it
     /// </summary>
     /// <param name="gameId">The game id</param>
     /// <param name="userId">The user's id</param>
-    public Task DeleteTrainer(Guid gameId, Guid userId);
-
-    /// <summary>
-    /// Searches for all trainers using their game id, then deletes it
-    /// </summary>
-    /// <param name="gameId">The game id</param>
-    public Task DeleteTrainersByGameId(Guid gameId);
+    public Task DeleteTrainer(Guid userId, Guid gameId);
 }

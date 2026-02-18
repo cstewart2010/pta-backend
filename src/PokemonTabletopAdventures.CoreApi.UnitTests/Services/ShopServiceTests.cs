@@ -110,7 +110,7 @@ internal class ShopServiceTests
                     Type = y.Value.Type,
                     Effects = y.Value.Effects,
                 })
-            }),
+            }).ToList(),
             SettingId = Guid.Empty,
             GameId = gameId,
             Name = string.Empty,
