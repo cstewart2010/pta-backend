@@ -12,8 +12,6 @@ public class NpcService(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<NpcService> logger) : AbstractMongoService<NpcDto>(repositoryService, MongoCollection.NPCs), INpcService
 {
-    private readonly ILogger<NpcService> _logger = logger;
-
     public async Task DeleteNpc(Guid id)
     {
         logger.LogInformation("Deleting Npc {id}", id);

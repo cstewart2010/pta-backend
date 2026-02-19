@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using Newtonsoft.Json;
 using NSubstitute;
 using PokemonTabletopAdventures.CoreApi.Constants;

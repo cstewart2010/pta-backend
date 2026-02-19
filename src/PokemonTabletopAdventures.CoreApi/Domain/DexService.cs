@@ -17,18 +17,18 @@ public class DexService(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<DexService> logger) : AbstractMongoService<BasePokemonDto>(repositoryService, MongoCollection.BasePokemon), IDexService
 {
-    private readonly ILogger<DexService> _logger = logger;
+    private readonly IRepositoryService _repositoryService = repositoryService;
 
     public async Task<ICollection<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
     {
         logger.LogInformation("Getting Dex entries for document type {documentType}", documentType);
-        var collection = repositoryService.GetCollection<TDocument>(documentType.ToString());
+        var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         return await collection.GetManyAsync(document => true);
     }
 
     public async Task<IndexResponse<TDocument>> GetDexEntry<TDocument>(DexType documentType, string name) where TDocument : IDexDocument
     {
-        var collection = repositoryService.GetCollection<TDocument>(documentType.ToString());
+        var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         var item = await collection.GetOneAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
         return item == null ? throw new ItemNotFoundException(name) : new IndexResponse<TDocument> { Data = item };
     }
@@ -77,7 +77,7 @@ public class DexService(
         int offset,
         int limit) where TDocument : IDexDocument
     {
-        var collection = repositoryService.GetCollection<TDocument>(documentType.ToString());
+        var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         var documents = await collection.GetManyAsync(document => true, offset, limit);
         var count = documents.Count;
         var results = documents.Select(x => x.Name).ToList();
@@ -103,7 +103,7 @@ public class DexService(
 
     public async Task PostDexEntries<TDocument>(string collectionName, ICollection<TDocument> documents) where TDocument : IDexDocument
     {
-        var collection = repositoryService.GetCollection<TDocument>(typeof(TDocument).Name);
+        var collection = _repositoryService.GetCollection<TDocument>(typeof(TDocument).Name);
         foreach (var document in documents)
         {
             var items = await collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name);
