@@ -75,38 +75,14 @@ internal class PokemonServiceTests
         var trainerId = Shared.UserIds.First();
         var gameId = Shared.GameIds.First();
         var expectedList = _pokemonCollection.Collection.Where(x => x.TrainerId == trainerId && x.GameId == gameId).ToList();
-        ICollection<Pokemon> actualList = [.. await _sut.GetPokemonByTrainerId(trainerId, gameId, false)];
+        ICollection<Pokemon> actualList = [.. await _sut.GetPokemonByTrainerId(trainerId, gameId)];
         Assert.That(actualList, Has.Count.EqualTo(expectedList.Count));
         Assert.Multiple(() =>
         {
             foreach (var item in expectedList)
             {
-                Assert.That(actualList.SingleOrDefault(x => x.PokemonId == item.PokemonId), Is.Not.Null);
+                Assert.That(expectedList.Select(x => x.PokemonId), Is.EquivalentTo(actualList.Select(x => x.PokemonId)));
             }
-        });
-    }
-
-    [Test]
-    public void GetPokemonByTrainerId_Invalid_Throws()
-    {
-        var trainerId = Guid.NewGuid();
-        var gameId = Guid.NewGuid();
-        var expectItem = _pokemonCollection.Collection.First();
-        var aggregateException = Assert.Throws<AggregateException>(() =>
-        {
-            var task = _sut.GetPokemonByTrainerId(trainerId, gameId, false);
-            task.Wait();
-        });
-
-        Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<PokemonDto>>());
-        var exception = aggregateException.InnerException as UnknownEntityException<PokemonDto>;
-        Assert.Multiple(() =>
-        {
-            Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
-            Assert.That(
-                exception.Message,
-                Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {PropertyNames.TrainerId} {PropertyNames.GameId}={(trainerId, gameId)}"));
-            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
 

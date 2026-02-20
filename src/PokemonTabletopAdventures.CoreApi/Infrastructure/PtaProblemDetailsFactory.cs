@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -6,6 +7,7 @@ using PokemonTabletopAdventures.CoreApi.Exceptions;
 
 namespace PokemonTabletopAdventures.CoreApi.Infrastructure;
 
+[ExcludeFromCodeCoverage]
 internal class PtaProblemDetailsFactory : ProblemDetailsFactory
 {
     public override ProblemDetails CreateProblemDetails(

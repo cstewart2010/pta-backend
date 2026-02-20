@@ -369,15 +369,11 @@ public class TrainerController(
     {
         await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
         var game = await GameService.GetGame(request.GameId, true);
-        foreach (var pokemon in await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId, false))
+        foreach (var pokemon in await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId))
         {
             await PokemonService.DeletePokemon(pokemon.PokemonId);
         }
-        await TrainerService.DeleteTrainer(request.GameId, request.TrainerId);
-        if (await TrainerService.GetTrainerById(request.TrainerId, request.GameId) == null)
-        {
-            throw new DeletionException($"Failed to delete trainer {request.TrainerId}");
-        }
+        await TrainerService.DeleteTrainer(request.TrainerId, request.GameId);
 
         var gm = await TrainerService.GetTrainerById(request.GameMasterId, request.GameId);
         var deleteTrainerLog = new Log

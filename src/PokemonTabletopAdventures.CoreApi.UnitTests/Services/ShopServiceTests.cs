@@ -17,6 +17,7 @@ internal class ShopServiceTests
 {
     private ShopService _sut;
     private ShopCollectionImpl _shopCollection;
+    
     [OneTimeSetUp]
     public void Setup()
     {
@@ -109,7 +110,7 @@ internal class ShopServiceTests
                     Type = y.Value.Type,
                     Effects = y.Value.Effects,
                 })
-            }),
+            }).ToList(),
             SettingId = Guid.Empty,
             GameId = gameId,
             Name = string.Empty,

@@ -262,7 +262,7 @@ public class GameController(
         var game = await GameService.GetGame(gameId, true);
         await IsGameAuthenticated(gameSessionPassword, game);
         await MassDeletePokemon(gameId);
-        await TrainerService.DeleteTrainersByGameId(gameId);
+        await TrainerService.DeleteTrainer(gameMasterId, gameId);
         await GetGameDeletion(gameId);
         return Ok();
     }

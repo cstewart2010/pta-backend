@@ -84,7 +84,7 @@ public class DtoToModelMapper : IDtoToModelMapper
 
     public async Task<Npc> ParseFromDto(NpcDto npc, IPokemonService pokemonService)
     {
-        var npcPokemon = await pokemonService.GetPokemonByTrainerId(npc.NPCId, npc.GameId, true);
+        var npcPokemon = await pokemonService.GetPokemonByTrainerId(npc.NPCId, npc.GameId);
         return new Npc
         {
             NpcId = npc.NPCId,
@@ -93,7 +93,7 @@ public class DtoToModelMapper : IDtoToModelMapper
             Feats = npc.Feats,
             TrainerClasses = npc.TrainerClasses,
             TrainerStats = npc.TrainerStats,
-            PokemonTeam = npcPokemon.Where(pokemon => pokemon.IsOnActiveTeam),
+            PokemonTeam = npcPokemon.Where(pokemon => pokemon.IsOnActiveTeam).ToList(),
             Level = npc.Level,
             TrainerSkills = npc.TrainerSkills,
             Gender = npc.Gender,
@@ -173,7 +173,7 @@ public class DtoToModelMapper : IDtoToModelMapper
             IsActive = model.IsActive,
             Type = model.Type,
             Environment = model.Environment,
-            Shops = shopModels.Where(shopModel => isGM || shopModel.IsActive),
+            Shops = shopModels.Where(shopModel => isGM || shopModel.IsActive).ToList(),
             Participants = await Task.WhenAll(model.ActiveParticipants.Select(ParseFromDto)),
             GameId = gameId,
         };
@@ -223,8 +223,8 @@ public class DtoToModelMapper : IDtoToModelMapper
 
     public async Task<Trainer> ParseFromDto(TrainerDto trainer, IPokemonService pokemonService, IPokedexService pokedexService)
     {
-        var trainerPokemon = await pokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId, false);
-        var pokedex = (await pokedexService.GetTrainerPokeDex(trainer.TrainerId, trainer.GameId)).OrderBy(item => item.DexNo);
+        var trainerPokemon = await pokemonService.GetPokemonByTrainerId(trainer.TrainerId, trainer.GameId);
+        var pokedex = (await pokedexService.GetTrainerPokeDex(trainer.TrainerId, trainer.GameId)).OrderBy(item => item.DexNo).ToList();
         var caught = pokedex.Count(dexItem => dexItem.IsCaught);
         return new Trainer
         {
@@ -240,8 +240,8 @@ public class DtoToModelMapper : IDtoToModelMapper
             TrainerClasses = trainer.TrainerClasses,
             TrainerStats = trainer.TrainerStats,
             IsComplete = trainer.IsComplete,
-            PokemonTeam = trainerPokemon.Where(pokemon => pokemon.IsOnActiveTeam),
-            PokemonHome = trainerPokemon.Where(pokemon => !pokemon.IsOnActiveTeam),
+            PokemonTeam = trainerPokemon.Where(pokemon => pokemon.IsOnActiveTeam).ToList(),
+            PokemonHome = trainerPokemon.Where(pokemon => !pokemon.IsOnActiveTeam).ToList(),
             PokeDex = pokedex,
             SeenTotal = pokedex.Count(dexItem => dexItem.IsSeen),
             CaughtTotal = caught,

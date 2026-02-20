@@ -235,10 +235,10 @@ public class SettingsController(
         {
             setting.Participants = [..setting.Participants.Where(participant => participant.ParticipantId != pokemonId)];
             await _settingService.UpdateSetting(setting, false);
-            pokemon.Pokeball = pokeball.ToString().Replace("_", " ");
+            pokemon.Pokeball = pokeball.Replace("_", " ");
             pokemon.OriginalTrainerId = request.TrainerId;
             pokemon.TrainerId = request.TrainerId;
-            var allMons = (await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId, false)).Where(pokemon => pokemon.IsOnActiveTeam).Count();
+            var allMons = (await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId)).Count(x => x.IsOnActiveTeam);
             pokemon.IsOnActiveTeam = allMons < 6;
             if (!string.IsNullOrWhiteSpace(nickname))
             {

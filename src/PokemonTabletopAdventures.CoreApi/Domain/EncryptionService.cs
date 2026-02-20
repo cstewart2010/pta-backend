@@ -9,11 +9,9 @@ public class EncryptionService(
     IRepositoryService repositoryService,
     ILogger<EncryptionService> logger) : IEncryptionService
 {
-    private readonly IRepositoryService _repositoryService = repositoryService;
-    private readonly ILogger<EncryptionService> _logger = logger;
-
     public async Task<string> GenerateToken(DateTime generationTime)
     {
+        logger.LogInformation("Generating token");
         byte[] time = BitConverter.GetBytes(generationTime.ToBinary());
         return await Task.FromResult(Convert.ToBase64String(time));
     }
@@ -51,7 +49,7 @@ public class EncryptionService(
 
     public async Task VerifySecret(string secret, Guid gameId)
     {
-        var collection = _repositoryService.GetCollection<GameDto>(MongoCollection.Games);
+        var collection = repositoryService.GetCollection<GameDto>(MongoCollection.Games);
         var game = await collection.GetOneAsync(x => x.GameId == gameId) ?? throw new UnknownEntityException<GameDto>(PropertyNames.GameId, gameId);
         if (!BCrypt.Net.BCrypt.Verify(secret, game.PasswordHash))
         {
@@ -61,7 +59,7 @@ public class EncryptionService(
 
     public async Task VerifySecret(string secret, string username)
     {
-        var collection = _repositoryService.GetCollection<UserDto>(MongoCollection.Users);
+        var collection = repositoryService.GetCollection<UserDto>(MongoCollection.Users);
         var user = await collection.GetOneAsync(x => x.Username ==  username) ?? throw new PtaUnauthorizedException(PtaExceptionParts.NoUserFoundMessage);
         if (!BCrypt.Net.BCrypt.Verify(secret, user.PasswordHash))
         {

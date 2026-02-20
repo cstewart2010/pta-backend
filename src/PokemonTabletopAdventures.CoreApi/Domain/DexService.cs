@@ -17,13 +17,11 @@ public class DexService(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<DexService> logger) : AbstractMongoService<BasePokemonDto>(repositoryService, MongoCollection.BasePokemon), IDexService
 {
-    private readonly ILogger<DexService> _logger = logger;
     private readonly IRepositoryService _repositoryService = repositoryService;
-    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
-    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
 
     public async Task<ICollection<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
     {
+        logger.LogInformation("Getting Dex entries for document type {documentType}", documentType);
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         return await collection.GetManyAsync(document => true);
     }
@@ -62,7 +60,7 @@ public class DexService(
             .Select(document => document.Form);
         return new PokemonAndForms
         {
-            Pokemon = await _dtoToModelMapper.ParseFromDto(model),
+            Pokemon = await dtoToModelMapper.ParseFromDto(model),
             AlternateForms = [.. alternateForms]
         };
     }
@@ -70,7 +68,7 @@ public class DexService(
     public async Task<ICollection<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon)
     {
         var allEvolutions = await Collection.GetManyAsync(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase));
-        var forms = await Task.WhenAll(allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(_dtoToModelMapper.ParseFromDto));
+        var forms = await Task.WhenAll(allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(dtoToModelMapper.ParseFromDto));
         return forms;
     }
 
@@ -82,7 +80,7 @@ public class DexService(
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         var documents = await collection.GetManyAsync(document => true, offset, limit);
         var count = documents.Count;
-        var results = documents.Select(x => x.Name);
+        var results = documents.Select(x => x.Name).ToList();
 
         return new IndexCollectionResponse
         {
@@ -128,7 +126,7 @@ public class DexService(
                 continue;
             }
 
-            var dto = await _modelToDtoMapper.ParseFromModel(document);
+            var dto = await modelToDtoMapper.ParseFromModel(document);
             await PostDocument(dto);
         }
     }
@@ -166,7 +164,7 @@ public class DexService(
             Nickname = pokemon.Nickname,
             Gender = pokemon.Gender,
             PokemonStatus = pokemon.PokemonStatus,
-            Moves = keptMoves.Union(newMoves),
+            Moves = keptMoves.Union(newMoves).ToList(),
             Type = basePokemon.Type,
             CatchRate = GetCatchRate(basePokemon),
             Nature = pokemon.Nature,
@@ -177,7 +175,7 @@ public class DexService(
             Skills = basePokemon.Skills,
             Passives = basePokemon.Passives,
             Proficiencies = basePokemon.Proficiencies,
-            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()),
+            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()).ToList(),
             EggHatchRate = basePokemon.EggHatchRate,
             Habitats = basePokemon.Habitats,
             Diet = basePokemon.Diet,
@@ -242,7 +240,7 @@ public class DexService(
             Skills = basePokemon.Skills,
             Passives = basePokemon.Passives,
             Proficiencies = basePokemon.Proficiencies,
-            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()),
+            EggGroups = basePokemon.EggGroups.Select(x => x.ToString()).ToList(),
             EggHatchRate = basePokemon.EggHatchRate,
             Habitats = basePokemon.Habitats,
             Diet = basePokemon.Diet,
@@ -258,7 +256,7 @@ public class DexService(
             CanEvolve = false,
             GameId = Guid.Empty,
             OriginalTrainerId = Guid.Empty,
-            Pokeball = Pokeball.Basic_Ball.ToString(),
+            Pokeball = nameof(Pokeball.Basic_Ball),
             TrainerId = Guid.Empty,
         };
     }

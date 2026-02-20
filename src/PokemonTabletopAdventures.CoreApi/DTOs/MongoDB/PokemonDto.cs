@@ -32,7 +32,7 @@ public class PokemonDto: IDocument
     /// <summary>
     /// The Pokemon species' alternate forms, if any
     /// </summary>
-    public IEnumerable<string> AlternateForms { get; set; } = [];
+    public ICollection<string> AlternateForms { get; set; } = [];
 
     /// <summary>
     /// The Pokemon species' normal image
@@ -84,7 +84,7 @@ public class PokemonDto: IDocument
     /// <summary>
     /// The Pokemon's moves
     /// </summary>
-    public IEnumerable<string> Moves { get; set; } = [];
+    public ICollection<string> Moves { get; set; } = [];
 
     /// <summary>
     /// The Pokemon's type positioning
@@ -147,22 +147,22 @@ public class PokemonDto: IDocument
     /// <summary>
     /// The Pokemon species' Skills
     /// </summary>
-    public IEnumerable<string> Skills { get; set; } = [];
+    public ICollection<string> Skills { get; set; } = [];
 
     /// <summary>
     /// The Pokemon's Passives
     /// </summary>
-    public IEnumerable<string> Passives { get; set; } = [];
+    public ICollection<string> Passives { get; set; } = [];
 
     /// <summary>
     /// The Pokemon's <see cref="Enums.EggGroups"/>
     /// </summary>
-    public IEnumerable<string> EggGroups { get; set; } = [];
+    public ICollection<string> EggGroups { get; set; } = [];
 
     /// <summary>
     /// The Pokemon's Proficiencies
     /// </summary>
-    public IEnumerable<string> Proficiencies { get; set; } = [];
+    public ICollection<string> Proficiencies { get; set; } = [];
 
     /// <summary>
     /// The Pokemon's hatch rate
@@ -172,7 +172,7 @@ public class PokemonDto: IDocument
     /// <summary>
     /// The Pokemon's habitats
     /// </summary>
-    public IEnumerable<string> Habitats { get; set; } = [];
+    public ICollection<string> Habitats { get; set; } = [];
 
     /// <summary>
     /// The Pokemon's diet

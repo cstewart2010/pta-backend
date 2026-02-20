@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
-[ApiController]
-public class ErrorsController : ControllerBase
+[ApiController, ExcludeFromCodeCoverage]
+public class ErrorController : ControllerBase
 {
     [Route("error")]
     [ApiExplorerSettings(IgnoreApi = true)]

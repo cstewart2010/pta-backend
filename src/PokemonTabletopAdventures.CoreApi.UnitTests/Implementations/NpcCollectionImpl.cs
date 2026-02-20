@@ -4,7 +4,7 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class NpcCollectionImpl : BaseCollectionImpl<NpcDto>
 {
-    public override ICollection<NpcDto> Collection { get; set; } = [..Shared.NpcIds.Zip(Shared.GameIds).Select(x =>
+    public override ICollection<NpcDto> Collection { get; protected set; } = [..Shared.NpcIds.Zip(Shared.GameIds).Select(x =>
     {
         return new NpcDto
         {

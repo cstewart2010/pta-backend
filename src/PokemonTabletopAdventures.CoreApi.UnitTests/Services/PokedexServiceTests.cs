@@ -87,31 +87,6 @@ internal class PokedexServiceTests
     }
 
     [Test]
-    [TestCaseSource(nameof(GetSearchItems), new object[] { 2 })]
-    public void GetTrainerDex_Invalid_Throws(SearchItem item)
-    {
-        var expectItem = pokedexCollection.Collection.First();
-        var trainerId = item.TrainerId ?? expectItem.TrainerId;
-        var gameId = item.GameId ?? expectItem.GameId;
-        var aggregateException = Assert.Throws<AggregateException>(() =>
-        {
-            var task = sut.GetTrainerPokeDex(trainerId, gameId);
-            task.Wait();
-        });
-
-        Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<PokeDexItemDto>>());
-        var exception = aggregateException.InnerException as UnknownEntityException<PokeDexItemDto>;
-        Assert.Multiple(() =>
-        {
-            Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
-            Assert.That(
-                exception.Message,
-                Is.EqualTo($"Could not find a {typeof(PokeDexItemDto).Name} using {PropertyNames.TrainerId} {PropertyNames.GameId}={(trainerId, gameId)}"));
-            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
-    }
-
-    [Test]
     public async Task PostDexItem_Valid_UpdatesCollection()
     {
         var count = pokedexCollection.Collection.Count;

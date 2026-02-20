@@ -10,11 +10,9 @@ public class PokedexService(
     IDtoToModelMapper dtoToModelMapper,
     ILogger<PokedexService> logger) : AbstractMongoService<PokeDexItemDto>(repositoryService, MongoCollection.Pokedex), IPokedexService
 {
-    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
-    private readonly ILogger<PokedexService> _logger = logger;
-
     public async Task DeleteDexItemForTrainer(Guid trainerId, Guid gameId)
     {
+        logger.LogInformation("Deleting pokedex for trainer {trainerId}", trainerId);
         await Collection.DeleteManyAsync(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId);
     }
 
@@ -25,17 +23,13 @@ public class PokedexService(
             x => Collection.GetOneAsync(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId && dexItem.DexNo == x.dexNo),
             $"{PropertyNames.TrainerId} {PropertyNames.GameId} {PropertyNames.DexNo}");
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<ICollection<PokedexItem>> GetTrainerPokeDex(Guid trainerId, Guid gameId)
     {
-        var dtos = await ThrowIfNullOrEmpty(
-            (trainerId, gameId),
-            x => Collection.GetManyAsync(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId),
-            $"{PropertyNames.TrainerId} {PropertyNames.GameId}");
-
-        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
+        var dtos = await Collection.GetManyAsync(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId);
+        return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 
     public async Task PostDexItem(Guid trainerId, Guid gameId, int dexNo, bool isSeen, bool isCaught)
@@ -60,7 +54,7 @@ public class PokedexService(
             new Models.UpdateData(PropertyNames.IsSeen, true),
             new Models.UpdateData(PropertyNames.IsCaught, true));
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<PokedexItem> UpdateDexItemIsSeen(Guid trainerId, Guid gameId, int dexNo)
@@ -70,6 +64,6 @@ public class PokedexService(
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
             new Models.UpdateData(PropertyNames.IsSeen, true));
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 }
