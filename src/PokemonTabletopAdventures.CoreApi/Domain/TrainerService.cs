@@ -67,7 +67,7 @@ public class TrainerService(
         else
         {
             await pokemonService.DeletePokemonByTrainerId(gameId, userId);
-            await pokedexService.DeleteDexItemForTrainer(userId, gameId);
+            await pokedexService.DeleteTrainerDex(userId, gameId);
             var settings = await settingService.GetAllSettings(gameId);
             foreach (var setting in settings)
             {
@@ -111,11 +111,7 @@ public class TrainerService(
 
     public async Task<ICollection<Trainer>> GetTrainersByGameId(Guid gameId)
     {
-        var dtos = await ThrowIfNullOrEmpty(
-            gameId,
-            id => Collection.GetManyAsync(trainer => trainer.GameId == id),
-            PropertyNames.GameId);
-
+        var dtos = await Collection.GetManyAsync(trainer => trainer.GameId == gameId);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService)));
     }
 
@@ -178,11 +174,7 @@ public class TrainerService(
 
     public async Task<ICollection<Trainer>> GetAllUserTrainers(Guid userId)
     {
-        var dtos = await  ThrowIfNullOrEmpty(
-            userId,
-            id => Collection.GetManyAsync(trainer => trainer.TrainerId == id),
-            PropertyNames.TrainerId);
-
+        var dtos = await  Collection.GetManyAsync(trainer => trainer.TrainerId == userId);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService)));
     }
 

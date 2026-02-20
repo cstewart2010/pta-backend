@@ -224,7 +224,7 @@ internal class PokedexServiceTests
             await sut.PostDexItem(trainerId, item.GameId, i, true, true);
         }
 
-        await sut.DeleteDexItemForTrainer(trainerId, item.GameId);
+        await sut.DeleteTrainerDex(trainerId, item.GameId);
         Assert.That(pokedexCollection.Collection, Has.Count.EqualTo(count));
     }
 
@@ -236,7 +236,7 @@ internal class PokedexServiceTests
         var pokedexItem = pokedexCollection.Collection.First();
         var trainerId = item.TrainerId ?? pokedexItem.TrainerId;
         var gameId = item.GameId ?? pokedexItem.GameId;
-        await sut.DeleteDexItemForTrainer(trainerId, gameId);
+        await sut.DeleteTrainerDex(trainerId, gameId);
         Assert.That(pokedexCollection.Collection, Has.Count.EqualTo(count));
     }
 

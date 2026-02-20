@@ -17,17 +17,6 @@ public abstract class AbstractMongoService<T>(
         return item;
     }
 
-    protected async Task<IEnumerable<T>> ThrowIfNullOrEmpty<T2>(T2 entityValue, Func<T2, Task<ICollection<T>>> func, string entityName)
-    {
-        var result = await func(entityValue);
-        if (result == null || result.Count == 0)
-        {
-            throw new UnknownEntityException<T>(entityName, entityValue);
-        }
-
-        return result;
-    }
-
     protected async Task PostDocument (T entity)
     {
         await PostDocument(Collection, entity);

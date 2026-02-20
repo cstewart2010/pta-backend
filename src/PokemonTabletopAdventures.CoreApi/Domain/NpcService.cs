@@ -33,21 +33,13 @@ public class NpcService(
 
     public async Task<ICollection<Npc>> GetNpcs(IEnumerable<Guid> npcIds)
     {
-        var dtos = await ThrowIfNullOrEmpty(
-            npcIds,
-            id => Collection.GetManyAsync(npc => npcIds.Contains(npc.NPCId)),
-            PropertyNames.NpcId);
-
+        var dtos = await Collection.GetManyAsync(npc => npcIds.Contains(npc.NPCId));
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, pokemonService)));
     }
 
     public async Task<ICollection<Npc>> GetNpcsByGameId(Guid gameId)
     {
-        var dtos = await ThrowIfNullOrEmpty(
-            gameId,
-            id => Collection.GetManyAsync(npc => npc.GameId == id),
-            PropertyNames.GameId);
-
+        var dtos = await Collection.GetManyAsync(npc => npc.GameId == gameId);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, pokemonService)));
     }
 

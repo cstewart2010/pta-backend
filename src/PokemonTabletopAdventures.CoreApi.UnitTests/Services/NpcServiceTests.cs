@@ -106,29 +106,6 @@ internal class NpcServiceTests
     }
 
     [Test]
-    public void GetNpcs_NoneValid_Throws()
-    {
-        Guid[] ids = [Guid.NewGuid()];
-
-        var aggregateException = Assert.Throws<AggregateException>(() =>
-        {
-            var task = _sut.GetNpcs(ids);
-            task.Wait();
-        });
-
-        Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<NpcDto>>());
-        var exception = aggregateException.InnerException as UnknownEntityException<NpcDto>;
-        Assert.Multiple(() =>
-        {
-            Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
-            Assert.That(
-                exception.Message,
-                Contains.Substring($"Could not find a {nameof(NpcDto)} using {PropertyNames.NpcId}"));
-            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
-    }
-
-    [Test]
     public async Task GetNpcsByGameId_Valid_ReturnsCollection()
     {
         var gameId = Shared.GameIds.First();
@@ -144,29 +121,6 @@ internal class NpcServiceTests
             {
                 Assert.That(actualNpcs.SingleOrDefault(x => x.NpcId == npc.NPCId), Is.Not.Null);
             }
-        });
-    }
-
-    [Test]
-    public void GetNpcsByGameId_Invalid_Throws()
-    {
-        var gameId = Guid.NewGuid();
-
-        var aggregateException = Assert.Throws<AggregateException>(() =>
-        {
-            var task = _sut.GetNpcsByGameId(gameId);
-            task.Wait();
-        });
-
-        Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<NpcDto>>());
-        var exception = aggregateException.InnerException as UnknownEntityException<NpcDto>;
-        Assert.Multiple(() =>
-        {
-            Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
-            Assert.That(
-                exception.Message,
-                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {PropertyNames.GameId}={gameId}"));
-            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         });
     }
 

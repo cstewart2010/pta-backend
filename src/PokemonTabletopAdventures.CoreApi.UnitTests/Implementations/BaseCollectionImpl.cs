@@ -1,10 +1,11 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Linq.Expressions;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
-internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto>
+internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto> where TDto : IDocument
 {
     public abstract ICollection<TDto> Collection { get; protected set; }
 

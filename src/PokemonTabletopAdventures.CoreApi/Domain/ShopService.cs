@@ -28,11 +28,7 @@ public class ShopService(
 
     public async Task<ICollection<Shop>> GetShopsByGameId(Guid gameId)
     {
-        var dtos = await ThrowIfNullOrEmpty(
-            gameId,
-            id => Collection.GetManyAsync(shop => shop.GameId == id),
-            PropertyNames.GameId);
-
+        var dtos = await Collection.GetManyAsync(shop => shop.GameId == gameId);
         return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 

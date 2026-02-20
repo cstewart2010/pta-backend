@@ -49,8 +49,6 @@ internal class Startup(IConfiguration configuration)
         services.AddSingleton<INpcService, NpcService>();
         services.AddSingleton<IGameService, GameService>();
 
-        services.AddSingleton<IExportService, ExportService>();
-
         services.AddSingleton<ISpriteService, SpriteService>();
 
         services.AddSingleton<IUserService, UserService>();
