@@ -83,10 +83,12 @@ public class GameService(
 
     public async Task<Game> UpdateGameLogs(Game theGame, bool isGM, params Log[] logs)
     {
+        var currentLogDtos = await Task.WhenAll(theGame.Logs.Select(modelToDtoMapper.ParseFromModel));
+        var newLogDtos = await Task.WhenAll(logs.Select(modelToDtoMapper.ParseFromModel).ToArray());
         var dto = await UpdateDocument(
             theGame.GameId,
             game => game.GameId == theGame.GameId,
-            new Models.UpdateData(PropertyNames.Logs, theGame.Logs?.Union(logs) ?? logs));
+            new Models.UpdateData(PropertyNames.Logs, currentLogDtos.Union(newLogDtos).ToArray()));
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, npcService, settingService, trainerService);
     }

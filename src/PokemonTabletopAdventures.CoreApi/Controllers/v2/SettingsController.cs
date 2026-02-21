@@ -417,7 +417,7 @@ public class SettingsController(
         await _settingService.UpdateSetting(setting, true);
 
         var gm = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
-        var newSettingLog = new LogDto(user: gm.TrainerName, action: $"activated a new encounter ({setting.Name})");
+        var newSettingLog = new LogDto(user: gm.TrainerName, action: $"activated a new encounter ({setting.Name})", DateTimeOffset.Now);
         await GameService.UpdateGameLogs(game, true, await DtoToModelMapper.ParseFromDto(newSettingLog));
         return Ok();
     }
@@ -516,7 +516,8 @@ public class SettingsController(
         await _settingService.UpdateSetting(setting, isGm);
         var removalLog = new LogDto(
             user: removedParticipant.Name,
-            action: $"has been removed from {setting.Name}");
+            action: $"has been removed from {setting.Name}",
+            DateTimeOffset.Now);
         await GameService.UpdateGameLogs(game, isGm, await DtoToModelMapper.ParseFromDto(removalLog));
         return Ok();
     }

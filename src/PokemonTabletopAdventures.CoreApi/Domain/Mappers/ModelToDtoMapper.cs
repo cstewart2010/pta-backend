@@ -68,7 +68,7 @@ public class ModelToDtoMapper : IModelToDtoMapper
 
     public async Task<LogDto> ParseFromModel(Log log)
     {
-        return await Task.FromResult(new LogDto(log.User, log.Action));
+        return await Task.FromResult(new LogDto(log.User, log.Action, log.LogTimestamp));
     }
 
     public async Task<NpcDto> ParseFromModel(Npc npc)

@@ -278,7 +278,7 @@ public abstract class PtaControllerBase(
 
     internal static LogDto ParseBackToModel(Log log)
     {
-        return new LogDto(log.User, log.Action);
+        return new LogDto(log.User, log.Action, log.LogTimestamp);
     }
 
     private static IEnumerable<Log> GetPage(
