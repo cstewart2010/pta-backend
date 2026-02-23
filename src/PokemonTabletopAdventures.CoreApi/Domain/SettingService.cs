@@ -39,11 +39,7 @@ public class SettingService(
 
     public async Task<ICollection<Setting>> GetAllSettings(Guid gameId)
     {
-        var dtos = await ThrowIfNullOrEmpty(
-            gameId,
-            id => Collection.GetManyAsync(setting => setting.GameId == gameId),
-            PropertyNames.GameId);
-
+        var dtos = await Collection.GetManyAsync(setting => setting.GameId == gameId);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, true, gameId, shopService)));
     }
 

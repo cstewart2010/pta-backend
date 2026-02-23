@@ -9,7 +9,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 /// <remarks>
 /// Initializes a new instance of <see cref="LogDto"/>
 /// </remarks>
-public class LogDto(string user, string action)
+public class LogDto(string user, string action, DateTimeOffset timestamp)
 {
     /// <summary>
     /// The user that the log comes from
@@ -25,5 +25,5 @@ public class LogDto(string user, string action)
     /// The timestamp for the Log
     /// </summary>
     [BsonRepresentation(BsonType.String)]
-    public DateTimeOffset LogTimestamp { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset LogTimestamp { get; set; } = timestamp;
 }

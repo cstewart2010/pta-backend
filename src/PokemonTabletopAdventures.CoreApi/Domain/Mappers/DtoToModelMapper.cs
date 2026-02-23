@@ -58,7 +58,7 @@ public class DtoToModelMapper : IDtoToModelMapper
     public async Task<Game> ParseFromDto(GameDto model, bool isGM, INpcService npcService, ISettingService settingService, ITrainerService trainerService)
     {
         var trainerModels = await trainerService.GetTrainersByGameId(model.GameId);
-        var npcModels = isGM ? [] : await Task.WhenAll(model.NPCs.Select(async id => await npcService.GetNpc(id)));
+        var npcModels = !isGM ? [] : await Task.WhenAll(model.NPCs.Select(async id => await npcService.GetNpc(id)));
         var settingModels = await settingService.GetAllSettings(model.GameId);
         return new Game
         {

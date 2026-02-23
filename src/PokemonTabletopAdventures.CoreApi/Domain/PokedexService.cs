@@ -10,7 +10,7 @@ public class PokedexService(
     IDtoToModelMapper dtoToModelMapper,
     ILogger<PokedexService> logger) : AbstractMongoService<PokeDexItemDto>(repositoryService, MongoCollection.Pokedex), IPokedexService
 {
-    public async Task DeleteDexItemForTrainer(Guid trainerId, Guid gameId)
+    public async Task DeleteTrainerDex(Guid trainerId, Guid gameId)
     {
         logger.LogInformation("Deleting pokedex for trainer {trainerId}", trainerId);
         await Collection.DeleteManyAsync(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId);

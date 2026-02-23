@@ -20,7 +20,6 @@ public class GameController(
     IDexService dexUtility,
     ISpriteService spriteService,
     IPokedexService pokedexService,
-    IExportService exportService,
     IEncryptionService encryptionService,
     IDtoToModelMapper dtoToModelMapper,
     IModelToDtoMapper modelToDtoMapper,
@@ -28,7 +27,6 @@ public class GameController(
 {
     private readonly ILogger<GameController> _logger = logger;
     private readonly ISpriteService _spriteService = spriteService;
-    private readonly IExportService _exportService = exportService;
     private readonly IEncryptionService _encryptionService = encryptionService;
     private readonly INpcService _npcService = npcService;
 
@@ -114,20 +112,6 @@ public class GameController(
         }
 
         return await GetUpdatedTrainer(accessToken, sessionAuth, userId, gameId);
-    }
-
-    [HttpPost("import")]
-    [ProducesResponseType(typeof(CreateGameResponse), 200)]
-    [ProducesResponseType(typeof(ProblemDetails), 400)]
-    public async Task<IActionResult> ImportGame()
-    {
-        var json = Request.GetJsonFromRequest();
-        if (string.IsNullOrEmpty(json))
-        {
-            throw new ImportFailedException(Constants.PtaExceptionParts.EmptyImportJsonMessage);
-        }
-        var game = await _exportService.ParseImport(json);
-        return Ok(new CreateGameResponse { Games = [game] });
     }
 
     [HttpPost("create")]
@@ -265,39 +249,6 @@ public class GameController(
         await TrainerService.DeleteTrainer(gameMasterId, gameId);
         await GetGameDeletion(gameId);
         return Ok();
-    }
-
-
-    [HttpDelete("{gameId}/export")]
-    [ProducesResponseType(typeof(void), 200)]
-    [ProducesResponseType(typeof(ProblemDetails), 400)]
-    [ProducesResponseType(typeof(ProblemDetails), 401)]
-    public async Task<IActionResult> ExportGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
-        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        [FromQuery] Guid gameMasterId,
-        [FromQuery] string gameSessionPassword)
-    {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
-        var gameMaster = await TrainerService.GetTrainerById(gameMasterId, gameId);
-        var game = await GameService.GetGame(gameId, true);
-        await _encryptionService.VerifySecret(gameSessionPassword, game.GameId);
-        var exportLog = new Log
-        {
-            User = gameMaster.TrainerName,
-            Action = GameLogMessages.GameCreationLog,
-            LogTimestamp = DateTimeOffset.Now,
-        };
-        await GameService.UpdateGameOnlineStatus(gameId, false);
-        await GameService.UpdateGameLogs(game, true, exportLog);
-        var exportStream = await _exportService.GetExportStream(game);
-
-        await DeleteGame(accessToken, sessionAuth, gameId, gameMasterId, gameSessionPassword);
-        return File(
-            exportStream,
-            ContentTypes.OctetStream,
-            $"{game.Nickname}.json");
     }
     
     private static Game BuildGame(string nickname)

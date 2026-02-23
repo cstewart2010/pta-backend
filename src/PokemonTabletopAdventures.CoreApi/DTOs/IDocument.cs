@@ -7,7 +7,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs;
 /// <summary>
 /// Provides a collection of properties for MongoDB documents
 /// </summary>
-internal interface IDocument
+public interface IDocument
 {
     /// <summary>
     /// MongoDB id

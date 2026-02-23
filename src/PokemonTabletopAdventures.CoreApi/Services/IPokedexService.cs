@@ -49,5 +49,5 @@ public interface IPokedexService
     /// <param name="dexNo">The dex number for the pokemon</param>
     public Task<PokedexItem> UpdateDexItemIsCaught(Guid trainerId, Guid gameId, int dexNo);
 
-    public Task DeleteDexItemForTrainer(Guid trainerId, Guid gameId);
+    public Task DeleteTrainerDex(Guid trainerId, Guid gameId);
 }

@@ -15,7 +15,7 @@ public class PokemonService(
     public async Task DeletePokemonByTrainerId(Guid gameId, Guid trainerId)
     {
         await Collection.DeleteManyAsync(pokemon => pokemon.TrainerId == trainerId && pokemon.GameId == gameId);
-        await pokedexService.DeleteDexItemForTrainer(trainerId, gameId);
+        await pokedexService.DeleteTrainerDex(trainerId, gameId);
     }
 
     public async Task<Pokemon> GetPokemonById(Guid id)
