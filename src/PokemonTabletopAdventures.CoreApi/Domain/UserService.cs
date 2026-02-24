@@ -1,6 +1,7 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Users;
 
@@ -10,24 +11,22 @@ public class UserService(
     IRepositoryService repositoryService,
     ITrainerService trainerService,
     IDtoToModelMapper dtoToModelMapper,
-    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<UserDto>(repositoryService, MongoCollection.Users), IUserService
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<UserService> logger) : AbstractMongoService<UserDto>(repositoryService, MongoCollection.Users), IUserService
 {
-    private readonly ITrainerService _trainerService = trainerService;
-    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
-    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
-
     public async Task DeleteUser(Guid userId)
     {
+        logger.LogInformation("Removing user {userId} from database", userId);
         await ThrowIfNull(
             userId,
             id => Collection.DeleteAsync(user => user.UserId == id),
             PropertyNames.UserId);
         
-        var trainers = await _trainerService.GetAllUserTrainers(userId);
+        var trainers = await trainerService.GetAllUserTrainers(userId);
         var games = trainers.Select(trainer => trainer.GameId);
         foreach(var gameId in games)
         {
-            await _trainerService.DeleteTrainer(gameId, userId);
+            await trainerService.DeleteTrainer(userId, gameId);
         }
     }
 
@@ -38,7 +37,7 @@ public class UserService(
             id => Collection.GetOneAsync(user => user.UserId == id),
             PropertyNames.UserId);
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<User> GetUserByUsername(string username)
@@ -48,24 +47,24 @@ public class UserService(
             username => Collection.GetOneAsync(user => user.Username.Equals(username, StringComparison.CurrentCultureIgnoreCase)),
             PropertyNames.Username);
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<ICollection<User>> GetUsers()
     {
         var dtos = await Collection.GetManyAsync(user => true);
-        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
+        return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 
     public async Task<ICollection<User>> GetUsers(int offset, int limit)
     {
         var dtos = await Collection.GetManyAsync(user => true, offset, limit);
-        return await Task.WhenAll(dtos.Select(_dtoToModelMapper.ParseFromDto));
+        return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 
     public async Task PostUser(User user, string passwordHash)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(user);
+        var dto = await modelToDtoMapper.ParseFromModel(user);
         dto.PasswordHash = passwordHash;
         dto.IsOnline = true;
         await PostUniqueDocument(dto, x => x.UserId == user.UserId);
@@ -73,12 +72,11 @@ public class UserService(
 
     public async Task<User> UpdateUser(User updatedUser)
     {
-        var dto = (await Collection.GetOneAsync(user => user.UserId == updatedUser.UserId))!;
-        dto.ActivityToken = updatedUser.ActivityToken;
-        dto.Games = updatedUser.Games;
-        dto.Messages = updatedUser.Messages;
+        var dto = (await Collection.GetOneAsync(user => user.UserId == updatedUser.UserId)) ?? throw new UserNotFoundException(updatedUser.UserId);
+        dto.Games = updatedUser.Games ?? dto.Games;
+        dto.Messages = updatedUser.Messages ?? dto.Messages;
         dto.SiteRole = updatedUser.SiteRole;
-        dto.Username = updatedUser.Username;
+        dto.Username = updatedUser.Username ?? dto.Username;
         await UpsertDocument(
             user => user.UserId,
             updatedUser.UserId,
@@ -92,9 +90,9 @@ public class UserService(
         var dto = await UpdateDocument(
             userId,
             user => user.UserId == userId,
-            new Models.UpdateData(PropertyNames.ActivityToken, token));
+            new UpdateData(PropertyNames.ActivityToken, token));
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task<User> UpdateUserOnlineStatus(Guid userId, bool isOnline)
@@ -104,7 +102,7 @@ public class UserService(
             user => user.UserId == userId,
             UserStatusUpdate(isOnline));
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     private static UpdateData[] UserStatusUpdate(bool isOnline)

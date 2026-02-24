@@ -182,12 +182,15 @@ public class TrainerService(
     {
         var userCollection = _repositoryService.GetCollection<UserDto>(MongoCollection.Users);
         var user = await userCollection.GetOneAsync(x => x.UserId == userId);
-        user!.Games.Remove(gameId);
+        if (user != null)
+        {
+            user.Games.Remove(gameId);
         
-        await userCollection.PutAsync(
-            user => user.UserId,
-            user.UserId,
-            user);
+            await userCollection.PutAsync(
+                x => x.UserId,
+                user.UserId,
+                user);
+        }
     }
 
     private static UpdateData[] TrainerStatusUpdate(bool isOnline)

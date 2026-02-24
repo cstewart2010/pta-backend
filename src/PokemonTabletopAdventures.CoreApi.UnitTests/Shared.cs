@@ -10,6 +10,7 @@ internal static class Shared
     public static readonly ICollection<Guid> NpcIds = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];
     public static readonly ICollection<Guid> ShopIds = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];
     public static readonly ICollection<Guid> SettingIds = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];
+    public static readonly ICollection<Guid> MessageIds = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];
     public static readonly List<(int DexNo, string Name, string Form, string EvolvesFrom, string Rarity)> Pokemon = [
         (1, "Bulbasaur", "Base", "", "Common"),
         (2, "Ivysaur", "Base", "Bulbasaur", "Uncommon"),
