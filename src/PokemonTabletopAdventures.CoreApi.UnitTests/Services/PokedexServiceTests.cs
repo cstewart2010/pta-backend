@@ -44,8 +44,8 @@ internal class PokedexServiceTests
     }
 
     [Test]
-    [TestCaseSource(nameof(GetSearchItems), new object[] { 3 })]
-    public async Task GetPokedexItem_Invalid_Throws(SearchItem item)
+    [TestCaseSource(nameof(GetSearchItemsForGetPokedexItem))]
+    public async Task GetPokedexItem_Invalid_ReturnsNull(SearchItem item)
     {
         var expectItem = _pokedexCollection.Collection.First();
         var trainerId = item.TrainerId ?? expectItem.TrainerId;
@@ -111,7 +111,7 @@ internal class PokedexServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.DuplicateEntryTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {typeof(PokeDexItemDto).Name}"));
+            Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {nameof(PokeDexItemDto)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             Assert.That(_pokedexCollection.Collection, Has.Count.EqualTo(count));
         });
@@ -128,6 +128,7 @@ internal class PokedexServiceTests
         await _sut.PostDexItem(trainerId, gameId, dexNo, isSeen, isCaught);
         var updatedItem = await _sut.UpdateDexItemIsSeen(trainerId, gameId, dexNo);
         var retrievedItem = await _sut.GetPokedexItem(trainerId, gameId, dexNo);
+        Assert.That(retrievedItem, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(updatedItem.IsSeen, Is.True);
@@ -153,7 +154,7 @@ internal class PokedexServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Failed to update {typeof(PokeDexItemDto).Name} {(trainerId, gameId)}"));
+            Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokeDexItemDto)} {(trainerId, gameId)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
@@ -169,6 +170,7 @@ internal class PokedexServiceTests
         await _sut.PostDexItem(trainerId, gameId, dexNo, isSeen, isCaught);
         var updatedItem = await _sut.UpdateDexItemIsCaught(trainerId, gameId, dexNo);
         var retrievedItem = await _sut.GetPokedexItem(trainerId, gameId, dexNo);
+        Assert.That(retrievedItem, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(updatedItem.IsSeen, Is.True);
@@ -194,7 +196,7 @@ internal class PokedexServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Failed to update {typeof(PokeDexItemDto).Name} {(trainerId, gameId)}"));
+            Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokeDexItemDto)} {(trainerId, gameId)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
@@ -215,7 +217,7 @@ internal class PokedexServiceTests
     }
 
     [Test]
-    [TestCaseSource(nameof(GetSearchItems), new object[] { 2 })]
+    [TestCaseSource(nameof(GetSearchItemsForDeleteDexItemForTrainer))]
     public async Task DeleteDexItemForTrainer_Invalid_DoesNotUpdateCollection(SearchItem item)
     {
         var count = _pokedexCollection.Collection.Count;
@@ -226,7 +228,7 @@ internal class PokedexServiceTests
         Assert.That(_pokedexCollection.Collection, Has.Count.EqualTo(count));
     }
 
-    private static SearchItem[] GetSearchItems(int count)
+    private static SearchItem[] GetSearchItemsForGetPokedexItem()
     {
         SearchItem[] items = 
         [
@@ -235,6 +237,17 @@ internal class PokedexServiceTests
             new SearchItem{ DexNo = -1}
         ];
 
-        return [.. items.Take(count)];
+        return items;
+    }
+
+    private static SearchItem[] GetSearchItemsForDeleteDexItemForTrainer()
+    {
+        SearchItem[] items = 
+        [
+            new SearchItem{ TrainerId = Guid.NewGuid()},
+            new SearchItem{ GameId = Guid.NewGuid()},
+        ];
+
+        return items;
     }
 }

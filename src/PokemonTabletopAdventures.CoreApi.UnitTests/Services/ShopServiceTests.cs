@@ -80,7 +80,7 @@ internal class ShopServiceTests
             GameId = Guid.Empty,
             Name = string.Empty,
             IsActive = false,
-            Type = (SettingType)0,
+            Type = 0,
             Environment = [],
             Participants = []
         };
@@ -115,7 +115,7 @@ internal class ShopServiceTests
             GameId = gameId,
             Name = string.Empty,
             IsActive = false,
-            Type = (SettingType)0,
+            Type = 0,
             Environment = [],
             Participants = []
         };

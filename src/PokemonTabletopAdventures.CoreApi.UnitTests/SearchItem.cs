@@ -2,9 +2,8 @@
 
 public class SearchItem
 {
-    public Guid? TrainerId { get; set; }
-    public Guid? NpcId { get; set; }
-    public Guid? GameId { get; set; }
-    public Guid? ShopId { get; set; }
-    public int? DexNo { get; set; }
+    public Guid? TrainerId { get; init; }
+    public Guid? NpcId { get; init; }
+    public Guid? GameId { get; init; }
+    public int? DexNo { get; init; }
 }
