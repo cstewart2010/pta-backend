@@ -32,11 +32,12 @@ internal class RepositoryService : IRepositoryService
         };
     }
 
-    public IMongoCollection<T> GetMongoCollection<T>(string collectionName)
+    private IMongoCollection<T> GetMongoCollection<T>(string collectionName)
     {
         return Database.GetCollection<T>(collectionName);
     }
 
+    #region Helper methods
     private static MongoClientSettings GetMongoClientSettings()
     {
         var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDBConnectionString, EnvironmentVariableTarget.Process);
@@ -53,4 +54,5 @@ internal class RepositoryService : IRepositoryService
 
         return settings;
     }
+    #endregion
 }

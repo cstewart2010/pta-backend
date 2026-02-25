@@ -135,6 +135,13 @@ public class TrainerServiceTests
         var actual = await _sut.GetTrainerByUsername(expected.TrainerName, expected.GameId);
         Assert.That(actual, Is.Not.Null);
     }
+
+    [Test]
+    public async Task GetTrainerByUsername_Invalid_ReturnsNull()
+    {
+        var actual = await _sut.GetTrainerByUsername(Guid.NewGuid().ToString(), Guid.NewGuid());
+        Assert.That(actual, Is.Null);
+    }
     
     [Test]
     public async Task GetTrainersByGameId_Valid_ReturnsTrainers()

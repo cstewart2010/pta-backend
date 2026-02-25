@@ -99,12 +99,13 @@ public class TrainerService(
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }
 
-    public async Task<Trainer> GetTrainerByUsername(string username, Guid gameId)
+    public async Task<Trainer?> GetTrainerByUsername(string username, Guid gameId)
     {
-        var dto = await ThrowIfNull(
-            (username, gameId),
-            x => Collection.GetOneAsync(trainer => trainer.TrainerName.Equals(x.username, StringComparison.CurrentCultureIgnoreCase) && trainer.GameId == x.gameId),
-            nameof(Trainer.TrainerName));
+        var dto = await Collection.GetOneAsync(x => x.TrainerName.Equals(username, StringComparison.CurrentCultureIgnoreCase) && x.GameId == gameId);
+        if (dto == null)
+        {
+            return null;
+        }
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }

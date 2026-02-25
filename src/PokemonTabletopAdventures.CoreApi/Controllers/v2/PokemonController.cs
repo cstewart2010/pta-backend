@@ -30,11 +30,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(RetrievePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemon(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromHeader] RetrievePokemonRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
+        await VerifyIdentity(sessionAuth, request.TrainerId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         return Ok(new RetrievePokemonResponse { Pokemon = [model] });
     }
@@ -55,11 +54,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetNpcMon(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromHeader] RetrievePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId);
         return Ok(new RetrievePokemonResponse { Pokemon = [..models] });
     }
@@ -69,11 +67,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetPossibleEvolutions(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromHeader] RetrievePokemonRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
+        await VerifyIdentity(sessionAuth, request.TrainerId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var pokemon = await PokemonService.GetPokemonById(request.PokemonId);
         if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
@@ -89,11 +86,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> TradePokemon(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] TradePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var game = await GameService.GetGame(request.GameId, true);
         var (leftPokemon, rightPokemon) = await GetTradePokemon(request.LeftPokemonId, request.RightPokemonId);
         await UpdatePokemonTrainerIds(leftPokemon, rightPokemon);
@@ -116,11 +112,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CapturePokemon(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] CapturePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var model = await BuildPokemon(request.TrainerId, request.GameId, request.Pokemon);
         await PokemonService.PostPokemon(model);
         await RefreshToken(request.GameMasterId);
@@ -132,11 +127,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CreateNewNpcMonAsync(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] CreatePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var models = await AddNpcPokemon(request.Pokemon, request.TrainerId, request.GameId);
         return Ok(new CreatePokemonResponse { Pokemon = [.. models] });
     }
@@ -146,11 +140,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<ActionResult> UpdateHP(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokemonRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.TrainerId);
+        await VerifyIdentity(sessionAuth, request.TrainerId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         if (!(model.TrainerId == request.TrainerId || trainer.IsGM == true))
@@ -168,12 +161,11 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> SwitchForm(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokemonRequest request)
     {
         var form = request.Form!;
-        var isGm = await VerifyIdentity(accessToken, sessionAuth, request.TrainerId, request.GameId);
+        var isGm = await VerifyIdentity(sessionAuth, request.TrainerId, request.GameId);
         var game = await GameService.GetGame(request.GameId, isGm);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
@@ -213,11 +205,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> MarkPokemonAsEvolvable(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var game = await GameService.GetGame(request.GameId, true);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         var trainer = await TrainerService.GetTrainerById(model.TrainerId, request.GameId);
@@ -238,7 +229,6 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> EvolvePokemonAsync(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokemonRequest request)
     {
@@ -246,7 +236,7 @@ public class PokemonController(
         {
             throw new InvalidEvolutionException(PtaExceptionParts.NullDataMessage);
         }
-        var isGm = await VerifyIdentity(accessToken, sessionAuth, request.TrainerId, request.GameId);
+        var isGm = await VerifyIdentity(sessionAuth, request.TrainerId, request.GameId);
         var game = await GameService.GetGame(request.GameId, isGm);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
@@ -280,18 +270,16 @@ public class PokemonController(
         return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
-    // todo: make a pokedex controller
     [HttpPatch("saw")]
     [ProducesResponseType(typeof(UpdatePokedexResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> UpdateDexItemIsSeen(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokedexRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         foreach (var item in request.PokedexItems)
         {
             var dexItem = await PokedexService.GetPokedexItem(request.TrainerId, request.GameId, item.DexNo);
@@ -313,11 +301,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> UpdateDexItemIsCaught(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokedexRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         foreach (var item in request.PokedexItems)
         {
             var dexItem = await PokedexService.GetPokedexItem(request.TrainerId, request.GameId, item.DexNo);
@@ -339,11 +326,10 @@ public class PokemonController(
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> DeletePokemon(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeletePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         await PokemonService.DeletePokemon(request.PokemonId);
         await RefreshToken(request.GameMasterId);
         return Ok();
@@ -442,7 +428,7 @@ public class PokemonController(
         Pokemon currentForm,
         EvolvePokemonData request)
     {
-        var total = request.KeptMoves.Count() + request.NewMoves.Count();
+        var total = request.KeptMoves.Count + request.NewMoves.Count;
         OutofRangeException.CheckValue(3, 6, total);
 
         var moveComparer = currentForm.Moves.Select(move => move.ToLower());

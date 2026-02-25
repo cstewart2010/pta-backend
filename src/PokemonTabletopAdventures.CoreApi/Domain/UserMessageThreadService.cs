@@ -17,7 +17,7 @@ public class UserMessageThreadService(
         logger.LogInformation("Removing message thread {id}", id);
         var dto = await ThrowIfNull(
             id,
-            id => Collection.DeleteAsync(message => message.MessageId == id),
+            x => Collection.DeleteAsync(message => message.MessageId == x),
             PropertyNames.MessageId);
 
         var ids = dto.Messages.Select(x => x.User).Distinct();
@@ -41,7 +41,7 @@ public class UserMessageThreadService(
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.GetOneAsync(message => message.MessageId == id),
+            x => Collection.GetOneAsync(message => message.MessageId == x),
             PropertyNames.MessageId);
 
         return await dtoToModelMapper.ParseFromDto(dto);

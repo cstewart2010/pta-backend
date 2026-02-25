@@ -36,7 +36,7 @@ public class ShopService(
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.GetOneAsync(shop => shop.GameId == gameId && shop.ShopId == id),
+            x => Collection.GetOneAsync(shop => shop.GameId == gameId && shop.ShopId == x),
             PropertyNames.ShopId);
 
         return await dtoToModelMapper.ParseFromDto(dto);

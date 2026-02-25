@@ -47,7 +47,7 @@ public class SettingService(
     {
         var dto = await ThrowIfNull(
             settingId,
-            id => Collection.GetOneAsync(setting => setting.SettingId == settingId && (setting.IsActive || isGM)),
+            id => Collection.GetOneAsync(setting => setting.SettingId == id && (setting.IsActive || isGM)),
             PropertyNames.SettingId);
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, dto.GameId, shopService);

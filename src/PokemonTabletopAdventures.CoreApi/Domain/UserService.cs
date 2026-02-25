@@ -34,7 +34,7 @@ public class UserService(
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.GetOneAsync(user => user.UserId == id),
+            x => Collection.GetOneAsync(user => user.UserId == x),
             PropertyNames.UserId);
 
         return await dtoToModelMapper.ParseFromDto(dto);
@@ -44,7 +44,7 @@ public class UserService(
     {
         var dto = await ThrowIfNull(
             username,
-            username => Collection.GetOneAsync(user => user.Username.Equals(username, StringComparison.CurrentCultureIgnoreCase)),
+            x => Collection.GetOneAsync(user => user.Username.Equals(x, StringComparison.CurrentCultureIgnoreCase)),
             PropertyNames.Username);
 
         return await dtoToModelMapper.ParseFromDto(dto);

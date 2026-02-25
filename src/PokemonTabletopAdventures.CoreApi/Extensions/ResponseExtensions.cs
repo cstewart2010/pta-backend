@@ -11,15 +11,11 @@ internal static class ResponseExtensions
         IUserService userService,
         Guid trainerId)
     {
-#if !DEBUG
         var token = await encryptionService.GenerateToken(DateTime.UtcNow);
         await userService.UpdateUserActivityToken(trainerId, token);
         var authHash = await encryptionService.HashSecret(RequestExtensions.AuthKey); ;
         response.Headers.Append(HeaderNames.SessionAuth, authHash);
         response.Headers.Append(HeaderNames.AccessToken, token);
-#else
-        await Task.CompletedTask;
-#endif
     }
 
     public static async Task RefreshToken(
@@ -28,12 +24,10 @@ internal static class ResponseExtensions
         IUserService userService,
         Guid id)
     {
-#if !DEBUG
+        var user = await userService.GetUserById(id);
+        
         var updatedToken = await encryptionService.GenerateToken(DateTime.UtcNow);
         await userService.UpdateUserActivityToken(id, updatedToken);
         response.Headers.Append(HeaderNames.AccessToken, updatedToken);
-#else
-        await Task.CompletedTask;
-#endif
     }
 }

@@ -36,7 +36,7 @@ public interface ITrainerService
     /// </summary>
     /// <param name="username">The trainer name</param>
     /// <param name="gameId">The game session id</param>
-    public Task<Trainer> GetTrainerByUsername(
+    public Task<Trainer?> GetTrainerByUsername(
         string username,
         Guid gameId);
 

@@ -12,7 +12,7 @@ internal class CollectionService<TDto>() : ICollectionService<TDto>
 {
     private static readonly ReplaceOptions UpsertOptions = new ReplaceOptions { IsUpsert = true };
 
-    internal required IMongoCollection<TDto> Collection { get; set; }
+    internal required IMongoCollection<TDto> Collection { get; init; }
 
     public async Task<TDto?> DeleteAsync(Expression<Func<TDto, bool>> filter)
     {

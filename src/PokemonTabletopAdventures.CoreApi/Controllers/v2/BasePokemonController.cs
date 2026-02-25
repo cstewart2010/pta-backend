@@ -14,12 +14,12 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
 {
     private const DexType Type = DexType.BasePokemon;
     private readonly IDexService _basePokemonService = basePokemonService;
-    private readonly ILogger<BasePokemonController> _logger = logger;
 
     [HttpGet(Name = nameof(GetAllPokemon))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
     public async Task<IActionResult> GetAllPokemon()
     {
+        logger.LogInformation("Retrieving all pokemon");
         var response = await DexService.GetOrderedIndexCollectionResponse();
         return Ok(response);
     }

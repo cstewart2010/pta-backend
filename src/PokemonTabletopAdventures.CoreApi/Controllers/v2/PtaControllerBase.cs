@@ -25,15 +25,14 @@ public abstract class PtaControllerBase(
     IDtoToModelMapper dtoToModelMapper,
     IModelToDtoMapper modelToDtoMapper) : ControllerBase
 {
-    private readonly IEncryptionService _encryptionService = encryptionService;
-    public IUserService UserService { get; } = userService;
-    public ITrainerService TrainerService { get; } = trainerService;
-    public IPokemonService PokemonService { get; } = pokemonService;
-    public IGameService GameService { get; } = gameService;
-    public IDexService DexService { get; } = dexService;
-    public IPokedexService PokedexService { get; } = pokedexService;
-    public IDtoToModelMapper DtoToModelMapper { get; } = dtoToModelMapper;
-    public IModelToDtoMapper ModelToDtoMapper { get; } = modelToDtoMapper;
+    protected IUserService UserService { get; } = userService;
+    protected ITrainerService TrainerService { get; } = trainerService;
+    protected IPokemonService PokemonService { get; } = pokemonService;
+    protected IGameService GameService { get; } = gameService;
+    protected IDexService DexService { get; } = dexService;
+    protected IPokedexService PokedexService { get; } = pokedexService;
+    protected IDtoToModelMapper DtoToModelMapper { get; } = dtoToModelMapper;
+    protected IModelToDtoMapper ModelToDtoMapper { get; } = modelToDtoMapper;
 
     protected async Task<Pokemon> BuildPokemon(
         Guid trainerId,
@@ -47,7 +46,7 @@ public abstract class PtaControllerBase(
         return pokemon;
     }
 
-    protected async Task<IEnumerable<Log>> AddItemsToTrainer(Trainer trainer, IEnumerable<Item> items)
+    protected async Task<IEnumerable<Log>> AddItemsToTrainer(Trainer trainer, ICollection<Item> items)
     {
         var itemList = trainer.Items;
         foreach (var item in items)
@@ -70,22 +69,20 @@ public abstract class PtaControllerBase(
     }
 
     protected async Task VerifyIdentity(
-        string accessToken,
         string sessionAuth,
         Guid id)
     {
         var user = await UserService.GetUserById(id);
-        Request.VerifyIdentity(user, _encryptionService, accessToken, sessionAuth);
+        Request.VerifyIdentity(user, encryptionService, sessionAuth);
     }
 
     protected async Task<bool> VerifyIdentity(
-        string accessToken,
         string sessionAuth,
         Guid id,
         Guid gameId)
     {
         var user = await UserService.GetUserById(id);
-        Request.VerifyIdentity(user, _encryptionService, accessToken, sessionAuth);
+        Request.VerifyIdentity(user, encryptionService, sessionAuth);
         var trainers = await TrainerService.GetTrainersByGameId(gameId);
         return trainers.FirstOrDefault(trainer => trainer.TrainerId == id)?.IsGM == true;
     }
@@ -93,25 +90,24 @@ public abstract class PtaControllerBase(
     protected async Task IsUserGM(
         Guid id,
         Guid gameId,
-        string accessToken,
         string sessionAuth)
     {
         var trainer = await TrainerService.GetTrainerById(id, gameId);
         var user = await UserService.GetUserById(id);
-        Request.IsUserGM(_encryptionService, accessToken, sessionAuth, user, trainer);
+        Request.IsUserGM(encryptionService, sessionAuth, user, trainer);
     }
 
     protected async Task AssignAuthAndToken(Guid id)
     {
-        await Response.AssignAuthAndToken(_encryptionService, UserService, id);
+        await Response.AssignAuthAndToken(encryptionService, UserService, id);
     }
 
     protected async Task RefreshToken(Guid id)
     {
-        await Response.RefreshToken(_encryptionService, UserService, id);
+        await Response.RefreshToken(encryptionService, UserService, id);
     }
 
-    protected async Task<IEnumerable<Log>> RemoveItemsFromTrainer(Trainer trainer, IEnumerable<Item> items)
+    protected async Task<IEnumerable<Log>> RemoveItemsFromTrainer(Trainer trainer, ICollection<Item> items)
     {
         var itemList = trainer.Items;
         foreach (var item in items)
@@ -124,7 +120,7 @@ public abstract class PtaControllerBase(
             );
         }
 
-        await TrainerService.UpdateTrainerItemList(trainer.TrainerId,trainer.GameId,itemList);
+        await TrainerService.UpdateTrainerItemList(trainer.TrainerId, trainer.GameId, itemList);
         return items.Select(item => new Log
         {
             User = trainer.TrainerName,
@@ -137,13 +133,13 @@ public abstract class PtaControllerBase(
         string gamePassword,
         Game game)
     {
-        await _encryptionService.VerifySecret(gamePassword, game.GameId);
+        await encryptionService.VerifySecret(gamePassword, game.GameId);
     }
 
     protected async Task IsUserAuthenticated(LoginRequest request)
     {
         var user = await UserService.GetUserByUsername(request.Username);
-        await _encryptionService.VerifySecret(request.Password, request.Username);
+        await encryptionService.VerifySecret(request.Password, request.Username);
         await UserService.UpdateUserOnlineStatus(user.UserId, true);
     }
 
@@ -193,7 +189,7 @@ public abstract class PtaControllerBase(
             },
             CurrentHP = 20,
             Origin = string.Empty,
-            Age = default,
+            Age = 0,
             IsAllowed = false,
             Background = string.Empty,
             SeenTotal = 0,
@@ -251,11 +247,11 @@ public abstract class PtaControllerBase(
         {
             pokemon.IsShiny = true;
         }
-        pokemon.Pokeball = Pokeball.Basic_Ball.ToString();
+        pokemon.Pokeball = nameof(Pokeball.Basic_Ball).Replace("_", "");
         return pokemon;
     }
 
-    #region Helper functions
+    #region Helper methods
     internal static RetrieveLogsResponse CreateRetrieveLogsResponse(Game game, int count)
     {
         if (count > game.Logs.Count)
@@ -264,13 +260,10 @@ public abstract class PtaControllerBase(
         }
 
         var response = new RetrieveLogsResponse { LogPages = [] };
-        if (game.Logs != null)
+        var logs = game.Logs.OrderByDescending(log => log.LogTimestamp).ToList();
+        for (var i = 0; i < count; i += 50)
         {
-            var logs = game.Logs.OrderByDescending(log => log.LogTimestamp);
-            for (int i = 0; i < count; i += 50)
-            {
-                response.LogPages.Add(GetPage(logs, i, 50));
-            }
+            response.LogPages.Add(GetPage(logs, i, 50));
         }
 
         return response;
@@ -282,7 +275,7 @@ public abstract class PtaControllerBase(
     }
 
     private static IEnumerable<Log> GetPage(
-        IEnumerable<Log> source,
+        ICollection<Log> source,
         int offset,
         int limit)
     {
@@ -316,7 +309,7 @@ public abstract class PtaControllerBase(
         }
         else
         {
-            itemList = [.. trainer.Items.Select(item => UpdateItemWithAddition(item, itemToken))];
+            itemList = [.. trainer.Items.Select(x => UpdateItemWithAddition(x, itemToken))];
         }
 
         return itemList;
@@ -345,8 +338,8 @@ public abstract class PtaControllerBase(
         if ((item?.Amount ?? 0) >= itemToken.Amount)
         {
             itemList = [.. trainer.Items
-                .Select(item => UpdateItemWithReduction(item, itemToken))
-                .Where(item => item.Amount > 0)];
+                .Select(x => UpdateItemWithReduction(x, itemToken))
+                .Where(x => x.Amount > 0)];
         }
 
         return itemList;

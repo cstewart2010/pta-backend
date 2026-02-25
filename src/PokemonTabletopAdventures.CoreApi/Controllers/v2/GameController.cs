@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
-using PokemonTabletopAdventures.CoreApi.Exceptions;
-using PokemonTabletopAdventures.CoreApi.Extensions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Trainers;
@@ -26,20 +24,17 @@ public class GameController(
     ILogger<GameController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
     private readonly ILogger<GameController> _logger = logger;
-    private readonly ISpriteService _spriteService = spriteService;
     private readonly IEncryptionService _encryptionService = encryptionService;
-    private readonly INpcService _npcService = npcService;
 
     [HttpGet("retrieve", Name = nameof(GetAllGames))]
     [ProducesResponseType(typeof(IEnumerable<RetrieveGameResponse>), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetAllGames(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromQuery] Guid userId,
         [FromQuery] string nickname)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
+        await VerifyIdentity(sessionAuth, userId);
         var user = await UserService.GetUserById(userId);
         IEnumerable<Game> gameModels;
         if (!string.IsNullOrWhiteSpace(nickname))
@@ -58,11 +53,10 @@ public class GameController(
     [ProducesResponseType(typeof(RetrieveGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetAllUserGames(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         Guid userId)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
+        await VerifyIdentity(sessionAuth, userId);
         var user = await UserService.GetUserById(userId);
         var gameModels = await GameService.GetAllGamesWithUser(user);
         return Ok(new RetrieveGameResponse { Games = [.. gameModels] });
@@ -72,7 +66,7 @@ public class GameController(
     [ProducesResponseType(typeof(IEnumerable<SpriteDto>), 200)]
     public async Task<IActionResult> GetAllSprites()
     {
-        var sprites = await _spriteService.GetAllSprites();
+        var sprites = await spriteService.GetAllSprites();
         return Ok(sprites.OrderBy(sprite => sprite.FriendlyText));
     }
 
@@ -100,7 +94,6 @@ public class GameController(
     [ProducesResponseType(typeof(RetrieveGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> RefreshInGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         Guid userId,
         Guid gameId,
@@ -108,10 +101,10 @@ public class GameController(
     {
         if (isGM)
         {
-            return await GetUpdatedGM(accessToken, sessionAuth, userId, gameId);
+            return await GetUpdatedGM(sessionAuth, userId, gameId);
         }
 
-        return await GetUpdatedTrainer(accessToken, sessionAuth, userId, gameId);
+        return await GetUpdatedTrainer(sessionAuth, userId, gameId);
     }
 
     [HttpPost("create")]
@@ -143,14 +136,12 @@ public class GameController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddLogsAsync(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        var isGm = await VerifyIdentity(accessToken, sessionAuth, request.UserId, gameId);
+        var isGm = await VerifyIdentity(sessionAuth, request.UserId, gameId);
         var game = await GameService.GetGame(gameId, isGm);
-        var logs = request.Game.Logs.Select(ParseBackToModel);
         await GameService.UpdateGameLogs(game, isGm, [.. request.Game.Logs]);
         await RefreshToken(request.UserId);
         return Ok(new UpdateGameResponse { Games = [game] });
@@ -161,12 +152,11 @@ public class GameController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> StartGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, gameId, sessionAuth);
         var trainer = await TrainerService.GetTrainerById(request.GameMasterId, gameId);
         var game = await GameService.GetGame(gameId, true);
         await IsGameAuthenticated(request.GameSessionPassword!, game);
@@ -180,12 +170,11 @@ public class GameController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> EndGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, gameId, sessionAuth);
         await SetEndGameStatuses(gameId);
         var game = await GameService.GetGame(gameId, true);
         return Ok(new UpdateGameResponse { Games = [game] });
@@ -196,12 +185,11 @@ public class GameController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddNPCsToGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, gameId, sessionAuth);
         var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
         var foundNpcIds = await GetNpcs(npcIds);
         var game = await GameService.GetGame(gameId, true);
@@ -216,13 +204,12 @@ public class GameController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> RemovesNPCsFromGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
         var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
-        await IsUserGM(request.GameMasterId, gameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, gameId, sessionAuth);
         var foundNpcIds = await GetNpcs(npcIds);
         var game = await GameService.GetGame(gameId, true);
         var newNpcList = game.Npcs.Select(x => x.NpcId).Except(foundNpcIds);
@@ -236,13 +223,12 @@ public class GameController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> DeleteGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         Guid gameId,
         [FromQuery] Guid gameMasterId,
         [FromQuery] string gameSessionPassword)
     {
-        await IsUserGM(gameMasterId, gameId, accessToken, sessionAuth);
+        await IsUserGM(gameMasterId, gameId, sessionAuth);
         var game = await GameService.GetGame(gameId, true);
         await IsGameAuthenticated(gameSessionPassword, game);
         await MassDeletePokemon(gameId);
@@ -285,24 +271,22 @@ public class GameController(
     }
 
     private async Task<OkObjectResult> GetUpdatedTrainer(
-        string accessToken,
         string sessionAuth,
         Guid userId,
         Guid gameId)
     {
-        await VerifyIdentity(accessToken, sessionAuth, userId);
+        await VerifyIdentity(sessionAuth, userId);
         await RefreshToken(userId);
         var game = await GameService.GetGame(gameId, false);
         return Ok(new RetrieveGameResponse { Games = [game] });
     }
 
     private async Task<OkObjectResult> GetUpdatedGM(
-        string accessToken,
         string sessionAuth,
         Guid userId,
         Guid gameId)
     {
-        await IsUserGM(userId, gameId, accessToken, sessionAuth);
+        await IsUserGM(userId, gameId, sessionAuth);
         await RefreshToken(userId);
         var game = await GameService.GetGame(gameId, true);
         return Ok(new RetrieveGameResponse { Games = [game] });
@@ -310,7 +294,7 @@ public class GameController(
 
     private async Task<IEnumerable<Guid>> GetNpcs(IEnumerable<Guid> npcIds)
     {
-        var npcs = await Task.WhenAll(npcIds.Select(_npcService.GetNpc));
+        var npcs = await Task.WhenAll(npcIds.Select(npcService.GetNpc));
         var foundNpcs = npcs.Select(x => x.NpcId);
         return foundNpcs;
     }

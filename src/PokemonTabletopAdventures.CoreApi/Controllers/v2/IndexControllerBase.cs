@@ -7,9 +7,9 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
 public abstract class IndexControllerBase(IDexService dexService) : ControllerBase
 {
-    public IDexService DexService { get; } = dexService;
+    protected IDexService DexService { get; } = dexService;
 
-    public async Task<OkObjectResult> GetItems<TDocument>(
+    protected async Task<OkObjectResult> GetItems<TDocument>(
         DexType documentType,
         int offset,
         int limit) where TDocument : IDexDocument
@@ -18,7 +18,7 @@ public abstract class IndexControllerBase(IDexService dexService) : ControllerBa
         return Ok(response);
     }
 
-    public async Task<OkObjectResult> GetItem<TDocument>(
+    protected async Task<OkObjectResult> GetItem<TDocument>(
         DexType documentType,
         string name) where TDocument : IDexDocument
     {
