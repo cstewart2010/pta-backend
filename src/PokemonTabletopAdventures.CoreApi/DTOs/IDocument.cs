@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using Newtonsoft.Json;
 
 namespace PokemonTabletopAdventures.CoreApi.DTOs;
 
@@ -12,7 +11,6 @@ public interface IDocument
     /// <summary>
     /// MongoDB id
     /// </summary>
-    [JsonIgnore]
     [BsonId]
     public ObjectId Id { get; set; }
 }

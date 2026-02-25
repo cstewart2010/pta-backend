@@ -4,11 +4,12 @@ using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
 [ExcludeFromCodeCoverage]
-internal class CollectionService<TDto>() : ICollectionService<TDto>
+internal class CollectionService<TDto>() : ICollectionService<TDto> where TDto : IDocument
 {
     private static readonly ReplaceOptions UpsertOptions = new ReplaceOptions { IsUpsert = true };
 

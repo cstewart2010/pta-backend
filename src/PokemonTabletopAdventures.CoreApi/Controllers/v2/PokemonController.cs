@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Games;
@@ -39,7 +38,7 @@ public class PokemonController(
     }
 
     [HttpGet("retrieve/trainer")]
-    [ProducesResponseType(typeof(PokemonDto), 200)]
+    [ProducesResponseType(typeof(RetrievePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> FindTrainerMon(

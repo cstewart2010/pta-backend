@@ -43,7 +43,7 @@ public class SettingsController(
     }
 
     [HttpGet("{gameId}")]
-    [ProducesResponseType(typeof(SettingDto), 200)]
+    [ProducesResponseType(typeof(Setting), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetActiveSetting(Guid gameId)
@@ -103,7 +103,7 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
         setting.Environment = request.Setting.Environment;
         await settingService.UpdateSetting(setting, true);
         return Ok();
@@ -118,7 +118,7 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
         var participant = GetSingleParticipant(request);
         if (setting.Participants.Any(activeParticipant => activeParticipant.ParticipantId == participant.ParticipantId))
         {
@@ -191,7 +191,7 @@ public class SettingsController(
             throw new InvalidCatchException(PtaExceptionParts.AlreadyCaughtPokemonMessage, HttpStatusCode.BadRequest);
         }
 
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         if (trainer?.IsOnline != true)
         {
@@ -252,7 +252,7 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
         var participant = GetSingleParticipant(request);
         if (setting.Participants.Any(activeParticipant =>
         {
@@ -293,7 +293,7 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await VerifyIdentity(sessionAuth, request.TrainerId);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
         var currentParticipant = GetSingleParticipant(request);
         var participant = setting.Participants.First(participant => participant.ParticipantId == request.TrainerId);
         if (GetDistance(currentParticipant.Position, participant.Position) > participant.Speed)
@@ -340,7 +340,7 @@ public class SettingsController(
         Guid pokemonId)
     {
         await VerifyIdentity(sessionAuth, request.TrainerId);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var pokemon = await PokemonService.GetPokemonById(pokemonId);
         if (pokemon.TrainerId != request.TrainerId)
@@ -404,8 +404,13 @@ public class SettingsController(
         await settingService.UpdateSetting(setting, true);
 
         var gm = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
-        var newSettingLog = new LogDto(user: gm.TrainerName, action: $"activated a new encounter ({setting.Name})", DateTimeOffset.Now);
-        await GameService.UpdateGameLogs(game, true, await DtoToModelMapper.ParseFromDto(newSettingLog));
+        var newSettingLog = new Log
+        {
+            User = gm.TrainerName,
+            Action = $"activated a new encounter ({setting.Name})",
+            LogTimestamp = DateTimeOffset.Now,
+        };
+        await GameService.UpdateGameLogs(game, true, newSettingLog);
         return Ok();
     }
 
@@ -418,7 +423,7 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
         setting.IsActive = false;
         await settingService.UpdateSetting(setting, true);
         return Ok();
@@ -433,7 +438,7 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, request.GameId);
+        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
         var participants = await Task.WhenAll(setting.Participants.Select(async participant => await GetWithUpdatedHP(participant, request.GameId)));
         setting.Participants = participants;
         var updatedSetting = await settingService.UpdateSetting(setting, true);
@@ -472,7 +477,7 @@ public class SettingsController(
     private async Task StreamSetting(Guid gameId)
     {
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-        var recieved = await RecieveAsync(webSocket);
+        var recieved = await ReceiveAsync(webSocket);
         while (!recieved.CloseStatus.HasValue)
         {
             await SendAsync(
@@ -481,7 +486,7 @@ public class SettingsController(
                 recieved.MessageType,
                 recieved.EndOfMessage);
 
-            recieved = await RecieveAsync(webSocket);
+            recieved = await ReceiveAsync(webSocket);
         }
 
         await webSocket.CloseAsync(
@@ -493,19 +498,21 @@ public class SettingsController(
     private async Task<IActionResult> RemoveFromParticipants(Guid gameId, Guid participantId, bool isGm)
     {
         var game = await GameService.GetGame(gameId, isGm);
-        var setting = await settingService.GetActiveSetting(gameId, isGm) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, gameId);
+        var setting = await settingService.GetActiveSetting(gameId, isGm) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, gameId);
         var removedParticipant = setting.Participants.First(participant => participant.ParticipantId == participantId);
         setting.Participants = [..setting.Participants.Where(participant => participant.ParticipantId != participantId)];
         await settingService.UpdateSetting(setting, isGm);
-        var removalLog = new LogDto(
-            user: removedParticipant.Name,
-            action: $"has been removed from {setting.Name}",
-            DateTimeOffset.Now);
-        await GameService.UpdateGameLogs(game, isGm, await DtoToModelMapper.ParseFromDto(removalLog));
+        var removalLog = new Log
+        {
+            User = removedParticipant.Name,
+            Action = $"has been removed from {setting.Name}",
+            LogTimestamp = DateTimeOffset.Now,
+        };
+        await GameService.UpdateGameLogs(game, isGm, removalLog);
         return Ok();
     }
 
-    private static async Task<WebSocketReceiveResult> RecieveAsync(WebSocket webSocket)
+    private static async Task<WebSocketReceiveResult> ReceiveAsync(WebSocket webSocket)
     {
         return await webSocket.ReceiveAsync(new ArraySegment<byte>(Buffer), CancellationToken.None);
     }
@@ -516,7 +523,7 @@ public class SettingsController(
         WebSocketMessageType messageType,
         bool endOfMessage)
     {
-        var setting = await settingService.GetActiveSetting(gameId, true) ?? throw new UnknownEntityException<SettingDto>(PropertyNames.GameId, gameId);
+        var setting = await settingService.GetActiveSetting(gameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, gameId);
         var message = JsonSerializer.Serialize(setting);
         var messageAsBytes = System.Text.Encoding.ASCII.GetBytes(message);
         await webSocket.SendAsync

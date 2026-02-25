@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Diagnostics.CodeAnalysis;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
@@ -24,7 +25,7 @@ internal class RepositoryService : IRepositoryService
     /// </summary>
     private IMongoDatabase Database { get; }
 
-    public ICollectionService<T> GetCollection<T>(string collectionName)
+    public ICollectionService<T> GetCollection<T>(string collectionName) where T : IDocument
     {
         return new CollectionService<T>()
         {

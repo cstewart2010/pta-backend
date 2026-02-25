@@ -6,6 +6,7 @@ using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Pokemons;
+using PokemonTabletopAdventures.Models.Shops;
 using PokemonTabletopAdventures.Models.Trainers;
 using PokemonTabletopAdventures.Models.Users;
 
@@ -44,7 +45,7 @@ public class TrainerController(
     public async Task<IActionResult> FindTrainer(
         [FromBody] RetrieveTrainerRequest request)
     {
-        var trainer = await TrainerService.GetTrainerByUsername(request.TrainerName!, request.GameId) ?? throw new UnknownEntityException<TrainerDto>(nameof(request.TrainerName), request.TrainerName);
+        var trainer = await TrainerService.GetTrainerByUsername(request.TrainerName!, request.GameId) ?? throw new UnknownEntityException<Trainer>(nameof(request.TrainerName), request.TrainerName);
         return Ok(new RetrieveTrainerResponse { Trainers = [trainer] });
     }
 
@@ -435,7 +436,7 @@ public class TrainerController(
     {
         var origin = await DexService.GetDexEntry<OriginDto>(DexType.Origins, trainer.Origin);
         var collection = await Task.WhenAll(origin.Data.StartingEquipmentList.Select(ConvertStartingEquipment));
-        trainer.Items = await Task.WhenAll(collection.Select(DtoToModelMapper.ParseFromDto));
+        trainer.Items = collection;
     }
 
     private async Task<ICollection<Trainer>> GetTrainers(Guid gameId)
@@ -444,7 +445,7 @@ public class TrainerController(
         return [.. models];
     }
 
-    private async Task<ItemDto> ConvertStartingEquipment(StartingEquipment s)
+    private async Task<Item> ConvertStartingEquipment(StartingEquipment s)
     {
         var baseItem = s.Type switch
         {
@@ -455,7 +456,7 @@ public class TrainerController(
             StartingEquipmentType.Pokemon => await DexService.GetDexEntry<BaseItemDto>(DexType.PokemonItems, s.Name),
             _ => throw new UnknownEntityException<SettingParticipantType>(nameof(s.Type), s.Type),
         };
-        var item = new ItemDto
+        var item = new Item
         {
             Name = baseItem.Data.Name,
             Effects = baseItem.Data.Effects,

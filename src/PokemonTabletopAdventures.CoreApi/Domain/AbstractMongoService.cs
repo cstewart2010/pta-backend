@@ -2,53 +2,57 @@
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Linq.Expressions;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
-public abstract class AbstractMongoService<T>(
+public abstract class AbstractMongoService<TDto>(
     IRepositoryService repositoryService,
-    string collectionName)
+    string collectionName) where TDto : IDocument
 {
-    protected ICollectionService<T> Collection { get; } = repositoryService.GetCollection<T>(collectionName);
+    protected ICollectionService<TDto> Collection { get; } = repositoryService.GetCollection<TDto>(collectionName);
 
-    protected async Task<T> ThrowIfNull<T2>(T2 entityValue, Func<T2, Task<T?>> func, string entityName)
+    protected async Task<TDto> ThrowIfNull<TInput>(TInput entityValue, Func<TInput, Task<TDto?>> func, string entityName)
     {
-        var item =  await func(entityValue) ?? throw new UnknownEntityException<T>(entityName, entityValue);
+        var item =  await func(entityValue) ?? throw new UnknownEntityException<TDto>(entityName, entityValue);
         return item;
     }
 
-    protected async Task PostDocument (T entity)
+    protected async Task PostDocument (TDto entity)
     {
         await PostDocument(Collection, entity);
     }
 
-    protected async Task PostUniqueDocument(T entity, Expression<Func<T, bool>> filter)
+    protected async Task PostUniqueDocument(TDto entity, Expression<Func<TDto, bool>> filter)
     {
         var check = await Collection.GetOneAsync(filter);
         if (check != null)
         {
-            throw new DuplicateEntryException(typeof(T));
+            throw new DuplicateEntryException(typeof(TDto));
         }
         await PostDocument(Collection, entity);
     }
 
-    protected async Task PostDocument<TCollection>(ICollectionService<TCollection> collection, TCollection entity)
+    protected async Task PostDocument<TCollection>(
+        ICollectionService<TCollection> collection,
+        TCollection entity)
+        where TCollection : IDocument
     {
         await collection.PostAsync(entity);
     }
 
-    protected async Task UpsertDocument(Expression<Func<T, Guid>> filter, Guid id, T entity)
+    protected async Task UpsertDocument(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity)
     {
         await Collection.PutAsync(filter, id, entity);
     }
 
-    protected async Task<T> UpdateDocument<T2>(
-        T2 id,
-        Expression<Func<T, bool>> filter,
+    protected async Task<TDto> UpdateDocument<TInput>(
+        TInput id,
+        Expression<Func<TDto, bool>> filter,
         params UpdateData[] updates)
     {
         var item = await Collection.PatchAsync(filter, updates)
-            ?? throw new UpdateException($"Failed to update {typeof(T).Name} {id}");
+            ?? throw new UpdateException($"Failed to update {typeof(TDto).Name} {id}");
         return item;
     }
 }

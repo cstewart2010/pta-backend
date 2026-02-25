@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Text.Json.Serialization;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Interfaces;
@@ -11,6 +12,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 public class BerryDto : IDocument, IDexDocument
 {
     /// <inheritdoc/>
+    [JsonIgnore]
     public ObjectId Id { get; set; }
 
     /// <inheritdoc/>

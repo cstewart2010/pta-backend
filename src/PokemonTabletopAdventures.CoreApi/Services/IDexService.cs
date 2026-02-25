@@ -1,4 +1,5 @@
-﻿using PokemonTabletopAdventures.Models.Interfaces;
+﻿using PokemonTabletopAdventures.CoreApi.DTOs;
+using PokemonTabletopAdventures.Models.Interfaces;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Indicies;
 using PokemonTabletopAdventures.Models.Pokemons;
@@ -14,13 +15,13 @@ public interface IDexService
     /// <param name="name">The name of the dex entry</param>
     public Task<IndexResponse<TDocument>> GetDexEntry<TDocument>(
         DexType documentType,
-        string name) where TDocument : IDexDocument;
+        string name) where TDocument : IDocument, IDexDocument;
 
     /// <summary>
     /// Returns all Dex extries for a specific Dex collection
     /// </summary>
     /// <param name="documentType">The dex collection you wish to return data from</param>
-    public Task<ICollection<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument;
+    public Task<ICollection<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDocument, IDexDocument;
 
     /// <summary>
     /// Adds a collection of dex entry to a specific dex collection
@@ -29,7 +30,7 @@ public interface IDexService
     /// <param name="documents">The documents to add to collection</param>
     public Task PostDexEntries<TDocument>(
         string collectionName,
-        ICollection<TDocument> documents) where TDocument : IDexDocument;
+        ICollection<TDocument> documents) where TDocument : IDocument, IDexDocument;
 
     /// <summary>
     /// Attempts to evolve a pokemon to its next stage
@@ -47,7 +48,7 @@ public interface IDexService
     public Task<IndexCollectionResponse> GetIndexCollectionResponse<TDocument>(
         DexType documentType,
         int offset,
-        int limit) where TDocument : IDexDocument;
+        int limit) where TDocument : IDocument, IDexDocument;
 
     public Task<IndexCollectionResponse> GetOrderedIndexCollectionResponse();
 

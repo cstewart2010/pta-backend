@@ -1,4 +1,5 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -19,14 +20,14 @@ public class DexService(
 {
     private readonly IRepositoryService _repositoryService = repositoryService;
 
-    public async Task<ICollection<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDexDocument
+    public async Task<ICollection<TDocument>> GetDexEntries<TDocument>(DexType documentType) where TDocument : IDocument, IDexDocument
     {
         logger.LogInformation("Getting Dex entries for document type {documentType}", documentType);
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         return await collection.GetManyAsync(document => true);
     }
 
-    public async Task<IndexResponse<TDocument>> GetDexEntry<TDocument>(DexType documentType, string name) where TDocument : IDexDocument
+    public async Task<IndexResponse<TDocument>> GetDexEntry<TDocument>(DexType documentType, string name) where TDocument : IDocument, IDexDocument
     {
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         var item = await collection.GetOneAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
@@ -75,7 +76,7 @@ public class DexService(
     public async Task<IndexCollectionResponse> GetIndexCollectionResponse<TDocument>(
         DexType documentType,
         int offset,
-        int limit) where TDocument : IDexDocument
+        int limit) where TDocument : IDocument, IDexDocument
     {
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
         var documents = await collection.GetManyAsync(document => true, offset, limit);
@@ -101,7 +102,7 @@ public class DexService(
         };
     }
 
-    public async Task PostDexEntries<TDocument>(string collectionName, ICollection<TDocument> documents) where TDocument : IDexDocument
+    public async Task PostDexEntries<TDocument>(string collectionName, ICollection<TDocument> documents) where TDocument : IDocument, IDexDocument
     {
         var collection = _repositoryService.GetCollection<TDocument>(typeof(TDocument).Name);
         foreach (var document in documents)

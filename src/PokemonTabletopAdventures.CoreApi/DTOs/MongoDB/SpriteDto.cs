@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Text.Json.Serialization;
+using MongoDB.Bson;
 
 namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 
@@ -10,6 +11,7 @@ public class SpriteDto : IDocument
     /// <summary>
     /// MongoDB id
     /// </summary>
+    [JsonIgnore]
     public ObjectId Id { get; set; }
 
     /// <summary>
