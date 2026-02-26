@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Npcs;
 
@@ -26,18 +27,14 @@ public class NpcController(
     [ProducesResponseType(typeof(RetrieveNpcResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 409)]
     public async Task<IActionResult> GetNpc(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveNpcRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var model = await npcService.GetNpc(request.NpcId);
-        var gameMaster = await TrainerService.GetTrainerById(request.GameMasterId, request.GameId);
-        if (gameMaster.GameId != model.GameId)
-        {
-            return Conflict();
-        }
-
+        ValidateGameIds(request.GameId, model.GameId);
         return Ok(new RetrieveNpcResponse { Npcs = [model] });
     }
 
@@ -66,6 +63,7 @@ public class NpcController(
         foreach (var npc in request.Npcs)
         {
             npc.NpcId = Guid.NewGuid();
+            npc.GameId = request.GameId;
             await npcService.PostNpc(npc);
         }
         return Ok(new CreateNpcResponse { Npcs = request.Npcs });
@@ -89,17 +87,14 @@ public class NpcController(
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 409)]
     public async Task<ActionResult> DeleteNpc(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteNpcRequest request)
     {
         await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var npc = await npcService.GetNpc(request.NpcId);
-        if (request.GameId != npc.GameId)
-        {
-            return Conflict();
-        }
-
+        ValidateGameIds(request.GameId, npc.GameId);
         await npcService.DeleteNpc(request.NpcId);
         var game = await GameService.GetGame(npc.GameId, true);
         var npcList = game.Npcs.Select(x => x.NpcId).Where(npcId => request.NpcId != npcId);
@@ -120,5 +115,13 @@ public class NpcController(
         }
         await GameService.UpdateGameNpcList(request.GameId, []);
         return Ok();
+    }
+
+    private static void ValidateGameIds(Guid requestGameId, Guid npcGameId)
+    {
+        if (requestGameId != npcGameId)
+        {
+            throw new ConflictInDataException(PtaExceptionParts.RequestAndNpcMismatch);
+        }
     }
 }

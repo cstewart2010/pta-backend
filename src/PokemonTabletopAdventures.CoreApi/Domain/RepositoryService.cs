@@ -41,7 +41,7 @@ internal class RepositoryService : IRepositoryService
     #region Helper methods
     private static MongoClientSettings GetMongoClientSettings()
     {
-        var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDBConnectionString, EnvironmentVariableTarget.Process);
+        var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDBConnectionString);
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new NullReferenceException($"{EnvironmentVariableNames.MongoDBConnectionString} environment variable need to be set to access MongoDB");

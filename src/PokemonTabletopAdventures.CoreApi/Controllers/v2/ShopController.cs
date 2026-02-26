@@ -39,19 +39,15 @@ public class ShopController(
 
     [HttpPost("trainer")]
     [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
-    [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetShopTrainer(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
         await VerifyIdentity(sessionAuth, request.UserId);
         var shop = await shopService.GetShopById(request.ShopId, request.GameId);
-        if (shop.IsActive != true)
-        {
-            throw new UnknownEntityException<Shop>(PropertyNames.ShopId, request.ShopId);
-        }
-
+        CheckShopIsActive(shop);
         return Ok(new RetrieveShopResponse { Shops = [shop] });
     }
 
@@ -72,17 +68,13 @@ public class ShopController(
     [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 409)]
     public async Task<IActionResult> GetShopsBySettingGM(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
         await IsUserGM(request.UserId, request.GameId, sessionAuth);
-        var setting = await settingService.GetSetting(request.SettingId, true);
-        if (setting.GameId != request.GameId)
-        {
-            throw new InvalidSettingException($"The request setting {request.SettingId} is associated with game {request.GameId}");
-        }
-
+        var setting = await settingService.GetSetting(request.SettingId, request.GameId, true);
         var shops = await shopService.GetShopsBySetting(setting);
         return Ok(new RetrieveShopResponse { Shops = [.. shops] });
     }
@@ -91,12 +83,13 @@ public class ShopController(
     [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 409)]
     public async Task<IActionResult> GetShopsBySettingTrainer(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
         await VerifyIdentity(sessionAuth, request.UserId);
-        var setting = await settingService.GetSetting(request.SettingId, true);
+        var setting = await settingService.GetSetting(request.SettingId, request.GameId, false);
         var shops = await shopService.GetShopsBySetting(setting);
         return Ok(new RetrieveShopResponse { Shops = [.. shops.Where(shop => shop.IsActive)] });
     }
@@ -131,8 +124,8 @@ public class ShopController(
         foreach (var requestShop in request.Shops)
         {
             var shop = await shopService.GetShopById(requestShop.ShopId, request.GameId);
-            shop.Name = requestShop.Name ?? shop.Name;
-            shop.Inventory = requestShop.Inventory ?? shop.Inventory;
+            shop.Name = requestShop.Name;
+            shop.Inventory = requestShop.Inventory;
             shop.IsActive = requestShop.IsActive;
             await shopService.UpdateShop(shop);
         }
@@ -151,10 +144,7 @@ public class ShopController(
         await VerifyIdentity(sessionAuth, request.UserId);
         var requestShop = request.Shops.SingleOrDefault() ?? throw new InvalidSettingException(PtaExceptionParts.TooManyShopsMessage);
         var shop = await shopService.GetShopById(requestShop.ShopId, request.GameId);
-        if (!shop.IsActive)
-        {
-            throw new InvalidShopException($"No active shop found with id: {requestShop.ShopId}");
-        }
+        CheckShopIsActive(shop);
         var game = await GameService.GetGame(shop.GameId, false);
         var trainer = await TrainerService.GetTrainerById(request.UserId, shop.GameId);
         var (validWares, cost) = GetValidWares(shop, request.Items);
@@ -215,5 +205,13 @@ public class ShopController(
     {
         var ware = shop.Inventory.FirstOrDefault(ware => item.Name == ware.Key && item.Type == ware.Value.Type);
         return !(ware.Key == null || item.Amount <= 0 || ware.Value.Quantity != -1 && item.Amount > ware.Value.Quantity);
+    }
+
+    private static void CheckShopIsActive(Shop shop)
+    {
+        if (!shop.IsActive)
+        {
+            throw new UnknownEntityException<Shop>(PropertyNames.ShopId, shop.ShopId);
+        }
     }
 }

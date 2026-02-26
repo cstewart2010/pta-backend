@@ -399,7 +399,7 @@ public class SettingsController(
             return Conflict();
         }
 
-        var setting = await settingService.GetSetting(request.Setting.SettingId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.SettingId, request.Setting.SettingId);
+        var setting = await settingService.GetSetting(request.Setting.SettingId, request.Setting.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.SettingId, request.Setting.SettingId);
         setting.IsActive = true;
         await settingService.UpdateSetting(setting, true);
 
@@ -456,7 +456,7 @@ public class SettingsController(
         Guid encounterId)
     {
         await IsUserGM(gameMasterId, gameId, sessionAuth);
-        await settingService.DeleteSetting(encounterId);
+        await settingService.DeleteSetting(encounterId, gameId);
         return Ok();
     }
 

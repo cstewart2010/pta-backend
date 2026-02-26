@@ -102,7 +102,6 @@ public class PokemonController(
             LogTimestamp = DateTimeOffset.Now
         };
         await GameService.UpdateGameLogs(game, true, tradeLog);
-        await RefreshToken(request.GameMasterId);
         return Ok();
     }
 
@@ -117,7 +116,6 @@ public class PokemonController(
         await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var model = await BuildPokemon(request.TrainerId, request.GameId, request.Pokemon);
         await PokemonService.PostPokemon(model);
-        await RefreshToken(request.GameMasterId);
         return Ok(new CapturePokemonResponse { Pokemon = model });
     }
 
@@ -195,7 +193,6 @@ public class PokemonController(
             LogTimestamp = DateTimeOffset.Now
         };
         await GameService.UpdateGameLogs(game, isGm, changedFormLog);
-        await RefreshToken(request.TrainerId);
         return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
@@ -219,7 +216,6 @@ public class PokemonController(
             LogTimestamp = DateTimeOffset.Now
         };
         await GameService.UpdateGameLogs(game, true, evolutionLog);
-        await RefreshToken(request.GameMasterId);
         return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
@@ -265,7 +261,6 @@ public class PokemonController(
         {
             await PokedexService.UpdateDexItemIsCaught(request.TrainerId, request.GameId, evolvedForm.DexNo);
         }
-        await RefreshToken(request.TrainerId);
         return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
@@ -330,7 +325,6 @@ public class PokemonController(
     {
         await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         await PokemonService.DeletePokemon(request.PokemonId);
-        await RefreshToken(request.GameMasterId);
         return Ok();
     }
 

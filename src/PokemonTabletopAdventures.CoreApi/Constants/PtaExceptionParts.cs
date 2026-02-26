@@ -19,6 +19,8 @@ public static class PtaExceptionParts
     public const string TooManyShopsTrainers = "Request should contain exactly one trainers";
     public const string UnauthorizedTrainerCompletionMessage = "User is not authorized for this action";
     public const string NoUserFoundMessage = "No username found with provided";
+    public const string RequestAndNpcMismatch = "Request GameId does not match npc GameId";
+    public const string RequestAndSettingMismatch = "Request GameId does not match setting GameId";
 
     public const string InvalidCatchTitle = "Invalid Catch Attempt";
     public const string InvalidSettingTitle = "Invalid Setting Request";
@@ -38,4 +40,5 @@ public static class PtaExceptionParts
     public const string UnknownEntityTitle = "Unknown Entity";
     public const string UserNotFoundTitle = "User was not found";
     public const string InvalidFormTitle = "Invalid Form";
+    public const string ConflictInDataTitle = "Conflict in Data";
 }

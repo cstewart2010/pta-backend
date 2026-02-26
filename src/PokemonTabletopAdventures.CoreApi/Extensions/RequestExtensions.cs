@@ -24,12 +24,12 @@ internal static class RequestExtensions
         Trainer gameMaster)
     {
         var isAdmin = user.SiteRole == UserRoleOnSite.SiteAdmin;
-        if (gameMaster.IsGM || isAdmin)
+        if (!gameMaster.IsGM && !isAdmin)
         {
-            request.VerifyIdentity(user, encryptionService, sessionAuth);
+            throw new PtaUnauthorizedException($"User {gameMaster.TrainerId} is not a GM or Admin");
         }
-
-        throw new PtaUnauthorizedException($"User {gameMaster.TrainerId} is not a GM or Admin");
+        
+        request.VerifyIdentity(user, encryptionService, sessionAuth);
     }
 
     public static void VerifyIdentity(

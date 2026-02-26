@@ -113,7 +113,6 @@ public class TrainerController(
             LogTimestamp = DateTimeOffset.UtcNow,
         };
         await GameService.UpdateGameLogs(game, true, log);
-        await RefreshToken(request.UserId);
         return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
@@ -137,7 +136,6 @@ public class TrainerController(
             LogTimestamp = DateTimeOffset.UtcNow,
         };
         await GameService.UpdateGameLogs(game, true, log);
-        await RefreshToken(request.UserId);
         return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
@@ -184,7 +182,6 @@ public class TrainerController(
         };
 
         await GameService.UpdateGameLogs(game, true, updatedHonorsLog);
-        await RefreshToken(request.UserId);
         return Ok(new UpdateTrainerResponse { Trainers = updatedTrainers });
     }
 
@@ -209,7 +206,6 @@ public class TrainerController(
             LogTimestamp = DateTimeOffset.Now
         };
         await GameService.UpdateGameLogs(game, true, updatedHonorsLog);
-        await RefreshToken(request.UserId);
         return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
 
@@ -228,7 +224,6 @@ public class TrainerController(
         var game = await GameService.GetGame(request.GameId, true);
         var addedItemsLogs = await AddItemsToTrainer(trainer, items);
         await GameService.UpdateGameLogs(game, true, [.. addedItemsLogs]);
-        await RefreshToken(request.UserId);
         var updatedTrainer = await TrainerService.GetTrainerById(trainerId, request.GameId);
         return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
@@ -251,7 +246,6 @@ public class TrainerController(
             await GameService.UpdateGameLogs(game, true, [.. addedItemsLogs]);
         }
 
-        await RefreshToken(request.UserId);
         return Ok();
     }
 
@@ -269,7 +263,6 @@ public class TrainerController(
         var items = request.Trainers.SingleOrDefault()?.Items ?? throw new InvalidTrainerException(PtaExceptionParts.TooManyShopsTrainers);
         var removedItemsLogs = await RemoveItemsFromTrainer(trainer, items);
         await GameService.UpdateGameLogs(game, false, [.. removedItemsLogs]);
-        await RefreshToken(request.UserId);
         var updatedTrainer = await TrainerService.GetTrainerById(request.UserId, request.GameId);
         return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
@@ -288,7 +281,6 @@ public class TrainerController(
         var items = trainer.Items;
         var removedItemsLogs = await RemoveItemsFromTrainer(trainer, items);
         await GameService.UpdateGameLogs(game, true, [.. removedItemsLogs]);
-        await RefreshToken(request.UserId);
         var updatedTrainer = await TrainerService.GetTrainerById(trainer.TrainerId, request.GameId);
         return Ok(new UpdateTrainerResponse { Trainers = [updatedTrainer] });
     }
@@ -312,7 +304,6 @@ public class TrainerController(
         }
 
         var updateTrainers = await TrainerService.GetTrainersByGameId(request.GameId);
-        await RefreshToken(request.UserId);
         return Ok(new UpdateTrainerResponse { Trainers = [.. updateTrainers] });
     }
 
@@ -370,7 +361,6 @@ public class TrainerController(
             LogTimestamp = DateTimeOffset.Now
         };
         await GameService.UpdateGameLogs(game, true, deleteTrainerLog);
-        await RefreshToken(request.GameMasterId);
         return Ok();
     }
 

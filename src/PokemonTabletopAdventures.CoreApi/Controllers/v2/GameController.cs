@@ -127,7 +127,6 @@ public class GameController(
             LogTimestamp = DateTimeOffset.Now
         };
         var updatedGame = await GameService.UpdateGameLogs(game, true, gameCreationLog);
-        await RefreshToken(request.UserId);
         return Ok(new CreateGameResponse { Games = [updatedGame] });
     }
 
@@ -143,7 +142,6 @@ public class GameController(
         var isGm = await VerifyIdentity(sessionAuth, request.UserId, gameId);
         var game = await GameService.GetGame(gameId, isGm);
         await GameService.UpdateGameLogs(game, isGm, [.. request.Game.Logs]);
-        await RefreshToken(request.UserId);
         return Ok(new UpdateGameResponse { Games = [game] });
     }
 
@@ -194,7 +192,6 @@ public class GameController(
         var foundNpcIds = await GetNpcs(npcIds);
         var game = await GameService.GetGame(gameId, true);
         var newNpcList = game.Npcs.Select(x => x.NpcId).Union(foundNpcIds);
-        await RefreshToken(request.GameMasterId);
         var updatedGame = await GameService.UpdateGameNpcList(gameId, [..newNpcList]);
         return Ok(new UpdateGameResponse { Games = [updatedGame] });
     }
@@ -213,7 +210,6 @@ public class GameController(
         var foundNpcIds = await GetNpcs(npcIds);
         var game = await GameService.GetGame(gameId, true);
         var newNpcList = game.Npcs.Select(x => x.NpcId).Except(foundNpcIds);
-        await RefreshToken(request.GameMasterId);
         var updatedGame = await GameService.UpdateGameNpcList(gameId, [.. newNpcList]);
         return Ok(new UpdateGameResponse { Games = [updatedGame] });
     }
@@ -276,7 +272,6 @@ public class GameController(
         Guid gameId)
     {
         await VerifyIdentity(sessionAuth, userId);
-        await RefreshToken(userId);
         var game = await GameService.GetGame(gameId, false);
         return Ok(new RetrieveGameResponse { Games = [game] });
     }
@@ -287,7 +282,6 @@ public class GameController(
         Guid gameId)
     {
         await IsUserGM(userId, gameId, sessionAuth);
-        await RefreshToken(userId);
         var game = await GameService.GetGame(gameId, true);
         return Ok(new RetrieveGameResponse { Games = [game] });
     }

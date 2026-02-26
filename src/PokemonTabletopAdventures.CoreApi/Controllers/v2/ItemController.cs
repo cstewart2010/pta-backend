@@ -53,7 +53,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<BaseItemDto>(DexType.MedicalItems, offset, limit);
+        return await GetItems<BaseItemDto>(DexType.Pokeballs, offset, limit);
     }
 
     [HttpGet("pokeball/{name}", Name = nameof(GetPokeball))]

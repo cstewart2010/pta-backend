@@ -6,6 +6,7 @@ using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Controllers.v2;
 using PokemonTabletopAdventures.CoreApi.Domain;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 using PokemonTabletopAdventures.Models.Indicies;
@@ -28,7 +29,7 @@ public class BasePokemonControllerTests
     }
 
     [Test]
-    public async Task GetAllPokemon_Test()
+    public async Task GetAllPokemon_ReturnsIndexCollectionResponse()
     {
         var sut = BuildSut();
         var response = await sut.GetAllPokemon();
@@ -38,6 +39,56 @@ public class BasePokemonControllerTests
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<IndexCollectionResponse>());
+        });
+    }
+
+    [Test]
+    public async Task GetPokemonByName_Valid_ReturnsPokemonAndForms()
+    {
+        var sut = BuildSut();
+        var response = await sut.GetPokemonByName("bulbasaur");
+        var result = response as ObjectResult;
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+            Assert.That(result.Value, Is.TypeOf<PokemonAndForms>());
+        });
+    }
+
+    [Test]
+    public async Task GetPokemonByForm_Valid_ReturnsFormDataResponse()
+    {
+        var sut = BuildSut();
+        var response = await sut.GetPokemonByForm("base");
+        var result = response as ObjectResult;
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+            Assert.That(result.Value, Is.TypeOf<FormDataResponse>());
+        });
+    }
+
+    [Test]
+    public void GetPokemonByForm_Invalid_ThrowsItemNotFoundException()
+    {
+        var sut = BuildSut();
+        var exception = Assert.Throws<AggregateException>(sut.GetPokemonByForm("base1").Wait);
+        Assert.That(exception.InnerException, Is.TypeOf<ItemNotFoundException>());
+    }
+
+    [Test]
+    public async Task GetPokemonByNameAndForm_Valid_ReturnsPokemonAndForms()
+    {
+        var sut = BuildSut();
+        var response = await sut.GetPokemonByNameAndForm("bulbasaur", "base");
+        var result = response as ObjectResult;
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+            Assert.That(result.Value, Is.TypeOf<PokemonAndForms>());
         });
     }
 

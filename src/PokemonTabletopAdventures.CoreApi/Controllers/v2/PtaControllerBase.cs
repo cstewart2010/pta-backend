@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
-using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Extensions;
 using PokemonTabletopAdventures.CoreApi.Services;
@@ -100,11 +99,6 @@ public abstract class PtaControllerBase(
     protected async Task AssignAuthAndToken(Guid id)
     {
         await Response.AssignAuthAndToken(encryptionService, UserService, id);
-    }
-
-    protected async Task RefreshToken(Guid id)
-    {
-        await Response.RefreshToken(encryptionService, UserService, id);
     }
 
     protected async Task<IEnumerable<Log>> RemoveItemsFromTrainer(Trainer trainer, ICollection<Item> items)

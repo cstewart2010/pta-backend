@@ -40,7 +40,7 @@ public class SettingServiceTests
     public async Task GetSetting_IsGm_Valid_ReturnsSetting()
     {
         var expected = _settingCollection.Collection.First();
-        var actual = await _sut.GetSetting(expected.SettingId, true);
+        var actual = await _sut.GetSetting(expected.SettingId, expected.GameId, true);
         
         Assert.That(actual, Is.Not.Null);
         var expectedParticipants = expected.ActiveParticipants.ToList();
@@ -72,7 +72,7 @@ public class SettingServiceTests
     public async Task GetSetting_NotIsGm_Valid_ReturnsSetting()
     {
         var expected = _settingCollection.Collection.First();
-        var actual = await _sut.GetSetting(expected.SettingId, false);
+        var actual = await _sut.GetSetting(expected.SettingId, expected.GameId, false);
         
         Assert.That(actual, Is.Not.Null);
         Assert.That(actual.Shops.ToList(), Has.Count.EqualTo(1));
@@ -96,7 +96,7 @@ public class SettingServiceTests
     {
         var gameId = Shared.GameIds.First();
         var actual = (await _sut.GetActiveSetting(gameId, isGm))!;
-        var shops = (await _sut.GetSetting(actual.SettingId, true)).Shops;
+        var shops = (await _sut.GetSetting(actual.SettingId, actual.GameId, true)).Shops;
         Assert.That(actual, Is.Not.Null);
         Assert.That(actual.Shops.ToList(), Has.Count.EqualTo(shops.Count(x => isGm ? x.GameId == gameId : x.GameId == gameId && x.IsActive)));
     }
@@ -236,7 +236,7 @@ public class SettingServiceTests
 
         var count = _settingCollection.Collection.Count;
         await _sut.PostSetting(model);
-        await _sut.DeleteSetting(model.SettingId);
+        await _sut.DeleteSetting(model.SettingId, model.GameId);
         
         Assert.That(_settingCollection.Collection, Has.Count.EqualTo(count));
     }

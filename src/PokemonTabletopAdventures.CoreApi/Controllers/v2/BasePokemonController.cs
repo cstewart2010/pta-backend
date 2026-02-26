@@ -39,7 +39,7 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
     public async Task<IActionResult> GetPokemonByForm(string form)
     {
         var entries = await _basePokemonService.GetDexEntries<BasePokemonDto>(Type);
-        var formData = entries.Where(pokemon => pokemon.Form.Contains(form))
+        var formData = entries.Where(pokemon => pokemon.Form.Contains(form, StringComparison.InvariantCultureIgnoreCase))
             .Select(pokemon => new FormData
             {
                 Name = pokemon.Name,

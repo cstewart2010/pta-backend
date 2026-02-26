@@ -38,12 +38,7 @@ public class GameServiceTests
         _shopCollection = new ShopCollectionImpl();
         _userCollection = new UserCollectionImpl();
         _pokedexCollection = new PokedexCollectionImpl();
-        _settingCollection = new SettingCollectionImpl(_trainerCollection,  _pokemonCollection, _npcCollection, _shopCollection);
-        foreach (var user in _userCollection.Collection)
-        {
-            user.Games = [.._trainerCollection.Collection.Where(x => x.TrainerId == user.UserId).Select(x => x.GameId)];
-        }
-
+        _settingCollection = new SettingCollectionImpl(_trainerCollection, _pokemonCollection, _npcCollection, _shopCollection);
         foreach (var game in _gameCollection.Collection)
         {
             game.NPCs = [.._npcCollection.Collection.Where(x => x.GameId == game.GameId).Select(x => x.NPCId)];

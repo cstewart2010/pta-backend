@@ -120,7 +120,6 @@ public class UserController(
         var user = await UserService.GetUserById(request.UserId);
         var recipient = await UserService.GetUserById(request.RecipientId);
         var threadId = await AddNewThreadToUsers(user, recipient, request.MessageContent);
-        await RefreshToken(request.UserId);
         var thread = await userMessageThreadService.GetMessageById(threadId);
         return Ok(new SendMessageResponse { MessageThread = thread });
     }
@@ -142,7 +141,6 @@ public class UserController(
         var thread = await userMessageThreadService.GetMessageById(request.MessageId);
         await AddNewReplyToThread(user, thread, request.MessageContent);
         var updatedThread = await userMessageThreadService.GetMessageById(request.MessageId);
-        await RefreshToken(request.UserId);
         return Ok(new SendMessageResponse { MessageThread = updatedThread });
     }
 
@@ -206,7 +204,6 @@ public class UserController(
             return BadRequest();
         }
         await UserService.DeleteUser(request.UserId);
-        await RefreshToken(request.AdminId);
         return Ok();
     }
 

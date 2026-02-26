@@ -14,7 +14,7 @@ public interface ISettingService
     /// Returns an setting matching the id
     /// </summary>
     /// <param name="encounterId">The setting id</param>
-    public Task<Setting> GetSetting(Guid encounterId, bool isGM);
+    public Task<Setting> GetSetting(Guid encounterId, Guid gameId, bool isGM);
 
     /// <summary>
     /// Returns all settings associated with the game session
@@ -44,5 +44,5 @@ public interface ISettingService
     /// Searches for a encounter using its id, then deletes it
     /// </summary>
     /// <param name="id">The encounter id</param>
-    public Task DeleteSetting(Guid id);
+    public Task DeleteSetting(Guid id, Guid gameId);
 }
