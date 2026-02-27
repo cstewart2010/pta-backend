@@ -8,6 +8,7 @@ using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Pokemons;
 using PokemonTabletopAdventures.Models.Settings;
 using PokemonTabletopAdventures.Models.Shops;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text.Json;
@@ -535,6 +536,7 @@ public class SettingsController(
         );
     }
 
+    [ExcludeFromCodeCoverage]
     private async Task<int> GetPokeballModifier(Pokemon pokemon, Guid trainerId, Pokeball pokeball, string[] environments)
     {
         if (pokemon.CurrentHP < 1 && pokeball != Pokeball.Save_Ball)
