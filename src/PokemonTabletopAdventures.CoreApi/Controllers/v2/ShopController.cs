@@ -142,7 +142,11 @@ public class ShopController(
         [FromBody] UpdateShopRequest request)
     {
         await VerifyIdentity(sessionAuth, request.UserId);
-        var requestShop = request.Shops.SingleOrDefault() ?? throw new InvalidSettingException(PtaExceptionParts.TooManyShopsMessage);
+        if (request.Shops.Count != 1)
+        {
+            throw new InvalidShopException(PtaExceptionParts.TooManyShopsMessage);
+        }
+        var requestShop = request.Shops.First();
         var shop = await shopService.GetShopById(requestShop.ShopId, request.GameId);
         CheckShopIsActive(shop);
         var game = await GameService.GetGame(shop.GameId, false);

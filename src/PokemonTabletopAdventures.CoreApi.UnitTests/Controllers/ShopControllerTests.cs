@@ -5,6 +5,7 @@ using NSubstitute;
 using PokemonTabletopAdventures.CoreApi.Controllers.v2;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
+using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Shops;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Controllers;
@@ -226,7 +227,7 @@ public class ShopControllerTests : BasePtaControllerTests
     }
 
     [Test]
-    public async Task CreateShop_Valid_ReturnsNpcs()
+    public async Task CreateShop_Valid_AddsShop()
     {
         // arrange
         var gameId = Shared.GameIds.First();
@@ -262,7 +263,7 @@ public class ShopControllerTests : BasePtaControllerTests
     }
 
     [Test]
-    public async Task UpdateShop_Valid_ReturnsNpcs()
+    public async Task UpdateShop_Valid_UpdatesShop()
     {
         // arrange
         var gameId = Shared.GameIds.First();
@@ -287,5 +288,148 @@ public class ShopControllerTests : BasePtaControllerTests
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdateShopResponse>());
         });
+    }
+    
+    [Test]
+    public async Task PurchaseFromShop_Valid_UpdatesTrainerAndShop()
+    {
+        // arrange
+        var gameId = Shared.GameIds.First();
+        var trainers = await TrainerService.GetTrainersByGameId(gameId);
+        var trainer = trainers.First(x => !x.IsGM);
+        var shops = await ShopService.GetShopsByGameId(gameId);
+        var shop = shops.First(x => x.IsActive);
+        trainer.Money = int.MaxValue;
+        await TrainerService.UpdateTrainer(trainer);
+        var request = new UpdateShopRequest
+        {
+            UserId = trainer.TrainerId,
+            GameId = gameId,
+            Shops = [shop],
+            Items =
+            [
+                ..shop.Inventory.Select(x => new Item
+                {
+                    Name = x.Key,
+                    Effects = x.Value.Effects,
+                    Amount = Random.Shared.Next(1, x.Value.Quantity),
+                    Type = x.Value.Type
+                })
+            ]
+        };
+        
+        // act
+        var response = await _sut.PurchaseFromShop(string.Empty, request);
+        
+        // assert
+        var result = response as ObjectResult;
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+            Assert.That(result.Value, Is.TypeOf<UpdateShopResponse>());
+        });
+    }
+    
+    [Test]
+    public async Task PurchaseFromShop_TooManyShops_InvalidShopException()
+    {
+        // arrange
+        var gameId = Shared.GameIds.First();
+        var trainers = await TrainerService.GetTrainersByGameId(gameId);
+        var trainer = trainers.First(x => !x.IsGM);
+        var shops = await ShopService.GetShopsByGameId(gameId);
+        var request = new UpdateShopRequest
+        {
+            UserId = trainer.TrainerId,
+            GameId = gameId,
+            Shops = shops,
+            Items = []
+        };
+        
+        // act
+        var exception = Assert.Throws<AggregateException>(_sut.PurchaseFromShop(string.Empty, request).Wait);
+        
+        // assert
+        Assert.That(exception.InnerException, Is.TypeOf<InvalidShopException>());
+    }
+    
+    [Test]
+    public async Task PurchaseFromShop_NoMoney_ThrowsInvalidShopException()
+    {
+        // arrange
+        var gameId = Shared.GameIds.First();
+        var trainers = await TrainerService.GetTrainersByGameId(gameId);
+        var trainer = trainers.First(x => !x.IsGM);
+        var shops = await ShopService.GetShopsByGameId(gameId);
+        var shop = shops.First(x => x.IsActive);
+        trainer.Money = 0;
+        await TrainerService.UpdateTrainer(trainer);
+        var request = new UpdateShopRequest
+        {
+            UserId = trainer.TrainerId,
+            GameId = gameId,
+            Shops = [shop],
+            Items =
+            [
+                ..shop.Inventory.Select(x => new Item
+                {
+                    Name = x.Key,
+                    Effects = x.Value.Effects,
+                    Amount = Random.Shared.Next(1, x.Value.Quantity),
+                    Type = x.Value.Type
+                })
+            ]
+        };
+        
+        // act
+        var exception = Assert.Throws<AggregateException>(_sut.PurchaseFromShop(string.Empty, request).Wait);
+        
+        // assert
+        Assert.That(exception.InnerException, Is.TypeOf<InvalidShopException>());
+    }
+
+    [Test]
+    public async Task DeleteShop_Valid_DeletesShop()
+    {
+        // arrange
+        var gameId = Shared.GameIds.Last();
+        var trainers = await TrainerService.GetTrainersByGameId(gameId);
+        var gm = trainers.First(x => x.IsGM);
+        var shops = await ShopService.GetShopsByGameId(gameId);
+        var shop = shops.First();
+        var request = new DeleteShopRequest
+        {
+            GameId = gameId,
+            ShopId = shop.ShopId,
+            UserId = gm.TrainerId
+        };
+        
+        // act
+        var response = await _sut.DeleteShop(string.Empty, request);
+        
+        // assert
+        Assert.That(response, Is.InstanceOf<OkResult>());
+    }
+
+    [Test]
+    public async Task DeleteShopsByGameId_Valid_DeletesShops()
+    {
+        // arrange
+        var gameId = Shared.GameIds.Last();
+        var trainers = await TrainerService.GetTrainersByGameId(gameId);
+        var gm = trainers.First(x => x.IsGM);
+        var request = new DeleteShopRequest
+        {
+            GameId = gameId,
+            ShopId = Guid.Empty,
+            UserId = gm.TrainerId
+        };
+        
+        // act
+        var response = await _sut.DeleteShopsByGameId(string.Empty, request);
+        
+        // assert
+        Assert.That(response, Is.InstanceOf<OkResult>());
     }
 }
