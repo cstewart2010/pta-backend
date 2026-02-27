@@ -64,6 +64,7 @@ public abstract class BasePtaControllerTests
             userMessageThreadCollection.Collection.Add(thread);
             user.Messages = [messageId];
         }
+        var spriteCollection = new SpriteCollectionImpl();
         _mockRepository.GetCollection<GameDto>(MongoCollection.Games).Returns(gameCollection);
         _mockRepository.GetCollection<UserDto>(MongoCollection.Users).Returns(userCollection);
         _mockRepository.GetCollection<ShopDto>(MongoCollection.Shops).Returns(shopCollection);
@@ -73,6 +74,7 @@ public abstract class BasePtaControllerTests
         _mockRepository.GetCollection<TrainerDto>(MongoCollection.Trainers).Returns(trainerCollection);
         _mockRepository.GetCollection<NpcDto>(MongoCollection.NPCs).Returns(npcCollection);
         _mockRepository.GetCollection<UserMessageThreadDto>(MongoCollection.UserMessageThreads).Returns(userMessageThreadCollection);
+        _mockRepository.GetCollection<SpriteDto>(MongoCollection.Sprites).Returns(spriteCollection);
         DexService = new DexService(_mockRepository, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<DexService>>());
         EncryptionService = Substitute.For<IEncryptionService>();
         EncryptionService.GenerateToken(Arg.Any<DateTime>()).Returns(string.Empty);
@@ -86,9 +88,12 @@ public abstract class BasePtaControllerTests
         GameService = new GameService(_mockRepository, TrainerService, NpcService, SettingService, ShopService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<GameService>>());
         UserService = new UserService(_mockRepository, TrainerService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<UserService>>());
         UserMessageThreadService = new UserMessageThreadService(_mockRepository, UserService, DtoToModelMapper, ModelToDtoMapper, Substitute.For<ILogger<UserMessageThreadService>>());
+        SpriteService = new SpriteService(_mockRepository, Substitute.For<ILogger<SpriteService>>());
     }
+    
+    protected SpriteService SpriteService { get; }
 
-    protected UserMessageThreadService UserMessageThreadService { get; set; }
+    protected UserMessageThreadService UserMessageThreadService { get; }
 
     protected UserService UserService { get; }
 

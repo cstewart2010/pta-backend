@@ -63,11 +63,12 @@ public class GameController(
     }
 
     [HttpGet("sprites/retrieve", Name = nameof(GetAllSprites))]
-    [ProducesResponseType(typeof(IEnumerable<SpriteDto>), 200)]
+    [ProducesResponseType(typeof(ICollection<Sprite>), 200)]
     public async Task<IActionResult> GetAllSprites()
     {
         var sprites = await spriteService.GetAllSprites();
-        return Ok(sprites.OrderBy(sprite => sprite.FriendlyText));
+        ICollection<Sprite> result = [..sprites.OrderBy(sprite => sprite.FriendlyText)];
+        return Ok(result);
     }
 
     [HttpGet("{gameId}/retrieve", Name = nameof(GetGame))]
@@ -229,7 +230,6 @@ public class GameController(
         await IsGameAuthenticated(gameSessionPassword, game);
         await MassDeletePokemon(gameId);
         await TrainerService.DeleteTrainer(gameMasterId, gameId);
-        await GetGameDeletion(gameId);
         return Ok();
     }
     
@@ -306,11 +306,6 @@ public class GameController(
                 trainer.GameId,
                 false);
         }
-    }
-
-    private async Task GetGameDeletion(Guid gameId)
-    {
-        await GameService.DeleteGame(gameId);
     }
 
     private async Task MassDeletePokemon(Guid gameId)
