@@ -5,6 +5,7 @@ using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Pokedex;
 using PokemonTabletopAdventures.Models.Pokemons;
+using PokemonTabletopAdventures.Models.Trainers;
 using System.Net;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
@@ -41,7 +42,7 @@ public class PokemonController(
     [ProducesResponseType(typeof(RetrievePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
-    public async Task<IActionResult> FindTrainerMon(
+    public async Task<IActionResult> GetTrainerMon(
         [FromHeader] RetrievePokemonRequest request)
     {
         var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId);
@@ -72,10 +73,7 @@ public class PokemonController(
         await VerifyIdentity(sessionAuth, request.TrainerId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var pokemon = await PokemonService.GetPokemonById(request.PokemonId);
-        if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
-        {
-            throw new PtaUnauthorizedException(PtaExceptionParts.UnauthorizedPokemonUseMessage);
-        }
+        CheckTrainerIds(trainer, pokemon);
         var models = await DexService.GetPossibleEvolutions(pokemon);
 		return Ok(new RetrievePokemonResponse { Models = [.. models] });
     }
@@ -143,11 +141,7 @@ public class PokemonController(
         await VerifyIdentity(sessionAuth, request.TrainerId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
-        if (!(model.TrainerId == request.TrainerId || trainer.IsGM == true))
-        {
-            throw new PtaUnauthorizedException(PtaExceptionParts.UnauthorizedPokemonUseMessage);
-        }
-
+        CheckTrainerIds(trainer, model);
         OutofRangeException.CheckValue(-model.PokemonStats.HP, model.PokemonStats.HP, request.HP);
         var updatedModel = await PokemonService.UpdatePokemonHP(request.PokemonId, request.HP);
         return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
@@ -166,11 +160,7 @@ public class PokemonController(
         var game = await GameService.GetGame(request.GameId, isGm);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
-        if (!(trainer.TrainerId == model.TrainerId || trainer.IsGM))
-        {
-            throw new PtaUnauthorizedException(PtaExceptionParts.UnauthorizedPokemonUseMessage);
-        }
-
+        CheckTrainerIds(trainer, model);
         form = form.Replace('_', '/');
         if (!model.AlternateForms.Contains(form))
         {
@@ -235,10 +225,7 @@ public class PokemonController(
         var game = await GameService.GetGame(request.GameId, isGm);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
-        if (!(trainer.TrainerId == model.TrainerId || trainer.IsGM))
-        {
-            throw new PtaUnauthorizedException(PtaExceptionParts.UnauthorizedPokemonUseMessage);
-        }
+        CheckTrainerIds(trainer, model);
         var evolvedForm = await GetEvolved(model, request.EvolvePokemonData);
 
         var updatedModel = await PokemonService.UpdatePokemon(evolvedForm);
@@ -249,18 +236,7 @@ public class PokemonController(
             LogTimestamp = DateTimeOffset.UtcNow
         };
         await GameService.UpdateGameLogs(game, isGm, evolutionLog);
-        var dexItem = await PokedexService.GetPokedexItem(request.TrainerId, request.GameId, evolvedForm.DexNo);
-        if (dexItem != null)
-        {
-            if (!dexItem.IsCaught)
-            {
-                await PokedexService.UpdateDexItemIsCaught(request.TrainerId, request.GameId, evolvedForm.DexNo);
-            }
-        }
-        else
-        {
-            await PokedexService.UpdateDexItemIsCaught(request.TrainerId, request.GameId, evolvedForm.DexNo);
-        }
+        await PokedexService.UpdateDexItemIsCaught(request.TrainerId, request.GameId, evolvedForm.DexNo);
         return Ok(new UpdatePokemonResponse { Pokemon = updatedModel });
     }
 
@@ -280,10 +256,11 @@ public class PokemonController(
             if (dexItem != null)
             {
                 await PokedexService.UpdateDexItemIsSeen(request.TrainerId, request.GameId, item.DexNo);
-                return Ok();
             }
-
-            await AddDexItem(request.TrainerId, request.GameId, item.DexNo, isSeen: true);
+            else
+            {
+                await AddDexItem(request.TrainerId, request.GameId, item.DexNo, isSeen: true);   
+            }
         }
         var pokedexModel = await PokedexService.GetTrainerPokeDex(request.TrainerId, request.GameId);
         return Ok(new UpdatePokedexResponse { PokedexItems = [.. pokedexModel] });
@@ -305,10 +282,11 @@ public class PokemonController(
             if (dexItem != null)
             {
                 await PokedexService.UpdateDexItemIsCaught(request.TrainerId, request.GameId, item.DexNo);
-                return Ok();
             }
-
-            await AddDexItem(request.TrainerId, request.GameId, item.DexNo, isCaught: true);
+            else
+            {
+                await AddDexItem(request.TrainerId, request.GameId, item.DexNo, isCaught: true);   
+            }
         }
         var pokedexModel = await PokedexService.GetTrainerPokeDex(request.TrainerId, request.GameId);
         return Ok(new UpdatePokedexResponse { PokedexItems = [.. pokedexModel] });
@@ -422,7 +400,7 @@ public class PokemonController(
         EvolvePokemonData request)
     {
         var total = request.KeptMoves.Count + request.NewMoves.Count;
-        OutofRangeException.CheckValue(3, 6, total);
+        OutofRangeException.CheckValue(1, 6, total);
 
         var moveComparer = currentForm.Moves.Select(move => move.ToLower());
         if (!request.KeptMoves.All(move => moveComparer.Contains(move.ToLower())))
@@ -433,5 +411,13 @@ public class PokemonController(
         var evolvedForm = await DexService.GetEvolved(currentForm, [..request.KeptMoves], request.NextForm, [..request.NewMoves]);
         evolvedForm.Pokeball = currentForm.Pokeball;
         return evolvedForm;
+    }
+
+    private static void CheckTrainerIds(Trainer trainer, Pokemon pokemon)
+    {
+        if (!(trainer.TrainerId == pokemon.TrainerId || trainer.IsGM))
+        {
+            throw new PtaUnauthorizedException(PtaExceptionParts.UnauthorizedPokemonUseMessage);
+        }
     }
 }
