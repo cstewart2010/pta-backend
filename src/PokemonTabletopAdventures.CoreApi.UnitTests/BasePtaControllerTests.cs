@@ -45,6 +45,25 @@ public abstract class BasePtaControllerTests
         }
 
         var userMessageThreadCollection = new UserMessageThreadCollectionImpl();
+        foreach (var user in userCollection.Collection)
+        {
+            var messageId = Guid.NewGuid();
+            var thread = new UserMessageThreadDto
+            {
+                MessageId = messageId,
+                Messages = new List<UserMessageDto>
+                {
+                    new UserMessageDto
+                    {
+                        Message = messageId.ToString(),
+                        Timestamp = DateTimeOffset.Now,
+                        User = user.UserId
+                    }
+                }
+            };
+            userMessageThreadCollection.Collection.Add(thread);
+            user.Messages = [messageId];
+        }
         _mockRepository.GetCollection<GameDto>(MongoCollection.Games).Returns(gameCollection);
         _mockRepository.GetCollection<UserDto>(MongoCollection.Users).Returns(userCollection);
         _mockRepository.GetCollection<ShopDto>(MongoCollection.Shops).Returns(shopCollection);

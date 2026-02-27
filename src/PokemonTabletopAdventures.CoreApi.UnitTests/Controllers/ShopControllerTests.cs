@@ -5,7 +5,6 @@ using NSubstitute;
 using PokemonTabletopAdventures.CoreApi.Controllers.v2;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
-using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Shops;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Controllers;

@@ -4,6 +4,7 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests;
 
 internal static class Shared
 {
+    public static readonly ICollection<Guid> AdminIds = [Guid.NewGuid(), Guid.NewGuid()];
     public static readonly ICollection<Guid> GameIds = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];
     public static readonly ICollection<Guid> PokemonIds = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];
     public static readonly ICollection<Guid> UserIds = [.. Enumerable.Range(0, 3).Select(x => Guid.NewGuid())];

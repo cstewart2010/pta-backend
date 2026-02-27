@@ -66,7 +66,11 @@ public class UserController(
         }
 
         var message = await userMessageThreadService.GetMessageById(request.MessageId);
-        return Ok(message);
+        var response = new RetrieveThreadResponse
+        {
+            MessageThread = message
+        };
+        return Ok(response);
     }
 
     [HttpPost("retrieve/message")]
@@ -78,13 +82,17 @@ public class UserController(
     {
         await VerifyIdentity(sessionAuth, request.UserId);
         var user = await UserService.GetUserById(request.UserId);
-        if (!user.Messages.Contains(request.MessageId))
+        if (!(user.Messages.Contains(request.MessageId) || await IsUserAdmin(request.UserId)))
         {
             return Conflict();
         }
 
         var message = await userMessageThreadService.GetMessageById(request.MessageId);
-        return Ok(message);
+        var response = new RetrieveThreadResponse
+        {
+            MessageThread = message
+        };
+        return Ok(response);
     }
 
     [HttpPost("create")]
@@ -133,7 +141,7 @@ public class UserController(
     {
         await VerifyIdentity(sessionAuth, request.UserId);
         var user = await UserService.GetUserById(request.UserId);
-        if (!user.Messages.Contains(request.MessageId))
+        if (!(user.Messages.Contains(request.MessageId) || await IsUserAdmin(request.UserId)))
         {
             return Conflict();
         }
@@ -199,7 +207,7 @@ public class UserController(
             return Unauthorized();
         }
 
-        if (request.AdminId == request.UserId)
+        if (request.AdminId == request.UserId || await IsUserAdmin(request.UserId))
         {
             return BadRequest();
         }
@@ -226,7 +234,7 @@ public class UserController(
     private async Task AddNewReplyToThread(User sender, UserMessageThread thread, string messageContent)
     {
         var message = new UserMessage { Message = messageContent, User = sender.UserId, Timestamp = DateTimeOffset.Now };
-        thread.Messages.Add(message);
+        thread.Messages = [..thread.Messages.Append(message)];
         await userMessageThreadService.UpdateThread(thread);
     }
 

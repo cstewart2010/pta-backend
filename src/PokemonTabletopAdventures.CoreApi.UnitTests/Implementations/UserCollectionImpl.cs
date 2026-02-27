@@ -4,9 +4,9 @@ namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
 
 internal class UserCollectionImpl : BaseCollectionImpl<UserDto>
 {
-    public override ICollection<UserDto> Collection { get; protected set; } = [..Shared.UserIds.Select(x =>
-    {
-        return new UserDto
+    public override ICollection<UserDto> Collection { get; protected set; } =
+    [
+        ..Shared.UserIds.Select(x => new UserDto
         {
             UserId = x,
             IsOnline = true,
@@ -17,6 +17,18 @@ internal class UserCollectionImpl : BaseCollectionImpl<UserDto>
             Games = [],
             ActivityToken = "",
             PasswordHash = ""
-        };
-    })];
+        }),
+        ..Shared.AdminIds.Select(x => new UserDto
+        {
+            UserId = x,
+            IsOnline = true,
+            SiteRole = Models.Enums.UserRoleOnSite.SiteAdmin,
+            Messages = [],
+            DateCreated = DateTime.Now,
+            Username = x.ToString(),
+            Games = [],
+            ActivityToken = "",
+            PasswordHash = ""
+        })
+    ];
 }
