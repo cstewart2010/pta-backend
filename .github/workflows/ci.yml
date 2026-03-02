@@ -8,7 +8,8 @@ on:
 env:
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
-  WORKING_DIRECTORY: src/PokemonTabletopAdventures.CoreApi
+  APP_WORKING_DIRECTORY: src/PokemonTabletopAdventures.CoreApi
+  TEST_WORKING_DIRECTORY: src/PokemonTabletopAdventures.CoreApi.UnitTests
   AZURE_WEBAPP_NAME: PTACoreAPI_TEST
   AZURE_WEBAPP_PACKAGE_PATH: PokemonTabletopAdventures.CoreApi\published
   AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
@@ -23,16 +24,20 @@ jobs:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
     - name: Add Source
       run: dotnet nuget add source --username cstewart2010 --password ${{ secrets.DEPLOY_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/cstewart2010/index.json"
-    - name: Restore
-      run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
-    - name: Build
-      run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
-    - name: Test
-      run: dotnet test "${{ env.WORKING_DIRECTORY }}.UnitTests" --no-build --collect:"Xplat Code Coverage"
+    - name: Restore App
+      run: dotnet restore "${{ env.APP_WORKING_DIRECTORY }}"
+    - name: Build App
+      run: dotnet build "${{ env.APP_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+    - name: Restore Unit Tests
+      run: dotnet restore "${{ env.APP_WORKING_DIRECTORY }}"
+    - name: Build Unit Tests
+      run: dotnet build "${{ env.TEST_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+    - name: Run Unit Tests
+      run: dotnet test "${{ env.TEST_WORKING_DIRECTORY }}" --no-build --collect:"Xplat Code Coverage"
     - name: Code Coverage Summary Report
       uses: irongut/CodeCoverageSummary@v1.3.0
       with:
-        filename: '${{ env.WORKING_DIRECTORY }}/TestResults/*/coverage.cobertura.xml'
+        filename: '${{ env.TEST_WORKING_DIRECTORY }}/TestResults/*/coverage.cobertura.xml'
         badge: true
         format: 'markdown'
         output: 'both'
@@ -44,7 +49,7 @@ jobs:
     - name: Write to Job Summary
       run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
     - name: Publish
-      run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+      run: dotnet publish "${{ env.APP_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
