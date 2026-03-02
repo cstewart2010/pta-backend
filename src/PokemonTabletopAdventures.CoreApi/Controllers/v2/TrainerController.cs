@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Exceptions;
@@ -31,7 +32,7 @@ public class TrainerController(
     [HttpGet("retrieve/all")]
     [ProducesResponseType(typeof(RetrieveTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
-    public async Task<IActionResult> FindTrainers(
+    public async Task<IActionResult> GetTrainers(
         [FromBody] RetrieveTrainerRequest request)
     {
         var trainers = await GetTrainers(request.GameId);
@@ -42,7 +43,7 @@ public class TrainerController(
     [ProducesResponseType(typeof(RetrieveTrainerResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
-    public async Task<IActionResult> FindTrainer(
+    public async Task<IActionResult> GetTrainer(
         [FromBody] RetrieveTrainerRequest request)
     {
         var trainer = await TrainerService.GetTrainerByUsername(request.TrainerName!, request.GameId) ?? throw new UnknownEntityException<Trainer>(nameof(request.TrainerName), request.TrainerName);
@@ -435,6 +436,7 @@ public class TrainerController(
         return [.. models];
     }
 
+    [ExcludeFromCodeCoverage]
     private async Task<Item> ConvertStartingEquipment(StartingEquipment s)
     {
         var baseItem = s.Type switch

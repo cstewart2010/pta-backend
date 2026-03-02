@@ -10,7 +10,7 @@ internal class TrainerCollectionImpl : BaseCollectionImpl<TrainerDto>
     {
         Age = Random.Shared.Next(0, 100),
         Background = x.ToString(),
-        CurrentHP = 20,
+        CurrentHP = 20 * trainerIndex / Shared.UserIds.Count,
         Description = x.ToString(),
         Feats = [..Enumerable.Range(0, 3).Select(_ => x.ToString())],
         GameId = y,
