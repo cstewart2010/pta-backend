@@ -22,30 +22,63 @@ internal class SettingCollectionImpl(
         NpcCollectionImpl npcCollection,
         ShopCollectionImpl shopCollection)
     {
-        var trainerParticipants =
-            trainerCollection.Collection.Select(x => SettingParticipantModel.FromTrainer(x, new MapPosition()));
-        var pokemonParticipants = pokemonCollection.Collection.Select(x =>
-            SettingParticipantModel.FromPokemon(x, new MapPosition(), SettingParticipantType.Pokemon));
-        var npcParticipants = npcCollection.Collection.Select(x =>
-            SettingParticipantModel.FromNpc(x, new MapPosition(), SettingParticipantType.NeutralNpc));
-        var shopParticipants =
-            shopCollection.Collection.Select(x => SettingParticipantModel.FromShop(x, new MapPosition()));
-        return Shared.GameIds.Select((x, gameIndex) => Shared.SettingIds.Select((y, settingIndex) =>new SettingDto
+        return Shared.GameIds.Select((gameId, gameIndex) => Shared.SettingIds.Select((_, settingIndex) =>
         {
-            ActiveParticipants =
+            var (x, y) = (0, 0);
+            List<SettingParticipantType> types1 =
             [
-                ..trainerParticipants,
-                ..pokemonParticipants,
-                ..npcParticipants,
-                ..shopParticipants
-            ],
-            Environment = [..Enumerable.Range(0,3).Select(y => Guid.NewGuid().ToString())],
-            GameId = x,
-            IsActive = gameIndex == settingIndex,
-            Name = y.ToString(),
-            SettingId = y,
-            Shops = Shared.ShopIds,
-            Type = (SettingType)Random.Shared.Next(1, 4)
+                SettingParticipantType.Pokemon, SettingParticipantType.EnemyPokemon,
+                SettingParticipantType.NeutralPokemon
+            ];
+            List<SettingParticipantType> types2 =
+                [SettingParticipantType.NeutralNpc, SettingParticipantType.EnemyNpc];
+            var trainerParticipants =
+                trainerCollection.Collection.Where(z => z.GameId == gameId).Select(trainer => SettingParticipantModel.FromTrainer(trainer, new MapPosition
+                {
+                    X = x++,
+                    Y = y++
+                }));
+            var pokemonParticipants = pokemonCollection.Collection.Where(z => z.GameId == gameId).Select(pokemon =>
+                SettingParticipantModel.FromPokemon(
+                    pokemon,
+                    new MapPosition
+                    {
+                        X = x++,
+                        Y = y++
+                    },
+                    types1[settingIndex % 3]));
+            var npcParticipants = npcCollection.Collection.Where(z => z.GameId == gameId).Select(npc =>
+                SettingParticipantModel.FromNpc(
+                    npc,
+                    new MapPosition
+                    {
+                        X = x++,
+                        Y = y++
+                    },
+                    types2[settingIndex % 2]));
+            var shopParticipants =
+                shopCollection.Collection.Where(z => z.GameId == gameId).Select(shop => SettingParticipantModel.FromShop(shop, new MapPosition
+                {
+                    X = x++,
+                    Y = y++
+                }));
+            return new SettingDto
+            {
+                ActiveParticipants =
+                [
+                    ..trainerParticipants,
+                    ..pokemonParticipants,
+                    ..npcParticipants,
+                    ..shopParticipants
+                ],
+                Environment = [..Enumerable.Range(0, 3).Select(y => Guid.NewGuid().ToString())],
+                GameId = gameId,
+                IsActive = gameIndex == settingIndex,
+                Name = y.ToString(),
+                SettingId = Guid.NewGuid(),
+                Shops = Shared.ShopIds,
+                Type = (SettingType)Random.Shared.Next(1, 4)
+            };
         })).SelectMany(x => x).ToList();
     }
 }

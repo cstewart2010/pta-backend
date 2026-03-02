@@ -18,7 +18,7 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 
 [ApiController]
 [Route(Routes.SettingRoute)]
-public class SettingsController(
+public class SettingController(
     IUserService userService,
     ITrainerService trainerService,
     IPokemonService pokemonService,
@@ -30,9 +30,9 @@ public class SettingsController(
     IPokedexService pokedexService,
     IDtoToModelMapper dtoToModelMapper,
     IModelToDtoMapper modelToDtoMapper,
-    ILogger<SettingsController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
+    ILogger<SettingController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
-    private readonly ILogger<SettingsController> _logger = logger;
+    private readonly ILogger<SettingController> _logger = logger;
 
     private static readonly byte[] Buffer = new byte[36];
 
@@ -104,10 +104,10 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
+        var setting = await GetActiveSettingOrThrow(request.GameId);
         setting.Environment = request.Setting.Environment;
-        await settingService.UpdateSetting(setting, true);
-        return Ok();
+        var updatedSetting = await settingService.UpdateSetting(setting, true);
+        return Ok(new UpdateSettingResponse { Setting = updatedSetting });
     }
 
     [HttpPut("participant/add")]
@@ -119,28 +119,14 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
+        var setting = await GetActiveSettingOrThrow(request.GameId);
         var participant = GetSingleParticipant(request);
         if (setting.Participants.Any(activeParticipant => activeParticipant.ParticipantId == participant.ParticipantId))
         {
             return Conflict();
         }
-        if (setting.Participants.Any(activeParticipant =>
-        {
-            if (activeParticipant.Position.X == participant.Position.X)
-            {
-                if (activeParticipant.Position.Y == participant.Position.Y)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }))
-        {
-            return Conflict();
-        }
-        setting.Participants.Add(participant);
+        CheckPosition(setting, participant);
+        setting.Participants = [.. setting.Participants, participant];
         await settingService.UpdateSetting(setting, true);
         return Ok();
     }
@@ -159,7 +145,7 @@ public class SettingsController(
     }
 
 
-    [HttpPut("{pokemonId}/return")]
+    [HttpPut("{pokemonId:guid}/return")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
@@ -169,6 +155,12 @@ public class SettingsController(
         Guid pokemonId)
     {
         await VerifyIdentity(sessionAuth, request.TrainerId);
+        await CheckValidPokemon(request.TrainerId, request.GameId, pokemonId);
+        var pokemon = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId);
+        if (!pokemon.Any(x => x.PokemonId == pokemonId))
+        {
+            throw new UnknownEntityException<Pokemon>(nameof(pokemonId), pokemonId);
+        }
         return await RemoveFromParticipants(request.GameId, pokemonId, true);
     }
 
@@ -180,7 +172,6 @@ public class SettingsController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateSettingRequest request,
         Guid pokemonId,
-        [FromQuery] int catchRate,
         [FromQuery] string pokeball,
         [FromQuery] string nickname)
     {
@@ -192,14 +183,14 @@ public class SettingsController(
             throw new InvalidCatchException(PtaExceptionParts.AlreadyCaughtPokemonMessage, HttpStatusCode.BadRequest);
         }
 
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
+        var setting = await GetActiveSettingOrThrow(request.GameId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         if (trainer?.IsOnline != true)
         {
             throw new InvalidCatchException(PtaExceptionParts.PlayNotOnlineMessage, HttpStatusCode.NotFound);
         }
 
-        if (!Enum.TryParse<Pokeball>(pokeball, true, out var pokebalEnum))
+        if (!Enum.TryParse<Pokeball>(pokeball.Replace(" ", "_"), true, out var pokebalEnum))
         {
             throw new ItemNotFoundException(pokeball);
         }
@@ -223,7 +214,7 @@ public class SettingsController(
             LogTimestamp = DateTimeOffset.Now
         };
 
-        if (check < catchRate)
+        if (check < pokemon.CatchRate)
         {
             setting.Participants = [..setting.Participants.Where(participant => participant.ParticipantId != pokemonId)];
             await settingService.UpdateSetting(setting, false);
@@ -253,23 +244,9 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
+        var setting = await GetActiveSettingOrThrow(request.GameId);
         var participant = GetSingleParticipant(request);
-        if (setting.Participants.Any(activeParticipant =>
-        {
-            if (activeParticipant.Position.X == participant.Position.X)
-            {
-                if (activeParticipant.Position.Y == participant.Position.Y)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }))
-        {
-            return Conflict();
-        }
+        CheckPosition(setting, participant);
         setting.Participants = [..setting.Participants.Select(x =>
         {
             if (x.ParticipantId == participant.ParticipantId)
@@ -294,28 +271,11 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await VerifyIdentity(sessionAuth, request.TrainerId);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
+        var setting = await GetActiveSettingOrThrow(request.GameId);
         var currentParticipant = GetSingleParticipant(request);
         var participant = setting.Participants.First(participant => participant.ParticipantId == request.TrainerId);
-        if (GetDistance(currentParticipant.Position, participant.Position) > participant.Speed)
-        {
-            return StatusCode(411);
-        }
-        if (setting.Participants.Any(activeParticipant =>
-        {
-            if (activeParticipant.Position.X == currentParticipant.Position.X)
-            {
-                if (activeParticipant.Position.Y == currentParticipant.Position.Y)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }))
-        {
-            return Conflict();
-        }
+        CheckDistance(currentParticipant, participant);
+        CheckPosition(setting, currentParticipant);
         setting.Participants = [..setting.Participants.Select(x =>
         {
             if (x.ParticipantId == request.TrainerId)
@@ -341,35 +301,14 @@ public class SettingsController(
         Guid pokemonId)
     {
         await VerifyIdentity(sessionAuth, request.TrainerId);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
+        var setting = await GetActiveSettingOrThrow(request.GameId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
-        var pokemon = await PokemonService.GetPokemonById(pokemonId);
-        if (pokemon.TrainerId != request.TrainerId)
-        {
-            throw new InvalidPokemonException($"{request.TrainerId} cannot move this pokemon");
-        }
+        await CheckValidPokemon(request.TrainerId, request.GameId, pokemonId);
 
         var currentParticipant = GetSingleParticipant(request);
         var participant = setting.Participants.First(participant => participant.ParticipantId == pokemonId);
-        if (GetDistance(currentParticipant.Position, participant.Position) > participant.Speed)
-        {
-            return StatusCode(411);
-        }
-        if (setting.Participants.Any(activeParticipant =>
-        {
-            if (activeParticipant.Position.X == currentParticipant.Position.X)
-            {
-                if (activeParticipant.Position.Y == currentParticipant.Position.Y)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }))
-        {
-            return Conflict();
-        }
+        CheckDistance(currentParticipant, participant);
+        CheckPosition(setting, currentParticipant);
         setting.Participants = [..setting.Participants.Select(x =>
         {
             if (x.ParticipantId == pokemonId)
@@ -424,7 +363,7 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
+        var setting = await GetActiveSettingOrThrow(request.GameId);
         setting.IsActive = false;
         await settingService.UpdateSetting(setting, true);
         return Ok();
@@ -439,7 +378,7 @@ public class SettingsController(
         [FromBody] UpdateSettingRequest request)
     {
         await IsUserGM(request.TrainerId, request.GameId, sessionAuth);
-        var setting = await settingService.GetActiveSetting(request.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, request.GameId);
+        var setting = await GetActiveSettingOrThrow(request.GameId);
         var participants = await Task.WhenAll(setting.Participants.Select(async participant => await GetWithUpdatedHP(participant, request.GameId)));
         setting.Participants = participants;
         var updatedSetting = await settingService.UpdateSetting(setting, true);
@@ -452,9 +391,9 @@ public class SettingsController(
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> DeleteSetting(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId,
-        Guid encounterId)
+        [FromQuery] Guid gameId,
+        [FromQuery] Guid gameMasterId,
+        [FromQuery] Guid encounterId)
     {
         await IsUserGM(gameMasterId, gameId, sessionAuth);
         await settingService.DeleteSetting(encounterId, gameId);
@@ -467,8 +406,8 @@ public class SettingsController(
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> DeleteSettings(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
-        Guid gameId,
-        Guid gameMasterId)
+        [FromQuery] Guid gameId,
+        [FromQuery] Guid gameMasterId)
     {
         await IsUserGM(gameMasterId, gameId, sessionAuth);
         await settingService.DeleteSettingsByGameId(gameId);
@@ -513,11 +452,6 @@ public class SettingsController(
         return Ok();
     }
 
-    private static async Task<WebSocketReceiveResult> ReceiveAsync(WebSocket webSocket)
-    {
-        return await webSocket.ReceiveAsync(new ArraySegment<byte>(Buffer), CancellationToken.None);
-    }
-
     private async Task SendAsync(
         WebSocket webSocket,
         Guid gameId,
@@ -534,6 +468,34 @@ public class SettingsController(
             endOfMessage,
             CancellationToken.None
         );
+    }
+
+    private async Task CheckValidPokemon(
+        Guid trainerId,
+        Guid gameId,
+        Guid pokemonId)
+    {
+        var pokemon = await PokemonService.GetPokemonByTrainerId(trainerId, gameId);
+        if (!pokemon.Any(x => x.PokemonId == pokemonId))
+        {
+            throw new UnknownEntityException<Pokemon>(nameof(pokemonId), pokemonId);
+        }
+    }
+
+    private void CheckDistance(SettingParticipant currentParticipant, SettingParticipant participant)
+    {
+        if (GetDistance(currentParticipant.Position, participant.Position) > participant.Speed)
+        {
+            throw new InvalidSettingException("Invalid distance input");
+        }
+    }
+
+    private void CheckPosition(Setting setting, SettingParticipant currentParticipant)
+    {
+        if (IsPositionInConflict(setting, currentParticipant))
+        {
+            throw new ConflictInDataException("Position is already taken");
+        }
     }
 
     [ExcludeFromCodeCoverage]
@@ -640,15 +602,37 @@ public class SettingsController(
         await GameService.UpdateGameLogs(game, false, repositionLog);
     }
 
+    private async Task<Setting> GetActiveSettingOrThrow(Guid gameId)
+    {
+        return await settingService.GetActiveSetting(gameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, gameId);
+    }
+
     #region Helper methods
     private static SettingParticipant GetSingleParticipant(UpdateSettingRequest request)
     {
-        return request.Setting.Participants.SingleOrDefault() ?? throw new InvalidSettingException(PtaExceptionParts.TooManyParticipantsMessage);
+        return request.Setting.Participants.Count != 1 ? throw new InvalidSettingException(PtaExceptionParts.TooManyParticipantsMessage) : request.Setting.Participants.First();
     }
 
     private static double GetDistance(MapPosition start, MapPosition end)
     {
         return Math.Sqrt(Math.Pow(start.X - end.X, 2) + Math.Pow(start.Y - end.Y, 2));
+    }
+
+    private static async Task<WebSocketReceiveResult> ReceiveAsync(WebSocket webSocket)
+    {
+        return await webSocket.ReceiveAsync(new ArraySegment<byte>(Buffer), CancellationToken.None);
+    }
+
+    private static bool IsPositionInConflict(Setting setting, SettingParticipant participant)
+    {
+        return setting.Participants.Where(x => x.ParticipantId != participant.ParticipantId).Any(activeParticipant =>
+        {
+            if (activeParticipant.Position.X != participant.Position.X)
+            {
+                return false;
+            }
+            return activeParticipant.Position.Y == participant.Position.Y;
+        });
     }
     #endregion
 }

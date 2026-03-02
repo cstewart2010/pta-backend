@@ -323,13 +323,9 @@ public abstract class PtaControllerBase(
         Item itemToken,
         Trainer trainer)
     {
-        var item = trainer.Items.FirstOrDefault(item => item.Name.Equals(itemToken.Name, StringComparison.CurrentCultureIgnoreCase));
-        if ((item?.Amount ?? 0) >= itemToken.Amount)
-        {
-            itemList = [.. trainer.Items
-                .Select(x => UpdateItemWithReduction(x, itemToken))
-                .Where(x => x.Amount > 0)];
-        }
+        itemList = [.. trainer.Items
+            .Select(x => UpdateItemWithReduction(x, itemToken))
+            .Where(x => x.Amount > 0)];
 
         return itemList;
     }
@@ -340,10 +336,14 @@ public abstract class PtaControllerBase(
     {
         if (item.Name == newItem.Name)
         {
+            if (item.Amount > 0)
+            {
+                return item;
+            }
             item.Amount -= newItem.Amount;
         }
 
-        return item;
+        throw new ItemNotFoundException(item.Name);
     }
 #endregion
 }

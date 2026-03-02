@@ -32,7 +32,11 @@ internal class TrainerCollectionImpl : BaseCollectionImpl<TrainerDto>
         TrainerClasses = [..Enumerable.Range(0, 3).Select(_ => x.ToString())],
         TrainerName = x.ToString(),
         TrainerSkills = [],
-        TrainerStats = new Stats(),
+        TrainerStats = new Stats
+        {
+            HP = 20,
+            Speed = 5,
+        },
         Origin = x.ToString()
     })).SelectMany(x => x).ToList();
 }

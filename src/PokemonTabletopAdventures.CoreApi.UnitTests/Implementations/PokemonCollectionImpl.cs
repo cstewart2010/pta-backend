@@ -27,7 +27,8 @@ internal class PokemonCollectionImpl : BaseCollectionImpl<PokemonDto>
                     IsOnActiveTeam = x.DexNo % 2 == 0,
                     PokemonStats = new Stats
                     {
-                        HP = 50
+                        HP = 50,
+                        Speed = 5,
                     },
                     Nature = Nature.Adamant
                 };

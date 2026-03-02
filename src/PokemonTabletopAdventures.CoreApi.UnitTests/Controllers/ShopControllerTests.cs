@@ -109,10 +109,7 @@ public class ShopControllerTests : BasePtaControllerTests
         };
         
         // act
-        var exception = Assert.Throws<AggregateException>(_sut.GetShopTrainer(string.Empty, request).Wait);
-        
-        // assert
-        Assert.That(exception.InnerException, Is.TypeOf<UnknownEntityException<Shop>>());
+        var exception = Assert.ThrowsAsync<UnknownEntityException<Shop>>(async() => await _sut.GetShopTrainer(string.Empty, request));
     }
 
     [Test]
