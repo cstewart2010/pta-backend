@@ -89,7 +89,14 @@ jobs:
       run: npm install -g allure
 
     - name: Generate Allure Report
-      run: allure generate
+      run: allure generate --name "Pokemon Tabletop Adventures Api Integration Tests"
+
+    - name: Add remoteHref to Summary
+      shell: pwsh
+      run: |
+        $x = Get-Content ./allure-report/summary.json
+        $x | Add-Member -Name "remoteHref" -Value "https://cstewart2010.github.io/pta-backend/" -MemberType NoteProperty
+        ConvertTo-Json $x > ./allure-report/summary.json
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
@@ -103,5 +110,5 @@ jobs:
       if: always()
       uses: allure-framework/allure-action@v0
       with:
-        report-directory: allure-history
-        github-token: ${{ secrets.ALLURE_REPORT }}
+        report-directory: allure-report
+        github-token: ${{ secrets.GITHUB_TOKEN }}
