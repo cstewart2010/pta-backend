@@ -90,22 +90,6 @@ jobs:
 
     - name: Generate Allure Report
       run: allure generate
-    
-    - name: Get Allure history
-      uses: actions/checkout@v5
-      if: always()
-      continue-on-error: true
-      with:
-        ref: gh-pages
-        path: gh-pages
-
-    - name: Generate Allure Report
-      uses: simple-elf/allure-report-action@v1.13
-      if: always()
-      with:
-        gh_pages: gh-pages
-        allure_report: allure-report
-        allure_history: allure-history
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
