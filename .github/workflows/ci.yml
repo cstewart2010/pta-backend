@@ -116,7 +116,6 @@ jobs:
         github_token: ${{ secrets.DEPLOY_TOKEN }}
         publish_dir: allure-history
         publish_branch: gh-pages
-        force_orphan: true
       
     - name: Run Allure Action
       if: always()
