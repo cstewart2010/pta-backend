@@ -94,7 +94,7 @@ jobs:
     - name: Add remoteHref to Summary
       shell: pwsh
       run: |
-        $x = Get-Content ./allure-report/summary.json
+        $x = Get-Content ./allure-report/summary.json | ConvertFrom-Json
         $x | Add-Member -Name "remoteHref" -Value "https://cstewart2010.github.io/pta-backend/" -MemberType NoteProperty
         ConvertTo-Json $x > ./allure-report/summary.json
       
@@ -110,5 +110,5 @@ jobs:
       if: always()
       uses: allure-framework/allure-action@v0
       with:
-        report-directory: allure-report
+        report-directory: ./allure-report
         github-token: ${{ secrets.GITHUB_TOKEN }}
