@@ -71,4 +71,4 @@ jobs:
       uses: allure-framework/allure-report@v0
       with:
         report-directory: "{{ env.INT_TEST_WORKING_DIRECTORY }}/bin/{{ env.CONFIGURATION }}/allure-report"
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.DEPLOY_TOKEN }}
