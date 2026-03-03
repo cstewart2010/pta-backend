@@ -23,10 +23,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v5
 
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 
@@ -79,6 +79,7 @@ jobs:
     #     name: webapp
     #     path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
+
     - name: Restore Integration Tests
       run: dotnet restore "${{ env.INT_TEST_WORKING_DIRECTORY }}"
 
@@ -88,11 +89,26 @@ jobs:
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
 
-    - name: Install allure
-      run: npm install -g allure
+    # - name: Install allure
+    #   run: npm install -g allure
+
+    # - name: Generate Allure Report
+    #   run: allure generate
+    
+    - name: Get Allure history
+      uses: actions/checkout@v5
+      if: always()
+      continue-on-error: true
+      with:
+        ref: gh-pages
+        path: gh-pages
 
     - name: Generate Allure Report
-      run: allure generate
+      uses: simple-elf/allure-report-action@v1.13
+      if: always()
+      with:
+        allure_results: allure-results
+        allure_history: allure-history
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
