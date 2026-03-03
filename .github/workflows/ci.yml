@@ -28,11 +28,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-        
+
     - uses: actions/setup-node@v4
       with:
-        node-version: "20"
-        cache: "yarn"
+        node-version: 24
 
     - name: Add Source
       run: dotnet nuget add source --username cstewart2010 --password ${{ secrets.DEPLOY_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/cstewart2010/index.json"
