@@ -68,7 +68,7 @@ jobs:
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
     - name: Run Allure Action
-      uses: allure-framework/allure-report@v0
+      uses: allure-framework/allure-action@v0
       with:
         report-directory: "{{ env.INT_TEST_WORKING_DIRECTORY }}/bin/{{ env.CONFIGURATION }}/allure-report"
         github-token: ${{ secrets.DEPLOY_TOKEN }}
