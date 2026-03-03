@@ -73,4 +73,4 @@ jobs:
       uses: allure-framework/allure-action@v0
       with:
         report-directory: ${{ env.ALLURE_RESULTS_PATH }}
-        github-token: ${{ secrets.DEPLOY_TOKEN }}
+        github-token: ${{ secrets.ALLURE_REPORT }}
