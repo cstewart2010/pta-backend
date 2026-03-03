@@ -7,7 +7,7 @@ public class HttpRequestMessageBuilder
 {
     private readonly HttpRequestMessage _httpRequestMessage;
 
-    public HttpRequestMessageBuilder(HttpMethod httpMethod, Uri baseAddress, string endpoint)
+    public HttpRequestMessageBuilder(HttpMethod httpMethod, string endpoint)
     {
         _httpRequestMessage = new HttpRequestMessage(httpMethod, endpoint);
     }

@@ -19,10 +19,6 @@ public class Response
         {
             ProblemDetails = JsonConvert.DeserializeObject<ProblemDetails>(content, Options);
         }
-        if (response.Headers.TryGetValues(HeaderNames.AccessToken, out var tokens))
-        {
-            ActivityToken = tokens.FirstOrDefault();
-        }
         if (response.Headers.TryGetValues(HeaderNames.SessionAuth, out var auths))
         {
             SessionAuth = auths.FirstOrDefault();
@@ -30,7 +26,6 @@ public class Response
     }
 
     public string? Content { get; }
-    public string? ActivityToken { get; }
     public string? SessionAuth { get; }
     public bool IsSuccessful { get; }
     public ProblemDetails? ProblemDetails { get; }
@@ -51,10 +46,6 @@ public class Response<T>
         {
             ProblemDetails = JsonConvert.DeserializeObject<ProblemDetails>(content, Options);
         }
-        if (response.Headers.TryGetValues(HeaderNames.AccessToken, out var tokens))
-        {
-            ActivityToken = tokens.FirstOrDefault();
-        }
         if (response.Headers.TryGetValues(HeaderNames.SessionAuth, out var auths))
         {
             SessionAuth = auths.FirstOrDefault();
@@ -63,7 +54,6 @@ public class Response<T>
 
     public string? Content { get; }
     public T? Data { get; }
-    public string? ActivityToken { get; }
     public string? SessionAuth { get; }
     public bool IsSuccessful { get; }
     public ProblemDetails? ProblemDetails { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Domain;
 using PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Enums;
