@@ -94,6 +94,14 @@ jobs:
     - name: Generate Allure Report
       run: allure generate
       
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.ALLURE_REPORT }}
+        publish_dir: ./allure-report
+        publish_branch: gh-pages
+        force_orphan: true
+      
     - name: Run Allure Action
       if: always()
       uses: allure-framework/allure-action@v0
