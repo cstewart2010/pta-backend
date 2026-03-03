@@ -114,7 +114,7 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.ALLURE_REPORT }}
-        publish_dir: ./allure-report
+        publish_dir: allure-history
         publish_branch: gh-pages
         force_orphan: true
       
@@ -122,5 +122,5 @@ jobs:
       if: always()
       uses: allure-framework/allure-action@v0
       with:
-        report-directory: ./allure-report
+        report-directory: allure-history
         github-token: ${{ secrets.ALLURE_REPORT }}
