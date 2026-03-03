@@ -1,8 +1,10 @@
-﻿using PokemonTabletopAdventures.Models.Indicies;
+﻿using Allure.NUnit.Attributes;
+using PokemonTabletopAdventures.Models.Indicies;
 
 namespace PokemonTabletopAdventures.CoreApi.IntegrationTests.Tests;
 
 [TestFixture]
+[AllureFeature("Pokedex")]
 internal class PokedexControllerTests : BaseTest
 {
     private HttpClientHelper _client;
@@ -16,17 +18,16 @@ internal class PokedexControllerTests : BaseTest
     [Test]
     public async Task BulbasaurTest()
     {
-        var request = AllureArrange(
-            "",
+        var request = AllureUtility.Arrange(
+            "Build request",
             () => new HttpRequestMessageBuilder(HttpMethod.Get, "api/v2/pokedex/bulbasaur").Build());
-        var response = await AllureAct(
-            "",
+        var response = await AllureUtility.Act(
+            "Send request",
             () => _client.SendRequestAsync<PokemonAndForms>(request));
-        AllureAssert(
-            "",
+        AllureUtility.Assert(
+            "Validate response",
             () =>
             {
-                TestContext.WriteLine(response.Content);
                 Assert.Multiple(() =>
                 {
                     Assert.That(response.IsSuccessful, Is.True);

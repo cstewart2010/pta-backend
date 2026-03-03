@@ -88,19 +88,43 @@ jobs:
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
 
-    - name: Install allure
-      run: npm install -g allure
-
-    - name: Generate Allure Report
-      run: allure generate
-      
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Load test report history
+      uses: actions/checkout@v4
+      if: always()
+      continue-on-error: true
       with:
-        github_token: ${{ secrets.ALLURE_REPORT }}
-        publish_dir: ./allure-report
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Build test report
+      uses: simple-elf/allure-report-action@v1.10
+      if: always()
+      with:
+        gh_pages: gh-pages
+        allure_history: allure-history
+        allure_results: build/allure-results
+
+    - name: Publish test report
+      uses: peaceiris/actions-gh-pages@v4
+      if: always()
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
-        force_orphan: true
+        publish_dir: allure-history
+
+    # - name: Install allure
+    #   run: npm install -g allure
+
+    # - name: Generate Allure Report
+    #   run: allure generate
+
+    # - name: Deploy to GitHub Pages
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   with:
+    #     github_token: ${{ secrets.ALLURE_REPORT }}
+    #     publish_dir: ./allure-report
+    #     publish_branch: gh-pages
+    #     force_orphan: true
       
     - name: Run Allure Action
       if: always()
