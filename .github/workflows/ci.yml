@@ -86,6 +86,18 @@ jobs:
 
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
+
+    - name: Add Quality Gate
+      run: |
+        cat <<EOF > "${{ env.ALLURE_RESULTS_PATH }}/quality-gate.json"
+        {
+          "qualityGate": {
+            "rules": [
+              "maxFailures": 0
+            ]
+          }
+        }
+        EOF
       
     - name: Run Allure Action
       if: always()
