@@ -23,18 +23,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+        
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "yarn"
+
     - name: Add Source
       run: dotnet nuget add source --username cstewart2010 --password ${{ secrets.DEPLOY_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/cstewart2010/index.json"
+
     - name: Restore Unit Tests
       run: dotnet restore "${{ env.UNIT_TEST_WORKING_DIRECTORY }}"
+
     - name: Build Unit Tests
       run: dotnet build "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+
     - name: Run Unit Tests
       run: dotnet test "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --no-build --collect:"Xplat Code Coverage"
+
     - name: Code Coverage Summary Report
       uses: irongut/CodeCoverageSummary@v1.3.0
       with:
@@ -42,32 +53,41 @@ jobs:
         badge: true
         format: 'markdown'
         output: 'both'
+
     - name: Add Coverage PR Comment
       uses: marocchino/sticky-pull-request-comment@v2
       with:
         recreate: true
         path: code-coverage-results.md
+
     - name: Write to Job Summary
       run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+
     - name: Publish
       run: dotnet publish "${{ env.APP_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4.0.0
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
     - name: Restore Integration Tests
       run: dotnet restore "${{ env.INT_TEST_WORKING_DIRECTORY }}"
+
     - name: Build Integration Tests
       run: dotnet build "${{ env.INT_TEST_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
+      
     - name: Run Allure Action
       if: always()
       uses: allure-framework/allure-action@v0
