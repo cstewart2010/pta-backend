@@ -54,7 +54,7 @@ jobs:
         format: 'markdown'
         output: 'both'
 
-    - name: Add Coverage PR Comment
+    - name: Add Unit Test Coverage PR Comment
       uses: marocchino/sticky-pull-request-comment@v2
       with:
         recreate: true
@@ -95,7 +95,7 @@ jobs:
         $x | Add-Member -Name "remoteHref" -Value "https://cstewart2010.github.io/pta-backend/" -MemberType NoteProperty
         ConvertTo-Json $x > ./allure-report/summary.json
       
-    - name: Deplo Allure Results to GitHub Pages
+    - name: Deploy Allure Results to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -103,7 +103,7 @@ jobs:
         publish_branch: gh-pages
         force_orphan: true
       
-    - name: Pin Results to PR
+    - name: Add Integration Test Report PR Comment
       if: always()
       uses: allure-framework/allure-action@v0
       with:
