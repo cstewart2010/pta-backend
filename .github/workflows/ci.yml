@@ -79,9 +79,6 @@ jobs:
     #     name: webapp
     #     path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
-    - name: list files
-      run: ls -la
-
     - name: Restore Integration Tests
       run: dotnet restore "${{ env.INT_TEST_WORKING_DIRECTORY }}"
 
@@ -91,21 +88,15 @@ jobs:
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
 
-    - name: Add Quality Gate
-      run: |
-        cat <<EOF > "${{ env.ALLURE_RESULTS_PATH }}/quality-gate.json"
-        {
-          "qualityGate": {
-            "rules": [
-              "maxFailures": 0
-            ]
-          }
-        }
-        EOF
+    - name: Install allure
+      run: npm install -g allure
+
+    - name: Generate Allure Report
+      run: allure generate
       
     - name: Run Allure Action
       if: always()
       uses: allure-framework/allure-action@v0
       with:
-        report-directory: ${{ env.ALLURE_RESULTS_PATH }}
+        report-directory: ./allure-report
         github-token: ${{ secrets.ALLURE_REPORT }}
