@@ -2,6 +2,6 @@
 
 internal static class EnvironmentVariableNames
 {
-    public const string Database = "Database";
-    public const string MongoDBConnectionString = "MongoDBConnectionString";
+    public const string Database = nameof(Database);
+    public const string MongoDBConnectionString = nameof(MongoDBConnectionString);
 }

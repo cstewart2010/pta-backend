@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36202.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonTabletopAdventures.CoreApi", "PokemonTabletopAdventures.CoreApi\PokemonTabletopAdventures.CoreApi.csproj", "{19DE7314-AADA-4386-86FD-DD65BFDC7EE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonTabletopAdventures.CoreApi", "src\PokemonTabletopAdventures.CoreApi\PokemonTabletopAdventures.CoreApi.csproj", "{19DE7314-AADA-4386-86FD-DD65BFDC7EE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonTabletopAdventures.CoreApi.UnitTests", "PokemonTabletopAdventures.CoreApi.UnitTests\PokemonTabletopAdventures.CoreApi.UnitTests.csproj", "{58013B45-8203-4893-AF5F-DDC7ED10656C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonTabletopAdventures.CoreApi.UnitTests", "test\PokemonTabletopAdventures.CoreApi.UnitTests\PokemonTabletopAdventures.CoreApi.UnitTests.csproj", "{58013B45-8203-4893-AF5F-DDC7ED10656C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonTabletopAdventures.CoreApi.IntegrationTests", "PokemonTabletopAdventures.CoreApi.IntegrationTests\PokemonTabletopAdventures.CoreApi.IntegrationTests.csproj", "{4740268C-C5C0-4E39-8BA7-CBFC08E787E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonTabletopAdventures.CoreApi.IntegrationTests", "test\PokemonTabletopAdventures.CoreApi.IntegrationTests\PokemonTabletopAdventures.CoreApi.IntegrationTests.csproj", "{4740268C-C5C0-4E39-8BA7-CBFC08E787E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

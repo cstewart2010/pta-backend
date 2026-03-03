@@ -25,7 +25,7 @@ internal class PokemonServiceTests
         var mockRepository = Substitute.For<IRepositoryService>();
         _pokedexCollection = new PokedexCollectionImpl();
         _pokemonCollection = new PokemonCollectionImpl();
-        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(_pokedexCollection);
+        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.PokeDex).Returns(_pokedexCollection);
         mockRepository.GetCollection<PokemonDto>(MongoCollection.Pokemon).Returns(_pokemonCollection);
         _pokedexService = new PokedexService(mockRepository, Shared.DtoToModelMapper, Substitute.For<ILogger<PokedexService>>());
         _sut = new PokemonService(mockRepository, _pokedexService, Shared.DtoToModelMapper, Shared.ModelToDtoMapper, Substitute.For<ILogger<PokemonService>>());

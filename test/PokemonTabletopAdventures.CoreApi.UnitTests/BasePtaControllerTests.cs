@@ -69,7 +69,7 @@ public abstract class BasePtaControllerTests
         _mockRepository.GetCollection<UserDto>(MongoCollection.Users).Returns(userCollection);
         _mockRepository.GetCollection<ShopDto>(MongoCollection.Shops).Returns(shopCollection);
         _mockRepository.GetCollection<SettingDto>(MongoCollection.Settings).Returns(settingCollection);
-        _mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(pokedexCollection);
+        _mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.PokeDex).Returns(pokedexCollection);
         _mockRepository.GetCollection<PokemonDto>(MongoCollection.Pokemon).Returns(pokemonCollection);
         _mockRepository.GetCollection<TrainerDto>(MongoCollection.Trainers).Returns(trainerCollection);
         _mockRepository.GetCollection<NpcDto>(MongoCollection.NPCs).Returns(npcCollection);

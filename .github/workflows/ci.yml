@@ -13,11 +13,13 @@ env:
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
   APP_WORKING_DIRECTORY: src/PokemonTabletopAdventures.CoreApi
-  UNIT_TEST_WORKING_DIRECTORY: src/PokemonTabletopAdventures.CoreApi.UnitTests
-  INT_TEST_WORKING_DIRECTORY: src/PokemonTabletopAdventures.CoreApi.IntegrationTests
-  AZURE_WEBAPP_NAME: pta-2
+  UNIT_TEST_WORKING_DIRECTORY: test/PokemonTabletopAdventures.CoreApi.UnitTests
+  INT_TEST_WORKING_DIRECTORY: test/PokemonTabletopAdventures.CoreApi.IntegrationTests
+  AZURE_WEBAPP_NAME_TEST: pta-2
+  AZURE_WEBAPP_NAME: TheReplacementPTAServicesCore20220223200441
   AZURE_WEBAPP_PACKAGE_PATH: PokemonTabletopAdventures.CoreApi/published
-  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
+  AZURE_WEBAPP_PUBLISH_PROFILE_TEST: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
   ALLURE_RESULTS_PATH: ./src/PokemonTabletopAdventures.CoreApi.IntegrationTests/bin/Release/net8.0/allure-results
 jobs:
   Build-Test-Deploy:
@@ -37,11 +39,11 @@ jobs:
     - name: Add Source
       run: dotnet nuget add source --username cstewart2010 --password ${{ secrets.DEPLOY_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/cstewart2010/index.json"
 
-    - name: Restore Unit Tests
-      run: dotnet restore "${{ env.UNIT_TEST_WORKING_DIRECTORY }}"
+    - name: Restore
+      run: dotnet restore
 
-    - name: Build Unit Tests
-      run: dotnet build "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+    - name: Build
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
 
     - name: Run Unit Tests
       run: dotnet test "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --no-build --collect:"Xplat Code Coverage"
@@ -69,15 +71,9 @@ jobs:
     - name: Deploy to Test Environment
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        app-name: ${{ env.AZURE_WEBAPP_NAME_TEST }}
+        publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-
-    - name: Restore Integration Tests
-      run: dotnet restore "${{ env.INT_TEST_WORKING_DIRECTORY }}"
-
-    - name: Build Integration Tests
-      run: dotnet build "${{ env.INT_TEST_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
 
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build

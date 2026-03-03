@@ -41,7 +41,7 @@ public class TrainerServiceTests
         mockRepository.GetCollection<SettingDto>(MongoCollection.Settings).Returns(_settingCollection);
         mockRepository.GetCollection<GameDto>(MongoCollection.Games).Returns(_gameCollection);
         mockRepository.GetCollection<UserDto>(MongoCollection.Users).Returns(_userCollection);
-        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(_pokedexCollection);
+        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.PokeDex).Returns(_pokedexCollection);
         mockRepository.GetCollection<PokemonDto>(MongoCollection.Pokemon).Returns(_pokemonCollection);
         mockRepository.GetCollection<TrainerDto>(MongoCollection.Trainers).Returns(_trainerCollection);
         mockRepository.GetCollection<NpcDto>(MongoCollection.NPCs).Returns(_npcCollection);

@@ -8,7 +8,7 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 public class PokedexService(
     IRepositoryService repositoryService,
     IDtoToModelMapper dtoToModelMapper,
-    ILogger<PokedexService> logger) : AbstractMongoService<PokeDexItemDto>(repositoryService, MongoCollection.Pokedex), IPokedexService
+    ILogger<PokedexService> logger) : AbstractMongoService<PokeDexItemDto>(repositoryService, MongoCollection.PokeDex), IPokedexService
 {
     public async Task DeleteTrainerDex(Guid trainerId, Guid gameId)
     {

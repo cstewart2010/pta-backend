@@ -20,7 +20,7 @@ internal class PokedexServiceTests
     {
         var mockRepository = Substitute.For<IRepositoryService>();
         _pokedexCollection = new PokedexCollectionImpl();
-        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(_pokedexCollection);
+        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.PokeDex).Returns(_pokedexCollection);
         var mockLogger = Substitute.For<ILogger<PokedexService>>();
         _sut = new PokedexService(mockRepository, Shared.DtoToModelMapper, mockLogger);
     }

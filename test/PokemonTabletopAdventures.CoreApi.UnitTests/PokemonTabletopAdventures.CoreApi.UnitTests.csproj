@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PokemonTabletopAdventures.CoreApi\PokemonTabletopAdventures.CoreApi.csproj" />
+    <ProjectReference Include="..\..\src\PokemonTabletopAdventures.CoreApi\PokemonTabletopAdventures.CoreApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>

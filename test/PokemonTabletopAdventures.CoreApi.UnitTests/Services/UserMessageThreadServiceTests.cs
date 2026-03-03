@@ -32,7 +32,7 @@ public class UserMessageThreadServiceTests
         mockRepository.GetCollection<SettingDto>(MongoCollection.Settings).Returns(settingCollection);
         mockRepository.GetCollection<GameDto>(MongoCollection.Games).Returns(gameCollection);
         mockRepository.GetCollection<UserDto>(MongoCollection.Users).Returns(userCollection);
-        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex).Returns(pokedexCollection);
+        mockRepository.GetCollection<PokeDexItemDto>(MongoCollection.PokeDex).Returns(pokedexCollection);
         mockRepository.GetCollection<PokemonDto>(MongoCollection.Pokemon).Returns(pokemonCollection);
         mockRepository.GetCollection<TrainerDto>(MongoCollection.Trainers).Returns(trainerCollection);
         mockRepository.GetCollection<NpcDto>(MongoCollection.NPCs).Returns(npcCollection);

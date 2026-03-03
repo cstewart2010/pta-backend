@@ -61,7 +61,7 @@ public class TrainerService(
             await shopCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
             var npcCollection = _repositoryService.GetCollection<NpcDto>(MongoCollection.NPCs);
             await npcCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
-            var pokedexCollection = _repositoryService.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex);
+            var pokedexCollection = _repositoryService.GetCollection<PokeDexItemDto>(MongoCollection.PokeDex);
             await pokedexCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
         }
         else
