@@ -4,6 +4,9 @@ on:
     branches:
       - refactor
       - develop
+  push:
+    branches:
+    - main
   workflow_dispatch:
 
 env:
@@ -17,7 +20,7 @@ env:
   AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
   ALLURE_RESULTS_PATH: ./src/PokemonTabletopAdventures.CoreApi.IntegrationTests/bin/Release/net8.0/allure-results
 jobs:
-  build:
+  Build, Test, and Deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
@@ -34,47 +37,47 @@ jobs:
     - name: Add Source
       run: dotnet nuget add source --username cstewart2010 --password ${{ secrets.DEPLOY_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/cstewart2010/index.json"
 
-    # - name: Restore Unit Tests
-    #   run: dotnet restore "${{ env.UNIT_TEST_WORKING_DIRECTORY }}"
+    - name: Restore Unit Tests
+      run: dotnet restore "${{ env.UNIT_TEST_WORKING_DIRECTORY }}"
 
-    # - name: Build Unit Tests
-    #   run: dotnet build "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+    - name: Build Unit Tests
+      run: dotnet build "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
 
-    # - name: Run Unit Tests
-    #   run: dotnet test "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --no-build --collect:"Xplat Code Coverage"
+    - name: Run Unit Tests
+      run: dotnet test "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --no-build --collect:"Xplat Code Coverage"
 
-    # - name: Code Coverage Summary Report
-    #   uses: irongut/CodeCoverageSummary@v1.3.0
-    #   with:
-    #     filename: '${{ env.UNIT_TEST_WORKING_DIRECTORY }}/TestResults/*/coverage.cobertura.xml'
-    #     badge: true
-    #     format: 'markdown'
-    #     output: 'both'
+    - name: Code Coverage Summary Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: '${{ env.UNIT_TEST_WORKING_DIRECTORY }}/TestResults/*/coverage.cobertura.xml'
+        badge: true
+        format: 'markdown'
+        output: 'both'
 
-    # - name: Add Coverage PR Comment
-    #   uses: marocchino/sticky-pull-request-comment@v2
-    #   with:
-    #     recreate: true
-    #     path: code-coverage-results.md
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        recreate: true
+        path: code-coverage-results.md
 
-    # - name: Write to Job Summary
-    #   run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+    - name: Write to Job Summary
+      run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
-    # - name: Publish
-    #   run: dotnet publish "${{ env.APP_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+    - name: Publish
+      run: dotnet publish "${{ env.APP_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
 
-    # - name: Deploy to Azure WebApp
-    #   uses: azure/webapps-deploy@v2
-    #   with:
-    #     app-name: ${{ env.AZURE_WEBAPP_NAME }}
-    #     publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
-    #     package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Deploy to Test Environment
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
-    # - name: Publish Artifacts
-    #   uses: actions/upload-artifact@v4.0.0
-    #   with:
-    #     name: webapp
-    #     path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Publish Artifacts
+      uses: actions/upload-artifact@v4.0.0
+      with:
+        name: webapp
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
     - name: Restore Integration Tests
       run: dotnet restore "${{ env.INT_TEST_WORKING_DIRECTORY }}"
@@ -84,21 +87,21 @@ jobs:
 
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
-
-    - name: Install allure
-      run: npm install -g allure
+      continue-on-error: true
 
     - name: Generate Allure Report
-      run: allure generate --name "Pokemon Tabletop Adventures Api Integration Tests"
+      run: |
+        npm install -g allure
+        allure generate --name "Pokemon Tabletop Adventures Api Integration Tests"
 
-    - name: Add remoteHref to Summary
+    - name: Add remoteHref to Summary Json
       shell: pwsh
       run: |
         $x = Get-Content ./allure-report/summary.json | ConvertFrom-Json
         $x | Add-Member -Name "remoteHref" -Value "https://cstewart2010.github.io/pta-backend/" -MemberType NoteProperty
         ConvertTo-Json $x > ./allure-report/summary.json
       
-    - name: Deploy to GitHub Pages
+    - name: Deplo Allure Results to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -106,9 +109,23 @@ jobs:
         publish_branch: gh-pages
         force_orphan: true
       
-    - name: Run Allure Action
+    - name: Pin Results to PR
       if: always()
       uses: allure-framework/allure-action@v0
       with:
         report-directory: ./allure-report
         github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Deploy to Production
+      uses: azure/webapps-deploy@v2
+      if: {{ github.ref == 'ref/head/main' }}
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    - name: Publish Artifacts
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: webapp
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
