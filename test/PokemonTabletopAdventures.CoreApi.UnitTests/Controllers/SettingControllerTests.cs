@@ -256,11 +256,7 @@ public class SettingControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.AddToActiveSettingAsync(string.Empty, request);
-        
-        // assert
-        var result = response as ConflictResult;
-        Assert.That(result, Is.Not.Null);
+        Assert.ThrowsAsync<ConflictInDataException>(() => _sut.AddToActiveSettingAsync(string.Empty, request));
     }
 
     [Test]
@@ -749,11 +745,7 @@ public class SettingControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.SetSettingToActive(string.Empty, request);
-        
-        // assert
-        var result = response as ConflictResult;
-        Assert.That(result, Is.Not.Null);
+        Assert.ThrowsAsync<ConflictInDataException>(() => _sut.SetSettingToActive(string.Empty, request));
     }
 
     [Test]

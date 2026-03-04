@@ -12,7 +12,6 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 public class FeatureController(IDexService dexService, ILogger<FeatureController> logger) : IndexControllerBase(dexService)
 {
     private const DexType Type = DexType.Features;
-    private readonly ILogger<FeatureController> _logger = logger;
 
     [HttpGet(Name = nameof(GetFeatures))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
@@ -20,7 +19,7 @@ public class FeatureController(IDexService dexService, ILogger<FeatureController
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<FeatureDto>(Type, offset, limit);
+        return await GetItems<FeatureDto, FeatureController>(Type, logger, offset, limit);
     }
 
     [HttpGet("{name}", Name = nameof(GetFeature))]
@@ -28,6 +27,6 @@ public class FeatureController(IDexService dexService, ILogger<FeatureController
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetFeature(string name)
     {
-        return await GetItem<FeatureDto>(Type, name);
+        return await GetItem<FeatureDto, FeatureController>(Type, logger, name);
     }
 }

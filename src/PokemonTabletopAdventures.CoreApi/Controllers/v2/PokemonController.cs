@@ -24,16 +24,15 @@ public class PokemonController(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<PokemonController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
-    private readonly ILogger<PokemonController> _logger = logger;
-
     [HttpPost("retrieve")]
     [ProducesResponseType(typeof(RetrievePokemonResponse), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 401)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemon(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromHeader] RetrievePokemonRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.TrainerId);
+        await VerifyIdentity(sessionAuth, logger, request.TrainerId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         return Ok(new RetrievePokemonResponse { Pokemon = [model] });
     }
@@ -41,7 +40,6 @@ public class PokemonController(
     [HttpGet("retrieve/trainer")]
     [ProducesResponseType(typeof(RetrievePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
-    [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetTrainerMon(
         [FromHeader] RetrievePokemonRequest request)
     {
@@ -57,7 +55,7 @@ public class PokemonController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromHeader] RetrievePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         var models = await PokemonService.GetPokemonByTrainerId(request.TrainerId, request.GameId);
         return Ok(new RetrievePokemonResponse { Pokemon = [..models] });
     }
@@ -70,7 +68,7 @@ public class PokemonController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromHeader] RetrievePokemonRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.TrainerId);
+        await VerifyIdentity(sessionAuth, logger, request.TrainerId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var pokemon = await PokemonService.GetPokemonById(request.PokemonId);
         CheckTrainerIds(trainer, pokemon);
@@ -80,13 +78,14 @@ public class PokemonController(
 
     [HttpPatch("trade")]
     [ProducesResponseType(typeof(void), 200)]
-    [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
+    [ProducesResponseType(typeof(ProblemDetails), 409)]
     public async Task<IActionResult> TradePokemon(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] TradePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         var game = await GameService.GetGame(request.GameId, true);
         var (leftPokemon, rightPokemon) = await GetTradePokemon(request.LeftPokemonId, request.RightPokemonId);
         await UpdatePokemonTrainerIds(leftPokemon, rightPokemon);
@@ -107,11 +106,12 @@ public class PokemonController(
     [ProducesResponseType(typeof(CapturePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> CapturePokemon(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] CapturePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         var model = await BuildPokemon(request.TrainerId, request.GameId, request.Pokemon);
         await PokemonService.PostPokemon(model);
         return Ok(new CapturePokemonResponse { Pokemon = model });
@@ -121,11 +121,12 @@ public class PokemonController(
     [ProducesResponseType(typeof(CreatePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> CreateNewNpcMonAsync(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] CreatePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         var models = await AddNpcPokemon(request.Pokemon, request.TrainerId, request.GameId);
         return Ok(new CreatePokemonResponse { Pokemon = [.. models] });
     }
@@ -134,11 +135,12 @@ public class PokemonController(
     [ProducesResponseType(typeof(UpdatePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<ActionResult> UpdateHP(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokemonRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.TrainerId);
+        await VerifyIdentity(sessionAuth, logger, request.TrainerId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         CheckTrainerIds(trainer, model);
@@ -151,12 +153,13 @@ public class PokemonController(
     [ProducesResponseType(typeof(UpdatePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> SwitchForm(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokemonRequest request)
     {
         var form = request.Form!;
-        var isGm = await VerifyIdentity(sessionAuth, request.TrainerId, request.GameId);
+        var isGm = await VerifyIdentity(sessionAuth, logger, request.TrainerId, request.GameId);
         var game = await GameService.GetGame(request.GameId, isGm);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
@@ -190,11 +193,12 @@ public class PokemonController(
     [ProducesResponseType(typeof(UpdatePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> MarkPokemonAsEvolvable(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         var game = await GameService.GetGame(request.GameId, true);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
         var trainer = await TrainerService.GetTrainerById(model.TrainerId, request.GameId);
@@ -213,6 +217,7 @@ public class PokemonController(
     [ProducesResponseType(typeof(UpdatePokemonResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> EvolvePokemonAsync(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokemonRequest request)
@@ -221,7 +226,7 @@ public class PokemonController(
         {
             throw new InvalidEvolutionException(PtaExceptionParts.NullDataMessage);
         }
-        var isGm = await VerifyIdentity(sessionAuth, request.TrainerId, request.GameId);
+        var isGm = await VerifyIdentity(sessionAuth, logger, request.TrainerId, request.GameId);
         var game = await GameService.GetGame(request.GameId, isGm);
         var trainer = await TrainerService.GetTrainerById(request.TrainerId, request.GameId);
         var model = await PokemonService.GetPokemonById(request.PokemonId);
@@ -249,7 +254,7 @@ public class PokemonController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokedexRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         foreach (var item in request.PokedexItems)
         {
             var dexItem = await PokedexService.GetPokedexItem(request.TrainerId, request.GameId, item.DexNo);
@@ -275,7 +280,7 @@ public class PokemonController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdatePokedexRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         foreach (var item in request.PokedexItems)
         {
             var dexItem = await PokedexService.GetPokedexItem(request.TrainerId, request.GameId, item.DexNo);
@@ -301,7 +306,7 @@ public class PokemonController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeletePokemonRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         await PokemonService.DeletePokemon(request.PokemonId);
         return Ok();
     }

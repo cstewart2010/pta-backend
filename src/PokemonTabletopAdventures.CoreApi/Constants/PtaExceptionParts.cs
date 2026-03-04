@@ -15,7 +15,7 @@ public static class PtaExceptionParts
     public const string NullDataMessage = "EvolvePokemonData property was null";
     public const string TooManyParticipantsMessage = "Request should contain exactly one participant";
     public const string TooManyShopsMessage = "Request should contain exactly one shop";
-    public const string TooManyShopsTrainers = "Request should contain exactly one trainers";
+    public const string TooManyTrainersMessage = "Request should contain exactly one trainers";
     public const string UnauthorizedTrainerCompletionMessage = "User is not authorized for this action";
     public const string NoUserFoundMessage = "No username found with provided";
     public const string RequestAndNpcMismatch = "Request GameId does not match npc GameId";

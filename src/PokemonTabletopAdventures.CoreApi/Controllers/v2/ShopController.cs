@@ -22,17 +22,16 @@ public class ShopController(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<ShopController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexService, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
-	private readonly ILogger<ShopController> _logger = logger;
-
     [HttpPost("gm")]
     [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetShopGM(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
-        await IsUserGM(request.UserId, request.GameId, sessionAuth);
+        await IsUserGM(request.UserId, request.GameId, logger, sessionAuth);
         var shop = await shopService.GetShopById(request.ShopId, request.GameId);
         return Ok(new RetrieveShopResponse { Shops = [shop] });
     }
@@ -45,7 +44,7 @@ public class ShopController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         var shop = await shopService.GetShopById(request.ShopId, request.GameId);
         CheckShopIsActive(shop);
         return Ok(new RetrieveShopResponse { Shops = [shop] });
@@ -55,11 +54,12 @@ public class ShopController(
     [ProducesResponseType(typeof(RetrieveShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetShops(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
-        await IsUserGM(request.UserId, request.GameId, sessionAuth);
+        await IsUserGM(request.UserId, request.GameId, logger, sessionAuth);
         var shops = await shopService.GetShopsByGameId(request.GameId);
         return Ok(new RetrieveShopResponse { Shops = [..shops]});
     }
@@ -73,7 +73,7 @@ public class ShopController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
-        await IsUserGM(request.UserId, request.GameId, sessionAuth);
+        await IsUserGM(request.UserId, request.GameId, logger, sessionAuth);
         var setting = await settingService.GetSetting(request.SettingId, request.GameId, true);
         var shops = await shopService.GetShopsBySetting(setting);
         return Ok(new RetrieveShopResponse { Shops = [.. shops] });
@@ -88,7 +88,7 @@ public class ShopController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         var setting = await settingService.GetSetting(request.SettingId, request.GameId, false);
         var shops = await shopService.GetShopsBySetting(setting);
         return Ok(new RetrieveShopResponse { Shops = [.. shops.Where(shop => shop.IsActive)] });
@@ -98,11 +98,12 @@ public class ShopController(
     [ProducesResponseType(typeof(CreateShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> CreateShop(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] CreateShopRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, logger, sessionAuth);
         foreach (var shop in request.Shops)
         {
             shop.GameId = request.GameId;
@@ -116,11 +117,12 @@ public class ShopController(
     [ProducesResponseType(typeof(UpdateShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> UpdateShop(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateShopRequest request)
     {
-        await IsUserGM(request.UserId, request.GameId, sessionAuth);
+        await IsUserGM(request.UserId, request.GameId, logger, sessionAuth);
         foreach (var requestShop in request.Shops)
         {
             var shop = await shopService.GetShopById(requestShop.ShopId, request.GameId);
@@ -137,11 +139,12 @@ public class ShopController(
     [ProducesResponseType(typeof(UpdateShopResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> PurchaseFromShop(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateShopRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         if (request.Shops.Count != 1)
         {
             throw new InvalidShopException(PtaExceptionParts.TooManyShopsMessage);
@@ -176,11 +179,12 @@ public class ShopController(
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<ActionResult> DeleteShop(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteShopRequest request)
     {
-        await IsUserGM(request.UserId, request.GameId, sessionAuth);
+        await IsUserGM(request.UserId, request.GameId, logger, sessionAuth);
         await shopService.DeleteShop(request.ShopId, request.GameId);
         return Ok();
     }
@@ -189,11 +193,12 @@ public class ShopController(
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<ActionResult> DeleteShopsByGameId(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteShopRequest request)
     {
-        await IsUserGM(request.UserId, request.GameId, sessionAuth);
+        await IsUserGM(request.UserId, request.GameId, logger, sessionAuth);
         await shopService.DeleteShopByGameId(request.GameId);
         return Ok();
     }

@@ -29,6 +29,7 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemonByName(string name)
     {
+        logger.LogInformation("Retrieving pokemon {name}", name);
         var entries = await _basePokemonService.GetPokedexEntry(name, "Base");
         return Ok(entries);
     }
@@ -38,19 +39,16 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemonByForm(string form)
     {
+        logger.LogInformation("Retrieving all pokemon");
         var entries = await _basePokemonService.GetDexEntries<BasePokemonDto>(Type);
+        logger.LogInformation("Filtering pokemon by form {form}", form);
         var formData = entries.Where(pokemon => pokemon.Form.Contains(form, StringComparison.InvariantCultureIgnoreCase))
             .Select(pokemon => new FormData
             {
                 Name = pokemon.Name,
                 Form = pokemon.Form
             }).ToList();
-        if (formData.Count != 0)
-        {
-            return Ok(new FormDataResponse { Data = formData });
-        }
-
-        throw new ItemNotFoundException(form);
+        return formData.Count != 0 ? Ok(new FormDataResponse { Data = formData }) : throw new ItemNotFoundException(form);
     }
 
     [HttpGet("{name}form/{form}", Name = nameof(GetPokemonByNameAndForm))]
@@ -58,6 +56,7 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemonByNameAndForm(string name, string form)
     {
+        logger.LogInformation("Retrieving pokemon {name}-{form}", name, form);
         var entries = await _basePokemonService.GetPokedexEntry(name, form);
         return Ok(entries);
     }

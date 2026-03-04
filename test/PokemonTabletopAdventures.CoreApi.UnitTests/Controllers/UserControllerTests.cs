@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PokemonTabletopAdventures.CoreApi.Controllers.v2;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.Models.Users;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Controllers;
@@ -81,7 +82,7 @@ public class UserControllerTests : BasePtaControllerTests
     }
 
     [Test]
-    public async Task GetUsers_NotAdmin_ReturnsUnauthorized()
+    public void GetUsers_NotAdmin_ReturnsUnauthorized()
     {
         // arrange
         var request = new RetrieveUserRequest
@@ -92,10 +93,7 @@ public class UserControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.GetUsers(string.Empty, request);
-        
-        // assert
-        Assert.That(response, Is.InstanceOf<UnauthorizedResult>());
+        Assert.ThrowsAsync<UserNotAdminException>(() => _sut.GetUsers(string.Empty, request));
     }
 
     [Test]
@@ -134,10 +132,7 @@ public class UserControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.ForceGetMessage(string.Empty, request);
-        
-        // assert
-        Assert.That(response, Is.InstanceOf<UnauthorizedResult>());
+        Assert.ThrowsAsync<UserNotAdminException>(() =>  _sut.ForceGetMessage(string.Empty, request));
     }
 
     [Test]
@@ -200,10 +195,7 @@ public class UserControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.GetMessage(string.Empty, request);
-        
-        // assert
-        Assert.That(response, Is.InstanceOf<ConflictResult>());
+        Assert.ThrowsAsync<ConflictInDataException>(() => _sut.GetMessage(string.Empty, request));
     }
 
     [Test]
@@ -388,7 +380,7 @@ public class UserControllerTests : BasePtaControllerTests
     }
 
     [Test]
-    public async Task DeleteUser_Admin_ReturnsBadRequest()
+    public void DeleteUser_Admin_ReturnsBadRequest()
     {
         // arrange
         var request = new DeleteUserRequest
@@ -397,10 +389,7 @@ public class UserControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.DeleteUser(string.Empty, request);
-        
-        // assert
-        Assert.That(response, Is.InstanceOf<BadRequestResult>());
+        Assert.ThrowsAsync<UserNotAdminException>(() => _sut.DeleteUser(string.Empty, request));
     }
 
     [Test]
@@ -430,7 +419,7 @@ public class UserControllerTests : BasePtaControllerTests
     }
 
     [Test]
-    public async Task ForceDeleteUser_NotAdmin_ReturnsUnauthorized()
+    public void ForceDeleteUser_NotAdmin_ReturnsUnauthorized()
     {
         // arrange
         var request = new DeleteUserRequest
@@ -440,14 +429,11 @@ public class UserControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.ForceDeleteUser(string.Empty, request);
-        
-        // assert
-        Assert.That(response, Is.InstanceOf<UnauthorizedResult>());
+        Assert.ThrowsAsync<UserNotAdminException>(() => _sut.ForceDeleteUser(string.Empty, request));
     }
 
     [Test]
-    public async Task ForceDeleteUser_SameAdmin_ReturnsBadRequest()
+    public void ForceDeleteUser_SameAdmin_ReturnsBadRequest()
     {
         // arrange
         var request = new DeleteUserRequest
@@ -457,14 +443,11 @@ public class UserControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.ForceDeleteUser(string.Empty, request);
-        
-        // assert
-        Assert.That(response, Is.InstanceOf<BadRequestResult>());
+        Assert.ThrowsAsync<PtaUnauthorizedException>(() => _sut.ForceDeleteUser(string.Empty, request));
     }
 
     [Test]
-    public async Task ForceDeleteUser_DifferentAdmin_ReturnsBadRequest()
+    public void ForceDeleteUser_DifferentAdmin_ReturnsBadRequest()
     {
         // arrange
         var request = new DeleteUserRequest
@@ -474,9 +457,6 @@ public class UserControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.ForceDeleteUser(string.Empty, request);
-        
-        // assert
-        Assert.That(response, Is.InstanceOf<BadRequestResult>());
+        Assert.ThrowsAsync<PtaUnauthorizedException>(() => _sut.ForceDeleteUser(string.Empty, request));
     }
 }
