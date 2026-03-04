@@ -68,10 +68,15 @@ internal class Startup(IConfiguration configuration)
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+            options.RoutePrefix = "swagger";
+        });
+        
         if (env.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
         }
 
@@ -87,6 +92,8 @@ internal class Startup(IConfiguration configuration)
         app.UseAuthorization();
 
         app.UseWebSockets();
+        
+        app.UseStaticFiles();
 
         app.UseEndpoints(endpoints =>
         {
