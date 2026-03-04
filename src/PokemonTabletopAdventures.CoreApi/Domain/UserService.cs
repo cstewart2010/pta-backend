@@ -19,7 +19,7 @@ public class UserService(
         logger.LogInformation("Removing user {userId} from database", userId);
         await ThrowIfNull(
             userId,
-            id => Collection.DeleteAsync(user => user.UserId == id),
+            id => Collection.DeleteAsync(user => user.UserId == id, logger),
             PropertyNames.UserId);
         
         var trainers = await trainerService.GetAllUserTrainers(userId);
@@ -34,7 +34,7 @@ public class UserService(
     {
         var dto = await ThrowIfNull(
             id,
-            x => Collection.GetOneAsync(user => user.UserId == x),
+            x => Collection.GetOneAsync(user => user.UserId == x, logger),
             PropertyNames.UserId);
 
         return await dtoToModelMapper.ParseFromDto(dto);
@@ -44,7 +44,7 @@ public class UserService(
     {
         var dto = await ThrowIfNull(
             username,
-            x => Collection.GetOneAsync(user => user.Username.Equals(x, StringComparison.CurrentCultureIgnoreCase)),
+            x => Collection.GetOneAsync(user => user.Username.Equals(x, StringComparison.CurrentCultureIgnoreCase), logger),
             PropertyNames.Username);
 
         return await dtoToModelMapper.ParseFromDto(dto);
@@ -52,13 +52,13 @@ public class UserService(
 
     public async Task<ICollection<User>> GetUsers()
     {
-        var dtos = await Collection.GetManyAsync(user => true);
+        var dtos = await Collection.GetManyAsync(user => true, logger);
         return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 
     public async Task<ICollection<User>> GetUsers(int offset, int limit)
     {
-        var dtos = await Collection.GetManyAsync(user => true, offset, limit);
+        var dtos = await Collection.GetManyAsync(user => true, offset, limit, logger);
         return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 
@@ -67,12 +67,12 @@ public class UserService(
         var dto = await modelToDtoMapper.ParseFromModel(user);
         dto.PasswordHash = passwordHash;
         dto.IsOnline = true;
-        await PostUniqueDocument(dto, x => x.UserId == user.UserId);
+        await PostUniqueDocument(dto, x => x.UserId == user.UserId, logger);
     }
 
     public async Task<User> UpdateUser(User updatedUser)
     {
-        var dto = (await Collection.GetOneAsync(user => user.UserId == updatedUser.UserId)) ?? throw new UserNotFoundException(updatedUser.UserId);
+        var dto = (await Collection.GetOneAsync(user => user.UserId == updatedUser.UserId, logger)) ?? throw new UserNotFoundException(updatedUser.UserId);
         dto.Games = updatedUser.Games ?? dto.Games;
         dto.Messages = updatedUser.Messages ?? dto.Messages;
         dto.SiteRole = updatedUser.SiteRole;
@@ -80,7 +80,8 @@ public class UserService(
         await UpsertDocument(
             user => user.UserId,
             updatedUser.UserId,
-            dto);
+            dto,
+            logger);
 
         return await GetUserById(dto.UserId);
     }
@@ -90,6 +91,7 @@ public class UserService(
         var dto = await UpdateDocument(
             userId,
             user => user.UserId == userId,
+            logger,
             new UpdateData(PropertyNames.ActivityToken, token));
 
         return await dtoToModelMapper.ParseFromDto(dto);
@@ -100,6 +102,7 @@ public class UserService(
         var dto = await UpdateDocument(
             userId,
             user => user.UserId == userId,
+            logger,
             UserStatusUpdate(isOnline));
 
         return await dtoToModelMapper.ParseFromDto(dto);

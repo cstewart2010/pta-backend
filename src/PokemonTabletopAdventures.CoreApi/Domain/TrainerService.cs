@@ -30,6 +30,7 @@ public class TrainerService(
         var dto = await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
+            logger,
             new UpdateData(PropertyNames.Origin, origin),
             new UpdateData(PropertyNames.TrainerClasses, new[] { trainerClass }),
             new UpdateData(PropertyNames.Feats, feats),
@@ -44,25 +45,25 @@ public class TrainerService(
         logger.LogInformation("Deleting trainer {id} from game {gameId}", userId, gameId);
         var trainer = await ThrowIfNull(
             userId,
-            id => Collection.DeleteAsync(x => x.TrainerId == id && x.GameId == gameId),
+            id => Collection.DeleteAsync(x => x.TrainerId == id && x.GameId == gameId, logger),
             PropertyNames.TrainerId);
 
         if (trainer.IsGM)
         {
             var gameCollection = _repositoryService.GetCollection<GameDto>(MongoCollection.Games);
-            await gameCollection.DeleteAsync(x => x.GameId == trainer.GameId);
+            await gameCollection.DeleteAsync(x => x.GameId == trainer.GameId, logger);
             var pokemonCollection = _repositoryService.GetCollection<PokemonDto>(MongoCollection.Pokemon);
-            await pokemonCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
+            await pokemonCollection.DeleteManyAsync(x => x.GameId == trainer.GameId, logger);
             var trainerCollection = _repositoryService.GetCollection<TrainerDto>(MongoCollection.Trainers);
-            await trainerCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
+            await trainerCollection.DeleteManyAsync(x => x.GameId == trainer.GameId, logger);
             var settingCollection = _repositoryService.GetCollection<SettingDto>(MongoCollection.Settings);
-            await settingCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
+            await settingCollection.DeleteManyAsync(x => x.GameId == trainer.GameId, logger);
             var shopCollection = _repositoryService.GetCollection<ShopDto>(MongoCollection.Shops);
-            await shopCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
+            await shopCollection.DeleteManyAsync(x => x.GameId == trainer.GameId, logger);
             var npcCollection = _repositoryService.GetCollection<NpcDto>(MongoCollection.NPCs);
-            await npcCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
+            await npcCollection.DeleteManyAsync(x => x.GameId == trainer.GameId, logger);
             var pokedexCollection = _repositoryService.GetCollection<PokeDexItemDto>(MongoCollection.PokeDex);
-            await pokedexCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
+            await pokedexCollection.DeleteManyAsync(x => x.GameId == trainer.GameId, logger);
         }
         else
         {
@@ -83,7 +84,7 @@ public class TrainerService(
     {
         var dto = await ThrowIfNull(
             (id, gameId),
-            x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId && !trainer.IsComplete),
+            x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId && !trainer.IsComplete, logger),
             PropertyNames.IsComplete);
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
@@ -93,7 +94,7 @@ public class TrainerService(
     {
         var dto = await ThrowIfNull(
             (id, gameId),
-            x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId),
+            x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId, logger),
             PropertyNames.TrainerId);
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
@@ -101,7 +102,7 @@ public class TrainerService(
 
     public async Task<Trainer?> GetTrainerByUsername(string username, Guid gameId)
     {
-        var dto = await Collection.GetOneAsync(x => x.TrainerName.Equals(username, StringComparison.CurrentCultureIgnoreCase) && x.GameId == gameId);
+        var dto = await Collection.GetOneAsync(x => x.TrainerName.Equals(username, StringComparison.CurrentCultureIgnoreCase) && x.GameId == gameId, logger);
         if (dto == null)
         {
             return null;
@@ -112,14 +113,14 @@ public class TrainerService(
 
     public async Task<ICollection<Trainer>> GetTrainersByGameId(Guid gameId)
     {
-        var dtos = await Collection.GetManyAsync(trainer => trainer.GameId == gameId);
+        var dtos = await Collection.GetManyAsync(trainer => trainer.GameId == gameId, logger);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService)));
     }
 
     public async Task PostTrainer(Trainer trainer)
     {
         var dto = await modelToDtoMapper.ParseFromModel(trainer);
-        await PostUniqueDocument(dto, x => trainer.TrainerId == x.TrainerId && trainer.GameId == x.GameId);
+        await PostUniqueDocument(dto, x => trainer.TrainerId == x.TrainerId && trainer.GameId == x.GameId, logger);
     }
 
     public async Task<Trainer> UpdateTrainer(Trainer updatedTrainer)
@@ -128,7 +129,8 @@ public class TrainerService(
         await UpsertDocument(
             trainer => trainer.TrainerId,
             updatedTrainer.TrainerId,
-            dto);
+            dto,
+            logger);
 
         return updatedTrainer;
     }
@@ -141,6 +143,7 @@ public class TrainerService(
         var dto = await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
+            logger,
             new UpdateData(PropertyNames.Honors, honors));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
@@ -155,6 +158,7 @@ public class TrainerService(
         var dto = await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
+            logger,
             new UpdateData(PropertyNames.Items, itemListDto));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
@@ -168,6 +172,7 @@ public class TrainerService(
         var dto = await UpdateDocument(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
+            logger,
             TrainerStatusUpdate(isOnline));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
@@ -175,14 +180,14 @@ public class TrainerService(
 
     public async Task<ICollection<Trainer>> GetAllUserTrainers(Guid userId)
     {
-        var dtos = await  Collection.GetManyAsync(trainer => trainer.TrainerId == userId);
+        var dtos = await  Collection.GetManyAsync(trainer => trainer.TrainerId == userId, logger);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService)));
     }
 
     private async Task UpdateUserAfterTrainerDeletion(Guid gameId, Guid userId)
     {
         var userCollection = _repositoryService.GetCollection<UserDto>(MongoCollection.Users);
-        var user = await userCollection.GetOneAsync(x => x.UserId == userId);
+        var user = await userCollection.GetOneAsync(x => x.UserId == userId, logger);
         if (user != null)
         {
             user.Games.Remove(gameId);
@@ -190,7 +195,8 @@ public class TrainerService(
             await userCollection.PutAsync(
                 x => x.UserId,
                 user.UserId,
-                user);
+                user,
+                logger);
         }
     }
 

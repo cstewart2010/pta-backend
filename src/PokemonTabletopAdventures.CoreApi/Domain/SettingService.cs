@@ -17,18 +17,18 @@ public class SettingService(
         logger.LogInformation("Deleting setting {id}", id);
         await ThrowIfNull(
             id,
-            settingId => Collection.DeleteAsync(setting => setting.SettingId == settingId && setting.GameId == gameId),
+            settingId => Collection.DeleteAsync(setting => setting.SettingId == settingId && setting.GameId == gameId, logger),
             PropertyNames.SettingId);
     }
 
     public async Task DeleteSettingsByGameId(Guid gameId)
     {
-        await Collection.DeleteManyAsync(setting => setting.GameId == gameId);
+        await Collection.DeleteManyAsync(setting => setting.GameId == gameId, logger);
     }
 
     public async Task<Setting?> GetActiveSetting(Guid gameId, bool isGM)
     {
-        var dto = await Collection.GetOneAsync(setting => setting.GameId == gameId && setting.IsActive);
+        var dto = await Collection.GetOneAsync(setting => setting.GameId == gameId && setting.IsActive, logger);
         if (dto == null)
         {
             return null;
@@ -39,7 +39,7 @@ public class SettingService(
 
     public async Task<ICollection<Setting>> GetAllSettings(Guid gameId)
     {
-        var dtos = await Collection.GetManyAsync(setting => setting.GameId == gameId);
+        var dtos = await Collection.GetManyAsync(setting => setting.GameId == gameId, logger);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, true, gameId, shopService)));
     }
 
@@ -47,7 +47,7 @@ public class SettingService(
     {
         var dto = await ThrowIfNull(
             settingId,
-            id => Collection.GetOneAsync(setting => setting.SettingId == id && setting.GameId == gameId && (setting.IsActive || isGM)),
+            id => Collection.GetOneAsync(setting => setting.SettingId == id && setting.GameId == gameId && (setting.IsActive || isGM), logger),
             PropertyNames.SettingId);
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, dto.GameId, shopService);
@@ -56,7 +56,7 @@ public class SettingService(
     public async Task PostSetting(Setting setting)
     {
         var dto = await modelToDtoMapper.ParseFromModel(setting);
-        await PostUniqueDocument(dto, x => x.SettingId == setting.SettingId);
+        await PostUniqueDocument(dto, x => x.SettingId == setting.SettingId, logger);
     }
 
     public async Task<Setting> UpdateSetting(Setting updatedSetting, bool isGM)
@@ -65,7 +65,8 @@ public class SettingService(
         await UpsertDocument(
             setting => setting.SettingId,
             updatedSetting.SettingId,
-            dto);
+            dto,
+            logger);
 
         return await GetSetting(dto.SettingId, dto.GameId, isGM);
     }

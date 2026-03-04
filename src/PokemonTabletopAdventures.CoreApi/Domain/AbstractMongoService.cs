@@ -18,40 +18,44 @@ public abstract class AbstractMongoService<TDto>(
         return item;
     }
 
-    protected async Task PostDocument (TDto entity)
+    protected async Task PostDocument<TService>(TDto entity, ILogger<TService> logger)
     {
-        await PostDocument(Collection, entity);
+        await PostDocument(Collection, entity, logger);
     }
 
-    protected async Task PostUniqueDocument(TDto entity, Expression<Func<TDto, bool>> filter)
+    protected async Task PostUniqueDocument<TService>(TDto entity, Expression<Func<TDto, bool>> filter, ILogger<TService> logger)
     {
-        var check = await Collection.GetOneAsync(filter);
+        logger.LogInformation("Checking for an item matching filter in {CollectionName}", typeof(TDto).Name);
+        var check = await Collection.GetOneAsync(filter, logger);
         if (check != null)
         {
+            logger.LogWarning("Matching item found in {CollectionName}", typeof(TDto).Name);
             throw new DuplicateEntryException(typeof(TDto));
         }
-        await PostDocument(Collection, entity);
+        await PostDocument(Collection, entity, logger);
     }
 
-    protected async Task PostDocument<TCollection>(
+    protected async Task PostDocument<TCollection, TService>(
         ICollectionService<TCollection> collection,
-        TCollection entity)
+        TCollection entity,
+        ILogger<TService> logger)
         where TCollection : IDocument
     {
-        await collection.PostAsync(entity);
+        await collection.PostAsync(entity, logger);
     }
 
-    protected async Task UpsertDocument(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity)
+    protected async Task UpsertDocument<TService>(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity, ILogger<TService> logger)
     {
-        await Collection.PutAsync(filter, id, entity);
+        await Collection.PutAsync(filter, id, entity,  logger);
     }
 
-    protected async Task<TDto> UpdateDocument<TInput>(
+    protected async Task<TDto> UpdateDocument<TInput, TService>(
         TInput id,
         Expression<Func<TDto, bool>> filter,
+        ILogger<TService> logger,
         params UpdateData[] updates)
     {
-        var item = await Collection.PatchAsync(filter, updates)
+        var item = await Collection.PatchAsync(filter, logger, updates)
             ?? throw new UpdateException($"Failed to update {typeof(TDto).Name} {id}");
         return item;
     }

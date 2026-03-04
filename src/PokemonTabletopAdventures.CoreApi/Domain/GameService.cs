@@ -21,7 +21,7 @@ public class GameService(
         logger.LogInformation("Deleting game {id}", id);
         await ThrowIfNull(
             id,
-            gameId => Collection.DeleteAsync(game => game.GameId == gameId),
+            gameId => Collection.DeleteAsync(game => game.GameId == gameId, logger),
             PropertyNames.GameId);
 
         logger.LogInformation("Deleting relevant items to game {id}", id);
@@ -34,13 +34,13 @@ public class GameService(
     public async Task<ICollection<Game>> GetAllGames(string nickname)
     {
         var dtos = await Collection.GetManyAsync(game =>
-            game.Nickname.Contains(nickname, StringComparison.CurrentCultureIgnoreCase));
+            game.Nickname.Contains(nickname, StringComparison.CurrentCultureIgnoreCase), logger);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, false, npcService, settingService, trainerService)));
     }
 
     public async Task<ICollection<Game>> GetAllGamesWithUser(User user)
     {
-        var dtos = await Collection.GetManyAsync(game => user.Games.Contains(game.GameId));
+        var dtos = await Collection.GetManyAsync(game => user.Games.Contains(game.GameId), logger);
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, false, npcService, settingService, trainerService)));
     }
 
@@ -48,7 +48,7 @@ public class GameService(
     {
         var dto = await ThrowIfNull(
             id,
-            x => Collection.GetOneAsync(game => game.GameId == x),
+            x => Collection.GetOneAsync(game => game.GameId == x, logger),
             PropertyNames.GameId);
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, npcService, settingService, trainerService);
@@ -62,7 +62,7 @@ public class GameService(
 
     public async Task<ICollection<Game>> GetMostRecent20Games(User user)
     {
-        var dtos = await Collection.GetManyAsync(x => !user.Games.Contains(x.GameId), 0, 20);
+        var dtos = await Collection.GetManyAsync(x => !user.Games.Contains(x.GameId), 0, 20, logger);
 
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, false, npcService, settingService, trainerService)));
     }
@@ -78,7 +78,7 @@ public class GameService(
     {
         var dto = await modelToDtoMapper.ParseFromModel(game);
         dto.PasswordHash = passwordHash;
-        await PostUniqueDocument(dto, x => x.GameId == game.GameId);
+        await PostUniqueDocument(dto, x => x.GameId == game.GameId, logger);
     }
 
     public async Task<Game> UpdateGameLogs(Game theGame, bool isGM, params Log[] logs)
@@ -88,6 +88,7 @@ public class GameService(
         var dto = await UpdateDocument(
             theGame.GameId,
             game => game.GameId == theGame.GameId,
+            logger,
             new Models.UpdateData(PropertyNames.Logs, currentLogDtos.Union(newLogDtos).ToArray()));
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, npcService, settingService, trainerService);
@@ -98,6 +99,7 @@ public class GameService(
         var dto = await UpdateDocument(
             gameId,
             game => game.GameId == gameId,
+            logger,
             new Models.UpdateData(PropertyNames.Npcs, npcIds));
 
         return await dtoToModelMapper.ParseFromDto(dto, true, npcService, settingService, trainerService);
@@ -108,6 +110,7 @@ public class GameService(
         var dto = await UpdateDocument(
             gameId,
             game => game.GameId == gameId,
+            logger,
             new Models.UpdateData(PropertyNames.IsOnline, isOnline));
 
         return await dtoToModelMapper.ParseFromDto(dto, true, npcService, settingService, trainerService);

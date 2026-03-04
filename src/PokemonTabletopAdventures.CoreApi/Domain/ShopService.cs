@@ -17,18 +17,18 @@ public class ShopService(
         logger.LogInformation("Deleting shop {id} from {gameId}", id, gameId);
         await ThrowIfNull(
             id,
-            shopId => Collection.DeleteAsync(shop => shop.ShopId == shopId && shop.GameId == gameId),
+            shopId => Collection.DeleteAsync(shop => shop.ShopId == shopId && shop.GameId == gameId, logger),
             PropertyNames.ShopId);
     }
 
     public async Task DeleteShopByGameId(Guid gameId)
     {
-        await Collection.DeleteManyAsync(shop => shop.GameId == gameId);
+        await Collection.DeleteManyAsync(shop => shop.GameId == gameId, logger);
     }
 
     public async Task<ICollection<Shop>> GetShopsByGameId(Guid gameId)
     {
-        var dtos = await Collection.GetManyAsync(shop => shop.GameId == gameId);
+        var dtos = await Collection.GetManyAsync(shop => shop.GameId == gameId, logger);
         return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 
@@ -36,7 +36,7 @@ public class ShopService(
     {
         var dto = await ThrowIfNull(
             id,
-            x => Collection.GetOneAsync(shop => shop.GameId == gameId && shop.ShopId == x),
+            x => Collection.GetOneAsync(shop => shop.GameId == gameId && shop.ShopId == x, logger),
             PropertyNames.ShopId);
 
         return await dtoToModelMapper.ParseFromDto(dto);
@@ -45,14 +45,14 @@ public class ShopService(
     public async Task<ICollection<Shop>> GetShopsBySetting(Setting setting)
     {
         var shopIds = setting.Shops.Select(s => s.ShopId);
-        var dtos = await Collection.GetManyAsync(shop => shopIds.Contains(shop.ShopId) && setting.GameId == shop.GameId);
+        var dtos = await Collection.GetManyAsync(shop => shopIds.Contains(shop.ShopId) && setting.GameId == shop.GameId, logger);
         return await Task.WhenAll(dtos.Select(dtoToModelMapper.ParseFromDto));
     }
 
     public async Task PostShop(Shop shop)
     {
         var dto = await modelToDtoMapper.ParseFromModel(shop);
-        await PostUniqueDocument(dto, x => x.GameId == shop.GameId && x.ShopId == shop.ShopId);
+        await PostUniqueDocument(dto, x => x.GameId == shop.GameId && x.ShopId == shop.ShopId, logger);
     }
 
     public async Task<Shop> UpdateShop(Shop updatedShop)
@@ -61,7 +61,8 @@ public class ShopService(
         await UpsertDocument(
             shop => shop.ShopId,
             updatedShop.ShopId,
-            dto);
+            dto,
+            logger);
 
         return await GetShopById(dto.ShopId, dto.GameId);
     }
