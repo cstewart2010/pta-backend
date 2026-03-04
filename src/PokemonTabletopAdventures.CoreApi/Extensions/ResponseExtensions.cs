@@ -8,7 +8,6 @@ internal static class ResponseExtensions
     public static async Task AssignAuthAndToken(
         this HttpResponse response,
         IEncryptionService encryptionService,
-        IUserService userService,
         Guid trainerId)
     {
         var authHash = await encryptionService.HashSecret($"{RequestExtensions.AuthKey}_{trainerId}");

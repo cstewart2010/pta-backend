@@ -2,7 +2,6 @@
 
 public static class PtaExceptionParts
 {
-    public const string EmptyImportJsonMessage = "Import json was empty";
     public const string UnauthorizedPokemonUseMessage = "This pokemon can only be accessed by it's trainer or the game master";
     public const string MissingUsernameMessage = "No username found with provided";
     public const string AlreadyCaughtPokemonMessage = "You cannot catch previously caught pokemon.";

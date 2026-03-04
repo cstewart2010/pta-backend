@@ -64,7 +64,7 @@ public static class AllureUtility
         var typeName = typeof(T).Name;
         var generics = typeof(T).GetGenericArguments().Select(x => x.Name).ToList();
         var fileName = generics.Count == 0 ? typeName : $"{typeName}<{string.Join(", ", generics)}>";
-        AllureApi.AddAttachment(fileName, "application/json", bytes, ".json");
+        AllureApi.AddAttachment(fileName, "text/plain", bytes, ".json");
         return result;
     }
 
@@ -73,7 +73,10 @@ public static class AllureUtility
         var result = await step();
         var json = JsonSerializer.Serialize(result);
         var bytes = Encoding.ASCII.GetBytes(json);
-        AllureApi.AddAttachment(nameof(T), "application/json", bytes, ".json");
+        var typeName = typeof(T).Name;
+        var generics = typeof(T).GetGenericArguments().Select(x => x.Name).ToList();
+        var fileName = generics.Count == 0 ? typeName : $"{typeName}<{string.Join(", ", generics)}>";
+        AllureApi.AddAttachment(fileName, "text/plain", bytes, ".json");
         return result;
     }
 }

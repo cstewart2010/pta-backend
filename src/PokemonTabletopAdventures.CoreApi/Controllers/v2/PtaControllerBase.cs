@@ -98,7 +98,7 @@ public abstract class PtaControllerBase(
 
     protected async Task AssignAuthAndToken(Guid id)
     {
-        await Response.AssignAuthAndToken(encryptionService, UserService, id);
+        await Response.AssignAuthAndToken(encryptionService, id);
     }
 
     protected async Task<IEnumerable<Log>> RemoveItemsFromTrainer(Trainer trainer, ICollection<Item> items)
