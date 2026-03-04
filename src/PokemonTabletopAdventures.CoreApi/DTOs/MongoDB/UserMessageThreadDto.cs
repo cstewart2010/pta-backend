@@ -18,5 +18,5 @@ public class UserMessageThreadDto : IDocument
     /// <summary>
     /// Collection of messages shared between two PTA Users
     /// </summary>
-    public IEnumerable<UserMessageDto> Messages { get; set; } = [];
+    public ICollection<UserMessageDto> Messages { get; set; } = [];
 }

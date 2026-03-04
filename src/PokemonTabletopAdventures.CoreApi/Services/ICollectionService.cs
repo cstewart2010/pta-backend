@@ -1,9 +1,10 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using System.Linq.Expressions;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 
 namespace PokemonTabletopAdventures.CoreApi.Services;
 
-public interface ICollectionService<TDto>
+public interface ICollectionService<TDto> where TDto : IDocument
 {
     public Task<TDto?> GetOneAsync(Expression<Func<TDto, bool>> filter);
     public Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter);

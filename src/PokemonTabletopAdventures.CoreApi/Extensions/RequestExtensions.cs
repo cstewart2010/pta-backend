@@ -16,52 +16,28 @@ internal static class RequestExtensions
 
     internal static string AuthKey { get; }
 
-    public static string? GetJsonFromRequest(this HttpRequest request)
-    {
-        var jsonFile = request.Form.Files.First(file => Path.GetExtension(file.FileName).Equals(Paths.JsonExt, StringComparison.CurrentCultureIgnoreCase));
-        if (jsonFile.Length > 0)
-        {
-            using var reader = new StreamReader(jsonFile.OpenReadStream());
-            var json = reader.ReadToEnd();
-            reader.Close();
-            return json;
-        }
-
-        return null;
-    }
-
     public static void IsUserGM(
         this HttpRequest request,
         IEncryptionService encryptionService,
-        string accessToken,
         string sessionAuth,
         User user,
         Trainer gameMaster)
     {
         var isAdmin = user.SiteRole == UserRoleOnSite.SiteAdmin;
-        if ((gameMaster.IsGM) == true || isAdmin)
+        if (!gameMaster.IsGM && !isAdmin)
         {
-            request.VerifyIdentity(user, encryptionService, accessToken, sessionAuth);
+            throw new PtaUnauthorizedException($"User {gameMaster.TrainerId} is not a GM or Admin");
         }
-
-        throw new PtaUnauthorizedException($"User {gameMaster.TrainerId} is not a GM");
+        
+        request.VerifyIdentity(user, encryptionService, sessionAuth);
     }
 
     public static void VerifyIdentity(
         this HttpRequest request,
         User user,
         IEncryptionService encryptionService,
-        string accessToken,
         string sessionAuth)
     {
-#if !DEBUG
-        if (user.ActivityToken != accessToken)
-        {
-            throw new Exceptions.PtaUnauthorizedException(PtaExceptionParts.ExpiredTokenMessage);
-        }
-
-        encryptionService.ValidateToken(accessToken, DateTime.UtcNow);
-        encryptionService.VerifySecret(AuthKey, sessionAuth);
-#endif
+        encryptionService.VerifySecret($"{AuthKey}_{user.UserId}", sessionAuth);
     }
 }

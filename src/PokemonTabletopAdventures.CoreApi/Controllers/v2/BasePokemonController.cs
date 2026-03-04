@@ -14,12 +14,12 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
 {
     private const DexType Type = DexType.BasePokemon;
     private readonly IDexService _basePokemonService = basePokemonService;
-    private readonly ILogger<BasePokemonController> _logger = logger;
 
     [HttpGet(Name = nameof(GetAllPokemon))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
     public async Task<IActionResult> GetAllPokemon()
     {
+        logger.LogInformation("Retrieving all pokemon");
         var response = await DexService.GetOrderedIndexCollectionResponse();
         return Ok(response);
     }
@@ -39,7 +39,7 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
     public async Task<IActionResult> GetPokemonByForm(string form)
     {
         var entries = await _basePokemonService.GetDexEntries<BasePokemonDto>(Type);
-        var formData = entries.Where(pokemon => pokemon.Form.Contains(form))
+        var formData = entries.Where(pokemon => pokemon.Form.Contains(form, StringComparison.InvariantCultureIgnoreCase))
             .Select(pokemon => new FormData
             {
                 Name = pokemon.Name,

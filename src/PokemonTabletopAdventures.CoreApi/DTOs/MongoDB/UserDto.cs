@@ -53,5 +53,5 @@ public class UserDto : IAuthenticated, IDocument
     /// <summary>
     /// List of PTA user's messages
     /// </summary>
-    public IEnumerable<Guid> Messages { get; set; } = [];
+    public ICollection<Guid> Messages { get; set; } = [];
 }

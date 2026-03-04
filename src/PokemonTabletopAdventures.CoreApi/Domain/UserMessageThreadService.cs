@@ -9,17 +9,15 @@ public class UserMessageThreadService(
     IRepositoryService repositoryService,
     IUserService userService,
     IDtoToModelMapper dtoToModelMapper,
-    IModelToDtoMapper modelToDtoMapper) : AbstractMongoService<UserMessageThreadDto>(repositoryService, MongoCollection.UserMessageThreads), IUserMessageThreadService
+    IModelToDtoMapper modelToDtoMapper,
+    ILogger<UserMessageThreadService> logger) : AbstractMongoService<UserMessageThreadDto>(repositoryService, MongoCollection.UserMessageThreads), IUserMessageThreadService
 {
-    private readonly IUserService _userService = userService;
-    private readonly IDtoToModelMapper _dtoToModelMapper = dtoToModelMapper;
-    private readonly IModelToDtoMapper _modelToDtoMapper = modelToDtoMapper;
-
     public async Task DeleteThread(Guid id)
     {
+        logger.LogInformation("Removing message thread {id}", id);
         var dto = await ThrowIfNull(
             id,
-            id => Collection.DeleteAsync(message => message.MessageId == id),
+            x => Collection.DeleteAsync(message => message.MessageId == x),
             PropertyNames.MessageId);
 
         var ids = dto.Messages.Select(x => x.User).Distinct();
@@ -28,9 +26,9 @@ public class UserMessageThreadService(
         {
             try
             {
-                var user = await _userService.GetUserById(userId);
+                var user = await userService.GetUserById(userId);
                 user.Messages.Remove(id);
-                await _userService.UpdateUser(user);
+                await userService.UpdateUser(user);
             }
             catch
             {
@@ -43,21 +41,21 @@ public class UserMessageThreadService(
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.GetOneAsync(message => message.MessageId == id),
+            x => Collection.GetOneAsync(message => message.MessageId == x),
             PropertyNames.MessageId);
 
-        return await _dtoToModelMapper.ParseFromDto(dto);
+        return await dtoToModelMapper.ParseFromDto(dto);
     }
 
     public async Task PostThread(UserMessageThread thread)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(thread);
+        var dto = await modelToDtoMapper.ParseFromModel(thread);
         await PostUniqueDocument(dto, x => x.MessageId == thread.MessageId);
     }
 
     public async Task<UserMessageThread> UpdateThread(UserMessageThread updatedThread)
     {
-        var dto = await _modelToDtoMapper.ParseFromModel(updatedThread);
+        var dto = await modelToDtoMapper.ParseFromModel(updatedThread);
         await UpsertDocument(
             thread => thread.MessageId,
             updatedThread.MessageId,

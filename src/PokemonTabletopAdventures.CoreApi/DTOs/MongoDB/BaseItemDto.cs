@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Text.Json.Serialization;
+using MongoDB.Bson;
 using PokemonTabletopAdventures.Models.Interfaces;
 
 namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
@@ -9,6 +10,7 @@ namespace PokemonTabletopAdventures.CoreApi.DTOs.MongoDB;
 public class BaseItemDto : IDocument, IDexDocument
 {
     /// <inheritdoc/>
+    [JsonIgnore]
     public ObjectId Id { get; set; }
 
     /// <inheritdoc/>

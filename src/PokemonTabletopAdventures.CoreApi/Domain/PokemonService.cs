@@ -23,7 +23,7 @@ public class PokemonService(
         logger.LogInformation("Getting pokemon for id {id}", id);
         var dto = await ThrowIfNull(
             id,
-            id => Collection.GetOneAsync(pokemon => pokemon.PokemonId == id),
+            x => Collection.GetOneAsync(pokemon => pokemon.PokemonId == x),
             PropertyNames.PokemonId);
 
         return await dtoToModelMapper.ParseFromDto(dto);

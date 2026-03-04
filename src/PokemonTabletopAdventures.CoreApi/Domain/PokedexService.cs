@@ -8,7 +8,7 @@ namespace PokemonTabletopAdventures.CoreApi.Domain;
 public class PokedexService(
     IRepositoryService repositoryService,
     IDtoToModelMapper dtoToModelMapper,
-    ILogger<PokedexService> logger) : AbstractMongoService<PokeDexItemDto>(repositoryService, MongoCollection.Pokedex), IPokedexService
+    ILogger<PokedexService> logger) : AbstractMongoService<PokeDexItemDto>(repositoryService, MongoCollection.PokeDex), IPokedexService
 {
     public async Task DeleteTrainerDex(Guid trainerId, Guid gameId)
     {
@@ -16,12 +16,13 @@ public class PokedexService(
         await Collection.DeleteManyAsync(dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId);
     }
 
-    public async Task<PokedexItem> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo)
+    public async Task<PokedexItem?> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo)
     {
-        var dto = await ThrowIfNull(
-            (trainerId, gameId, dexNo),
-            x => Collection.GetOneAsync(dexItem => dexItem.TrainerId == x.trainerId && dexItem.GameId == x.gameId && dexItem.DexNo == x.dexNo),
-            $"{PropertyNames.TrainerId} {PropertyNames.GameId} {PropertyNames.DexNo}");
+        var dto = await Collection.GetOneAsync(x => x.TrainerId == trainerId && x.GameId == gameId && x.DexNo == dexNo);
+        if (dto == null)
+        {
+            return null;
+        }
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }

@@ -14,12 +14,6 @@ public interface IEncryptionService
     public Task<string> HashSecret(string secret);
 
     /// <summary>
-    /// Returns true if the token falls withing the time span
-    /// </summary>
-    /// <param name="token"></param>
-    public Task ValidateToken(string token, DateTime checkTime);
-
-    /// <summary>
     /// Verifys that the secret matches the encryption
     /// </summary>
     /// <param name="secret">The secret to validate</param>

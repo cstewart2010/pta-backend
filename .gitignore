@@ -341,3 +341,5 @@ ASALocalRun/
 */libmongocrypt.dylib
 */libmongocrypt.so
 */mongocrypt.dll
+
+allure*

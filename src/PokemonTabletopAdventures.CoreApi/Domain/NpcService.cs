@@ -25,7 +25,7 @@ public class NpcService(
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.GetOneAsync(npc => npc.NPCId == id),
+            x => Collection.GetOneAsync(npc => npc.NPCId == x),
             PropertyNames.NpcId);
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService);

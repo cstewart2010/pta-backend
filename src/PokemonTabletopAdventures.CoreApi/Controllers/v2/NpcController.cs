@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
-using PokemonTabletopAdventures.Models.Games;
 using PokemonTabletopAdventures.Models.Npcs;
 
 namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
@@ -21,26 +21,20 @@ public class NpcController(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<NpcController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
-    private readonly INpcService _npcService = npcService;
     private readonly ILogger<NpcController> _logger = logger;
 
     [HttpPost("retrieve")]
     [ProducesResponseType(typeof(RetrieveNpcResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 409)]
     public async Task<IActionResult> GetNpc(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveNpcRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var model = await _npcService.GetNpc(request.NpcId);
-        var gameMaster = await TrainerService.GetTrainerById(request.GameMasterId, request.GameId);
-        if (gameMaster.GameId != model.GameId)
-        {
-            return Conflict();
-        }
-
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        var model = await npcService.GetNpc(request.NpcId);
+        ValidateGameIds(request.GameId, model.GameId);
         return Ok(new RetrieveNpcResponse { Npcs = [model] });
     }
 
@@ -49,12 +43,11 @@ public class NpcController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetNpcsInGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveNpcRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var models = await _npcService.GetNpcsByGameId(request.GameId);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        var models = await npcService.GetNpcsByGameId(request.GameId);
         return Ok(new RetrieveNpcResponse { Npcs = [..models] });
     }
 
@@ -63,15 +56,15 @@ public class NpcController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> CreateNewNpcAsync(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] CreateNpcRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         foreach (var npc in request.Npcs)
         {
             npc.NpcId = Guid.NewGuid();
-            await _npcService.PostNpc(npc);
+            npc.GameId = request.GameId;
+            await npcService.PostNpc(npc);
         }
         return Ok(new CreateNpcResponse { Npcs = request.Npcs });
     }
@@ -82,12 +75,11 @@ public class NpcController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> AddNpcStats(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateNpcRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var updatedList = await Task.WhenAll(request.Npcs.Select(async model => await _npcService.UpdateNpc(model)));
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        var updatedList = await Task.WhenAll(request.Npcs.Select(async model => await npcService.UpdateNpc(model)));
         return Ok(new UpdateNpcResponse { Npcs = updatedList });
     }
 
@@ -95,38 +87,41 @@ public class NpcController(
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 409)]
     public async Task<ActionResult> DeleteNpc(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteNpcRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
-        var npc = await _npcService.GetNpc(request.NpcId);
-        if (request.GameId != npc.GameId)
-        {
-            return Conflict();
-        }
-
-        await _npcService.DeleteNpc(request.NpcId);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
+        var npc = await npcService.GetNpc(request.NpcId);
+        ValidateGameIds(request.GameId, npc.GameId);
+        await npcService.DeleteNpc(request.NpcId);
         var game = await GameService.GetGame(npc.GameId, true);
-        var npcList = game.Npcs.Select(npc => npc.NpcId).Where(npcId => request.NpcId != npcId);
+        var npcList = game.Npcs.Select(x => x.NpcId).Where(npcId => request.NpcId != npcId);
         await GameService.UpdateGameNpcList(npc.GameId, [.. npcList]);
         return Ok();
     }
 
     [HttpDelete("delete/all")]
     public async Task<ActionResult> DeleteNpcsInGame(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteNpcRequest request)
     {
-        await IsUserGM(request.GameMasterId, request.GameId, accessToken, sessionAuth);
+        await IsUserGM(request.GameMasterId, request.GameId, sessionAuth);
         var game = await GameService.GetGame(request.GameId, true);
         foreach (var npc in game.Npcs)
         {
-            await _npcService.DeleteNpc(npc.NpcId);
+            await npcService.DeleteNpc(npc.NpcId);
         }
         await GameService.UpdateGameNpcList(request.GameId, []);
         return Ok();
+    }
+
+    private static void ValidateGameIds(Guid requestGameId, Guid npcGameId)
+    {
+        if (requestGameId != npcGameId)
+        {
+            throw new ConflictInDataException(PtaExceptionParts.RequestAndNpcMismatch);
+        }
     }
 }

@@ -12,12 +12,12 @@ public class SettingService(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<SettingService> logger) : AbstractMongoService<SettingDto>(repositoryService, MongoCollection.Settings), ISettingService
 {
-    public async Task DeleteSetting(Guid id)
+    public async Task DeleteSetting(Guid id, Guid gameId)
     {
         logger.LogInformation("Deleting setting {id}", id);
         await ThrowIfNull(
             id,
-            settingId => Collection.DeleteAsync(setting => setting.SettingId == settingId),
+            settingId => Collection.DeleteAsync(setting => setting.SettingId == settingId && setting.GameId == gameId),
             PropertyNames.SettingId);
     }
 
@@ -43,11 +43,11 @@ public class SettingService(
         return await Task.WhenAll(dtos.Select(async dto => await dtoToModelMapper.ParseFromDto(dto, true, gameId, shopService)));
     }
 
-    public async Task<Setting> GetSetting(Guid settingId, bool isGM)
+    public async Task<Setting> GetSetting(Guid settingId, Guid gameId, bool isGM)
     {
         var dto = await ThrowIfNull(
             settingId,
-            id => Collection.GetOneAsync(setting => setting.SettingId == settingId && (setting.IsActive || isGM)),
+            id => Collection.GetOneAsync(setting => setting.SettingId == id && setting.GameId == gameId && (setting.IsActive || isGM)),
             PropertyNames.SettingId);
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, dto.GameId, shopService);
@@ -67,6 +67,6 @@ public class SettingService(
             updatedSetting.SettingId,
             dto);
 
-        return await GetSetting(dto.SettingId, isGM);
+        return await GetSetting(dto.SettingId, dto.GameId, isGM);
     }
 }

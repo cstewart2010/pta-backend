@@ -61,7 +61,7 @@ public class TrainerService(
             await shopCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
             var npcCollection = _repositoryService.GetCollection<NpcDto>(MongoCollection.NPCs);
             await npcCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
-            var pokedexCollection = _repositoryService.GetCollection<PokeDexItemDto>(MongoCollection.Pokedex);
+            var pokedexCollection = _repositoryService.GetCollection<PokeDexItemDto>(MongoCollection.PokeDex);
             await pokedexCollection.DeleteManyAsync(x => x.GameId == trainer.GameId);
         }
         else
@@ -99,12 +99,13 @@ public class TrainerService(
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }
 
-    public async Task<Trainer> GetTrainerByUsername(string username, Guid gameId)
+    public async Task<Trainer?> GetTrainerByUsername(string username, Guid gameId)
     {
-        var dto = await ThrowIfNull(
-            (username, gameId),
-            x => Collection.GetOneAsync(trainer => trainer.TrainerName.Equals(x.username, StringComparison.CurrentCultureIgnoreCase) && trainer.GameId == x.gameId),
-            nameof(Trainer.TrainerName));
+        var dto = await Collection.GetOneAsync(x => x.TrainerName.Equals(username, StringComparison.CurrentCultureIgnoreCase) && x.GameId == gameId);
+        if (dto == null)
+        {
+            return null;
+        }
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }
@@ -182,12 +183,15 @@ public class TrainerService(
     {
         var userCollection = _repositoryService.GetCollection<UserDto>(MongoCollection.Users);
         var user = await userCollection.GetOneAsync(x => x.UserId == userId);
-        user!.Games.Remove(gameId);
+        if (user != null)
+        {
+            user.Games.Remove(gameId);
         
-        await userCollection.PutAsync(
-            user => user.UserId,
-            user.UserId,
-            user);
+            await userCollection.PutAsync(
+                x => x.UserId,
+                user.UserId,
+                user);
+        }
     }
 
     private static UpdateData[] TrainerStatusUpdate(bool isOnline)

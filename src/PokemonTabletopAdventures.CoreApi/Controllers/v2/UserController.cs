@@ -22,7 +22,6 @@ public class UserController(
     ILogger<UserController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
     private readonly ILogger<UserController> _logger = logger;
-    private readonly IUserMessageThreadService _userMessageThreadService = userMessageThreadService;
     private readonly IEncryptionService _encryptionService = encryptionService;
 
     [HttpPost("retrieve/user/name")]
@@ -40,11 +39,10 @@ public class UserController(
     [ProducesResponseType(typeof(IEnumerable<User>), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetUsers(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveUserRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, request.UserId);
         if (!await IsUserAdmin(request.UserId))
         {
             return Unauthorized();
@@ -58,37 +56,43 @@ public class UserController(
     [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ForceGetMessage(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveThreadRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, request.UserId);
         if (!await IsUserAdmin(request.UserId))
         {
             return Unauthorized();
         }
 
-        var message = await _userMessageThreadService.GetMessageById(request.MessageId);
-        return Ok(message);
+        var message = await userMessageThreadService.GetMessageById(request.MessageId);
+        var response = new RetrieveThreadResponse
+        {
+            MessageThread = message
+        };
+        return Ok(response);
     }
 
     [HttpPost("retrieve/message")]
     [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> GetMessage(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveThreadRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, request.UserId);
         var user = await UserService.GetUserById(request.UserId);
-        if (!user.Messages.Contains(request.MessageId))
+        if (!(user.Messages.Contains(request.MessageId) || await IsUserAdmin(request.UserId)))
         {
             return Conflict();
         }
 
-        var message = await _userMessageThreadService.GetMessageById(request.MessageId);
-        return Ok(message);
+        var message = await userMessageThreadService.GetMessageById(request.MessageId);
+        var response = new RetrieveThreadResponse
+        {
+            MessageThread = message
+        };
+        return Ok(response);
     }
 
     [HttpPost("create")]
@@ -117,16 +121,14 @@ public class UserController(
     [ProducesResponseType(typeof(SendMessageResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> SendMessageAsync(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] SendMessageRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, request.UserId);
         var user = await UserService.GetUserById(request.UserId);
         var recipient = await UserService.GetUserById(request.RecipientId);
         var threadId = await AddNewThreadToUsers(user, recipient, request.MessageContent);
-        await RefreshToken(request.UserId);
-        var thread = await _userMessageThreadService.GetMessageById(threadId);
+        var thread = await userMessageThreadService.GetMessageById(threadId);
         return Ok(new SendMessageResponse { MessageThread = thread });
     }
 
@@ -134,21 +136,19 @@ public class UserController(
     [ProducesResponseType(typeof(SendMessageResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ReplyMessageAsync(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] SendMessageRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, request.UserId);
         var user = await UserService.GetUserById(request.UserId);
-        if (!user.Messages.Contains(request.MessageId))
+        if (!(user.Messages.Contains(request.MessageId) || await IsUserAdmin(request.UserId)))
         {
             return Conflict();
         }
 
-        var thread = await _userMessageThreadService.GetMessageById(request.MessageId);
+        var thread = await userMessageThreadService.GetMessageById(request.MessageId);
         await AddNewReplyToThread(user, thread, request.MessageContent);
-        var updatedThread = await _userMessageThreadService.GetMessageById(request.MessageId);
-        await RefreshToken(request.UserId);
+        var updatedThread = await userMessageThreadService.GetMessageById(request.MessageId);
         return Ok(new SendMessageResponse { MessageThread = updatedThread });
     }
 
@@ -169,11 +169,10 @@ public class UserController(
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> Logout(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] LoginRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, request.UserId);
         await UserService.UpdateUserOnlineStatus(request.UserId, false);
         return Ok();
     }
@@ -182,11 +181,10 @@ public class UserController(
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> DeleteUser(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteUserRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, request.UserId);
         if (await IsUserAdmin(request.UserId))
         {
             return BadRequest();
@@ -200,22 +198,20 @@ public class UserController(
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     public async Task<IActionResult> ForceDeleteUser(
-        [FromHeader(Name = HeaderNames.AccessToken)] string accessToken,
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteUserRequest request)
     {
-        await VerifyIdentity(accessToken, sessionAuth, request.AdminId);
+        await VerifyIdentity(sessionAuth, request.AdminId);
         if (!await IsUserAdmin(request.AdminId))
         {
             return Unauthorized();
         }
 
-        if (request.AdminId == request.UserId)
+        if (request.AdminId == request.UserId || await IsUserAdmin(request.UserId))
         {
             return BadRequest();
         }
         await UserService.DeleteUser(request.UserId);
-        await RefreshToken(request.AdminId);
         return Ok();
     }
 
@@ -227,7 +223,7 @@ public class UserController(
             MessageId = Guid.NewGuid(),
             Messages = [message]
         };
-        await _userMessageThreadService.PostThread(thread);
+        await userMessageThreadService.PostThread(thread);
         sender.Messages.Add(thread.MessageId);
         recipient.Messages.Add(thread.MessageId);
         await UserService.UpdateUser(sender);
@@ -238,8 +234,8 @@ public class UserController(
     private async Task AddNewReplyToThread(User sender, UserMessageThread thread, string messageContent)
     {
         var message = new UserMessage { Message = messageContent, User = sender.UserId, Timestamp = DateTimeOffset.Now };
-        thread.Messages.Add(message);
-        await _userMessageThreadService.UpdateThread(thread);
+        thread.Messages = [..thread.Messages.Append(message)];
+        await userMessageThreadService.UpdateThread(thread);
     }
 
     private async Task<bool> IsUserAdmin(Guid userId)

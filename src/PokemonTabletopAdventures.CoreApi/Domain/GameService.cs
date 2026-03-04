@@ -48,7 +48,7 @@ public class GameService(
     {
         var dto = await ThrowIfNull(
             id,
-            id => Collection.GetOneAsync(game => game.GameId == id),
+            x => Collection.GetOneAsync(game => game.GameId == x),
             PropertyNames.GameId);
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, npcService, settingService, trainerService);

@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using PokemonTabletopAdventures.CoreApi.Constants;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Diagnostics.CodeAnalysis;
+using PokemonTabletopAdventures.CoreApi.DTOs;
 
 namespace PokemonTabletopAdventures.CoreApi.Domain;
 
@@ -24,7 +25,7 @@ internal class RepositoryService : IRepositoryService
     /// </summary>
     private IMongoDatabase Database { get; }
 
-    public ICollectionService<T> GetCollection<T>(string collectionName)
+    public ICollectionService<T> GetCollection<T>(string collectionName) where T : IDocument
     {
         return new CollectionService<T>()
         {
@@ -32,14 +33,15 @@ internal class RepositoryService : IRepositoryService
         };
     }
 
-    public IMongoCollection<T> GetMongoCollection<T>(string collectionName)
+    private IMongoCollection<T> GetMongoCollection<T>(string collectionName)
     {
         return Database.GetCollection<T>(collectionName);
     }
 
+    #region Helper methods
     private static MongoClientSettings GetMongoClientSettings()
     {
-        var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDBConnectionString, EnvironmentVariableTarget.Process);
+        var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDBConnectionString);
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new NullReferenceException($"{EnvironmentVariableNames.MongoDBConnectionString} environment variable need to be set to access MongoDB");
@@ -53,4 +55,5 @@ internal class RepositoryService : IRepositoryService
 
         return settings;
     }
+    #endregion
 }

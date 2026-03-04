@@ -16,7 +16,7 @@ public interface IPokedexService
     /// <param name="trainerId">The trainer's id to search with</param>
     /// <param name="gameId">The game session id</param>
     /// <param name="dexNo">The dex number for the pokemon</param>
-    public Task<PokedexItem> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo);
+    public Task<PokedexItem?> GetPokedexItem(Guid trainerId, Guid gameId, int dexNo);
 
     /// <summary>
     /// Attempts to add a dexItem using the provided document

@@ -55,8 +55,7 @@ public class SettingParticipantModel
     /// <summary>
     /// Returns the trainer as a participant
     /// </summary>
-    /// <param name="trainerId"></param>
-    /// <param name="gameId"></param>
+    /// <param name="trainer"></param>
     /// <param name="position"></param>
     public static SettingParticipantModel FromTrainer(TrainerDto trainer, MapPosition position)
     {
@@ -73,8 +72,7 @@ public class SettingParticipantModel
     /// <summary>
     /// Returns the Shop as a participant
     /// </summary>
-    /// <param name="shopId"></param>
-    /// <param name="gameId"></param>
+    /// <param name="shop"></param>
     /// <param name="position"></param>
     public static SettingParticipantModel FromShop(ShopDto shop, MapPosition position)
     {
@@ -90,7 +88,7 @@ public class SettingParticipantModel
     /// <summary>
     /// Returns the pokemon as a participant
     /// </summary>
-    /// <param name="pokemonId"></param>
+    /// <param name="pokemon"></param>
     /// <param name="position"></param>
     /// <param name="type"></param>
     public static SettingParticipantModel FromPokemon(PokemonDto pokemon, MapPosition position, SettingParticipantType type)
@@ -108,7 +106,7 @@ public class SettingParticipantModel
     /// <summary>
     /// Returns the npc as a participant
     /// </summary>
-    /// <param name="npcId"></param>
+    /// <param name="npc"></param>
     /// <param name="position"></param>
     /// <param name="type"></param>
     public static SettingParticipantModel FromNpc(NpcDto npc, MapPosition position, SettingParticipantType type)
