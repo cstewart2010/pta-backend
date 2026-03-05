@@ -51,7 +51,7 @@ public class BasePokemonController(IDexService basePokemonService, ILogger<BaseP
         return formData.Count != 0 ? Ok(new FormDataResponse { Data = formData }) : throw new ItemNotFoundException(form);
     }
 
-    [HttpGet("{name}form/{form}", Name = nameof(GetPokemonByNameAndForm))]
+    [HttpGet("{name}/form/{form}", Name = nameof(GetPokemonByNameAndForm))]
     [ProducesResponseType(typeof(PokemonAndForms), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemonByNameAndForm(string name, string form)
