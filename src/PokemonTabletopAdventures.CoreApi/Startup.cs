@@ -81,7 +81,7 @@ internal class Startup(IConfiguration configuration)
         app.UseSwaggerUI(options =>
         {
             options.SwaggerEndpoint("/swagger/v2/swagger.json", "v2");
-            options.RoutePrefix = "";
+            options.RoutePrefix = "swagger";
         });
         
         if (env.IsDevelopment())
