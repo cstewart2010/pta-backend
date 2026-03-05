@@ -5,6 +5,7 @@ namespace PokemonTabletopAdventures.CoreApi.IntegrationTests;
 
 [AllureNUnit]
 [AllureEpic("Pokemon Tabletop Adventures Api")]
+[AllureParentSuite("Pokemon Tabletop Adventures Api")]
 public abstract class BaseTest
 {
 }

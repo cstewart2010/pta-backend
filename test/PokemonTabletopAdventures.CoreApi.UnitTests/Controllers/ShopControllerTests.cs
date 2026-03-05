@@ -54,11 +54,11 @@ public class ShopControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveShopResponse>());
-        });
+        }
     }
 
     [Test]
@@ -84,11 +84,11 @@ public class ShopControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveShopResponse>());
-        });
+        }
     }
 
     [Test]
@@ -109,7 +109,7 @@ public class ShopControllerTests : BasePtaControllerTests
         };
         
         // act
-        var exception = Assert.ThrowsAsync<UnknownEntityException<Shop>>(async() => await _sut.GetShopTrainer(string.Empty, request));
+        Assert.ThrowsAsync<UnknownEntityException<Shop>>(async() => await _sut.GetShopTrainer(string.Empty, request));
     }
 
     [Test]
@@ -133,11 +133,11 @@ public class ShopControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveShopResponse>());
-        });
+        }
     }
 
     [Test]
@@ -162,11 +162,11 @@ public class ShopControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveShopResponse>());
-        });
+        }
     }
 
     [Test]
@@ -191,11 +191,11 @@ public class ShopControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveShopResponse>());
-        });
+        }
     }
 
     [Test]
@@ -251,11 +251,11 @@ public class ShopControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<CreateShopResponse>());
-        });
+        }
     }
 
     [Test]
@@ -279,11 +279,11 @@ public class ShopControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdateShopResponse>());
-        });
+        }
     }
     
     [Test]
@@ -320,11 +320,11 @@ public class ShopControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdateShopResponse>());
-        });
+        }
     }
     
     [Test]

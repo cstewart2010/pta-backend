@@ -37,14 +37,14 @@ internal class PokemonServiceTests
         var expectedPokemon = _pokemonCollection.Collection.First();
         var actualPokemon = await _sut.GetPokemonById(expectedPokemon.PokemonId);
         Assert.That(actualPokemon, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actualPokemon.GameId, Is.EqualTo(expectedPokemon.GameId));
             Assert.That(actualPokemon.TrainerId, Is.EqualTo(expectedPokemon.TrainerId));
             Assert.That(actualPokemon.PokemonId, Is.EqualTo(expectedPokemon.PokemonId));
             Assert.That(actualPokemon.DexNo, Is.EqualTo(expectedPokemon.DexNo));
             Assert.That(actualPokemon.Nickname, Is.EqualTo(expectedPokemon.Nickname));
-        });
+        }
     }
 
     [Test]
@@ -59,14 +59,14 @@ internal class PokemonServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<PokemonDto>>());
         var exception = aggregateException.InnerException as UnknownEntityException<PokemonDto>;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
                 Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {PropertyNames.PokemonId}={pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]
@@ -77,13 +77,13 @@ internal class PokemonServiceTests
         var expectedList = _pokemonCollection.Collection.Where(x => x.TrainerId == trainerId && x.GameId == gameId).ToList();
         ICollection<Pokemon> actualList = [.. await _sut.GetPokemonByTrainerId(trainerId, gameId)];
         Assert.That(actualList, Has.Count.EqualTo(expectedList.Count));
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             foreach (var item in expectedList)
             {
                 Assert.That(expectedList.Select(x => x.PokemonId), Is.EquivalentTo(actualList.Select(x => x.PokemonId)));
             }
-        });
+        }
     }
 
     [Test]
@@ -112,13 +112,13 @@ internal class PokemonServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<DuplicateEntryException>());
         var exception = aggregateException.InnerException as DuplicateEntryException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.DuplicateEntryTitle));
             Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {nameof(PokemonDto)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             Assert.That(_pokemonCollection.Collection, Has.Count.EqualTo(count));
-        });
+        }
     }
 
     [Test]
@@ -130,7 +130,7 @@ internal class PokemonServiceTests
         var actualUpdate = await _sut.UpdatePokemon(updatedPokemon);
         Assert.That(actualUpdate, Is.Not.Null);
         var retrievedUpdate = await _sut.GetPokemonById(testPokemon.PokemonId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actualUpdate.PokemonId, Is.EqualTo(testPokemon.PokemonId));
             Assert.That(retrievedUpdate.PokemonId, Is.EqualTo(testPokemon.PokemonId));
@@ -140,7 +140,7 @@ internal class PokemonServiceTests
             Assert.That(retrievedUpdate.GameId, Is.EqualTo(testPokemon.GameId));
             Assert.That(actualUpdate.SpeciesName, Is.Not.EqualTo(originalName));
             Assert.That(actualUpdate.SpeciesName, Is.EqualTo(retrievedUpdate.SpeciesName));
-        });
+        }
     }
 
     [Test]
@@ -152,11 +152,11 @@ internal class PokemonServiceTests
         var updatedPokemon = await _sut.UpdatePokemonEvolvability(testPokemon.PokemonId, isEvolvable);
         Assert.That(updatedPokemon, Is.Not.Null);
         var retrievedPokemon = await _sut.GetPokemonById(testPokemon.PokemonId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedPokemon.CanEvolve, Is.EqualTo(isEvolvable));
             Assert.That(retrievedPokemon.CanEvolve, Is.EqualTo(updatedPokemon.CanEvolve));
-        });
+        }
     }
 
     [Test]
@@ -173,12 +173,12 @@ internal class PokemonServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UpdateException>());
         var exception = aggregateException.InnerException as UpdateException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokemonDto)} {pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 
     [Test]
@@ -228,11 +228,11 @@ internal class PokemonServiceTests
         var updatedPokemon = await _sut.UpdatePokemonLocation(testPokemon.PokemonId, isOnActiveTeam);
         Assert.That(updatedPokemon, Is.Not.Null);
         var retrievedPokemon = await _sut.GetPokemonById(testPokemon.PokemonId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedPokemon.IsOnActiveTeam, Is.EqualTo(isOnActiveTeam));
             Assert.That(retrievedPokemon.IsOnActiveTeam, Is.EqualTo(updatedPokemon.IsOnActiveTeam));
-        });
+        }
     }
 
     [Test]
@@ -249,12 +249,12 @@ internal class PokemonServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UpdateException>());
         var exception = aggregateException.InnerException as UpdateException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokemonDto)} {pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 
     [Test]
@@ -265,11 +265,11 @@ internal class PokemonServiceTests
         var updatedPokemon = await _sut.UpdatePokemonTrainerId(testPokemon.PokemonId, trainerId);
         Assert.That(updatedPokemon, Is.Not.Null);
         var retrievedPokemon = await _sut.GetPokemonById(testPokemon.PokemonId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedPokemon.TrainerId, Is.EqualTo(trainerId));
             Assert.That(retrievedPokemon.TrainerId, Is.EqualTo(updatedPokemon.TrainerId));
-        });
+        }
     }
 
     [Test]
@@ -285,12 +285,12 @@ internal class PokemonServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UpdateException>());
         var exception = aggregateException.InnerException as UpdateException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokemonDto)} {pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 
     [Test]
@@ -317,14 +317,14 @@ internal class PokemonServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<PokemonDto>>());
         var exception = aggregateException.InnerException as UnknownEntityException<PokemonDto>;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
                 Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {PropertyNames.PokemonId}={pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]

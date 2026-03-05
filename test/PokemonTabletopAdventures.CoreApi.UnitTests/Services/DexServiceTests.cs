@@ -39,12 +39,12 @@ public class DexServiceTests
         var response = await _sut.GetDexEntry<BasePokemonDto>(DexType.BasePokemon, name);
         Assert.That(response, Is.Not.Null);
         Assert.That(response.Data, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(response.Data.Name, Is.EqualTo(name));
             Assert.That(response.Data.Form, Is.EqualTo(form));
             Assert.That(response.Data.DexNo, Is.EqualTo(dexNo));
-        });
+        }
     }
 
     [Test]
@@ -60,12 +60,12 @@ public class DexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<ItemNotFoundException>());
         var exception = aggregateException.InnerException as ItemNotFoundException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.ItemNotFoundTitle));
             Assert.That(exception.Message, Is.EqualTo($"Could not find {itemName}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]
@@ -82,7 +82,7 @@ public class DexServiceTests
     {
         var evolved = await _sut.GetEvolved(_pokemon, keptMoves, "Venusaur", newMoves);
         string[] updatedMoves = [.. keptMoves, .. newMoves];
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(evolved.SpeciesName, Is.EqualTo("Venusaur"));
             Assert.That(evolved.DexNo, Is.EqualTo(3));
@@ -91,7 +91,7 @@ public class DexServiceTests
             {
                 Assert.That(evolved.Moves, Contains.Item(move));
             }
-        });
+        }
     }
 
     [Test]
@@ -127,12 +127,12 @@ public class DexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<InvalidEvolutionException>());
         var exception = aggregateException.InnerException as InvalidEvolutionException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.EvolutionErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"{_pokemon.SpeciesName} does not know {string.Join(", ", moves)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 
     [Test]
@@ -148,12 +148,12 @@ public class DexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<InvalidEvolutionException>());
         var exception = aggregateException.InnerException as InvalidEvolutionException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.EvolutionErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"Venusaur cannot learn {string.Join(", ", moves)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 
     [Test]
@@ -227,12 +227,12 @@ public class DexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<ItemNotFoundException>());
         var exception = aggregateException.InnerException as ItemNotFoundException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.ItemNotFoundTitle));
             Assert.That(exception.Message, Is.EqualTo($"Could not find {name}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]
@@ -249,12 +249,12 @@ public class DexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<ItemNotFoundException>());
         var exception = aggregateException.InnerException as ItemNotFoundException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.ItemNotFoundTitle));
             Assert.That(exception.Message, Is.EqualTo($"Could not find {form}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]
@@ -263,7 +263,7 @@ public class DexServiceTests
     public async Task GetNewPokemon_Full_Valid_ReturnNewPokemon(string name, string form, string nickname, Nature nature, Gender gender, Status status)
     {
         var newPokemon = await _sut.GetNewPokemon(name, nature, gender, status, nickname, form);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(newPokemon.SpeciesName, Is.EqualTo(name));
             Assert.That(newPokemon.Nickname, Is.EqualTo(nickname));
@@ -272,7 +272,7 @@ public class DexServiceTests
             Assert.That(newPokemon.Nature, Is.EqualTo(nature));
             Assert.That(newPokemon.Gender, Is.EqualTo(gender));
             Assert.That(newPokemon.PokemonStatus, Is.EqualTo(status));
-        });
+        }
     }
 
     [Test]
@@ -284,13 +284,13 @@ public class DexServiceTests
         var response = await _sut.GetPokedexEntry(name, selectedForm);
         Assert.That(response, Is.Not.Null);
         Assert.That(response.Pokemon, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(response.Pokemon.Name, Is.EqualTo(name));
             Assert.That(response.Pokemon.Form, Is.EqualTo(selectedForm));
             Assert.That(response.Pokemon.DexNo, Is.EqualTo(3));
             Assert.That(response.AlternateForms, Has.Count.EqualTo(2));
-        });
+        }
         Assert.That(response.AlternateForms, Contains.Item(altForm1));
         Assert.That(response.AlternateForms, Contains.Item(altForm2));
     }
@@ -309,12 +309,12 @@ public class DexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<ItemNotFoundException>());
         var exception = aggregateException.InnerException as ItemNotFoundException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.ItemNotFoundTitle));
             Assert.That(exception.Message, Is.EqualTo($"Could not find {name}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]
@@ -331,12 +331,12 @@ public class DexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<ItemNotFoundException>());
         var exception = aggregateException.InnerException as ItemNotFoundException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.ItemNotFoundTitle));
             Assert.That(exception.Message, Is.EqualTo($"Could not find {selectedForm}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]

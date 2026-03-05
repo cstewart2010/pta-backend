@@ -32,14 +32,14 @@ internal class PokedexServiceTests
         {
             var actualItem = await _sut.GetPokedexItem(expectedItem.TrainerId, expectedItem.GameId, expectedItem.DexNo);
             Assert.That(actualItem, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(actualItem.IsCaught, Is.EqualTo(expectedItem.IsCaught));
                 Assert.That(actualItem.IsSeen, Is.EqualTo(expectedItem.IsSeen));
                 Assert.That(actualItem.DexNo, Is.EqualTo(expectedItem.DexNo));
                 Assert.That(actualItem.GameId, Is.EqualTo(expectedItem.GameId));
                 Assert.That(actualItem.TrainerId, Is.EqualTo(expectedItem.TrainerId));
-            });
+            }
         }
     }
 
@@ -62,14 +62,14 @@ internal class PokedexServiceTests
         var actualItem = await _sut.GetTrainerPokeDex(expectItem.TrainerId, expectItem.GameId);
         Assert.That(actualItem, Is.Not.Null.Or.Empty);
         Assert.That(actualItem, Has.Count.EqualTo(3));
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             foreach (var item in actualItem)
             {
                 Assert.That(item.GameId, Is.EqualTo(expectItem.GameId));
                 Assert.That(item.TrainerId, Is.EqualTo(expectItem.TrainerId));
             }
-        });
+        }
     }
 
     [Test]
@@ -84,7 +84,7 @@ internal class PokedexServiceTests
         await _sut.PostDexItem(trainerId, gameId, dexNo, isSeen, isCaught);
         var actualItem = await _sut.GetPokedexItem(trainerId, gameId, dexNo);
         Assert.That(actualItem, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actualItem.IsCaught, Is.EqualTo(isCaught));
             Assert.That(actualItem.IsSeen, Is.EqualTo(isSeen));
@@ -92,7 +92,7 @@ internal class PokedexServiceTests
             Assert.That(actualItem.GameId, Is.EqualTo(gameId));
             Assert.That(actualItem.TrainerId, Is.EqualTo(trainerId));
             Assert.That(_pokedexCollection.Collection, Has.Count.EqualTo(count + 1));
-        });
+        }
     }
 
     [Test]
@@ -108,13 +108,13 @@ internal class PokedexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<DuplicateEntryException>());
         var exception = aggregateException.InnerException as DuplicateEntryException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.DuplicateEntryTitle));
             Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {nameof(PokeDexItemDto)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             Assert.That(_pokedexCollection.Collection, Has.Count.EqualTo(count));
-        });
+        }
     }
 
     [Test]
@@ -129,13 +129,13 @@ internal class PokedexServiceTests
         var updatedItem = await _sut.UpdateDexItemIsSeen(trainerId, gameId, dexNo);
         var retrievedItem = await _sut.GetPokedexItem(trainerId, gameId, dexNo);
         Assert.That(retrievedItem, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedItem.IsSeen, Is.True);
             Assert.That(retrievedItem.IsSeen, Is.True);
             Assert.That(updatedItem.IsCaught, Is.False);
             Assert.That(retrievedItem.IsCaught, Is.False);
-        });
+        }
     }
 
     [Test]
@@ -151,12 +151,12 @@ internal class PokedexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UpdateException>());
         var exception = aggregateException.InnerException as UpdateException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokeDexItemDto)} {(trainerId, gameId)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 
     [Test]
@@ -171,13 +171,13 @@ internal class PokedexServiceTests
         var updatedItem = await _sut.UpdateDexItemIsCaught(trainerId, gameId, dexNo);
         var retrievedItem = await _sut.GetPokedexItem(trainerId, gameId, dexNo);
         Assert.That(retrievedItem, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedItem.IsSeen, Is.True);
             Assert.That(retrievedItem.IsSeen, Is.True);
             Assert.That(updatedItem.IsCaught, Is.True);
             Assert.That(retrievedItem.IsCaught, Is.True);
-        });
+        }
     }
 
     [Test]
@@ -193,12 +193,12 @@ internal class PokedexServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UpdateException>());
         var exception = aggregateException.InnerException as UpdateException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UpdateErrorTitle));
             Assert.That(exception.Message, Is.EqualTo($"Failed to update {nameof(PokeDexItemDto)} {(trainerId, gameId)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 
     [Test]

@@ -45,22 +45,22 @@ public abstract class BaseIndexControllerTests<TIndex>
     {
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<IndexCollectionResponse>());
-        });
+        }
     }
 
     protected void SingleItemTest(IActionResult response)
     {
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<IndexResponse<TIndex>>());
-        });
+        }
     }
     
     protected DexService DexService { get; }

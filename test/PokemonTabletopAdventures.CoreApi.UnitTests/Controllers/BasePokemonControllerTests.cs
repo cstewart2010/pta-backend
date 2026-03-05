@@ -35,11 +35,11 @@ public class BasePokemonControllerTests
         var response = await sut.GetAllPokemon();
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<IndexCollectionResponse>());
-        });
+        }
     }
 
     [Test]
@@ -49,11 +49,11 @@ public class BasePokemonControllerTests
         var response = await sut.GetPokemonByName("bulbasaur");
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<PokemonAndForms>());
-        });
+        }
     }
 
     [Test]
@@ -63,11 +63,11 @@ public class BasePokemonControllerTests
         var response = await sut.GetPokemonByForm("base");
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<FormDataResponse>());
-        });
+        }
     }
 
     [Test]
@@ -85,11 +85,11 @@ public class BasePokemonControllerTests
         var response = await sut.GetPokemonByNameAndForm("bulbasaur", "base");
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<PokemonAndForms>());
-        });
+        }
     }
 
     private BasePokemonController BuildSut()

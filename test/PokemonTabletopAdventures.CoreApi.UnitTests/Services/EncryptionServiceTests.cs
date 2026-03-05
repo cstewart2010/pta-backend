@@ -75,12 +75,12 @@ internal class EncryptionServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<PtaUnauthorizedException>());
         var exception = aggregateException.InnerException as PtaUnauthorizedException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.AuthenticationErrorTitle));
             Assert.That(exception.Message, Is.EqualTo(PtaExceptionParts.EmptyTokenMessage));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-        });
+        }
     }
 
     [Test]
@@ -97,12 +97,12 @@ internal class EncryptionServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<PtaUnauthorizedException>());
         var exception = aggregateException.InnerException as PtaUnauthorizedException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.AuthenticationErrorTitle));
             Assert.That(exception.Message, Is.EqualTo("The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters."));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-        });
+        }
     }
 
     [Test]
@@ -119,12 +119,12 @@ internal class EncryptionServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<PtaUnauthorizedException>());
         var exception = aggregateException.InnerException as PtaUnauthorizedException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.AuthenticationErrorTitle));
             Assert.That(exception.Message, Is.EqualTo(PtaExceptionParts.ExpiredTokenMessage));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-        });
+        }
     }
 
     [Test]
@@ -135,10 +135,9 @@ internal class EncryptionServiceTests
     {
         var game = _gameCollection.Collection.First();
         game.PasswordHash = await _sut.HashSecret(secret);
-        Assert.DoesNotThrow(() =>
+        Assert.DoesNotThrowAsync( async() =>
         {
-            var task = _sut.VerifySecret(secret, game.GameId);
-            task.Wait();
+            await _sut.VerifySecret(secret, game.GameId);
         });
     }
 
@@ -154,12 +153,12 @@ internal class EncryptionServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<GameDto>>());
         var exception = aggregateException.InnerException as UnknownEntityException<GameDto>;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(exception.Message, Is.EqualTo($"Could not find a {nameof(GameDto)} using {PropertyNames.GameId}={id}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]
@@ -178,12 +177,12 @@ internal class EncryptionServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<PtaUnauthorizedException>());
         var exception = aggregateException.InnerException as PtaUnauthorizedException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.AuthenticationErrorTitle));
             Assert.That(exception.Message, Is.EqualTo(PtaExceptionParts.InvalidSecretMessage));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-        });
+        }
     }
 
     [Test]
@@ -194,10 +193,9 @@ internal class EncryptionServiceTests
     {
         var user = _userCollection.Collection.First();
         user.PasswordHash = await _sut.HashSecret(secret);
-        Assert.DoesNotThrow(() =>
+        Assert.DoesNotThrowAsync(async () =>
         {
-            var task = _sut.VerifySecret(secret, user.Username);
-            task.Wait();
+            await _sut.VerifySecret(secret, user.Username);
         });
     }
 
@@ -213,12 +211,12 @@ internal class EncryptionServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<PtaUnauthorizedException>());
         var exception = aggregateException.InnerException as PtaUnauthorizedException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.AuthenticationErrorTitle));
             Assert.That(exception.Message, Is.EqualTo(PtaExceptionParts.NoUserFoundMessage));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-        });
+        }
     }
 
     [Test]
@@ -237,11 +235,11 @@ internal class EncryptionServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<PtaUnauthorizedException>());
         var exception = aggregateException.InnerException as PtaUnauthorizedException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.AuthenticationErrorTitle));
             Assert.That(exception.Message, Is.EqualTo(PtaExceptionParts.InvalidSecretMessage));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-        });
+        }
     }
 }

@@ -53,11 +53,11 @@ public class NpcControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveNpcResponse>());
-        });
+        }
     }
 
     [Test]
@@ -126,11 +126,11 @@ public class NpcControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveNpcResponse>());
-        });
+        }
     }
 
     [Test]
@@ -177,11 +177,11 @@ public class NpcControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<CreateNpcResponse>());
-        });
+        }
     }
 
     [Test]
@@ -205,11 +205,11 @@ public class NpcControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdateNpcResponse>());
-        });
+        }
     }
 
     [Test]

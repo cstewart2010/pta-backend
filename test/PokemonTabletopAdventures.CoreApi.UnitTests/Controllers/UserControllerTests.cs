@@ -50,11 +50,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveUserResponse>());
-        });
+        }
     }
 
     [Test]
@@ -74,11 +74,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveUserResponse>());
-        });
+        }
     }
 
     [Test]
@@ -113,11 +113,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveThreadResponse>());
-        });
+        }
     }
 
     [Test]
@@ -152,11 +152,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveThreadResponse>());
-        });
+        }
     }
 
     [Test]
@@ -176,11 +176,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrieveThreadResponse>());
-        });
+        }
     }
 
     [Test]
@@ -214,11 +214,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<CreateUserResponse>());
-        });
+        }
     }
 
     [Test]
@@ -263,11 +263,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<SendMessageResponse>());
-        });
+        }
     }
 
     [Test]
@@ -288,11 +288,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<SendMessageResponse>());
-        });
+        }
     }
 
     [Test]
@@ -331,11 +331,11 @@ public class UserControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<LoginResponse>());
-        });
+        }
     }
 
     [Test]

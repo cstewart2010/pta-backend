@@ -30,7 +30,7 @@ public class SpriteServiceTests
     {
         var actual = await _sut.GetAllSprites();
         Assert.That(actual, Is.Not.Null.And.Count.EqualTo(_spriteCollection.Collection.Count));
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             foreach (var expected in _spriteCollection.Collection)
             {
@@ -38,7 +38,7 @@ public class SpriteServiceTests
                     actual.SingleOrDefault(x => x.FriendlyText == expected.FriendlyText && x.Value == expected.Value),
                     Is.Not.Null);
             }
-        });
+        }
     }
 
     [Test]
@@ -67,17 +67,17 @@ public class SpriteServiceTests
         };
         var count = _spriteCollection.Collection.Count;
         var aggregateException = Assert.Throws<AggregateException>(_sut.PostSprite(expected).Wait);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(_spriteCollection.Collection, Has.Count.EqualTo(count));
             Assert.That(aggregateException.InnerException, Is.InstanceOf<PtaException>());
-        });
-        Assert.Multiple(() =>
+        }
+        using (Assert.EnterMultipleScope())
         {
             var exception = (PtaException)aggregateException.InnerException!;
             Assert.That(exception.Message, Is.EqualTo("Cannot add sprite with empty field"));
             Assert.That(exception.Title, Is.EqualTo("Invalid Sprite"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 }
