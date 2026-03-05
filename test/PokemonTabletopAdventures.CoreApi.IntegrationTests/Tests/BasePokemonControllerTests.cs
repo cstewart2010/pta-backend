@@ -23,21 +23,21 @@ internal class BasePokemonControllerTests : BaseTest
     [AllureName("/{name}")]
     public async Task GetPokemonByName_Valid_ReturnsPokemonAndForms()
     {
-        var request = AllureUtility.Arrange(
+        var builder = AllureUtility.Arrange(
             "Build HTTP GET request for api/v2/pokedex/bulbasaur",
-            () => new HttpRequestMessageBuilder(HttpMethod.Get, "api/v2/pokedex/bulbasaur").Build());
+            () => new HttpRequestMessageBuilder("api/v2/pokedex/bulbasaur"));
         var response = await AllureUtility.Act(
             "Send request",
-            () => _client.SendRequestAsync<PokemonAndForms>(request));
+            () => _client.SendRequestAsync<PokemonAndForms>(builder));
         AllureUtility.Assert(
             "Validate response is type PokemonAndForms and contains expected data",
             () =>
             {
-                Assert.Multiple(() =>
+                using (Assert.EnterMultipleScope())
                 {
                     Assert.That(response.IsSuccessful, Is.True);
                     Assert.That(response.Data, Is.Not.Null);
-                });
+                }
 
                 Assert.That(response.Data.Pokemon, Is.Not.Null);
                 var data = response.Data.Pokemon;
