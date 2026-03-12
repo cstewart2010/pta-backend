@@ -67,33 +67,40 @@ public abstract class PtaControllerBase(
         });
     }
 
-    protected async Task VerifyIdentity(
+    protected async Task VerifyIdentity<TController>(
         string sessionAuth,
+        ILogger<TController> logger,
         Guid id)
+        where TController : PtaControllerBase
     {
         var user = await UserService.GetUserById(id);
-        Request.VerifyIdentity(user, encryptionService, sessionAuth);
+        logger.LogInformation("Verifying user {userId} auth", user.UserId);
+        await Request.VerifyIdentity(user, encryptionService, sessionAuth);
     }
 
-    protected async Task<bool> VerifyIdentity(
+    protected async Task<bool> VerifyIdentity<TController>(
         string sessionAuth,
+        ILogger<TController> logger,
         Guid id,
         Guid gameId)
+        where TController : PtaControllerBase
     {
-        var user = await UserService.GetUserById(id);
-        Request.VerifyIdentity(user, encryptionService, sessionAuth);
+        await VerifyIdentity(sessionAuth, logger, id);
         var trainers = await TrainerService.GetTrainersByGameId(gameId);
         return trainers.FirstOrDefault(trainer => trainer.TrainerId == id)?.IsGM == true;
     }
 
-    protected async Task IsUserGM(
+    protected async Task IsUserGM<TController>(
         Guid id,
         Guid gameId,
+        ILogger<TController> logger,
         string sessionAuth)
+        where TController : PtaControllerBase
     {
         var trainer = await TrainerService.GetTrainerById(id, gameId);
         var user = await UserService.GetUserById(id);
-        Request.IsUserGM(encryptionService, sessionAuth, user, trainer);
+        logger.LogInformation("Verifying user {userId} is a GM or SiteAdmin", user.UserId);
+        await Request.IsUserGM(encryptionService, sessionAuth, user, trainer);
     }
 
     protected async Task AssignAuthAndToken(Guid id)
@@ -103,16 +110,7 @@ public abstract class PtaControllerBase(
 
     protected async Task<IEnumerable<Log>> RemoveItemsFromTrainer(Trainer trainer, ICollection<Item> items)
     {
-        var itemList = trainer.Items;
-        foreach (var item in items)
-        {
-            itemList = UpdateAllItemsWithReduction
-            (
-                [..itemList],
-                item,
-                trainer
-            );
-        }
+        var itemList = items.Aggregate(trainer.Items, (current, item) => UpdateAllItemsWithReduction([..current], item, trainer));
 
         await TrainerService.UpdateTrainerItemList(trainer.TrainerId, trainer.GameId, itemList);
         return items.Select(item => new Log

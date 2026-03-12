@@ -35,7 +35,7 @@ internal class ShopServiceTests
         var actual = await _sut.GetShopById(expected.ShopId, expected.GameId);
         
         Assert.That(actual, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.ShopId, Is.EqualTo(expected.ShopId));
             Assert.That(actual.GameId, Is.EqualTo(expected.GameId));
@@ -49,7 +49,7 @@ internal class ShopServiceTests
                 Assert.That(actual.Inventory[key].Effects, Is.EqualTo(expected.Inventory[key].Effects));
                 Assert.That(actual.Inventory[key].Quantity, Is.EqualTo(expected.Inventory[key].Quantity));
             }
-        });
+        }
     }
 
     [Test]
@@ -60,14 +60,14 @@ internal class ShopServiceTests
         var actual = await _sut.GetShopsByGameId(gameId);
         
         Assert.That(actual, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual, Has.Count.EqualTo(expected.Count));
             foreach (var actualItem in actual)
             {
                 Assert.That(actualItem.GameId, Is.EqualTo(gameId));
             }
-        });
+        }
     }
 
     [Test]
@@ -142,7 +142,7 @@ internal class ShopServiceTests
         var actual = await _sut.GetShopById(shop.ShopId, shop.GameId);
         
         Assert.That(actual, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.ShopId, Is.EqualTo(shop.ShopId));
             Assert.That(actual.GameId, Is.EqualTo(shop.GameId));
@@ -156,7 +156,7 @@ internal class ShopServiceTests
                 Assert.That(actual.Inventory[key].Effects, Is.EqualTo(shop.Inventory[key].Effects));
                 Assert.That(actual.Inventory[key].Quantity, Is.EqualTo(shop.Inventory[key].Quantity));
             }
-        });
+        }
     }
 
     [Test]
@@ -171,12 +171,12 @@ internal class ShopServiceTests
         
         Assert.That(aggregatedException.InnerException, Is.InstanceOf<DuplicateEntryException>());
         var exception = (DuplicateEntryException)aggregatedException.InnerException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {nameof(ShopDto)}"));
             Assert.That(exception.Title, Is.EqualTo(PtaExceptionParts.DuplicateEntryTitle));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        });
+        }
     }
 
     [Test]
@@ -195,14 +195,14 @@ internal class ShopServiceTests
         
         var updatedActual = await _sut.UpdateShop(updatedExcepted);
         Assert.That(updatedActual, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedActual.ShopId, Is.EqualTo(shop.ShopId));
             Assert.That(updatedActual.GameId, Is.EqualTo(updatedExcepted.GameId));
             Assert.That(updatedActual.Name, Is.EqualTo(updatedExcepted.Name));
             Assert.That(updatedActual.IsActive, Is.EqualTo(updatedExcepted.IsActive));
             Assert.That(updatedActual.Inventory.Keys, Is.EquivalentTo(updatedExcepted.Inventory.Keys));
-        });
+        }
     }
 
     [Test]

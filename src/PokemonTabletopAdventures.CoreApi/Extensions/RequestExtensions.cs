@@ -16,7 +16,7 @@ internal static class RequestExtensions
 
     internal static string AuthKey { get; }
 
-    public static void IsUserGM(
+    public static async Task IsUserGM(
         this HttpRequest request,
         IEncryptionService encryptionService,
         string sessionAuth,
@@ -29,15 +29,15 @@ internal static class RequestExtensions
             throw new PtaUnauthorizedException($"User {gameMaster.TrainerId} is not a GM or Admin");
         }
         
-        request.VerifyIdentity(user, encryptionService, sessionAuth);
+        await request.VerifyIdentity(user, encryptionService, sessionAuth);
     }
 
-    public static void VerifyIdentity(
+    public static async Task VerifyIdentity(
         this HttpRequest request,
         User user,
         IEncryptionService encryptionService,
         string sessionAuth)
     {
-        encryptionService.VerifySecret($"{AuthKey}_{user.UserId}", sessionAuth);
+        await encryptionService.VerifySecret($"{AuthKey}_{user.UserId}", sessionAuth);
     }
 }

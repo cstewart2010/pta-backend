@@ -1,4 +1,4 @@
-name: Run Unit Tests
+name: Build, Test, and Deploy Application
 on:
   pull_request:
     branches:
@@ -75,6 +75,10 @@ jobs:
         publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
+    - name: Sleep for 10 seconds before running integration tests
+      shell: pwsh
+      run: Start-Sleep -s 10
+
     - name: Run Integration Tests
       run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
       continue-on-error: true
@@ -105,6 +109,15 @@ jobs:
       with:
         report-directory: ./allure-report
         github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Fail Pipeline if unit tests failed
+      shell: pwsh
+      run: |
+        $x = Get-Content ./allure-report/summary.json | ConvertFrom-Json
+        if ($x.status -ne "passed") {
+          Write-Host Integration Test Status: $x.status
+          exit 1
+        }
 
     - name: Deploy to Production
       uses: azure/webapps-deploy@v2

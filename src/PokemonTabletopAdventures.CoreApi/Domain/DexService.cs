@@ -24,13 +24,13 @@ public class DexService(
     {
         logger.LogInformation("Getting Dex entries for document type {documentType}", documentType);
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
-        return await collection.GetManyAsync(document => true);
+        return await collection.GetManyAsync(document => true, logger);
     }
 
     public async Task<IndexResponse<TDocument>> GetDexEntry<TDocument>(DexType documentType, string name) where TDocument : IDocument, IDexDocument
     {
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
-        var item = await collection.GetOneAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
+        var item = await collection.GetOneAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase), logger);
         return item == null ? throw new ItemNotFoundException(name) : new IndexResponse<TDocument> { Data = item };
     }
 
@@ -51,7 +51,7 @@ public class DexService(
 
     public async Task<PokemonAndForms> GetPokedexEntry(string name, string form)
     {
-        var allForms = await Collection.GetManyAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
+        var allForms = await Collection.GetManyAsync(document => document.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase), logger);
         if (allForms.Count == 0)
         {
             throw new ItemNotFoundException(name);
@@ -68,7 +68,7 @@ public class DexService(
 
     public async Task<ICollection<PokemonForm>> GetPossibleEvolutions(Pokemon pokemon)
     {
-        var allEvolutions = await Collection.GetManyAsync(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase));
+        var allEvolutions = await Collection.GetManyAsync(document => document.EvolvesFrom.Equals(pokemon.SpeciesName, StringComparison.CurrentCultureIgnoreCase), logger);
         var forms = await Task.WhenAll(allEvolutions.Where(evolution => evolution.Form.Equals(pokemon.Form, StringComparison.CurrentCultureIgnoreCase)).Select(dtoToModelMapper.ParseFromDto));
         return forms;
     }
@@ -79,7 +79,7 @@ public class DexService(
         int limit) where TDocument : IDocument, IDexDocument
     {
         var collection = _repositoryService.GetCollection<TDocument>(documentType.ToString());
-        var documents = await collection.GetManyAsync(document => true, offset, limit);
+        var documents = await collection.GetManyAsync(document => true, offset, limit, logger);
         var count = documents.Count;
         var results = documents.Select(x => x.Name).ToList();
 
@@ -92,7 +92,7 @@ public class DexService(
 
     public async Task<IndexCollectionResponse> GetOrderedIndexCollectionResponse()
     {
-        var documents = await Collection.GetManyAsync(document => true);
+        var documents = await Collection.GetManyAsync(document => true, logger);
         var results = documents.OrderBy(pokemon => pokemon.DexNo).GroupBy(pokemon => pokemon.Name).Select(x => x.Key).ToArray();
 
         return new IndexCollectionResponse
@@ -107,13 +107,13 @@ public class DexService(
         var collection = _repositoryService.GetCollection<TDocument>(typeof(TDocument).Name);
         foreach (var document in documents)
         {
-            var items = await collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name);
+            var items = await collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name, logger);
             if (items.Count != 0)
             {
                 continue;
             }
 
-            await PostDocument(collection, document);
+            await PostDocument(collection, document, logger);
         }
     }
 
@@ -121,14 +121,14 @@ public class DexService(
     {
         foreach (var document in documents)
         {
-            var items = await Collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name && document.Form == currentDocument.Form);
+            var items = await Collection.GetManyAsync(currentDocument => document.Name == currentDocument.Name && document.Form == currentDocument.Form, logger);
             if (items.Count != 0)
             {
                 continue;
             }
 
             var dto = await modelToDtoMapper.ParseFromModel(document);
-            await PostDocument(dto);
+            await PostDocument(dto, logger);
         }
     }
 

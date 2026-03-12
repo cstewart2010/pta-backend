@@ -13,7 +13,7 @@ public class SpriteService(
     public async Task<ICollection<Sprite>> GetAllSprites()
     {
         logger.LogInformation("Retrieving sprites");
-        var dtos = await Collection.GetManyAsync(sprite => true);
+        var dtos = await Collection.GetManyAsync(sprite => true, logger);
         logger.LogInformation("Successfully retrieved sprites");
         return [..dtos.Select(dto => new Sprite
         {
@@ -34,7 +34,7 @@ public class SpriteService(
             FriendlyText = sprite.FriendlyText,
             Value = sprite.Value
         };
-        await PostDocument(dto);
+        await PostDocument(dto, logger);
         logger.LogInformation("{friendlyText} sprite added", sprite.FriendlyText);
     }
 }

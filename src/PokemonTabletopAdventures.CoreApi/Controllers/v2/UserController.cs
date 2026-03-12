@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using PokemonTabletopAdventures.CoreApi.Exceptions;
 using PokemonTabletopAdventures.CoreApi.Services;
 using PokemonTabletopAdventures.Models.Enums;
 using PokemonTabletopAdventures.Models.Users;
@@ -21,7 +22,6 @@ public class UserController(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<UserController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
-    private readonly ILogger<UserController> _logger = logger;
     private readonly IEncryptionService _encryptionService = encryptionService;
 
     [HttpPost("retrieve/user/name")]
@@ -42,10 +42,10 @@ public class UserController(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveUserRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         if (!await IsUserAdmin(request.UserId))
         {
-            return Unauthorized();
+            throw new UserNotAdminException(request.UserId);
         }
 
         var users = await UserService.GetUsers(request.Offset, request.Limit);
@@ -55,14 +55,15 @@ public class UserController(
     [HttpPost("retrieve/message/admin")]
     [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> ForceGetMessage(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveThreadRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         if (!await IsUserAdmin(request.UserId))
         {
-            return Unauthorized();
+            throw new UserNotAdminException(request.UserId);
         }
 
         var message = await userMessageThreadService.GetMessageById(request.MessageId);
@@ -76,15 +77,17 @@ public class UserController(
     [HttpPost("retrieve/message")]
     [ProducesResponseType(typeof(RetrieveThreadResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
+    [ProducesResponseType(typeof(ProblemDetails), 409)]
     public async Task<IActionResult> GetMessage(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveThreadRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         var user = await UserService.GetUserById(request.UserId);
         if (!(user.Messages.Contains(request.MessageId) || await IsUserAdmin(request.UserId)))
         {
-            return Conflict();
+            throw new ConflictInDataException("User is not admin, attempted to retrieve foreign message");
         }
 
         var message = await userMessageThreadService.GetMessageById(request.MessageId);
@@ -97,7 +100,7 @@ public class UserController(
 
     [HttpPost("create")]
     [ProducesResponseType(typeof(CreateUserResponse), 200)]
-    [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
     public async Task<IActionResult> CreateNewUser(
         [FromBody] CreateuUserRequest request)
     {
@@ -119,12 +122,14 @@ public class UserController(
 
     [HttpPost("create/message")]
     [ProducesResponseType(typeof(SendMessageResponse), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> SendMessageAsync(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] SendMessageRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         var user = await UserService.GetUserById(request.UserId);
         var recipient = await UserService.GetUserById(request.RecipientId);
         var threadId = await AddNewThreadToUsers(user, recipient, request.MessageContent);
@@ -134,12 +139,14 @@ public class UserController(
 
     [HttpPut("reply")]
     [ProducesResponseType(typeof(SendMessageResponse), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> ReplyMessageAsync(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] SendMessageRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         var user = await UserService.GetUserById(request.UserId);
         if (!(user.Messages.Contains(request.MessageId) || await IsUserAdmin(request.UserId)))
         {
@@ -154,7 +161,9 @@ public class UserController(
 
     [HttpPatch("login")]
     [ProducesResponseType(typeof(LoginResponse), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> Login(
         [FromBody] LoginRequest request)
     {
@@ -165,14 +174,41 @@ public class UserController(
         return Ok(new LoginResponse { User = user });
     }
 
-    [HttpPut("logout")]
+    [HttpPatch("elevated")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
+    public async Task<IActionResult> ElevateUser(
+        [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
+        [FromBody] DeleteUserRequest request)
+    {
+        await VerifyIdentity(sessionAuth, logger, request.AdminId);
+        if (!await IsUserAdmin(request.AdminId))
+        {
+            throw new UserNotAdminException(request.AdminId);
+        }
+
+        if (request.AdminId == request.UserId || await IsUserAdmin(request.UserId))
+        {
+            throw new PtaUnauthorizedException($"Admin {request.AdminId} cannot elevate self");
+        }
+        var user = await UserService.GetUserById(request.UserId);
+        user.SiteRole = UserRoleOnSite.Active;
+        await UserService.UpdateUser(user);
+        await UserService.DeleteUser(request.UserId);
+        return Ok();
+    }
+
+    [HttpPut("logout")]
+    [ProducesResponseType(typeof(void), 200)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
+    [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> Logout(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] LoginRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         await UserService.UpdateUserOnlineStatus(request.UserId, false);
         return Ok();
     }
@@ -180,14 +216,15 @@ public class UserController(
     [HttpDelete("delete/user")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> DeleteUser(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteUserRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.UserId);
+        await VerifyIdentity(sessionAuth, logger, request.UserId);
         if (await IsUserAdmin(request.UserId))
         {
-            return BadRequest();
+            throw new UserNotAdminException(request.AdminId);
         }
 
         await UserService.DeleteUser(request.UserId);
@@ -197,19 +234,20 @@ public class UserController(
     [HttpDelete("delete/user/elevated")]
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> ForceDeleteUser(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] DeleteUserRequest request)
     {
-        await VerifyIdentity(sessionAuth, request.AdminId);
+        await VerifyIdentity(sessionAuth, logger, request.AdminId);
         if (!await IsUserAdmin(request.AdminId))
         {
-            return Unauthorized();
+            throw new UserNotAdminException(request.AdminId);
         }
 
         if (request.AdminId == request.UserId || await IsUserAdmin(request.UserId))
         {
-            return BadRequest();
+            throw new PtaUnauthorizedException($"Admin {request.AdminId} cannot delete self");
         }
         await UserService.DeleteUser(request.UserId);
         return Ok();

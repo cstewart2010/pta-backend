@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
 namespace PokemonTabletopAdventures.CoreApi.IntegrationTests;
 
@@ -12,9 +13,9 @@ public abstract class BaseResponse
 
     protected BaseResponse(HttpResponseMessage response, string content)
     {
-        TestContext.WriteLine("Parsing response");
-        TestContext.WriteLine($"Status Code: {response.StatusCode}");
-        TestContext.WriteLine($"Content: {content}");
+        TestContext.Out.WriteLine("Parsing response");
+        TestContext.Out.WriteLine($"Status Code: {response.StatusCode}");
+        TestContext.Out.WriteLine($"Content: {content}");
         Content = content;
         IsSuccessful = response.IsSuccessStatusCode;
         StatusCode = response.StatusCode;
@@ -48,5 +49,6 @@ public class Response<T> : BaseResponse
         }
     }
 
+    [JsonIgnore]
     public T? Data { get; }
 }

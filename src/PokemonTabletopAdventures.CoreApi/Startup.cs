@@ -6,6 +6,7 @@ using PokemonTabletopAdventures.CoreApi.Infrastructure;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.OpenApi.Models;
 
 namespace PokemonTabletopAdventures.CoreApi;
 
@@ -62,16 +63,29 @@ internal class Startup(IConfiguration configuration)
         services.AddTransient<ProblemDetailsFactory, PtaProblemDetailsFactory>();
         services.AddProblemDetails();
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v2", new OpenApiInfo
+            {
+                Version = "v2",
+                Title = "Pokemon Tabletop Adventures CoreApi",
+                Description = "Backend API for Pokemon Tabletop Adventures Web Application",
+            });
+        });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v2/swagger.json", "v2");
+            options.RoutePrefix = "swagger";
+        });
+        
         if (env.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
         }
 

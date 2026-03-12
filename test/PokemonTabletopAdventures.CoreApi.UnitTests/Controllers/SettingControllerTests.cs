@@ -50,11 +50,11 @@ public class SettingControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.InstanceOf<ICollection<Environments>>());
-        });
+        }
     }
 
     [Test]
@@ -75,11 +75,11 @@ public class SettingControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.InstanceOf<RetrieveSettingResponse>());
-        });
+        }
     }
 
     [Test]
@@ -103,11 +103,11 @@ public class SettingControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.InstanceOf<CreateSettingResponse>());
-        });
+        }
     }
 
     [Test]
@@ -140,11 +140,11 @@ public class SettingControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.InstanceOf<UpdateSettingResponse>());
-        });
+        }
     }
 
     [Test]
@@ -256,11 +256,7 @@ public class SettingControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.AddToActiveSettingAsync(string.Empty, request);
-        
-        // assert
-        var result = response as ConflictResult;
-        Assert.That(result, Is.Not.Null);
+        Assert.ThrowsAsync<ConflictInDataException>(() => _sut.AddToActiveSettingAsync(string.Empty, request));
     }
 
     [Test]
@@ -749,11 +745,7 @@ public class SettingControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.SetSettingToActive(string.Empty, request);
-        
-        // assert
-        var result = response as ConflictResult;
-        Assert.That(result, Is.Not.Null);
+        Assert.ThrowsAsync<ConflictInDataException>(() => _sut.SetSettingToActive(string.Empty, request));
     }
 
     [Test]

@@ -12,7 +12,6 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 public class OriginsController(IDexService dexService, ILogger<OriginsController> logger) : IndexControllerBase(dexService)
 {
     private const DexType Type = DexType.Origins;
-    private readonly ILogger<OriginsController> _logger = logger;
 
     [HttpGet(Name = nameof(GetOrigins))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
@@ -20,7 +19,7 @@ public class OriginsController(IDexService dexService, ILogger<OriginsController
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<OriginDto>(Type, offset, limit);
+        return await GetItems<OriginDto, OriginsController>(Type, logger, offset, limit);
     }
 
     [HttpGet("{name}", Name = nameof(GetOrigin))]
@@ -28,6 +27,6 @@ public class OriginsController(IDexService dexService, ILogger<OriginsController
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetOrigin(string name)
     {
-        return await GetItem<OriginDto>(Type, name);
+        return await GetItem<OriginDto, OriginsController>(Type, logger, name);
     }
 }

@@ -52,11 +52,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrievePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -109,11 +109,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrievePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -140,11 +140,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<RetrievePokemonResponse>());
-        });
+        }
     }
     
     [Test]
@@ -154,7 +154,6 @@ public class PokemonControllerTests : BasePtaControllerTests
         var gameId = Shared.GameIds.First();
         var trainers = await TrainerService.GetTrainersByGameId(gameId);
         var trainer = trainers.First(x => !x.IsGM);
-        var gm = trainers.First(x => x.IsGM);
         var request = new RetrievePokemonRequest
         {
             GameMasterId = Guid.Empty,
@@ -251,11 +250,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<CapturePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -288,11 +287,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<CapturePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -326,11 +325,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<CreatePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -359,11 +358,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdatePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -415,11 +414,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdatePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -469,11 +468,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdatePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -504,11 +503,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdatePokemonResponse>());
-        });
+        }
     }
 
     [Test]
@@ -518,7 +517,6 @@ public class PokemonControllerTests : BasePtaControllerTests
         var gameId = Shared.GameIds.First();
         var trainers = await TrainerService.GetTrainersByGameId(gameId);
         var trainer = trainers.First(x => !x.IsGM);
-        var gm = trainers.First(x => x.IsGM);
         var pokemon = trainer.PokemonHome.First(x => x.SpeciesName.Equals("Bulbasaur", StringComparison.InvariantCultureIgnoreCase));
         var request = new UpdatePokemonRequest
         {
@@ -604,11 +602,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdatePokedexResponse>());
-        });
+        }
     }
 
     [Test]
@@ -650,11 +648,11 @@ public class PokemonControllerTests : BasePtaControllerTests
         // assert
         var result = response as ObjectResult;
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result.Value, Is.TypeOf<UpdatePokedexResponse>());
-        });
+        }
     }
 
     [Test]

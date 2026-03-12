@@ -45,13 +45,13 @@ internal class NpcServiceTests
         var actualNpc = await _sut.GetNpc(id);
 
         Assert.That(actualNpc, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actualNpc.NpcId, Is.EqualTo(id));
             Assert.That(actualNpc.GameId, Is.EqualTo(expectedNpc.GameId));
             Assert.That(actualNpc.Age, Is.EqualTo(expectedNpc.Age));
             Assert.That(actualNpc.TrainerName, Is.EqualTo(expectedNpc.TrainerName));
-        });
+        }
     }
 
     [Test]
@@ -66,14 +66,14 @@ internal class NpcServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<NpcDto>>());
         var exception = aggregateException.InnerException as UnknownEntityException<NpcDto>;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {PropertyNames.NpcId}={item.NpcId}"));
+                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {nameof(NpcDto.NPCId)}={item.NpcId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     [Test]
@@ -85,13 +85,13 @@ internal class NpcServiceTests
 
         Assert.That(npcs, Is.Not.Null.Or.Empty);
         Assert.That(npcs, Has.Count.EqualTo(_npcCollection.Collection.Count));
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             foreach (var npc in _npcCollection.Collection)
             {
                 Assert.That(npcs.SingleOrDefault(x => x.NpcId == npc.NPCId), Is.Not.Null);
             }
-        });
+        }
     }
 
     [Test]
@@ -115,13 +115,13 @@ internal class NpcServiceTests
 
         Assert.That(actualNpcs, Is.Not.Null.Or.Empty);
         Assert.That(actualNpcs, Has.Count.EqualTo(expectedNpcs.Length));
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             foreach (var npc in expectedNpcs)
             {
                 Assert.That(actualNpcs.SingleOrDefault(x => x.NpcId == npc.NPCId), Is.Not.Null);
             }
-        });
+        }
     }
 
     [Test]
@@ -154,12 +154,12 @@ internal class NpcServiceTests
 
         Assert.That(_npcCollection.Collection, Has.Count.EqualTo(initialCount + 1));
         var newNpc = await _sut.GetNpc(npc.NpcId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(newNpc.Background, Is.EqualTo(npc.Background));
             Assert.That(newNpc.GameId, Is.EqualTo(npc.GameId));
             Assert.That(newNpc.Height, Is.EqualTo(npc.Height));
-        });
+        }
     }
 
     [Test]
@@ -197,13 +197,13 @@ internal class NpcServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<DuplicateEntryException>());
         var exception = aggregateException.InnerException as DuplicateEntryException;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.DuplicateEntryTitle));
             Assert.That(exception.Message, Is.EqualTo($"Duplicate entry of type {nameof(NpcDto)}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             Assert.That(_npcCollection.Collection, Has.Count.EqualTo(initialCount));
-        });
+        }
     }
 
     [Test]
@@ -222,12 +222,12 @@ internal class NpcServiceTests
 
         var updatedNpc = await _sut.UpdateNpc(npc);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedNpc, Is.Not.Null);
             Assert.That(_npcCollection.Collection, Has.Count.EqualTo(count));
-        });
-        Assert.Multiple(() =>
+        }
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedNpc.GameId, Is.Not.EqualTo(oldGameId));
             Assert.That(updatedNpc.Age, Is.Not.EqualTo(oldAge));
@@ -235,7 +235,7 @@ internal class NpcServiceTests
             Assert.That(updatedNpc.GameId, Is.EqualTo(npc.GameId));
             Assert.That(updatedNpc.Age, Is.EqualTo(npc.Age));
             Assert.That(updatedNpc.TrainerName, Is.EqualTo(npc.TrainerName));
-        });
+        }
     }
 
     [Test]
@@ -266,14 +266,14 @@ internal class NpcServiceTests
 
         Assert.That(aggregateException.InnerException, Is.TypeOf<UnknownEntityException<NpcDto>>());
         var exception = aggregateException.InnerException as UnknownEntityException<NpcDto>;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {PropertyNames.NpcId}={id}"));
+                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {nameof(NpcDto.NPCId)}={id}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-        });
+        }
     }
 
     private static SearchItem[] GetSearchItem()

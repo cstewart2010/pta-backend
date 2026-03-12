@@ -63,11 +63,11 @@ public class UserMessageThreadServiceTests
         await _sut.PostThread(thread);
         
         var actual = await _sut.GetMessageById(thread.MessageId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.MessageId, Is.EqualTo(thread.MessageId));
             Assert.That(actual.Messages, Has.Count.EqualTo(thread.Messages.Count));
-        });
+        }
     }
 
     [Test]
@@ -91,11 +91,11 @@ public class UserMessageThreadServiceTests
             Messages = []
         };
         var actual = await _sut.UpdateThread(updatedThread);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.MessageId, Is.EqualTo(thread.MessageId));
             Assert.That(actual.Messages, Is.Empty);
-        });
+        }
     }
 
     [Test]

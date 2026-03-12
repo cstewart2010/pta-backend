@@ -69,7 +69,7 @@ public class UserServiceTests
         var userId = Shared.UserIds.First();
         var expected = _userCollection.Collection.First(x => x.UserId == userId);
         var user = await _sut.GetUserByUsername(expected.Username);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(user.Games, Is.EquivalentTo(expected.Games));
             Assert.That(user.Messages, Is.EquivalentTo(expected.Messages));
@@ -78,7 +78,7 @@ public class UserServiceTests
             Assert.That(user.Username, Is.EqualTo(expected.Username));
             Assert.That(user.ActivityToken, Is.EqualTo(expected.ActivityToken));
             Assert.That(user.DateCreated, Is.EqualTo(expected.DateCreated));
-        });
+        }
     }
 
     [Test]
@@ -116,8 +116,8 @@ public class UserServiceTests
         
         await _sut.PostUser(user, passwordHash);
         var actual = _userCollection.Collection.First(x => x.UserId == userId);
-        Assert.Multiple(() =>
-            {
+        using (Assert.EnterMultipleScope())
+        {
                 Assert.That(actual.Games, Is.EquivalentTo(user.Games));
                 Assert.That(actual.Messages, Is.EquivalentTo(user.Messages));
                 Assert.That(actual.SiteRole, Is.EqualTo(UserRoleOnSite.IpBanned));
@@ -126,8 +126,7 @@ public class UserServiceTests
                 Assert.That(actual.ActivityToken, Is.Empty);
                 Assert.That(actual.DateCreated, Is.EqualTo(user.DateCreated));
                 Assert.That(actual.PasswordHash, Is.EqualTo(passwordHash));
-            }
-        );
+        }
     }
 
     [Test]
@@ -147,7 +146,7 @@ public class UserServiceTests
         };
         
         var actual = await _sut.UpdateUser(user);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.Games, Is.EquivalentTo(expected.Games));
             Assert.That(actual.Messages, Is.EquivalentTo(expected.Messages));
@@ -155,7 +154,7 @@ public class UserServiceTests
             Assert.That(actual.ActivityToken, Is.EqualTo(expected.ActivityToken));
             Assert.That(actual.DateCreated, Is.EqualTo(expected.DateCreated));
             Assert.That(actual.SiteRole, Is.EqualTo(user.SiteRole));
-        });
+        }
     }
 
     [Test]
@@ -175,7 +174,7 @@ public class UserServiceTests
         };
         
         var actual = await _sut.UpdateUser(user);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.Games, Is.EquivalentTo(user.Games));
             Assert.That(actual.Messages, Is.EquivalentTo(user.Messages));
@@ -183,7 +182,7 @@ public class UserServiceTests
             Assert.That(actual.ActivityToken, Is.EqualTo(expected.ActivityToken));
             Assert.That(actual.DateCreated, Is.EqualTo(expected.DateCreated));
             Assert.That(actual.SiteRole, Is.EqualTo(user.SiteRole));
-        });
+        }
     }
 
     [Test]

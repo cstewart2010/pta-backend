@@ -23,18 +23,18 @@ public class GameController(
     IModelToDtoMapper modelToDtoMapper,
     ILogger<GameController> logger) : PtaControllerBase(userService, trainerService, pokemonService, gameService, dexUtility, pokedexService, encryptionService, dtoToModelMapper, modelToDtoMapper)
 {
-    private readonly ILogger<GameController> _logger = logger;
     private readonly IEncryptionService _encryptionService = encryptionService;
 
     [HttpGet("retrieve", Name = nameof(GetAllGames))]
     [ProducesResponseType(typeof(IEnumerable<RetrieveGameResponse>), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetAllGames(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromQuery] Guid userId,
         [FromQuery] string nickname)
     {
-        await VerifyIdentity(sessionAuth, userId);
+        await VerifyIdentity(sessionAuth, logger, userId);
         var user = await UserService.GetUserById(userId);
         IEnumerable<Game> gameModels;
         if (!string.IsNullOrWhiteSpace(nickname))
@@ -52,11 +52,12 @@ public class GameController(
     [HttpGet("user/{userId}/retrieve", Name = nameof(GetAllUserGames))]
     [ProducesResponseType(typeof(RetrieveGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetAllUserGames(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         Guid userId)
     {
-        await VerifyIdentity(sessionAuth, userId);
+        await VerifyIdentity(sessionAuth, logger, userId);
         var user = await UserService.GetUserById(userId);
         var gameModels = await GameService.GetAllGamesWithUser(user);
         return Ok(new RetrieveGameResponse { Games = [.. gameModels] });
@@ -94,6 +95,7 @@ public class GameController(
     [HttpGet("refresh")]
     [ProducesResponseType(typeof(RetrieveGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> RefreshInGame(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         Guid userId,
@@ -109,7 +111,7 @@ public class GameController(
     }
 
     [HttpPost("create")]
-    [ProducesResponseType(typeof(CreateGameResponse), 201)]
+    [ProducesResponseType(typeof(CreateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     public async Task<IActionResult> CreateNewGame(
         [FromBody] CreateGameRequest request)
@@ -132,15 +134,16 @@ public class GameController(
     }
 
     [HttpPatch("{gameId}/logs/add")]
-    [ProducesResponseType(typeof(UpdateGameResponse), 201)]
+    [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> AddLogsAsync(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        var isGm = await VerifyIdentity(sessionAuth, request.UserId, gameId);
+        var isGm = await VerifyIdentity(sessionAuth, logger, request.UserId, gameId);
         var game = await GameService.GetGame(gameId, isGm);
         await GameService.UpdateGameLogs(game, isGm, [.. request.Game.Logs]);
         return Ok(new UpdateGameResponse { Games = [game] });
@@ -150,12 +153,13 @@ public class GameController(
     [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> StartGame(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        await IsUserGM(request.GameMasterId, gameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, gameId, logger, sessionAuth);
         var trainer = await TrainerService.GetTrainerById(request.GameMasterId, gameId);
         var game = await GameService.GetGame(gameId, true);
         await IsGameAuthenticated(request.GameSessionPassword!, game);
@@ -168,12 +172,13 @@ public class GameController(
     [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> EndGame(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        await IsUserGM(request.GameMasterId, gameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, gameId, logger, sessionAuth);
         await SetEndGameStatuses(gameId);
         var game = await GameService.GetGame(gameId, true);
         return Ok(new UpdateGameResponse { Games = [game] });
@@ -183,12 +188,13 @@ public class GameController(
     [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> AddNPCsToGame(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
-        await IsUserGM(request.GameMasterId, gameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, gameId, logger, sessionAuth);
         var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
         var foundNpcIds = await GetNpcs(npcIds);
         var game = await GameService.GetGame(gameId, true);
@@ -201,13 +207,14 @@ public class GameController(
     [ProducesResponseType(typeof(UpdateGameResponse), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> RemovesNPCsFromGame(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] UpdateGameRequest request,
         Guid gameId)
     {
         var npcIds = request.Game.Npcs.Select(npc => npc.NpcId);
-        await IsUserGM(request.GameMasterId, gameId, sessionAuth);
+        await IsUserGM(request.GameMasterId, gameId, logger, sessionAuth);
         var foundNpcIds = await GetNpcs(npcIds);
         var game = await GameService.GetGame(gameId, true);
         var newNpcList = game.Npcs.Select(x => x.NpcId).Except(foundNpcIds);
@@ -219,13 +226,14 @@ public class GameController(
     [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> DeleteGame(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         Guid gameId,
         [FromQuery] Guid gameMasterId,
         [FromQuery] string gameSessionPassword)
     {
-        await IsUserGM(gameMasterId, gameId, sessionAuth);
+        await IsUserGM(gameMasterId, gameId, logger, sessionAuth);
         var game = await GameService.GetGame(gameId, true);
         await IsGameAuthenticated(gameSessionPassword, game);
         await MassDeletePokemon(gameId);
@@ -271,7 +279,7 @@ public class GameController(
         Guid userId,
         Guid gameId)
     {
-        await VerifyIdentity(sessionAuth, userId);
+        await VerifyIdentity(sessionAuth, logger, userId);
         var game = await GameService.GetGame(gameId, false);
         return Ok(new RetrieveGameResponse { Games = [game] });
     }
@@ -281,7 +289,7 @@ public class GameController(
         Guid userId,
         Guid gameId)
     {
-        await IsUserGM(userId, gameId, sessionAuth);
+        await IsUserGM(userId, gameId, logger, sessionAuth);
         var game = await GameService.GetGame(gameId, true);
         return Ok(new RetrieveGameResponse { Games = [game] });
     }

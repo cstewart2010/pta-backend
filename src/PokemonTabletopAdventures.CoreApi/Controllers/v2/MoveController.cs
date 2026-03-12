@@ -12,7 +12,6 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 public class MoveController(IDexService dexService, ILogger<MoveController> logger) : IndexControllerBase(dexService)
 {
     private const DexType Type = DexType.Moves;
-    private readonly ILogger<MoveController> _logger = logger;
 
     [HttpGet(Name = nameof(GetMoves))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
@@ -20,7 +19,7 @@ public class MoveController(IDexService dexService, ILogger<MoveController> logg
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<MoveDto>(Type, offset, limit);
+        return await GetItems<MoveDto, MoveController>(Type, logger, offset, limit);
     }
 
     [HttpGet("{name}", Name = nameof(GetMove))]
@@ -28,6 +27,6 @@ public class MoveController(IDexService dexService, ILogger<MoveController> logg
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetMove(string name)
     {
-        return await GetItem<MoveDto>(Type, name);
+        return await GetItem<MoveDto, MoveController>(Type, logger, name);
     }
 }

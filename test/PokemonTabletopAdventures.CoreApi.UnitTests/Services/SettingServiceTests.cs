@@ -45,7 +45,7 @@ public class SettingServiceTests
         Assert.That(actual, Is.Not.Null);
         var expectedParticipants = expected.ActiveParticipants.ToList();
         var actualParticipants = actual.Participants.ToList();
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.SettingId, Is.EqualTo(expected.SettingId));
             Assert.That(actual.Name, Is.EqualTo(expected.Name));
@@ -65,7 +65,7 @@ public class SettingServiceTests
                 Assert.That(actualParticipants[i].Position.X, Is.EqualTo(expectedParticipants[i].Position.X));
                 Assert.That(actualParticipants[i].Position.Y, Is.EqualTo(expectedParticipants[i].Position.Y));
             }
-        });
+        }
     }
 
     [Test]
@@ -168,7 +168,7 @@ public class SettingServiceTests
         Assert.That(_settingCollection.Collection, Has.Count.EqualTo(count + 1));
         var actual = _settingCollection.Collection.First(x => x.SettingId == model.SettingId);
         Assert.That(actual, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.SettingId, Is.EqualTo(model.SettingId));
             Assert.That(actual.GameId, Is.EqualTo(model.GameId));
@@ -177,7 +177,7 @@ public class SettingServiceTests
             Assert.That(actual.Shops, Is.EquivalentTo(model.Shops.Select(x => x.ShopId)));
             Assert.That(actual.Type, Is.EqualTo(model.Type));
             Assert.That(actual.ActiveParticipants.ToList(), Has.Count.EqualTo(model.Participants.Count));
-        });
+        }
     }
 
     [Test]
@@ -190,11 +190,11 @@ public class SettingServiceTests
         model.Environment = [..model.Environment, "additional"];
         var updatedModel = await _sut.UpdateSetting(model, isGm);
         Assert.That(updatedModel, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedModel.SettingId, Is.EqualTo(model.SettingId));
             Assert.That(updatedModel.Environment, Is.EquivalentTo(model.Environment));
-        });
+        }
     }
 
     [Test]

@@ -13,7 +13,6 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 public class TrainerClassController(IDexService dexService, ILogger<TrainerClassController> logger) : IndexControllerBase(dexService)
 {
     private const DexType Type = DexType.TrainerClasses;
-    private readonly ILogger<TrainerClassController> _logger = logger;
 
     [HttpGet(Name = nameof(GetClasses))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
@@ -21,7 +20,7 @@ public class TrainerClassController(IDexService dexService, ILogger<TrainerClass
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<TrainerClassDto>(Type, offset, limit);
+        return await GetItems<TrainerClassDto, TrainerClassController>(Type, logger, offset, limit);
     }
 
     [HttpGet("{name}", Name = nameof(GetClass))]
@@ -29,6 +28,6 @@ public class TrainerClassController(IDexService dexService, ILogger<TrainerClass
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetClass(string name)
     {
-        return await GetItem<TrainerClassDto>(Type, name);
+        return await GetItem<TrainerClassDto, TrainerClassController>(Type, logger, name);
     }
 }

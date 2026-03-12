@@ -115,9 +115,9 @@ public abstract class BasePtaControllerTests
     
     protected IEncryptionService EncryptionService { get; }
     
-    protected DtoToModelMapper DtoToModelMapper => Shared.DtoToModelMapper;
+    protected static DtoToModelMapper DtoToModelMapper => Shared.DtoToModelMapper;
     
-    protected ModelToDtoMapper ModelToDtoMapper => Shared.ModelToDtoMapper;
+    protected static ModelToDtoMapper ModelToDtoMapper => Shared.ModelToDtoMapper;
 
     private void AddCollection<TIndex>(DexType dexType)
         where TIndex : class, IDocument, IDexDocument, new()

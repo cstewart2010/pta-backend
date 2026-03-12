@@ -64,7 +64,7 @@ public class TrainerServiceTests
         var expectedTrainerSkills = expected.TrainerSkills.ToList();
         
         Assert.That(actual, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.TrainerId, Is.EqualTo(expected.TrainerId));
             Assert.That(actual.GameId, Is.EqualTo(expected.GameId));
@@ -96,8 +96,8 @@ public class TrainerServiceTests
             Assert.That(actual.Level, Is.EqualTo(expected.Honors.Count() + 1));
             Assert.That(actual.Species, Is.EqualTo(expected.Species));
             Assert.That(actual.Sprite, Is.EqualTo(expected.Sprite));
-        });
-        Assert.Multiple(() =>
+        }
+        using (Assert.EnterMultipleScope())
         {
             for (var i = 0; i < expected.Items.Count; i++)
             {
@@ -106,8 +106,8 @@ public class TrainerServiceTests
                 Assert.That(actualItems[i].Amount, Is.EqualTo(expectedItems[i].Amount));
                 Assert.That(actualItems[i].Effects, Is.EqualTo(expectedItems[i].Effects));
             }
-        });
-        Assert.Multiple(() =>
+        }
+        using (Assert.EnterMultipleScope())
         {
             for (var i = 0; i < expectedTrainerSkills.Count; i++)
             {
@@ -116,8 +116,8 @@ public class TrainerServiceTests
                 Assert.That(actualTrainerSkills[i].Talent1, Is.EqualTo(expectedTrainerSkills[i].Talent1));
                 Assert.That(actualTrainerSkills[i].Talent2, Is.EqualTo(expectedTrainerSkills[i].Talent2));
             }
-        });
-        Assert.Multiple(() =>
+        }
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(actual.TrainerStats.HP, Is.EqualTo(expected.TrainerStats.HP));
             Assert.That(actual.TrainerStats.Attack, Is.EqualTo(expected.TrainerStats.Attack));
@@ -125,7 +125,7 @@ public class TrainerServiceTests
             Assert.That(actual.TrainerStats.Defense, Is.EqualTo(expected.TrainerStats.Defense));
             Assert.That(actual.TrainerStats.SpecialDefense, Is.EqualTo(expected.TrainerStats.SpecialDefense));
             Assert.That(actual.TrainerStats.Speed, Is.EqualTo(expected.TrainerStats.Speed));
-        });
+        }
     }
 
     [Test]
@@ -177,13 +177,13 @@ public class TrainerServiceTests
         var actual = await _sut.GetAllUserTrainers(userId);
         Assert.That(actual, Is.Not.Null);
         Assert.That(actual, Has.Count.EqualTo(expected.Count));
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             foreach (var trainer in actual)
             {
                 Assert.That(trainer.TrainerId, Is.EqualTo(userId));
             }
-        });
+        }
     }
 
     [Test]
@@ -346,7 +346,7 @@ public class TrainerServiceTests
         
         await _sut.CompleteTrainer(trainer.TrainerId,  trainer.GameId, origin, trainerClasses.First(), feats, stats);
         var updatedTrainer = await _sut.GetTrainerById(trainer.TrainerId, trainer.GameId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(updatedTrainer.Origin, Is.EqualTo(origin));
             Assert.That(updatedTrainer.TrainerClasses, Is.EquivalentTo(trainerClasses));
@@ -357,7 +357,7 @@ public class TrainerServiceTests
             Assert.That(updatedTrainer.TrainerStats.Speed, Is.EqualTo(stats.Speed));
             Assert.That(updatedTrainer.TrainerStats.SpecialAttack, Is.EqualTo(stats.SpecialAttack));
             Assert.That(updatedTrainer.TrainerStats.SpecialDefense, Is.EqualTo(stats.SpecialDefense));
-        });
+        }
     }
 
     [Test, NonParallelizable]
@@ -366,7 +366,7 @@ public class TrainerServiceTests
         var trainer = _trainerCollection.Collection.First(x => x.IsGM);
         
         await _sut.DeleteTrainer(trainer.TrainerId, trainer.GameId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(_gameCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
             Assert.That(_trainerCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
@@ -375,7 +375,7 @@ public class TrainerServiceTests
             Assert.That(_pokedexCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
             Assert.That(_shopCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
             Assert.That(_npcCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Empty);
-        });
+        }
     }
 
     [Test, NonParallelizable]
@@ -384,7 +384,7 @@ public class TrainerServiceTests
         var trainer = _trainerCollection.Collection.First(x => !x.IsGM);
         
         await _sut.DeleteTrainer(trainer.TrainerId, trainer.GameId);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(_gameCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
             Assert.That(_trainerCollection.Collection.Where(x => x.GameId == trainer.GameId), Is.Not.Empty);
@@ -396,6 +396,6 @@ public class TrainerServiceTests
             Assert.That(_trainerCollection.Collection.Any(x => x.TrainerId == trainer.TrainerId && x.GameId == trainer.GameId), Is.False);
             Assert.That(_pokemonCollection.Collection.Any(x => x.TrainerId == trainer.TrainerId && x.GameId == trainer.GameId), Is.False);
             Assert.That(_pokedexCollection.Collection.Any(x => x.TrainerId == trainer.TrainerId && x.GameId == trainer.GameId), Is.False);
-        });
+        }
     }
 }

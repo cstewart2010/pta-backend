@@ -1,6 +1,7 @@
 ﻿using PokemonTabletopAdventures.CoreApi.Domain.Models;
 using PokemonTabletopAdventures.CoreApi.Services;
 using System.Linq.Expressions;
+using Microsoft.Extensions.Logging;
 using PokemonTabletopAdventures.CoreApi.DTOs;
 
 namespace PokemonTabletopAdventures.CoreApi.UnitTests.Implementations;
@@ -9,7 +10,7 @@ internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto> wher
 {
     public abstract ICollection<TDto> Collection { get; protected set; }
 
-    public Task<TDto?> DeleteAsync(Expression<Func<TDto, bool>> filter)
+    public Task<TDto?> DeleteAsync<TService>(Expression<Func<TDto, bool>> filter, ILogger<TService> logger)
     {
         var item = Collection.FirstOrDefault(x => filter.Compile().Invoke(x));
         if (item != null)
@@ -19,30 +20,30 @@ internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto> wher
         return Task.FromResult(item);
     }
 
-    public Task DeleteManyAsync(Expression<Func<TDto, bool>> filter)
+    public Task DeleteManyAsync<TService>(Expression<Func<TDto, bool>> filter, ILogger<TService> logger)
     {
         Collection = [.. Collection.Where(x => !filter.Compile().Invoke(x))];
         return Task.CompletedTask;
     }
 
-    public Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter)
+    public Task<ICollection<TDto>> GetManyAsync<TService>(Expression<Func<TDto, bool>> filter, ILogger<TService> logger)
     {
         ICollection<TDto> items = [.. Collection.Where(x => filter.Compile().Invoke(x))];
         return Task.FromResult(items);
     }
 
-    public Task<ICollection<TDto>> GetManyAsync(Expression<Func<TDto, bool>> filter, int offset, int limit)
+    public Task<ICollection<TDto>> GetManyAsync<TService>(Expression<Func<TDto, bool>> filter, int offset, int limit, ILogger<TService> logger)
     {
         ICollection<TDto> items = [.. Collection.Where(x => filter.Compile().Invoke(x)).Skip(offset).Take(limit)];
         return Task.FromResult(items);
     }
 
-    public Task<TDto?> GetOneAsync(Expression<Func<TDto, bool>> filter)
+    public Task<TDto?> GetOneAsync<TService>(Expression<Func<TDto, bool>> filter, ILogger<TService> logger)
     {
         return Task.FromResult(Collection.FirstOrDefault(x => filter.Compile().Invoke(x)));
     }
 
-    public Task<TDto?> PatchAsync(Expression<Func<TDto, bool>> filter, params UpdateData[] data)
+    public Task<TDto?> PatchAsync<TService>(Expression<Func<TDto, bool>> filter, ILogger<TService> logger, params UpdateData[] data)
     {
         var item = Collection.FirstOrDefault(x => filter.Compile().Invoke(x));
         if (item == null)
@@ -58,13 +59,13 @@ internal abstract class BaseCollectionImpl<TDto> : ICollectionService<TDto> wher
         return Task.FromResult(item)!;
     }
 
-    public Task PostAsync(TDto entity)
+    public Task PostAsync<TService>(TDto entity, ILogger<TService> logger)
     {
         Collection.Add(entity);
         return Task.CompletedTask;
     }
 
-    public Task PutAsync(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity)
+    public Task PutAsync<TService>(Expression<Func<TDto, Guid>> filter, Guid id, TDto entity, ILogger<TService> logger)
     {
         var item = Collection.FirstOrDefault(x => filter.Compile().Invoke(x) == id);
         if (item == null)

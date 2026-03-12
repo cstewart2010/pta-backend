@@ -12,7 +12,6 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 public class BerryController(IDexService dexService, ILogger<BerryController> logger) : IndexControllerBase(dexService)
 {
     private const DexType Type = DexType.Berries;
-    private readonly ILogger<BerryController> _logger = logger;
 
     [HttpGet(Name = nameof(GetBerries))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
@@ -20,7 +19,7 @@ public class BerryController(IDexService dexService, ILogger<BerryController> lo
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<BerryDto>(Type, offset, limit);
+        return await GetItems<BerryDto, BerryController>(Type, logger, offset, limit);
     }
 
     [HttpGet("{name}", Name = nameof(GetBerry))]
@@ -28,6 +27,6 @@ public class BerryController(IDexService dexService, ILogger<BerryController> lo
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetBerry(string name)
     {
-        return await GetItem<BerryDto>(Type, name);
+        return await GetItem<BerryDto, BerryController>(Type, logger, name);
     }
 }

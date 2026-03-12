@@ -17,8 +17,8 @@ public class UserMessageThreadService(
         logger.LogInformation("Removing message thread {id}", id);
         var dto = await ThrowIfNull(
             id,
-            x => Collection.DeleteAsync(message => message.MessageId == x),
-            PropertyNames.MessageId);
+            x => Collection.DeleteAsync(message => message.MessageId == x, logger),
+            nameof(UserMessageThread.MessageId));
 
         var ids = dto.Messages.Select(x => x.User).Distinct();
 
@@ -41,8 +41,8 @@ public class UserMessageThreadService(
     {
         var dto = await ThrowIfNull(
             id,
-            x => Collection.GetOneAsync(message => message.MessageId == x),
-            PropertyNames.MessageId);
+            x => Collection.GetOneAsync(message => message.MessageId == x, logger),
+            nameof(UserMessageThread.MessageId));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -50,7 +50,7 @@ public class UserMessageThreadService(
     public async Task PostThread(UserMessageThread thread)
     {
         var dto = await modelToDtoMapper.ParseFromModel(thread);
-        await PostUniqueDocument(dto, x => x.MessageId == thread.MessageId);
+        await PostUniqueDocument(dto, x => x.MessageId == thread.MessageId, logger);
     }
 
     public async Task<UserMessageThread> UpdateThread(UserMessageThread updatedThread)
@@ -59,7 +59,8 @@ public class UserMessageThreadService(
         await UpsertDocument(
             thread => thread.MessageId,
             updatedThread.MessageId,
-            dto);
+            dto,
+            logger);
 
         return await GetMessageById(updatedThread.MessageId);
     }

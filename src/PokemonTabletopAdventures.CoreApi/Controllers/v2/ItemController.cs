@@ -11,15 +11,13 @@ namespace PokemonTabletopAdventures.CoreApi.Controllers.v2;
 [Route(Routes.ItemdexRoute)]
 public class ItemController(IDexService dexService, ILogger<ItemController> logger) : IndexControllerBase(dexService)
 {
-    private readonly ILogger<ItemController> _logger = logger;
-
     [HttpGet("key", Name = nameof(GetKeyItems))]
     [ProducesResponseType(typeof(IndexCollectionResponse), 200)]
     public async Task<IActionResult> GetKeyItems(
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<BaseItemDto>(DexType.KeyItems, offset, limit);
+        return await GetItems<BaseItemDto, ItemController>(DexType.KeyItems, logger, offset, limit);
     }
 
     [HttpGet("key/{name}", Name = nameof(GetKeyItem))]
@@ -27,7 +25,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetKeyItem(string name)
     {
-        return await GetItem<BaseItemDto>(DexType.KeyItems, name);
+        return await GetItem<BaseItemDto, ItemController>(DexType.KeyItems, logger, name);
     }
 
     [HttpGet("medical", Name = nameof(GetMedicalItems))]
@@ -36,7 +34,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<BaseItemDto>(DexType.MedicalItems, offset, limit);
+        return await GetItems<BaseItemDto, ItemController>(DexType.MedicalItems, logger, offset, limit);
     }
 
     [HttpGet("medical/{name}", Name = nameof(GetMedicalItem))]
@@ -44,7 +42,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetMedicalItem(string name)
     {
-        return await GetItem<BaseItemDto>(DexType.MedicalItems, name);
+        return await GetItem<BaseItemDto, ItemController>(DexType.MedicalItems, logger, name);
     }
 
     [HttpGet("pokeball", Name = nameof(GetPokeballs))]
@@ -53,7 +51,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<BaseItemDto>(DexType.Pokeballs, offset, limit);
+        return await GetItems<BaseItemDto, ItemController>(DexType.Pokeballs, logger, offset, limit);
     }
 
     [HttpGet("pokeball/{name}", Name = nameof(GetPokeball))]
@@ -61,7 +59,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokeball(string name)
     {
-        return await GetItem<BaseItemDto>(DexType.Pokeballs, name);
+        return await GetItem<BaseItemDto, ItemController>(DexType.Pokeballs, logger, name);
     }
 
     [HttpGet("pokemon", Name = nameof(GetPokemonItems))]
@@ -70,7 +68,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<BaseItemDto>(DexType.PokemonItems, offset, limit);
+        return await GetItems<BaseItemDto, ItemController>(DexType.PokemonItems, logger, offset, limit);
     }
 
     [HttpGet("pokemon/{name}", Name = nameof(GetPokemonItem))]
@@ -78,7 +76,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetPokemonItem(string name)
     {
-        return await GetItem<BaseItemDto>(DexType.PokemonItems, name);
+        return await GetItem<BaseItemDto, ItemController>(DexType.PokemonItems, logger, name);
     }
 
     [HttpGet("trainer", Name = nameof(GetTrainerItems))]
@@ -87,7 +85,7 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
         [FromQuery] int offset,
         [FromQuery] int limit)
     {
-        return await GetItems<BaseItemDto>(DexType.TrainerEquipment, offset, limit);
+        return await GetItems<BaseItemDto, ItemController>(DexType.TrainerEquipment, logger, offset, limit);
     }
 
     [HttpGet("trainer/{name}", Name = nameof(GetTrainerItem))]
@@ -95,6 +93,6 @@ public class ItemController(IDexService dexService, ILogger<ItemController> logg
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public async Task<IActionResult> GetTrainerItem(string name)
     {
-        return await GetItem<BaseItemDto>(DexType.TrainerEquipment, name);
+        return await GetItem<BaseItemDto, ItemController>(DexType.TrainerEquipment, logger, name);
     }
 }
