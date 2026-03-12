@@ -24,7 +24,7 @@ public class PokemonService(
         var dto = await ThrowIfNull(
             id,
             x => Collection.GetOneAsync(pokemon => pokemon.PokemonId == x, logger),
-            PropertyNames.PokemonId);
+            nameof(Pokemon.PokemonId));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -59,7 +59,7 @@ public class PokemonService(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
             logger,
-            new Models.UpdateData(PropertyNames.CanEvolve, isEvolvable));
+            new Models.UpdateData(nameof(Pokemon.CanEvolve), isEvolvable));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -70,7 +70,7 @@ public class PokemonService(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
             logger,
-            new Models.UpdateData(PropertyNames.CurrentHP, hp));
+            new Models.UpdateData(nameof(Pokemon.CurrentHP), hp));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -81,7 +81,7 @@ public class PokemonService(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
             logger,
-            new Models.UpdateData(PropertyNames.IsOnActiveTeam, isOnActiveTeam));
+            new Models.UpdateData(nameof(Pokemon.IsOnActiveTeam), isOnActiveTeam));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -92,7 +92,7 @@ public class PokemonService(
             pokemonId,
             pokemon => pokemon.PokemonId == pokemonId,
             logger,
-            new Models.UpdateData(PropertyNames.TrainerId, trainerId));
+            new Models.UpdateData(nameof(Pokemon.TrainerId), trainerId));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -102,6 +102,6 @@ public class PokemonService(
         await ThrowIfNull(
             id,
             pokemonId => Collection.DeleteAsync(pokemon => pokemon.PokemonId == pokemonId, logger),
-            PropertyNames.PokemonId);
+            nameof(Pokemon.PokemonId));
     }
 }

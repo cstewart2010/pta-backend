@@ -352,7 +352,7 @@ public class SettingController(
             throw new ConflictInDataException("There is already an active setting.");
         }
 
-        var setting = await settingService.GetSetting(request.Setting.SettingId, request.Setting.GameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.SettingId, request.Setting.SettingId);
+        var setting = await settingService.GetSetting(request.Setting.SettingId, request.Setting.GameId, true) ?? throw new UnknownEntityException<Setting>(nameof(Setting.SettingId), request.Setting.SettingId);
         setting.IsActive = true;
         await settingService.UpdateSetting(setting, true);
 
@@ -394,7 +394,7 @@ public class SettingController(
     {
         await IsUserGM(request.TrainerId, request.GameId, logger, sessionAuth);
         var setting = await GetActiveSettingOrThrow(request.GameId);
-        var participants = await Task.WhenAll(setting.Participants.Select(async participant => await GetWithUpdatedHP(participant, request.GameId)));
+        var participants = await Task.WhenAll(setting.Participants.Select(async participant => await GetWithUpdatedHp(participant, request.GameId)));
         setting.Participants = participants;
         var updatedSetting = await settingService.UpdateSetting(setting, true);
         return Ok(new UpdateSettingResponse { Setting = updatedSetting});
@@ -455,7 +455,7 @@ public class SettingController(
     private async Task<IActionResult> RemoveFromParticipants(Guid gameId, Guid participantId, bool isGm)
     {
         var game = await GameService.GetGame(gameId, isGm);
-        var setting = await settingService.GetActiveSetting(gameId, isGm) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, gameId);
+        var setting = await settingService.GetActiveSetting(gameId, isGm) ?? throw new UnknownEntityException<Setting>(nameof(Game.GameId), gameId);
         var removedParticipant = setting.Participants.First(participant => participant.ParticipantId == participantId);
         setting.Participants = [..setting.Participants.Where(participant => participant.ParticipantId != participantId)];
         await settingService.UpdateSetting(setting, isGm);
@@ -475,7 +475,7 @@ public class SettingController(
         WebSocketMessageType messageType,
         bool endOfMessage)
     {
-        var setting = await settingService.GetActiveSetting(gameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, gameId);
+        var setting = await settingService.GetActiveSetting(gameId, true) ?? throw new UnknownEntityException<Setting>(nameof(Game.GameId), gameId);
         var message = JsonSerializer.Serialize(setting);
         var messageAsBytes = System.Text.Encoding.ASCII.GetBytes(message);
         await webSocket.SendAsync
@@ -527,10 +527,7 @@ public class SettingController(
         var consideredUltra = -5;
         var environment = Environments.Default;
         var types = pokemon.Type.Split('/').Aggregate(PokemonTypes.None, (current, type) => current | Enum.Parse<PokemonTypes>(type, true));
-        if (environments != null)
-        {
-            environment = environments.Aggregate(environment, (current, env) => current | Enum.Parse<Environments>(env, true));
-        }
+        environment = environments.Aggregate(environment, (current, env) => current | Enum.Parse<Environments>(env, true));
 
         return pokeball switch
         {
@@ -584,7 +581,7 @@ public class SettingController(
         };
     }
 
-    private async Task<SettingParticipant> GetWithUpdatedHP(SettingParticipant participant, Guid gameId)
+    private async Task<SettingParticipant> GetWithUpdatedHp(SettingParticipant participant, Guid gameId)
     {
         var dto =  participant.Type switch
         {
@@ -614,7 +611,7 @@ public class SettingController(
 
     private async Task<Setting> GetActiveSettingOrThrow(Guid gameId)
     {
-        return await settingService.GetActiveSetting(gameId, true) ?? throw new UnknownEntityException<Setting>(PropertyNames.GameId, gameId);
+        return await settingService.GetActiveSetting(gameId, true) ?? throw new UnknownEntityException<Setting>(nameof(Game.GameId), gameId);
     }
 
     #region Helper methods

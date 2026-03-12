@@ -18,7 +18,7 @@ public class ShopService(
         await ThrowIfNull(
             id,
             shopId => Collection.DeleteAsync(shop => shop.ShopId == shopId && shop.GameId == gameId, logger),
-            PropertyNames.ShopId);
+            nameof(Shop.ShopId));
     }
 
     public async Task DeleteShopByGameId(Guid gameId)
@@ -37,7 +37,7 @@ public class ShopService(
         var dto = await ThrowIfNull(
             id,
             x => Collection.GetOneAsync(shop => shop.GameId == gameId && shop.ShopId == x, logger),
-            PropertyNames.ShopId);
+            nameof(Shop.ShopId));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }

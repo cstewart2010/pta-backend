@@ -27,7 +27,7 @@ public class ShopController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
-    public async Task<IActionResult> GetShopGM(
+    public async Task<IActionResult> GetShopGm(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
@@ -69,7 +69,7 @@ public class ShopController(
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 401)]
     [ProducesResponseType(typeof(ProblemDetails), 409)]
-    public async Task<IActionResult> GetShopsBySettingGM(
+    public async Task<IActionResult> GetShopsBySettingGm(
         [FromHeader(Name = HeaderNames.SessionAuth)] string sessionAuth,
         [FromBody] RetrieveShopRequest request)
     {
@@ -220,7 +220,7 @@ public class ShopController(
     {
         if (!shop.IsActive)
         {
-            throw new UnknownEntityException<Shop>(PropertyNames.ShopId, shop.ShopId);
+            throw new UnknownEntityException<Shop>(nameof(Shop.ShopId), shop.ShopId);
         }
     }
 }

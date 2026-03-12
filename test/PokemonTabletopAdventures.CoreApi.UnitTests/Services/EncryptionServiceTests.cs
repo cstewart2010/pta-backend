@@ -156,7 +156,7 @@ internal class EncryptionServiceTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
-            Assert.That(exception.Message, Is.EqualTo($"Could not find a {nameof(GameDto)} using {PropertyNames.GameId}={id}"));
+            Assert.That(exception.Message, Is.EqualTo($"Could not find a {nameof(GameDto)} using {nameof(GameDto.GameId)}={id}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
     }

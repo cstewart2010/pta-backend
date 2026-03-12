@@ -20,7 +20,7 @@ public class UserService(
         await ThrowIfNull(
             userId,
             id => Collection.DeleteAsync(user => user.UserId == id, logger),
-            PropertyNames.UserId);
+            nameof(User.UserId));
         
         var trainers = await trainerService.GetAllUserTrainers(userId);
         var games = trainers.Select(trainer => trainer.GameId);
@@ -35,7 +35,7 @@ public class UserService(
         var dto = await ThrowIfNull(
             id,
             x => Collection.GetOneAsync(user => user.UserId == x, logger),
-            PropertyNames.UserId);
+            nameof(User.UserId));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -45,7 +45,7 @@ public class UserService(
         var dto = await ThrowIfNull(
             username,
             x => Collection.GetOneAsync(user => user.Username.Equals(x, StringComparison.CurrentCultureIgnoreCase), logger),
-            PropertyNames.Username);
+            nameof(User.Username));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -92,7 +92,7 @@ public class UserService(
             userId,
             user => user.UserId == userId,
             logger,
-            new UpdateData(PropertyNames.ActivityToken, token));
+            new UpdateData(nameof(User.ActivityToken), token));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -112,13 +112,13 @@ public class UserService(
     {
         if (isOnline)
         {
-            return [new UpdateData(PropertyNames.IsOnline, isOnline)];
+            return [new UpdateData(nameof(UserDto.IsOnline), isOnline)];
         }
 
         return
         [
-            new UpdateData(PropertyNames.IsOnline, isOnline),
-            new UpdateData(PropertyNames.ActivityToken, string.Empty)
+            new UpdateData(nameof(UserDto.IsOnline), isOnline),
+            new UpdateData(nameof(User.ActivityToken), string.Empty)
         ];
     }
 }

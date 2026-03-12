@@ -18,7 +18,7 @@ public class NpcService(
         await ThrowIfNull(
             id,
             npcId => Collection.DeleteAsync(npc => npc.NPCId == npcId, logger),
-            PropertyNames.NpcId);
+            nameof(NpcDto.NPCId));
     }
 
     public async Task<Npc> GetNpc(Guid id)
@@ -26,7 +26,7 @@ public class NpcService(
         var dto = await ThrowIfNull(
             id,
             x => Collection.GetOneAsync(npc => npc.NPCId == x, logger),
-            PropertyNames.NpcId);
+            nameof(NpcDto.NPCId));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService);
     }

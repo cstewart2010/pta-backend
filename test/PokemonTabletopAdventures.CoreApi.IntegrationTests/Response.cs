@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using PokemonTabletopAdventures.CoreApi.Constants;
+using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
 namespace PokemonTabletopAdventures.CoreApi.IntegrationTests;
 
@@ -48,5 +49,6 @@ public class Response<T> : BaseResponse
         }
     }
 
+    [JsonIgnore]
     public T? Data { get; }
 }

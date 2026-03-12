@@ -53,8 +53,8 @@ public class PokedexService(
             (trainerId, gameId),
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
             logger,
-            new Models.UpdateData(PropertyNames.IsSeen, true),
-            new Models.UpdateData(PropertyNames.IsCaught, true));
+            new Models.UpdateData(nameof(PokedexItem.IsSeen), true),
+            new Models.UpdateData(nameof(PokedexItem.IsCaught), true));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }
@@ -65,7 +65,7 @@ public class PokedexService(
             (trainerId, gameId),
             dexItem => dexItem.TrainerId == trainerId && dexItem.GameId == gameId && dexItem.DexNo == dexNo,
             logger,
-            new Models.UpdateData(PropertyNames.IsSeen, true));
+            new Models.UpdateData(nameof(PokedexItem.IsSeen), true));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }

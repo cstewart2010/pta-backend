@@ -31,11 +31,11 @@ public class TrainerService(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
             logger,
-            new UpdateData(PropertyNames.Origin, origin),
-            new UpdateData(PropertyNames.TrainerClasses, new[] { trainerClass }),
-            new UpdateData(PropertyNames.Feats, feats),
-            new UpdateData(PropertyNames.TrainerStats, stats),
-            new UpdateData(PropertyNames.IsComplete, true));
+            new UpdateData(nameof(Trainer.Origin), origin),
+            new UpdateData(nameof(Trainer.TrainerClasses), new[] { trainerClass }),
+            new UpdateData(nameof(Trainer.Feats), feats),
+            new UpdateData(nameof(Trainer.TrainerStats), stats),
+            new UpdateData(nameof(Trainer.IsComplete), true));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }
@@ -46,7 +46,7 @@ public class TrainerService(
         var trainer = await ThrowIfNull(
             userId,
             id => Collection.DeleteAsync(x => x.TrainerId == id && x.GameId == gameId, logger),
-            PropertyNames.TrainerId);
+            nameof(Trainer.TrainerId));
 
         if (trainer.IsGM)
         {
@@ -85,7 +85,7 @@ public class TrainerService(
         var dto = await ThrowIfNull(
             (id, gameId),
             x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId && !trainer.IsComplete, logger),
-            PropertyNames.IsComplete);
+            nameof(Trainer.IsComplete));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }
@@ -95,7 +95,7 @@ public class TrainerService(
         var dto = await ThrowIfNull(
             (id, gameId),
             x => Collection.GetOneAsync(trainer => trainer.TrainerId == x.id && trainer.GameId == x.gameId, logger),
-            PropertyNames.TrainerId);
+            nameof(Trainer.TrainerId));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }
@@ -144,7 +144,7 @@ public class TrainerService(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
             logger,
-            new UpdateData(PropertyNames.Honors, honors));
+            new UpdateData(nameof(Trainer.Honors), honors));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }
@@ -159,7 +159,7 @@ public class TrainerService(
             trainerId,
             trainer => trainer.TrainerId == trainerId && trainer.GameId == gameId,
             logger,
-            new UpdateData(PropertyNames.Items, itemListDto));
+            new UpdateData(nameof(Trainer.Items), itemListDto));
 
         return await dtoToModelMapper.ParseFromDto(dto, pokemonService, pokedexService);
     }
@@ -202,14 +202,5 @@ public class TrainerService(
 
     private static UpdateData[] TrainerStatusUpdate(bool isOnline)
     {
-        if (isOnline)
-        {
-            return [new UpdateData(PropertyNames.IsOnline, isOnline)];
-        }
-
-        return
-        [
-            new UpdateData(PropertyNames.IsOnline, isOnline),
-            new UpdateData(PropertyNames.ActivityToken, string.Empty)
-        ];
+        return [new UpdateData(nameof(Trainer.IsOnline), isOnline)];
     }}

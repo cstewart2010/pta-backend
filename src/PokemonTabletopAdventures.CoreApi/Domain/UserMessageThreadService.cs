@@ -18,7 +18,7 @@ public class UserMessageThreadService(
         var dto = await ThrowIfNull(
             id,
             x => Collection.DeleteAsync(message => message.MessageId == x, logger),
-            PropertyNames.MessageId);
+            nameof(UserMessageThread.MessageId));
 
         var ids = dto.Messages.Select(x => x.User).Distinct();
 
@@ -42,7 +42,7 @@ public class UserMessageThreadService(
         var dto = await ThrowIfNull(
             id,
             x => Collection.GetOneAsync(message => message.MessageId == x, logger),
-            PropertyNames.MessageId);
+            nameof(UserMessageThread.MessageId));
 
         return await dtoToModelMapper.ParseFromDto(dto);
     }

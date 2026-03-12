@@ -49,7 +49,7 @@ public class ShopControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.GetShopGM(string.Empty, request);
+        var response = await _sut.GetShopGm(string.Empty, request);
         
         // assert
         var result = response as ObjectResult;
@@ -157,7 +157,7 @@ public class ShopControllerTests : BasePtaControllerTests
         };
         
         // act
-        var response = await _sut.GetShopsBySettingGM(string.Empty, request);
+        var response = await _sut.GetShopsBySettingGm(string.Empty, request);
         
         // assert
         var result = response as ObjectResult;

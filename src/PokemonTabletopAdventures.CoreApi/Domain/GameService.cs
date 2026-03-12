@@ -22,7 +22,7 @@ public class GameService(
         await ThrowIfNull(
             id,
             gameId => Collection.DeleteAsync(game => game.GameId == gameId, logger),
-            PropertyNames.GameId);
+            nameof(Game.GameId));
 
         logger.LogInformation("Deleting relevant items to game {id}", id);
         await settingService.DeleteSettingsByGameId(id);
@@ -49,7 +49,7 @@ public class GameService(
         var dto = await ThrowIfNull(
             id,
             x => Collection.GetOneAsync(game => game.GameId == x, logger),
-            PropertyNames.GameId);
+            nameof(Game.GameId));
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, npcService, settingService, trainerService);
     }
@@ -89,7 +89,7 @@ public class GameService(
             theGame.GameId,
             game => game.GameId == theGame.GameId,
             logger,
-            new Models.UpdateData(PropertyNames.Logs, currentLogDtos.Union(newLogDtos).ToArray()));
+            new Models.UpdateData(nameof(Game.Logs), currentLogDtos.Union(newLogDtos).ToArray()));
 
         return await dtoToModelMapper.ParseFromDto(dto, isGM, npcService, settingService, trainerService);
     }
@@ -100,7 +100,7 @@ public class GameService(
             gameId,
             game => game.GameId == gameId,
             logger,
-            new Models.UpdateData(PropertyNames.Npcs, npcIds));
+            new Models.UpdateData(nameof(Game.Npcs), npcIds));
 
         return await dtoToModelMapper.ParseFromDto(dto, true, npcService, settingService, trainerService);
     }
@@ -111,7 +111,7 @@ public class GameService(
             gameId,
             game => game.GameId == gameId,
             logger,
-            new Models.UpdateData(PropertyNames.IsOnline, isOnline));
+            new Models.UpdateData(nameof(Game.IsOnline), isOnline));
 
         return await dtoToModelMapper.ParseFromDto(dto, true, npcService, settingService, trainerService);
     }

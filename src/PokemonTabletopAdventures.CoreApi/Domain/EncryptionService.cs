@@ -50,7 +50,7 @@ public class EncryptionService(
     public async Task VerifySecret(string secret, Guid gameId)
     {
         var collection = repositoryService.GetCollection<GameDto>(MongoCollection.Games);
-        var game = await collection.GetOneAsync(x => x.GameId == gameId, logger) ?? throw new UnknownEntityException<GameDto>(PropertyNames.GameId, gameId);
+        var game = await collection.GetOneAsync(x => x.GameId == gameId, logger) ?? throw new UnknownEntityException<GameDto>(nameof(GameDto.GameId), gameId);
         if (!BCrypt.Net.BCrypt.Verify(secret, game.PasswordHash))
         {
             throw new PtaUnauthorizedException(PtaExceptionParts.InvalidSecretMessage);

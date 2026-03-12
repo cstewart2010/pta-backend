@@ -64,7 +64,7 @@ internal class PokemonServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {PropertyNames.PokemonId}={pokemonId}"));
+                Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {nameof(Pokemon.PokemonId)}={pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
     }
@@ -79,7 +79,7 @@ internal class PokemonServiceTests
         Assert.That(actualList, Has.Count.EqualTo(expectedList.Count));
         using (Assert.EnterMultipleScope())
         {
-            foreach (var item in expectedList)
+            foreach (var unused in expectedList)
             {
                 Assert.That(expectedList.Select(x => x.PokemonId), Is.EquivalentTo(actualList.Select(x => x.PokemonId)));
             }
@@ -322,7 +322,7 @@ internal class PokemonServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {PropertyNames.PokemonId}={pokemonId}"));
+                Is.EqualTo($"Could not find a {nameof(PokemonDto)} using {nameof(Pokemon.PokemonId)}={pokemonId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
     }
@@ -333,7 +333,7 @@ internal class PokemonServiceTests
         var count = _pokemonCollection.Collection.Count;
         var trainerId = Guid.NewGuid();
         var gameId = Guid.NewGuid();
-        foreach (var x in Enumerable.Range(0, 5))
+        foreach (var unused in Enumerable.Range(0, 5))
         {
             var pokemonId = Guid.NewGuid();
             await _sut.PostPokemon(GetPokemon(pokemonId, trainerId, gameId, nameof(DeletePokemonByTrainerId_Valid_UpdatesCollection)));

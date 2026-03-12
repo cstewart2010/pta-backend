@@ -71,7 +71,7 @@ internal class NpcServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {PropertyNames.NpcId}={item.NpcId}"));
+                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {nameof(NpcDto.NPCId)}={item.NpcId}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
     }
@@ -271,7 +271,7 @@ internal class NpcServiceTests
             Assert.That(exception!.Title, Is.EqualTo(PtaExceptionParts.UnknownEntityTitle));
             Assert.That(
                 exception.Message,
-                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {PropertyNames.NpcId}={id}"));
+                Is.EqualTo($"Could not find a {nameof(NpcDto)} using {nameof(NpcDto.NPCId)}={id}"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
     }
