@@ -1,0 +1,6 @@
+Building request for GET api/v2/pokedex/bulbasaur
+Request built
+Sending request to api/v2/pokedex/bulbasaur
+Parsing response
+Status Code: OK
+Content: {"pokemon":{"name":"Bulbasaur","dexNo":1,"form":"Base","normalPortrait":"bulbasaur","shinyPortrait":"bulbasaur","pokemonStats":{"hp":30,"attack":5,"defense":5,"specialAttack":7,"specialDefense":7,"speed":5},"type":"Grass/Poison","size":"Small","weight":"Light","moves":["Tackle","Leech Seed","Vine Whip"],"skills":["Sprouter","Threaded"],"passives":["Growl","Overgrow"],"proficiencies":["Grass","Poison","Floral","Vine Whip"],"eggGroups":["Monster","Grass"],"eggHatchRate":"10 Days","habitats":["Forest","Jungle"],"diet":"Phototroph","rarity":"Rare","stage":1,"specialFormName":"","baseFormName":"","gMaxMove":"","evolvesFrom":"","legendaryStats":{"hp":0,"moves":[],"legendaryMoves":[],"passives":[],"features":[]}},"alternateForms":[]}

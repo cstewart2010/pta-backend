@@ -1,0 +1,29 @@
+{
+  "stats": {
+    "total": 1,
+    "passed": 1
+  },
+  "status": "passed",
+  "newTests": [
+    {
+      "id": "d52e11ac07aa91b051874539a9bb89cf",
+      "name": "/{name}",
+      "status": "passed",
+      "duration": 4257
+    }
+  ],
+  "flakyTests": [],
+  "retryTests": [],
+  "name": "Pokemon Tabletop Adventures Api Integration Tests – Pull request #125",
+  "duration": 4257,
+  "createdAt": 1773549728868,
+  "plugin": "Awesome",
+  "meta": {
+    "reportId": "05495987-e378-41c4-8a67-3aa10c067007",
+    "singleFile": false,
+    "withTestResultsLinks": true
+  },
+  "pullRequestHref": "https://github.com/cstewart2010/pta-backend/pull/125",
+  "jobHref": "https://github.com/cstewart2010/pta-backend/actions/runs/23103490158",
+  "remoteHref": "https://cstewart2010.github.io/pta-backend/"
+}
