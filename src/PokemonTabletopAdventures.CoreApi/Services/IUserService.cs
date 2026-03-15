@@ -1,0 +1,65 @@
+﻿using PokemonTabletopAdventures.Models.Users;
+
+namespace PokemonTabletopAdventures.CoreApi.Services;
+
+public interface IUserService
+{
+    /// <summary>
+    /// Returns a user matching the trainer id
+    /// </summary>
+    /// <param name="id">The user id</param>
+    public Task<User> GetUserById(Guid id);
+
+    /// <summary>
+    /// Returns a trainer matching the trainer name and game session id
+    /// </summary>
+    /// <param name="username">The trainer name</param>
+    public Task<User> GetUserByUsername(string username);
+
+    /// <summary>
+    /// Returns all users in the database
+    /// </summary>
+    public Task<ICollection<User>> GetUsers();
+
+    /// <summary>
+    /// Returns a colllection of users in the database
+    /// </summary>
+    public Task<ICollection<User>> GetUsers(int offset, int limit);
+
+    /// <summary>
+    /// Attempts to add a user using the provided document
+    /// </summary>
+    /// <param name="user">The document to add</param>
+    public Task PostUser(User user, string passwordHash);
+
+    /// <summary>
+    /// Attempts to replace the previous user with the new data
+    /// </summary>
+    /// <param name="updatedUser">The updated user data</param>
+    public Task<User> UpdateUser(User updatedUser);
+
+    /// <summary>
+    /// Searches for a trainer, then updates their activity token
+    /// </summary>
+    /// <param name="userId">The user id</param>
+    /// <param name="token">The new activity token</param>
+    public Task<User> UpdateUserActivityToken(
+        Guid userId,
+        string token);
+
+    /// <summary>
+    /// Searches for a trainer, then updates their online status
+    /// </summary>
+    /// <param name="userId">The user id</param>
+    /// <param name="isOnline">The updated online status</param>
+    /// <exception cref="ArgumentNullException" />
+    public Task<User> UpdateUserOnlineStatus(
+        Guid userId,
+        bool isOnline);
+
+    /// <summary>
+    /// Deletes the user and everything associated with them
+    /// </summary>
+    /// <param name="userId">The user's user id</param>
+    public Task DeleteUser(Guid userId);
+}

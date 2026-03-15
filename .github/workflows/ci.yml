@@ -1,0 +1,134 @@
+name: Build, Test, and Deploy Application
+on:
+  pull_request:
+    branches:
+      - refactor
+      - develop
+  push:
+    branches:
+    - main
+  workflow_dispatch:
+
+env:
+  CONFIGURATION: Release
+  DOTNET_CORE_VERSION: 8.0.x
+  APP_WORKING_DIRECTORY: src/PokemonTabletopAdventures.CoreApi
+  UNIT_TEST_WORKING_DIRECTORY: test/PokemonTabletopAdventures.CoreApi.UnitTests
+  INT_TEST_WORKING_DIRECTORY: test/PokemonTabletopAdventures.CoreApi.IntegrationTests
+  AZURE_WEBAPP_NAME_TEST: pta-2
+  AZURE_WEBAPP_NAME: TheReplacementPTAServicesCore20220223200441
+  AZURE_WEBAPP_PACKAGE_PATH: PokemonTabletopAdventures.CoreApi/published
+  AZURE_WEBAPP_PUBLISH_PROFILE_TEST: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+  ALLURE_RESULTS_PATH: ./src/PokemonTabletopAdventures.CoreApi.IntegrationTests/bin/Release/net8.0/allure-results
+jobs:
+  Build-Test-Deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Add Source
+      run: dotnet nuget add source --username cstewart2010 --password ${{ secrets.DEPLOY_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/cstewart2010/index.json"
+
+    - name: Restore
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Run Unit Tests
+      run: dotnet test "${{ env.UNIT_TEST_WORKING_DIRECTORY }}" --no-build --collect:"Xplat Code Coverage"
+
+    - name: Code Coverage Summary Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: '${{ env.UNIT_TEST_WORKING_DIRECTORY }}/TestResults/*/coverage.cobertura.xml'
+        badge: true
+        format: 'markdown'
+        output: 'both'
+
+    - name: Add Unit Test Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        recreate: true
+        path: code-coverage-results.md
+
+    - name: Write to Job Summary
+      run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+
+    - name: Publish
+      run: dotnet publish "${{ env.APP_WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+
+    - name: Deploy to Test Environment
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME_TEST }}
+        publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    - name: Sleep for 10 seconds before running integration tests
+      shell: pwsh
+      run: Start-Sleep -s 10
+
+    - name: Run Integration Tests
+      run: dotnet test "${{ env.INT_TEST_WORKING_DIRECTORY }}" --no-build
+      continue-on-error: true
+
+    - name: Generate Allure Report
+      run: |
+        npm install -g allure
+        allure generate --name "Pokemon Tabletop Adventures Api Integration Tests"
+
+    - name: Add remoteHref to Summary Json
+      shell: pwsh
+      run: |
+        $x = Get-Content ./allure-report/summary.json | ConvertFrom-Json
+        $x | Add-Member -Name "remoteHref" -Value "https://cstewart2010.github.io/pta-backend/" -MemberType NoteProperty
+        ConvertTo-Json $x > ./allure-report/summary.json
+      
+    - name: Deploy Allure Results to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: allure-report
+        publish_branch: gh-pages
+        force_orphan: true
+      
+    - name: Add Integration Test Report PR Comment
+      if: always()
+      uses: allure-framework/allure-action@v0
+      with:
+        report-directory: ./allure-report
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Fail Pipeline if unit tests failed
+      shell: pwsh
+      run: |
+        $x = Get-Content ./allure-report/summary.json | ConvertFrom-Json
+        if ($x.status -ne "passed") {
+          Write-Host Integration Test Status: $x.status
+          exit 1
+        }
+
+    - name: Deploy to Production
+      uses: azure/webapps-deploy@v2
+      if: ${{ github.ref == 'refs/head/main' }}
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    - name: Publish Artifacts
+      uses: actions/upload-artifact@v4.0.0
+      with:
+        name: webapp
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
